@@ -1,8 +1,14 @@
+import sys
+
 from setuptools import setup, find_packages
+
+if not sys.version_info >= (2,7):
+    print("This package requires python version >= 2.7.")
+    sys.exit(1)
 
 setup(
     name = 'glotz-formats',
-    version = '0.1.0dev',
+    version = '0.1.0dev0',
     package_dir = {'': 'src'},
     packages = find_packages('src'),
 
@@ -18,6 +24,5 @@ setup(
         ],
 
     install_requires=['numpy'],
-
     tests_require = ['nose'],
 )

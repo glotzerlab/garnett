@@ -1,9 +1,12 @@
 import unittest
 import os
+import sys
 import io
 import tempfile
 
 import glotzformats
+
+PYTHON_3 = sys.version_info[0] == 3
 
 try:
     import hoomd_script
@@ -28,12 +31,15 @@ class BasePosFileReaderTest(unittest.TestCase):
         reader = glotzformats.reader.PosFileReader()
         return reader.read(stream)
         traj = reader.read(io.StringIO(glotzformats.samples.POS_HPMC))
-
     
 class PosFileReaderTest(BasePosFileReaderTest):
 
     def test_hpmc_dialect(self):
-        traj = self.read_trajectory(io.StringIO(glotzformats.samples.POS_HPMC))
+        if PYTHON_3:
+            sample = io.StringIO(glotzformats.samples.POS_HPMC)
+        else:
+            sample = io.StringIO(unicode(glotzformats.samples.POS_HPMC))
+        traj = self.read_trajectory(sample)
         box_expected = glotzformats.trajectory.Box(Lx=10,Ly=10,Lz=10)
         for frame in traj:
             N = len(frame)
@@ -41,7 +47,11 @@ class PosFileReaderTest(BasePosFileReaderTest):
             self.assertEqual(frame.box, box_expected)
 
     def test_incsim_dialect(self):
-        traj = self.read_trajectory(io.StringIO(glotzformats.samples.POS_HPMC))
+        if PYTHON_3:
+            sample = io.StringIO(glotzformats.samples.POS_INCSIM)
+        else:
+            sample = io.StringIO(unicode(glotzformats.samples.POS_INCSIM))
+        traj = self.read_trajectory(sample)
         box_expected = glotzformats.trajectory.Box(Lx=10,Ly=10,Lz=10)
         for frame in traj:
             N = len(frame)
@@ -77,8 +87,6 @@ class HPMCPosFileReaderTest(BasePosFileReaderTest):
         self.system.particles[1].orientation = (1,0,0,0);
         sorter.set_params(grid=8)
         dump.pos(filename=self.fn_pos, period = 1)
-        pos = dump.pos(filename='sphere.pos', period=1)
-        self.mc.setup_pos_writer(pos)
         run(10, quiet=True)
         with open(self.fn_pos, 'r', encoding='utf-8') as posfile:
             traj = self.read_trajectory(posfile)
@@ -105,9 +113,7 @@ class HPMCPosFileReaderTest(BasePosFileReaderTest):
         self.system.particles[1].orientation = (1,0,0,0);
         sorter.set_params(grid=8)
         pos_writer = dump.pos(filename=self.fn_pos, period = 1)
-        pos = dump.pos(filename='convex_polyhedron.pos', period=1)
         self.mc.setup_pos_writer(pos_writer)
-        self.mc.setup_pos_writer(pos)
         run(10, quiet=True)
         with open(self.fn_pos, 'r', encoding='utf-8') as posfile:
             traj = self.read_trajectory(posfile)
