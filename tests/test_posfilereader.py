@@ -1,0 +1,117 @@
+import unittest
+import os
+import io
+import tempfile
+
+import glotzformats
+
+try:
+    import hoomd_script
+except ImportError:
+    HOOMD = False
+else:
+    HOOMD = True
+
+if HOOMD:
+    try:
+        from hoomd_plugins import hpmc
+    except ImportError:
+        HPMC = False
+    else:
+        HPMC = True
+else:
+    HPMC = False
+
+class BasePosFileReaderTest(unittest.TestCase):
+
+    def read_trajectory(self, stream):
+        reader = glotzformats.reader.PosFileReader()
+        return reader.read(stream)
+        traj = reader.read(io.StringIO(glotzformats.samples.POS_HPMC))
+
+    
+class PosFileReaderTest(BasePosFileReaderTest):
+
+    def test_hpmc_dialect(self):
+        traj = self.read_trajectory(io.StringIO(glotzformats.samples.POS_HPMC))
+        box_expected = glotzformats.trajectory.Box(Lx=10,Ly=10,Lz=10)
+        for frame in traj:
+            N = len(frame)
+            self.assertEqual(frame.types, ['A'] * N)
+            self.assertEqual(frame.box, box_expected)
+
+    def test_incsim_dialect(self):
+        traj = self.read_trajectory(io.StringIO(glotzformats.samples.POS_HPMC))
+        box_expected = glotzformats.trajectory.Box(Lx=10,Ly=10,Lz=10)
+        for frame in traj:
+            N = len(frame)
+            self.assertEqual(frame.types, ['A'] * N)
+            self.assertEqual(frame.box, box_expected)
+
+@unittest.skipIf(not HPMC, 'requires HPMC')
+class HPMCPosFileReaderTest(BasePosFileReaderTest):
+
+    def setUp(self):
+        self.tmp_dir = tempfile.TemporaryDirectory()
+        self.addCleanup(self.tmp_dir.cleanup)
+        self.fn_pos = os.path.join(self.tmp_dir.name, 'test.pos')
+
+    def del_system(self):   
+        del self.system
+
+    def del_mc(self):
+        del self.mc
+
+    def test_sphere(self):
+        from hoomd_script import init, sorter, data, dump, run
+        from hoomd_plugins import hpmc
+        self.system = init.create_empty(N=2, box=data.boxdim(L=10, dimensions=2), particle_types=['A'])
+        self.addCleanup(init.reset)
+        self.addCleanup(self.del_system)
+        self.mc = hpmc.integrate.sphere(seed=10);
+        self.mc.shape_param.set("A", diameter=1.0)
+        self.addCleanup(self.del_mc)
+        self.system.particles[0].position = (0,0,0);
+        self.system.particles[0].orientation = (1,0,0,0);
+        self.system.particles[1].position = (2,0,0);
+        self.system.particles[1].orientation = (1,0,0,0);
+        sorter.set_params(grid=8)
+        dump.pos(filename=self.fn_pos, period = 1)
+        pos = dump.pos(filename='sphere.pos', period=1)
+        self.mc.setup_pos_writer(pos)
+        run(10, quiet=True)
+        with open(self.fn_pos, 'r', encoding='utf-8') as posfile:
+            traj = self.read_trajectory(posfile)
+
+    def test_convex_polyhedron(self):
+        from hoomd_script import init, sorter, data, dump, run
+        from hoomd_plugins import hpmc
+        self.system = init.create_empty(N=2, box=data.boxdim(L=10, dimensions=2), particle_types=['A'])
+        self.addCleanup(init.reset)
+        self.addCleanup(self.del_system)
+        self.mc = hpmc.integrate.convex_polygon(seed=10);
+        self.addCleanup(self.del_mc)
+        self.mc.shape_param.set("A", vertices=[(-2,-1,-1),
+                                               (-2,1,-1),
+                                               (-2,-1,1),
+                                               (-2,1,1),
+                                               (2,-1,-1),
+                                               (2,1,-1),
+                                               (2,-1,1),
+                                               (2,1,1)]);
+        self.system.particles[0].position = (0,0,0);
+        self.system.particles[0].orientation = (1,0,0,0);
+        self.system.particles[1].position = (2,0,0);
+        self.system.particles[1].orientation = (1,0,0,0);
+        sorter.set_params(grid=8)
+        pos_writer = dump.pos(filename=self.fn_pos, period = 1)
+        pos = dump.pos(filename='convex_polyhedron.pos', period=1)
+        self.mc.setup_pos_writer(pos_writer)
+        self.mc.setup_pos_writer(pos)
+        run(10, quiet=True)
+        with open(self.fn_pos, 'r', encoding='utf-8') as posfile:
+            traj = self.read_trajectory(posfile)
+
+
+if __name__ == '__main__':
+    unittest.main()
