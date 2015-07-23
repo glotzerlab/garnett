@@ -147,7 +147,8 @@ def parse_shape_definition(line):
             num_vertices = int(next(tokens))
             vertices = []
             for i in range(num_vertices):
-                vertices.append(float(next(tokens)))
+                xyz = next(tokens), next(tokens), next(tokens)
+                vertices.append([num(v) for v in xyz])
         try:
             color = next(tokens)
         except StopIteration:
@@ -157,5 +158,5 @@ def parse_shape_definition(line):
         else:
             return PolyShapeDefinition(shape_class=shape_class,vertices=vertices,color=color)
     except Exception as error:
-        warnings.warn("Failed to parse shape definition, using fallback mode.")
+        warnings.warn("Failed to parse shape definition, using fallback mode. ({})".format(line))
         return FallbackShapeDefinition(line)

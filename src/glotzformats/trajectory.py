@@ -60,7 +60,7 @@ class ShapeDefinition(object):
         return str(self)
 
     def __eq__(self, other):
-        return self.__dict__ == other.__dict__
+        return str(self) == str(other)
 
 class SphereShapeDefinition(ShapeDefinition):
 
@@ -97,7 +97,7 @@ class PolyShapeDefinition(ShapeDefinition):
         return "{} {} {} {}".format(
             self.shape_class,
             len(self.vertices),
-            ' '.join((str(v) for v in self.vertices)),
+            ' '.join((str(v) for xyz in self.vertices for v in xyz)),
             self.color)
 
 class FrameData(object):
