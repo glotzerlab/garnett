@@ -3,10 +3,14 @@ import os
 import sys
 import io
 import tempfile
+import random
+import warnings
 
 import glotzformats
 
 PYTHON_3 = sys.version_info[0] == 3
+
+warnings.filterwarnings('error', category=glotzformats.errors.ParserWarning)
 
 try:
     import hoomd_script
@@ -31,8 +35,28 @@ class BasePosFileReaderTest(unittest.TestCase):
         reader = glotzformats.reader.PosFileReader()
         return reader.read(stream)
         traj = reader.read(io.StringIO(glotzformats.samples.POS_HPMC))
-    
+
+class BasePosFileWriterTest(BasePosFileReaderTest):
+
+    def dump_trajectory(self, trajectory):
+        writer = glotzformats.writer.PosFileWriter()
+        return writer.dump(trajectory)
+
+    def write_trajectory(self, trajectory, file):
+        writer = glotzformats.writer.PosFileWriter()
+        return writer.write(trajectory, file)
+
 class PosFileReaderTest(BasePosFileReaderTest):
+
+    def test_read_empty(self):
+        empty_sample = io.StringIO("")
+        with self.assertRaises(glotzformats.errors.ParserError):
+            self.read_trajectory(empty_sample)
+
+    def test_read_garbage(self):
+        garbage_sample = io.StringIO(str(os.urandom(1024 * 100)))
+        with self.assertRaises(glotzformats.errors.ParserError):
+            self.read_trajectory(garbage_sample)
 
     def test_hpmc_dialect(self):
         if PYTHON_3:
@@ -66,7 +90,7 @@ class HPMCPosFileReaderTest(BasePosFileReaderTest):
         self.addCleanup(self.tmp_dir.cleanup)
         self.fn_pos = os.path.join(self.tmp_dir.name, 'test.pos')
 
-    def del_system(self):   
+    def del_system(self):
         del self.system
 
     def del_mc(self):
@@ -118,6 +142,19 @@ class HPMCPosFileReaderTest(BasePosFileReaderTest):
         with open(self.fn_pos, 'r', encoding='utf-8') as posfile:
             traj = self.read_trajectory(posfile)
 
+class PosFileWriterTest(BasePosFileWriterTest):
+
+    def test_hpmc_dialect(self):
+        if PYTHON_3:
+            sample = io.StringIO(glotzformats.samples.POS_HPMC)
+        else:
+            sample = io.StringIO(unicode(glotzformats.samples.POS_HPMC))
+        traj = self.read_trajectory(sample)
+        dump = io.StringIO()
+        self.write_trajectory(traj, dump)
+        dump.seek(0)
+        traj_cmp = self.read_trajectory(dump)
+        self.assertEqual(traj, traj_cmp)
 
 if __name__ == '__main__':
     unittest.main()
