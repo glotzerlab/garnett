@@ -82,6 +82,30 @@ class PosFileReaderTest(BasePosFileReaderTest):
             self.assertEqual(frame.types, ['A'] * N)
             self.assertEqual(frame.box, box_expected)
 
+    def test_monotype_dialect(self):
+        if PYTHON_3:
+            sample = io.StringIO(glotzformats.samples.POS_MONOTYPE)
+        else:
+            sample = io.StringIO(unicode(glotzformats.samples.POS_MONOTYPE))
+        traj = self.read_trajectory(sample)
+        box_expected = glotzformats.trajectory.Box(Lx=10,Ly=10,Lz=10)
+        for frame in traj:
+            N = len(frame)
+            self.assertEqual(frame.types, ['A'] * N)
+            self.assertEqual(frame.box, box_expected)
+
+    def test_injavis_dialect(self):
+        if PYTHON_3:
+            sample = io.StringIO(glotzformats.samples.POS_INJAVIS)
+        else:
+            sample = io.StringIO(unicode(glotzformats.samples.POS_INJAVIS))
+        traj = self.read_trajectory(sample)
+        box_expected = glotzformats.trajectory.Box(Lx=10,Ly=10,Lz=10)
+        for frame in traj:
+            N = len(frame)
+            self.assertEqual(frame.types, ['A'] * N)
+            self.assertEqual(frame.box, box_expected)
+
 @unittest.skipIf(not HPMC, 'requires HPMC')
 class HPMCPosFileReaderTest(BasePosFileReaderTest):
 

@@ -55,10 +55,9 @@ class ShapeDefinition(object):
 
     def __str__(self):
         return "{} {}".format(self.shape_class, self.color)
-        s = shape_class
-        if self.color is not None:
-            s += ' ' + self.color
-        return s
+
+    def __repr__(self):
+        return str(self)
 
     def __eq__(self, other):
         return self.__dict__ == other.__dict__
@@ -96,7 +95,8 @@ class PolyShapeDefinition(ShapeDefinition):
 
     def __str__(self):
         return "{} {} {} {}".format(
-            self.shape_class, len(self.vertices),
+            self.shape_class,
+            len(self.vertices),
             ' '.join((str(v) for v in self.vertices)),
             self.color)
 
