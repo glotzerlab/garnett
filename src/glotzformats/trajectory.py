@@ -109,6 +109,7 @@ class FrameData(object):
         self.positions = None                       # Nx3 matrix
         self.orientations = None                    # Nx4 matrix
         self.data = None                            # A dictionary of lists for each attribute
+        self.data_keys = None                       # A list of strings
         self.shapedef = collections.OrderedDict()   # A ordered dictionary of instances of ShapeDefinition
 
     def __len__(self):
@@ -140,6 +141,7 @@ class RawFrameData(object):
         self.positions = list()                     # Nx3
         self.orientations = list()                  # NX4
         self.data = None                            # A dictionary of lists for each attribute
+        self.data_keys = None                       # A list of strings
         self.shapedef = collections.OrderedDict()   # A ordered dictionary of instances of ShapeDefinition
 
 class Trajectory(object):
@@ -238,5 +240,7 @@ def raw_frame_to_frame(raw_frame):
     ret.positions, ret.orientations, ret.box = rotate_improper_triclinic(positions, orientations, raw_frame.box)
     ret.shapedef = raw_frame.shapedef
     ret.types = raw_frame.types
+    ret.data = raw_frame.data
+    ret.data_keys = raw_frame.data_keys
     assert N == len(ret.types) == len(ret.positions) == len(ret.orientations)
     return ret

@@ -18,7 +18,7 @@ class PosFileWriter(object):
         for frame in trajectory:
             # data section
             if frame.data is not None:
-                header_keys = list(frame.data.keys())
+                header_keys = frame.data_keys
                 _print('#[data] ', end='')
                 _print(' '.join(header_keys))
                 columns = list()

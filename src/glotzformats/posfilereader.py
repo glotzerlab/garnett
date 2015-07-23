@@ -47,14 +47,14 @@ class PosFileReader(object):
             if is_comment(line):
                 continue
             if line.startswith('#[done]'):
-                return data, i
+                return keys, data, i
             else:
                 values = line.split()
                 for key, value in zip(keys, values):
                     data[key].append(value)
         else:
             warnings.warn("File ended abruptly.", ParserWarning)
-            return data, i
+            return keys, data, i
 
     def read(self, stream, default_type='A'):
         """Read text stream and return a trajectory instance.
@@ -80,7 +80,7 @@ class PosFileReader(object):
             if line.startswith('#'):
                 if line.startswith('#[data]'):
                     _assert(raw_frame.data is None)
-                    raw_frame.data, j = self._read_data_section(line, stream)
+                    raw_frame.data_keys, raw_frame.data, j = self._read_data_section(line, stream)
                     i += j
                 else:
                     raise ParserError(line)
