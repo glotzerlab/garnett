@@ -135,6 +135,12 @@ class FrameData(object):
     def __repr__(self):
         return str(self)
 
+    def make_snapshot(self):
+        return make_hoomd_blue_snapshot(self)
+
+    def copyto_snapshot(self):
+        return copyto_hoomd_blue_snapshot(self)
+
 class RawFrameData(object):
     """Class to capture unprocessed frame data during parsing."""
 
@@ -250,3 +256,16 @@ def raw_frame_to_frame(raw_frame):
     ret.data_keys = raw_frame.data_keys
     assert N == len(ret.types) == len(ret.positions) == len(ret.orientations)
     return ret
+
+def copyto_hoomd_blue_snapshot(frame, snapshot):
+    np.copyto(snapshot.particles.position, frame.positions)
+    np.copyto(snapshot.particles.orientation, frame.orientations)
+    return snapshot
+
+def make_hoomd_blue_snapshot(frame):
+    from hoomd_script import data
+    snapshot = data.make_snapshot(
+        N = len(frame),
+        box = data.boxdim(**frame.box.__dict__),
+        particle_types = frame.types)
+    return copyto_hoomd_blue_snapshot(frame, snapshot)
