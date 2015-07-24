@@ -1,11 +1,13 @@
 import io
 import sys
+import logging
 from itertools import chain
 
 import numpy as np
 
 from .posfilereader import POSFILE_FLOAT_DIGITS
 
+logger = logging.getLogger(__name__)
 PYTHON_3 = sys.version_info[0] == 3
 
 def num(x):
@@ -21,7 +23,7 @@ class PosFileWriter(object):
                 file.write(msg+end)
             else:
                 file.write(unicode(msg+end))
-        for frame in trajectory:
+        for i, frame in enumerate(trajectory):
             # data section
             if frame.data is not None:
                 header_keys = frame.data_keys
@@ -45,6 +47,8 @@ class PosFileWriter(object):
                 _write(name, end=' ')
                 _write(' '.join((str(num(v)) for v in chain(pos, rot))))
             _write('eof')
+            logger.debug("Wrote frame {}.".format(i+1))
+        logger.info("Wrote {} frames.".format(i+1))
     
     def dump(self, trajectory):
         f = io.StringIO()
