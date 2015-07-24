@@ -33,6 +33,8 @@ with open('posfile2.pos', 'w') as posfile:
 
 ## Example use with HPMC
 
+Click [here](https://bitbucket.org/glotzer/glotz-formats/src/master/examples/) for more examples.
+
 ```
 #!python
 pos_reader = PosFileReader()
