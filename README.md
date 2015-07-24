@@ -39,15 +39,16 @@ pos_reader = PosFileReader()
 with open('cube.pos') as posfile:
     traj = pos_reader.read(posfile)
 
-# Initializing from last frame
+# Initialize from last frame
 snapshot = traj[-1].make_snapshot()
 system = init.read_snapshot(snapshot)
 
-# Restore last frame from pos-file
-sn2 = system.take_snapshot()
-traj[-1].copyto_snapshot(sn2)
+# Restore last frame
+snapshot = system.take_snapshot()
+traj[-1].copyto_snapshot(snapshot)
 
 ```
+*Note: Always use hoomd's own pos-file **writer** when possible.*
 
 ## Testing
 
