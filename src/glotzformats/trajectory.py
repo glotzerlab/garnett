@@ -167,7 +167,10 @@ class Trajectory(object):
             yield frame
 
     def __getitem__(self, index):
-        return self.frames[index]
+        if isinstance(index, slice):
+            return Trajectory(self.frames[index])
+        else:
+            return self.frames[index]
 
     def __eq__(self, other):
         if len(self) != len(other):
