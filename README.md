@@ -9,6 +9,12 @@ This is a collection of samples, parsers and writers for formats used in the Glo
 * Carl Simon Adorf, csadorf@umich.edu (Maintainer)
 * Richmond Newmann, newmanrs@umich.edu
 
+## Setup
+
+To install this package with pip, execute:
+
+    pip install git+https://$USER@bitbucket.org/glotzer/glotz-formats.git#egg=glotzformats --user
+
 ## Quickstart
 
 ```
@@ -25,11 +31,23 @@ with open('posfile2.pos', 'w') as posfile:
     pos_writer.write(traj, posfile)
 ```
 
-## Setup
+## Example use with HPMC
 
-To install this package with pip, execute:
+```
+#!python
+pos_reader = PosFileReader()
+with open('cube.pos') as posfile:
+    traj = pos_reader.read(posfile)
 
-    pip install git+https://$USER@bitbucket.org/glotzer/glotz-formats.git#egg=glotzformats --user
+# Initializing from last frame
+snapshot = traj[-1].make_snapshot()
+system = init.read_snapshot(snapshot)
+
+# Restore last frame from pos-file
+sn2 = system.take_snapshot()
+traj[-1].copyto_snapshot(sn2)
+
+```
 
 ## Testing
 
