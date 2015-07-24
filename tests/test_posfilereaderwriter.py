@@ -5,6 +5,7 @@ import io
 import tempfile
 import random
 import warnings
+import subprocess
 
 import glotzformats
 
@@ -31,8 +32,8 @@ else:
 
 class BasePosFileReaderTest(unittest.TestCase):
 
-    def read_trajectory(self, stream):
-        reader = glotzformats.reader.PosFileReader()
+    def read_trajectory(self, stream, precision=None):
+        reader = glotzformats.reader.PosFileReader(precision=precision)
         return reader.read(stream)
         traj = reader.read(io.StringIO(glotzformats.samples.POS_HPMC))
 
@@ -183,6 +184,77 @@ class PosFileWriterTest(BasePosFileWriterTest):
         dump.seek(0)
         traj_cmp = self.read_trajectory(dump)
         self.assertEqual(traj, traj_cmp)
+
+    def test_incsim_dialect(self):
+        if PYTHON_3:
+            sample = io.StringIO(glotzformats.samples.POS_INCSIM)
+        else:
+            sample = io.StringIO(unicode(glotzformats.samples.POS_INCSIM))
+        traj = self.read_trajectory(sample)
+        dump = io.StringIO()
+        self.write_trajectory(traj, dump)
+        dump.seek(0)
+        traj_cmp = self.read_trajectory(dump)
+        self.assertEqual(traj, traj_cmp)
+
+    def test_monotype_dialect(self):
+        if PYTHON_3:
+            sample = io.StringIO(glotzformats.samples.POS_MONOTYPE)
+        else:
+            sample = io.StringIO(unicode(glotzformats.samples.POS_MONOTYPE))
+        traj = self.read_trajectory(sample)
+        dump = io.StringIO()
+        self.write_trajectory(traj, dump)
+        dump.seek(0)
+        traj_cmp = self.read_trajectory(dump)
+        self.assertEqual(traj, traj_cmp)
+
+    def test_injavis_dialect(self):
+        if PYTHON_3:
+            sample = io.StringIO(glotzformats.samples.POS_INJAVIS)
+        else:
+            sample = io.StringIO(unicode(glotzformats.samples.POS_INJAVIS))
+        traj = self.read_trajectory(sample)
+        dump = io.StringIO()
+        self.write_trajectory(traj, dump)
+        dump.seek(0)
+        traj_cmp = self.read_trajectory(dump)
+        self.assertEqual(traj, traj_cmp)
+
+class InjavisReadWriteTest(BasePosFileWriterTest):
+
+    def read_write_injavis(self, sample):
+        if PYTHON_3:
+            sample_file = io.StringIO(glotzformats.samples.POS_HPMC)
+        else:
+            sample_file = io.StringIO(unicode(glotzformats.samples.POS_HPMC))
+        traj0 = self.read_trajectory(sample_file, precision=7) # account for low injavis precision
+        with tempfile.NamedTemporaryFile('w', suffix='.pos') as tmpfile0:
+            with tempfile.NamedTemporaryFile('r', suffix='.pos') as tmpfile1:
+                self.write_trajectory(traj0, tmpfile0)
+                tmpfile0.flush()
+                subprocess.check_call(['injavis', tmpfile0.name, '-o', tmpfile1.name])
+                traj1 = self.read_trajectory(tmpfile1)
+        # Injavis only writes last frame
+        frame0 = traj0[-1]
+        frame1 = traj1[-1]
+        # Injavis apparently ignores the color specification when writing
+        for frame in (frame0, frame1):
+            for name, shapedef in frame.shapedef.items():
+                shapedef.color = None
+        self.assertEqual(frame0, frame1)
+
+    def test_hpmc_dialect(self):
+        self.read_write_injavis(glotzformats.samples.POS_HPMC)
+
+    def test_incsim_dialect(self):
+        self.read_write_injavis(glotzformats.samples.POS_INCSIM)
+
+    def test_monotype_dialect(self):
+        self.read_write_injavis(glotzformats.samples.POS_MONOTYPE)
+
+    def test_injavis_dialect(self):
+        self.read_write_injavis(glotzformats.samples.POS_INJAVIS)
 
 if __name__ == '__main__':
     unittest.main()
