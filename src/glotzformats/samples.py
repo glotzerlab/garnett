@@ -31,7 +31,8 @@ eof
 #[data] Steps X-Length Y-Length Z-Length
 000003  10.000  10.000  10.000
 000004  10.000  10.000  10.000
-000005  10.000  10.000  10.000"""
+000005  10.000  10.000  10.000
+#[done]"""
 
 POS_MONOTYPE = """#[data] Steps           Time            Vol             Packing         Press           MSD             DeltaX          DeltaQ          DeltaV          AcceptX         AcceptQ         AcceptV         Ensemble        Shear           Overlaps        X-Length        Y-Length        Z-Length        XY-Angle        XZ-Angle        YZ-Angle        RNGstate        RNGstatew
 5683290 0       13854.542584873 0.553368299     11      2.219808854     0.089573664     0.060274335     0.749136778     0.296100599     0.27948962      0.285714286     2       0       0       24.017662106    24.017662106    24.017662106    90      90      90      3728705625      1305200346
