@@ -1,9 +1,12 @@
 import io
+import sys
 from itertools import chain
 
 import numpy as np
 
 from .posfilereader import POSFILE_FLOAT_DIGITS
+
+PYTHON_3 = sys.version_info[0] == 3
 
 def num(x):
     return int(x) if int(x) == x else round(x, POSFILE_FLOAT_DIGITS)
@@ -13,32 +16,35 @@ class PosFileWriter(object):
 
     def write(self, trajectory, file):
         """Write trajectory to the file-like object file."""
-        def _print(*args, **kwargs):
-            return print(file=file, *args, **kwargs)
+        def _write(msg, end='\n'):
+            if PYTHON_3:
+                file.write(msg+end)
+            else:
+                file.write(unicode(msg+end))
         for frame in trajectory:
             # data section
             if frame.data is not None:
                 header_keys = frame.data_keys
-                _print('#[data] ', end='')
-                _print(' '.join(header_keys))
+                _write('#[data] ', end='')
+                _write(' '.join(header_keys))
                 columns = list()
                 for key in header_keys:
                     columns.append(frame.data[key])
                 rows = np.array(columns).transpose()
                 for row in rows:
-                    _print(' '.join(row))
-                _print('#[done]')
+                    _write(' '.join(row))
+                _write('#[done]')
             # boxMatrix
             box_matrix = np.array(frame.box.get_box_matrix())
-            _print('boxMatrix', end=' ')
-            _print(' '.join((str(num(v)) for v in box_matrix.flatten())))
+            _write('boxMatrix ', end='')
+            _write(' '.join((str(num(v)) for v in box_matrix.flatten())))
             # shape defs
             for name, definition in frame.shapedef.items():
-                _print('def {} "{}"'.format(name, definition))
+                _write('def {} "{}"'.format(name, definition))
             for name, pos, rot in zip(frame.types, frame.positions, frame.orientations):
-                _print(name, end=' ')
-                _print(' '.join((str(num(v)) for v in chain(pos, rot))))
-            _print('eof')
+                _write(name, end=' ')
+                _write(' '.join((str(num(v)) for v in chain(pos, rot))))
+            _write('eof')
     
     def dump(self, trajectory):
         f = io.StringIO()

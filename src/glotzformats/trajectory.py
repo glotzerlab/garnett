@@ -126,6 +126,9 @@ class FrameData(object):
                 and self.data == other.data\
                 and self.shapedef == other.shapedef
 
+    def __ne__(self, other):
+        return not self.__eq__(other)
+
     def __str__(self):
         return "Frame(N={})".format(len(self))
 

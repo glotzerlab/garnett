@@ -10,7 +10,7 @@ import glotzformats
 
 PYTHON_3 = sys.version_info[0] == 3
 
-warnings.filterwarnings('error', category=glotzformats.errors.ParserWarning)
+#warnings.filterwarnings('error', category=glotzformats.errors.ParserWarning)
 
 try:
     import hoomd_script
@@ -49,10 +49,14 @@ class BasePosFileWriterTest(BasePosFileReaderTest):
 class PosFileReaderTest(BasePosFileReaderTest):
 
     def test_read_empty(self):
-        empty_sample = io.StringIO("")
+        if PYTHON_3:
+            empty_sample = io.StringIO("")
+        else:
+            empty_sample = io.StringIO(unicode(''))
         with self.assertRaises(glotzformats.errors.ParserError):
             self.read_trajectory(empty_sample)
 
+    @unittest.skipIf(not PYTHON_3, 'requires python 3')
     def test_read_garbage(self):
         garbage_sample = io.StringIO(str(os.urandom(1024 * 100)))
         with self.assertRaises(glotzformats.errors.ParserError):
