@@ -138,8 +138,8 @@ class FrameData(object):
     def make_snapshot(self):
         return make_hoomd_blue_snapshot(self)
 
-    def copyto_snapshot(self):
-        return copyto_hoomd_blue_snapshot(self)
+    def copyto_snapshot(self, snapshot):
+        return copyto_hoomd_blue_snapshot(self, snapshot)
 
 class RawFrameData(object):
     """Class to capture unprocessed frame data during parsing."""

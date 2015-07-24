@@ -73,6 +73,7 @@ class FrameSnapshotExport(TrajectoryTest):
             snapshot1 = traj[-1].make_snapshot()
             self.assert_snapshots_equal(snapshot0, snapshot1)
             self.system.restore_snapshot(snapshot1)
+            run(1, quiet=True)  # sanity check
 
     def test_hpmc_dialect(self):
         snapshot = self.make_snapshot(glotzformats.samples.POS_HPMC)
