@@ -14,10 +14,11 @@ PYTHON_3 = sys.version_info[0] == 3
 #warnings.filterwarnings('error', category=glotzformats.errors.ParserWarning)
 
 try:
-    import hoomd_script
+    from hoomd_script import context
 except ImportError:
     HOOMD = False
 else:
+    context.initialize()
     HOOMD = True
 
 if HOOMD:

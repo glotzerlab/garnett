@@ -12,7 +12,6 @@ try:
 except ImportError:
     HOOMD = False
 else:
-    context.initialize()
     HOOMD = True
 
 class TrajectoryTest(unittest.TestCase):
@@ -92,4 +91,5 @@ class FrameSnapshotExport(TrajectoryTest):
         snapshot = self.make_snapshot(glotzformats.samples.POS_INJAVIS)
 
 if __name__ == '__main__':
+    context.initialize()
     unittest.main()
