@@ -211,6 +211,9 @@ def rotate_improper_triclinic(positions, orientations, box_matrix, dimensions=3)
         assert Lz==1
         assert xz == yz == 0
     box = Box(Lx=Lx,Ly=Ly,Lz=Lz,xy=xy,xz=xz,yz=yz,dimensions=dimensions)
+    triclinic = v[0][1] == v[0][2] == v[1][2] == 0
+    if triclinic:
+        return positions, orientations, box
 
     # unit vectors
     e1 = np.array((1.0, 0, 0))
@@ -250,6 +253,7 @@ def raw_frame_to_frame(raw_frame):
     positions = np.array(raw_frame.positions)
     orientations = np.array(raw_frame.orientations)
     ret.positions, ret.orientations, ret.box = rotate_improper_triclinic(positions, orientations, raw_frame.box)
+    #ret.positions, ret.orientations, ret.box = positions, orientations, raw_frame.box
     ret.shapedef = raw_frame.shapedef
     ret.types = raw_frame.types
     ret.data = raw_frame.data
