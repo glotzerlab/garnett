@@ -17,6 +17,8 @@ To install this package with pip, execute:
 
 ## Quickstart
 
+### Reading and writing
+
 ```
 #!python
 from glotzformats.reader import PosFileReader
@@ -30,6 +32,32 @@ pos_writer = PosFileWriter()
 with open('posfile2.pos', 'w') as posfile:
     pos_writer.write(traj, posfile)
 ```
+
+### Data access
+
+Access individual frames or create sub trajectories by indexing
+```
+#!python
+first_frame = traj[0]
+last_frame = traj[-1]
+n_th_frame = traj[n]
+# and so on
+
+sub_trajectory = traj[i:j]
+```
+
+Access properties of individual frames:
+```
+frame = traj[i]
+frame.box              # 3x3 matrix (not required to be upper-triangular)
+frame.types            # Nx1
+frame.positions        # Nx3
+frame.orientations     # NX4
+frame.data             # A dictionary of lists for each attribute
+frame.data_key         # A list of strings
+frame.shapedef         # A ordered dictionary of instances of ShapeDefinition
+```
+All matrices are `numpy` arrays.
 
 ## Example use with HPMC
 
