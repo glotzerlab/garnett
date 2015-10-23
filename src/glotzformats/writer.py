@@ -1,1 +1,1 @@
-from .posfilewriter import PosFileWriter
+from .posfilewriter import PosFileWriter  # noqa

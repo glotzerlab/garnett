@@ -1,1 +1,1 @@
-from .posfilereader import PosFileReader
+from .posfilereader import PosFileReader  # noqa
