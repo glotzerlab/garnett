@@ -11,11 +11,12 @@ Example:
 import collections
 import logging
 import warnings
-import re
 
 import numpy as np
 
-from .trajectory import RawFrameData, FrameData, Trajectory, raw_frame_to_frame, SphereShapeDefinition, PolyShapeDefinition, FallbackShapeDefinition
+from .trajectory import RawFrameData, Trajectory, raw_frame_to_frame,\
+    SphereShapeDefinition, PolyShapeDefinition,\
+    FallbackShapeDefinition
 from .errors import ParserError, ParserWarning
 
 logger = logging.getLogger(__name__)
@@ -24,11 +25,13 @@ POSFILE_FLOAT_DIGITS = 11
 COMMENT_CHARACTERS = ['//']
 TOKENS_SKIP = ['rotation', 'antiAliasing']
 
+
 def is_comment(line):
     for comment_char in COMMENT_CHARACTERS:
         if line.startswith(comment_char):
             return True
     return False
+
 
 class PosFileReader(object):
     """Read pos-files with different dialects."""
@@ -36,10 +39,11 @@ class PosFileReader(object):
     def __init__(self, precision=None):
         """Initialize a pos-file reader.
 
-        :param precision: The number of digits to round floating-point values to.
+        :param precision: The number of digits to
+                          round floating-point values to.
         :type precision: int
         """
-        self.precision=precision or POSFILE_FLOAT_DIGITS
+        self.precision = precision or POSFILE_FLOAT_DIGITS
 
     def num(self, x):
         if isinstance(x, int):
@@ -52,15 +56,18 @@ class PosFileReader(object):
 
         :param stream: The stream, which contains the posfile.
         :type stream: A file-like textstream.
-        :param default_type: The default particle type for posfile dialects without type definition.
+        :param default_type: The default particle type for
+                             posfile dialects without type definition.
         :type default_type: str
         """
         i = line = None
+
         def _assert(assertion):
             assert i is not None
             assert line is not None
             if not assertion:
-                raise ParserError("Failed to read line #{}: {}.".format(i, line))
+                raise ParserError(
+                    "Failed to read line #{}: {}.".format(i, line))
         monotype = False
         frames = list()
         raw_frame = RawFrameData()
@@ -71,16 +78,17 @@ class PosFileReader(object):
             if line.startswith('#'):
                 if line.startswith('#[data]'):
                     _assert(raw_frame.data is None)
-                    raw_frame.data_keys, raw_frame.data, j = self._read_data_section(line, stream)
+                    raw_frame.data_keys, raw_frame.data, j = \
+                        self._read_data_section(line, stream)
                     i += j
                 else:
                     raise ParserError(line)
             else:
                 tokens = line.rstrip().split()
                 if not tokens:
-                    continue # empty line
+                    continue  # empty line
                 elif tokens[0] in TOKENS_SKIP:
-                    continue # skip these lines
+                    continue  # skip these lines
                 if tokens[0] == 'eof':
                     # end of frame, start new frame
                     frames.append(raw_frame_to_frame(raw_frame))
@@ -90,21 +98,23 @@ class PosFileReader(object):
                     definition, data, end = line.strip().split('"')
                     _assert(len(end) == 0)
                     name = definition.split()[1]
-                    raw_frame.shapedef[name] = self._parse_shape_definition(data)
-                elif tokens[0] == 'shape': # monotype
+                    raw_frame.shapedef[
+                        name] = self._parse_shape_definition(data)
+                elif tokens[0] == 'shape':  # monotype
                     definition = line.strip().split('"')[1]
-                    raw_frame.shapedef[default_type] = self._parse_shape_definition(definition)
+                    raw_frame.shapedef[default_type] = \
+                        self._parse_shape_definition(definition)
                     _assert(len(raw_frame.shapedef) == 1)
                     monotype = True
                 elif tokens[0] in ('boxMatrix', 'box'):
                     if len(tokens) == 10:
-                    #_assert(len(tokens) == 10)
-                    #raw_frame.box = np.array((self.num(v) for v in tokens[1:])).reshape((3,3))
-                        raw_frame.box = np.array([self.num(v) for v in tokens[1:]]).reshape((3,3))
+                        raw_frame.box = np.array(
+                            [self.num(v) for v in tokens[1:]]).reshape((3, 3))
                     elif len(tokens) == 4:
-                    #raw_frame.box = np.array(tokens[1:]).reshape((3,3))
-                    #__assert(len(tokens) == 4)
-                        raw_frame.box = np.array([[self.num(tokens[1]),0,0],[0,self.num(tokens[2]),0],[0,0,self.num(tokens[3])]]).reshape((3,3))
+                        raw_frame.box = np.array([
+                            [self.num(tokens[1]), 0, 0],
+                            [0, self.num(tokens[2]), 0],
+                            [0, 0, self.num(tokens[3])]]).reshape((3, 3))
                 else:
                     # assume we are reading positions now
                     if not monotype:
@@ -117,7 +127,7 @@ class PosFileReader(object):
                         quat = tokens[-4:]
                     elif len(tokens) >= 3:
                         xyz = tokens[-3:]
-                        quat = (1,0,0,0)
+                        quat = (1, 0, 0, 0)
                     else:
                         raise ParserError(line)
                     raw_frame.types.append(name)
@@ -162,9 +172,11 @@ class PosFileReader(object):
             except StopIteration:
                 color = None
             if shape_class.lower() == 'sphere':
-                return SphereShapeDefinition(diameter=diameter,color=color)
+                return SphereShapeDefinition(diameter=diameter, color=color)
             else:
-                return PolyShapeDefinition(shape_class=shape_class,vertices=vertices,color=color)
-        except Exception as error:
-            warnings.warn("Failed to parse shape definition, using fallback mode. ({})".format(line))
+                return PolyShapeDefinition(shape_class=shape_class,
+                                           vertices=vertices, color=color)
+        except Exception:
+            warnings.warn("Failed to parse shape definition, "
+                          "using fallback mode. ({})".format(line))
             return FallbackShapeDefinition(line)

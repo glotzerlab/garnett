@@ -63,7 +63,7 @@ class FrameSnapshotExport(TrajectoryTest):
         self.system.particles[1].orientation = (1,0,0,0);
         sorter.set_params(grid=8)
         with tempfile.NamedTemporaryFile('r') as tmpfile:
-            dump.pos(filename=tmpfile.name, period = 1)
+            pos = dump.pos(filename=tmpfile.name, period = 1)
             run(10, quiet=True)
             snapshot0 = self.system.take_snapshot()
             run(1, quiet=True)  # the hoomd pos-writer lags by one sweep
@@ -72,6 +72,7 @@ class FrameSnapshotExport(TrajectoryTest):
             snapshot1 = traj[-1].make_snapshot()
             self.assert_snapshots_equal(snapshot0, snapshot1)
             self.system.restore_snapshot(snapshot1)
+            pos.disable()
             run(1, quiet=True)  # sanity check
 
     def test_hpmc_dialect(self):
@@ -91,5 +92,5 @@ class FrameSnapshotExport(TrajectoryTest):
         snapshot = self.make_snapshot(glotzformats.samples.POS_INJAVIS)
 
 if __name__ == '__main__':
-    context.initialize()
+    context.initialize('--mode=cpu')
     unittest.main()
