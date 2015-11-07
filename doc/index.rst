@@ -16,6 +16,7 @@ Contents:
    :maxdepth: 2
 
    trajectory
+   posfiles
 
 
 Quickstart
@@ -88,7 +89,7 @@ Example use with HPMC
 
 .. note::
 
-    Use hoomd's native pos-file _writer_ whenever possible.
+    Use hoomd's native pos-file *writer* whenever possible.
 
 
 Indices and tables

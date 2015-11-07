@@ -1,1 +1,3 @@
-from .posfilereader import PosFileReader  # noqa
+from .posfilereader import PosFileReader
+
+__all__ = ['PosFileReader']

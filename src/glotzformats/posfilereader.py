@@ -2,7 +2,8 @@
 
 Authors: Richmond Newmann, Carl Simon Adorf
 
-Example:
+.. code::
+
     reader = PosFileReader()
     with open('a_posfile.pos', 'r', encoding='utf-8') as posfile:
         return reader.read(posfile)
@@ -14,7 +15,7 @@ import warnings
 
 import numpy as np
 
-from .trajectory import RawFrameData, Trajectory, raw_frame_to_frame,\
+from .trajectory import _RawFrameData, Trajectory, raw_frame_to_frame,\
     SphereShapeDefinition, PolyShapeDefinition,\
     FallbackShapeDefinition
 from .errors import ParserError, ParserWarning
@@ -26,7 +27,7 @@ COMMENT_CHARACTERS = ['//']
 TOKENS_SKIP = ['rotation', 'antiAliasing']
 
 
-def is_comment(line):
+def _is_comment(line):
     for comment_char in COMMENT_CHARACTERS:
         if line.startswith(comment_char):
             return True
@@ -34,7 +35,11 @@ def is_comment(line):
 
 
 class PosFileReader(object):
-    """Read pos-files with different dialects."""
+    """Read pos-files with different dialects.
+
+        :param precision: The number of digits to
+                          round floating-point values to.
+        :type precision: int"""
 
     def __init__(self, precision=None):
         """Initialize a pos-file reader.
@@ -45,7 +50,7 @@ class PosFileReader(object):
         """
         self.precision = precision or POSFILE_FLOAT_DIGITS
 
-    def num(self, x):
+    def _num(self, x):
         if isinstance(x, int):
             return x
         else:
@@ -70,10 +75,10 @@ class PosFileReader(object):
                     "Failed to read line #{}: {}.".format(i, line))
         monotype = False
         frames = list()
-        raw_frame = RawFrameData()
+        raw_frame = _RawFrameData()
         logger.debug("Reading frames.")
         for i, line in enumerate(stream):
-            if is_comment(line):
+            if _is_comment(line):
                 continue
             if line.startswith('#'):
                 if line.startswith('#[data]'):
@@ -92,7 +97,7 @@ class PosFileReader(object):
                 if tokens[0] == 'eof':
                     # end of frame, start new frame
                     frames.append(raw_frame_to_frame(raw_frame))
-                    raw_frame = RawFrameData()
+                    raw_frame = _RawFrameData()
                     logger.debug("Read frame {}.".format(len(frames)))
                 elif tokens[0] == 'def':
                     definition, data, end = line.strip().split('"')
@@ -109,12 +114,12 @@ class PosFileReader(object):
                 elif tokens[0] in ('boxMatrix', 'box'):
                     if len(tokens) == 10:
                         raw_frame.box = np.array(
-                            [self.num(v) for v in tokens[1:]]).reshape((3, 3))
+                            [self._num(v) for v in tokens[1:]]).reshape((3, 3))
                     elif len(tokens) == 4:
                         raw_frame.box = np.array([
-                            [self.num(tokens[1]), 0, 0],
-                            [0, self.num(tokens[2]), 0],
-                            [0, 0, self.num(tokens[3])]]).reshape((3, 3))
+                            [self._num(tokens[1]), 0, 0],
+                            [0, self._num(tokens[2]), 0],
+                            [0, 0, self._num(tokens[3])]]).reshape((3, 3))
                 else:
                     # assume we are reading positions now
                     if not monotype:
@@ -131,8 +136,8 @@ class PosFileReader(object):
                     else:
                         raise ParserError(line)
                     raw_frame.types.append(name)
-                    raw_frame.positions.append([self.num(v) for v in xyz])
-                    raw_frame.orientations.append([self.num(v) for v in quat])
+                    raw_frame.positions.append([self._num(v) for v in xyz])
+                    raw_frame.orientations.append([self._num(v) for v in quat])
         if len(frames) == 0:
             raise ParserError("Did not read a single complete frame.")
         logger.info("Read {} frames.".format(len(frames)))
@@ -143,7 +148,7 @@ class PosFileReader(object):
         data = collections.defaultdict(list)
         keys = header.strip().split()[1:]
         for i, line in enumerate(stream):
-            if is_comment(line):
+            if _is_comment(line):
                 continue
             if line.startswith('#[done]'):
                 return keys, data, i
@@ -166,7 +171,7 @@ class PosFileReader(object):
                 vertices = []
                 for i in range(num_vertices):
                     xyz = next(tokens), next(tokens), next(tokens)
-                    vertices.append([self.num(v) for v in xyz])
+                    vertices.append([self._num(v) for v in xyz])
             try:
                 color = next(tokens)
             except StopIteration:

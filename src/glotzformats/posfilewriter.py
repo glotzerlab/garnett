@@ -1,3 +1,14 @@
+"""POS-file writer for the Glotzer Group, University of Michigan.
+
+Author: Carl Simon Adorf
+
+.. code::
+
+    writer = PosFileWriter()
+    with open('a_posfile.pos', 'w', encoding='utf-8') as posfile:
+        writer.write(trajectory, posfile)
+"""
+
 import io
 import sys
 import logging
@@ -11,7 +22,7 @@ logger = logging.getLogger(__name__)
 PYTHON_3 = sys.version_info[0] == 3
 
 
-def num(x):
+def _num(x):
     return int(x) if int(x) == x else round(x, POSFILE_FLOAT_DIGITS)
 
 
@@ -41,14 +52,14 @@ class PosFileWriter(object):
             # boxMatrix
             box_matrix = np.array(frame.box.get_box_matrix())
             _write('boxMatrix ', end='')
-            _write(' '.join((str(num(v)) for v in box_matrix.flatten())))
+            _write(' '.join((str(_num(v)) for v in box_matrix.flatten())))
             # shape defs
             for name, definition in frame.shapedef.items():
                 _write('def {} "{}"'.format(name, definition))
             for name, pos, rot in zip(frame.types, frame.positions,
                                       frame.orientations):
                 _write(name, end=' ')
-                _write(' '.join((str(num(v)) for v in chain(pos, rot))))
+                _write(' '.join((str(_num(v)) for v in chain(pos, rot))))
             _write('eof')
             logger.debug("Wrote frame {}.".format(i + 1))
         logger.info("Wrote {} frames.".format(i + 1))
