@@ -8,7 +8,7 @@ if not sys.version_info >= (2,7):
 
 setup(
     name = 'glotz-formats',
-    version = '0.1.3',
+    version = '0.1.4rc1',
     package_dir = {'': 'src'},
     packages = find_packages('src'),
 
@@ -23,6 +23,5 @@ setup(
         "Topic :: Scientific/Engineering :: Physics",
         ],
 
-    install_requires=['numpy'],
     tests_require = ['nose'],
 )

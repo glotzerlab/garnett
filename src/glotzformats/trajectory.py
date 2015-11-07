@@ -1,3 +1,9 @@
+"""Trajectories are the path that objects follow 
+as affected by external forces.
+
+The trajectory module provides classes to store discretized
+trajectories."""
+
 import logging
 import math
 import collections
@@ -12,7 +18,9 @@ SHAPE_DEFAULT_COLOR = '005984FF'
 
 
 class Box(object):
-    """A triclinical box class."""
+    """A triclinical box class.
+
+    .. seealso:: https://codeblue.umich.edu/hoomd-blue/doc/page_box.html"""
 
     def __init__(self, Lx, Ly, Lz, xy=0.0, xz=0.0, yz=0.0, dimensions=3):
         self.Lx = Lx
@@ -27,6 +35,9 @@ class Box(object):
         return self.__dict__ == other.__dict__
 
     def get_box_matrix(self):
+        """Returns the box matrix (3x3).
+
+        The dimensions (Lx,Ly,Lz) are the diagonal."""
         return [[self.Lx, self.xy * self.Lx, self.xz * self.Lz],
                 [0, self.Ly, self.yz * self.Lz],
                 [0, 0, self.Lz]]
@@ -41,21 +52,23 @@ class Box(object):
 
 
 class FallbackShapeDefinition(str):
+    """This shape definition class is used when no specialied
+    ShapeDefinition class can be applied."""
     pass
 
 
 class ShapeDefinition(object):
+    """Initialize a ShapeDefinition instance.
+
+    :param shape_class: The shape class definition,
+                        e.g. 'sphere' or 'poly3d'.
+    :type shape_class: str
+    :param color: Definition of a color for the
+                  particular shape (optional).
+    :type color: A str for RGB color definiton.
+    """
 
     def __init__(self, shape_class, color=None):
-        """Initialize a ShapeDefinition instance.
-
-        :param shape_class: The shape class definition,
-                            e.g. 'sphere' or 'poly3d'.
-        :type shape_class: str
-        :param color: Definition of a color for the
-                      particular shape (optional).
-        :type color: A str for RGB color definiton.
-        """
         self.shape_class = shape_class
         self.color = color or SHAPE_DEFAULT_COLOR
 
@@ -89,18 +102,18 @@ class SphereShapeDefinition(ShapeDefinition):
 
 
 class PolyShapeDefinition(ShapeDefinition):
+    """Initialize a ShapeDefinition instance.
+
+    :param shape_class: The shape class definition,
+                        e.g. 'sphere' or 'poly3d'.
+    :type shape_class: str
+    :param vertices: A list of vertice vectors, if applicable.
+    :type vertices: A sequence of 3-tuple of numbers (Nx3).
+    :param color: Definition of a color for the particular shape.
+    :type color: A str for RGB color definiton.
+        """
 
     def __init__(self, shape_class, vertices=None, color=None):
-        """Initialize a ShapeDefinition instance.
-
-        :param shape_class: The shape class definition,
-                            e.g. 'sphere' or 'poly3d'.
-        :type shape_class: str
-        :param vertices: A list of vertice vectors, if applicable.
-        :type vertices: A sequence of 3-tuple of numbers (Nx3).
-        :param color: Definition of a color for the particular shape.
-        :type color: A str for RGB color definiton.
-        """
         super(PolyShapeDefinition, self).__init__(
             shape_class=shape_class, color=color)
         self.vertices = vertices
@@ -117,15 +130,20 @@ class FrameData(object):
     """One FrameData instance manages the data of one frame in a trajectory."""
 
     def __init__(self):
-        self.box = None                             # Box object
-        self.types = None                           # Nx1 list of types
-        self.positions = None                       # Nx3 matrix
-        self.orientations = None                    # Nx4 matrix
-        # A dictionary of lists for each attribute
+        self.box = None
+        "Instance of :class:`~.Box`"
+        self.types = None
+        "Nx1 list of types represented as strings."
+        self.positions = None
+        "Nx3 matrix of coordinates for N particles in 3 dimensions."
+        self.orientations = None
+        "Nx4 matrix of rotational coordinates represented as quaternions."
         self.data = None
-        self.data_keys = None                       # A list of strings
-        # A ordered dictionary of instances of ShapeDefinition
+        "A dictionary of lists for each attribute."
+        self.data_keys = None
+        "A list of strings, where each string represents one attribute."
         self.shapedef = collections.OrderedDict()
+        "A ordered dictionary of instances of :class:`~.ShapeDefinition`."
 
     def __len__(self):
         return len(self.types)
@@ -151,14 +169,18 @@ class FrameData(object):
         return str(self)
 
     def make_snapshot(self):
+        "Create a hoomd-blue snapshot object from this frame."
         return make_hoomd_blue_snapshot(self)
 
     def copyto_snapshot(self, snapshot):
+        "Copy this frame to a hoomd-blue snapshot."
         return copyto_hoomd_blue_snapshot(self, snapshot)
 
 
-class RawFrameData(object):
-    """Class to capture unprocessed frame data during parsing."""
+class _RawFrameData(object):
+    """Class to capture unprocessed frame data during parsing.
+    
+    All matrices are numpy arrays."""
 
     def __init__(self):
         # 3x3 matrix (not required to be upper-triangular)
@@ -174,7 +196,35 @@ class RawFrameData(object):
 
 
 class Trajectory(object):
-    """A trajectory is a sequence of frames."""
+    """A trajectory is a sequence of :class:`~.FrameData` instances.
+
+    The length of a trajectory is obtained via `len`.
+
+    .. code::
+
+        N = len(trajectory)
+
+    You can iterate through individual frames like this:
+
+    .. code::
+
+        for frame in trajectory:
+            # do something
+
+    Access indivdual frames with indeces:
+
+    .. code::
+
+        first_frame = traj[0]
+        last_frame = traj[-1]
+        n_th_frame = traj[n]
+
+    
+    Create a sub-trajectory from the i'th to the (j-1)'th frame:
+
+    .. code::
+        
+        sub_trajectory = traj[i:j]"""
 
     def __init__(self, frames=None):
         self.frames = frames or list()
@@ -287,12 +337,14 @@ def raw_frame_to_frame(raw_frame):
 
 
 def copyto_hoomd_blue_snapshot(frame, snapshot):
+    "Copy the frame into a hoomd-blue snapshot."
     np.copyto(snapshot.particles.position, frame.positions)
     np.copyto(snapshot.particles.orientation, frame.orientations)
     return snapshot
 
 
 def make_hoomd_blue_snapshot(frame):
+    "Create a hoomd-blue snapshot from the frame instance."
     from hoomd_script import data
     snapshot = data.make_snapshot(
         N=len(frame),

@@ -15,6 +15,8 @@ Contents:
 .. toctree::
    :maxdepth: 2
 
+   trajectory
+
 
 Quickstart
 ==========
@@ -84,7 +86,7 @@ Example use with HPMC
     traj[-1].copyto_snapshot(snapshot)
 
 
-.. notice::
+.. note::
 
     Use hoomd's native pos-file _writer_ whenever possible.
 
