@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 #
 # glotzformats documentation build configuration file, created by
-# sphinx-quickstart on Fri Nov  6 17:52:58 2015.
+# sphinx-quickstart on Fri Nov  6 18:00:11 2015.
 #
 # This file is execfile()d with the current directory set to its
 # containing dir.
@@ -33,7 +33,6 @@ import shlex
 extensions = [
     'sphinx.ext.autodoc',
     'sphinx.ext.intersphinx',
-    'sphinx.ext.pngmath',
     'sphinx.ext.viewcode',
 ]
 
@@ -80,7 +79,7 @@ language = None
 
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.
-exclude_patterns = []
+exclude_patterns = ['_build']
 
 # The reST default role (used for this markup: `text`) to use for all
 # documents.

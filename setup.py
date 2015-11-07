@@ -23,5 +23,6 @@ setup(
         "Topic :: Scientific/Engineering :: Physics",
         ],
 
+    install_requires=['numpy'],
     tests_require = ['nose'],
 )
