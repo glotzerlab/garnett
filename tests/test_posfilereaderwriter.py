@@ -18,7 +18,7 @@ try:
 except ImportError:
     HOOMD = False
 else:
-    context.initialize()
+    context.initialize('--mode=cpu')
     HOOMD = True
 
 if HOOMD:
@@ -222,6 +222,7 @@ class PosFileWriterTest(BasePosFileWriterTest):
         traj_cmp = self.read_trajectory(dump)
         self.assertEqual(traj, traj_cmp)
 
+@unittest.skip("injavis is currently not starting correctly.")
 class InjavisReadWriteTest(BasePosFileWriterTest):
 
     def read_write_injavis(self, sample):
