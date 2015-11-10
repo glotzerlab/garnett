@@ -15,7 +15,7 @@ import warnings
 
 import numpy as np
 
-from .trajectory import _RawFrameData, Trajectory, raw_frame_to_frame,\
+from .trajectory import _RawFrameData, Trajectory, _raw_frame_to_frame,\
     SphereShapeDefinition, PolyShapeDefinition,\
     FallbackShapeDefinition
 from .errors import ParserError, ParserWarning
@@ -96,7 +96,7 @@ class PosFileReader(object):
                     continue  # skip these lines
                 if tokens[0] == 'eof':
                     # end of frame, start new frame
-                    frames.append(raw_frame_to_frame(raw_frame))
+                    frames.append(_raw_frame_to_frame(raw_frame))
                     raw_frame = _RawFrameData()
                     logger.debug("Read frame {}.".format(len(frames)))
                 elif tokens[0] == 'def':

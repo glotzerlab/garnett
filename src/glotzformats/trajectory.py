@@ -1,4 +1,4 @@
-"""Trajectories are the path that objects follow 
+"""Trajectories are the path that objects follow
 as affected by external forces.
 
 The trajectory module provides classes to store discretized
@@ -52,8 +52,10 @@ class Box(object):
 
 
 class FallbackShapeDefinition(str):
-    """This shape definition class is used when no specialied
-    ShapeDefinition class can be applied."""
+    """This shape definition class is used when no specialized
+    ShapeDefinition class can be applied.
+
+    The fallback shape definition is a str containing the definition."""
     pass
 
 
@@ -83,16 +85,15 @@ class ShapeDefinition(object):
 
 
 class SphereShapeDefinition(ShapeDefinition):
+    """Initialize a ShapeDefinition instance.
+
+    :param diameter: The diameter of the sphere.
+    :type diameter: A floating point number.
+    :param color: Definition of a color for the
+                  particular shape (optional).
+    :type color: A str for RGB color definiton."""
 
     def __init__(self, diameter, color=None):
-        """Initialize a ShapeDefinition instance.
-
-        :param diameter: The diameter of the sphere.
-        :type diameter: A floating point number.
-        :param color: Definition of a color for the
-                      particular shape (optional).
-        :type color: A str for RGB color definiton.
-        """
         super(SphereShapeDefinition, self).__init__(
             shape_class='sphere', color=color)
         self.diameter = diameter
@@ -179,7 +180,7 @@ class FrameData(object):
 
 class _RawFrameData(object):
     """Class to capture unprocessed frame data during parsing.
-    
+
     All matrices are numpy arrays."""
 
     def __init__(self):
@@ -219,11 +220,11 @@ class Trajectory(object):
         last_frame = traj[-1]
         n_th_frame = traj[n]
 
-    
+
     Create a sub-trajectory from the i'th to the (j-1)'th frame:
 
     .. code::
-        
+
         sub_trajectory = traj[i:j]"""
 
     def __init__(self, frames=None):
@@ -319,7 +320,7 @@ def rotate_improper_triclinic(positions, orientations,
     return positions, orientations, box
 
 
-def raw_frame_to_frame(raw_frame):
+def _raw_frame_to_frame(raw_frame):
     """Generate a frame object from a raw frame object."""
     N = len(raw_frame.types)
     ret = FrameData()

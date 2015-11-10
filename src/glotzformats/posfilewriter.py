@@ -23,6 +23,7 @@ PYTHON_3 = sys.version_info[0] == 3
 
 
 def _num(x):
+    "Round x if x is a floating point number."
     return int(x) if int(x) == x else round(x, POSFILE_FLOAT_DIGITS)
 
 
@@ -30,7 +31,11 @@ class PosFileWriter(object):
     """Write pos-files from a trajectory instance."""
 
     def write(self, trajectory, file):
-        """Write trajectory to the file-like object file."""
+        """Serialize a trajectory into pos-format and write it to file.
+
+        :param trajectory: The trajectory to serialize
+        :type trajectory: :class:`~glotzformats.trajectory.Trajectory`
+        :param file: A file-like object."""
         def _write(msg, end='\n'):
             if PYTHON_3:
                 file.write(msg + end)
@@ -65,6 +70,11 @@ class PosFileWriter(object):
         logger.info("Wrote {} frames.".format(i + 1))
 
     def dump(self, trajectory):
+        """Serialize trajectory into pos-format.
+
+        :param trajectory: The trajectory to serialize.
+        :type trajectory: :class:`~glotzformats.trajectory.Trajectory`
+        :rtype: str"""
         f = io.StringIO()
         self.write(trajectory, f)
         return f.getvalue()
