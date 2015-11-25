@@ -15,6 +15,15 @@ To install this package with pip, execute:
 
     pip install git+https://$USER@bitbucket.org/glotzer/glotz-formats.git#egg=glotzformats --user
 
+## Documentation
+
+Documentation for this package is available through the download page or you can build it yourself using sphinx.
+To build documentation using sphinx, execute within the repository:
+
+    cd doc
+    make html
+    open _build/html/index.html
+
 ## Quickstart
 
 ### Reading and writing
