@@ -13,6 +13,7 @@ glotzformats - documentation
 .. toctree::
    :maxdepth: 2
 
+   installation
    quickstart
    trajectory
    posfiles
