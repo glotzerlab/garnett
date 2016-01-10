@@ -127,6 +127,126 @@ class PolyShapeDefinition(ShapeDefinition):
             self.color)
 
 
+class Frame(object):
+    """A frame is a container object for the actual frame data.
+
+    The frame data is read from the origin stream whenever accessed."""
+
+    def __init__(self):
+        self.frame_data = None
+
+    def load(self):
+        "Load the frame into memory."
+        logger.debug("Loading frame.")
+        if self.frame_data is None:
+            self.frame_data = _raw_frame_to_frame(self.read())
+
+    def unload(self):
+        "Unload the frame from memory."
+        logger.debug("Unloading frame.")
+        self.frame_data = None
+
+    def __len__(self):
+        "Return the number of particles in this frame."
+        self.load()
+        return len(self.frame_data)
+
+    def __eq__(self, other):
+        self.load()
+        other.load()
+        return self.frame_data == other.frame_data
+
+    def __ne__(self, other):
+        return not self.__eq__(other)
+
+    def make_snapshot(self):
+        "Create a hoomd-blue snapshot object from this frame."
+        self.load()
+        return make_hoomd_blue_snapshot(self.frame_data)
+
+    def copyto_snapshot(self, snapshot):
+        "Copy this frame to a hoomd-blue snapshot."
+        self.load()
+        return copyto_hoomd_blue_snapshot(self.frame_data, snapshot)
+
+    @property
+    def box(self):
+        "Instance of :class:`~.Box`"
+        self.load()
+        return self.frame_data.box
+
+    @box.setter
+    def box(self, value):
+        self.load()
+        self.frame_data.box = value
+
+    @property
+    def types(self):
+        "Nx1 list of types represented as strings."
+        self.load()
+        return self.frame_data.types
+
+    @types.setter
+    def types(self, value):
+        self.load()
+        self.frame_data.types = value
+
+    @property
+    def positions(self):
+        "Nx3 matrix of coordinates for N particles in 3 dimensions."
+        self.load()
+        return self.frame_data.positions
+
+    @positions.setter
+    def positions(self, value):
+        self.load()
+        self.frame_data.positions = value
+
+    @property
+    def orientations(self):
+        "Nx4 matrix of rotational coordinates represented as quaternions."
+        self.load()
+        return self.frame_data.orientations
+
+    @orientations.setter
+    def orientations(self, value):
+        self.load()
+        self.frame_data.orientations = value
+
+    @property
+    def data(self):
+        "A dictionary of lists for each attribute."
+        self.load()
+        return self.frame_data.data
+
+    @data.setter
+    def data(self, value):
+        self.load()
+        self.frame_data.data = value
+
+    @property
+    def data_keys(self):
+        "A list of strings, where each string represents one attribute."
+        self.load()
+        return self.frame_data.data_keys
+
+    @data_keys.setter
+    def data_keys(self, value):
+        self.load()
+        self.frame_data.data_keys = value
+
+    @property
+    def shapedef(self):
+        "A ordered dictionary of instances of :class:`~.ShapeDefinition`."
+        self.load()
+        return self.frame_data.shapedef
+
+    @shapedef.setter
+    def shapedef(self, value):
+        self.load()
+        self.frame_data.shapedef = value
+
+
 class FrameData(object):
     """One FrameData instance manages the data of one frame in a trajectory."""
 

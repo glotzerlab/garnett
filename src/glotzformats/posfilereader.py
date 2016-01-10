@@ -15,7 +15,7 @@ import warnings
 
 import numpy as np
 
-from .trajectory import _RawFrameData, Trajectory, _raw_frame_to_frame,\
+from .trajectory import _RawFrameData, Frame, Trajectory, \
     SphereShapeDefinition, PolyShapeDefinition,\
     FallbackShapeDefinition
 from .errors import ParserError, ParserWarning
@@ -34,114 +34,21 @@ def _is_comment(line):
     return False
 
 
-class PosFileReader(object):
-    """Read pos-files with different dialects.
+class PosFileFrame(Frame):
 
-        :param precision: The number of digits to
-                          round floating-point values to.
-        :type precision: int"""
-
-    def __init__(self, precision=None):
-        """Initialize a pos-file reader.
-
-        :param precision: The number of digits to
-                          round floating-point values to.
-        :type precision: int
-        """
-        self.precision = precision or POSFILE_FLOAT_DIGITS
+    def __init__(self, stream, start, end, precision, default_type):
+        self.stream = stream
+        self.start = start
+        self.end = end
+        self.precision = precision
+        self.default_type = default_type
+        super(PosFileFrame, self).__init__()
 
     def _num(self, x):
         if isinstance(x, int):
             return x
         else:
             return round(float(x), self.precision)
-
-    def read(self, stream, default_type='A'):
-        """Read text stream and return a trajectory instance.
-
-        :param stream: The stream, which contains the posfile.
-        :type stream: A file-like textstream.
-        :param default_type: The default particle type for
-                             posfile dialects without type definition.
-        :type default_type: str
-        """
-        i = line = None
-
-        def _assert(assertion):
-            assert i is not None
-            assert line is not None
-            if not assertion:
-                raise ParserError(
-                    "Failed to read line #{}: {}.".format(i, line))
-        monotype = False
-        frames = list()
-        raw_frame = _RawFrameData()
-        logger.debug("Reading frames.")
-        for i, line in enumerate(stream):
-            if _is_comment(line):
-                continue
-            if line.startswith('#'):
-                if line.startswith('#[data]'):
-                    _assert(raw_frame.data is None)
-                    raw_frame.data_keys, raw_frame.data, j = \
-                        self._read_data_section(line, stream)
-                    i += j
-                else:
-                    raise ParserError(line)
-            else:
-                tokens = line.rstrip().split()
-                if not tokens:
-                    continue  # empty line
-                elif tokens[0] in TOKENS_SKIP:
-                    continue  # skip these lines
-                if tokens[0] == 'eof':
-                    # end of frame, start new frame
-                    frames.append(_raw_frame_to_frame(raw_frame))
-                    raw_frame = _RawFrameData()
-                    logger.debug("Read frame {}.".format(len(frames)))
-                elif tokens[0] == 'def':
-                    definition, data, end = line.strip().split('"')
-                    _assert(len(end) == 0)
-                    name = definition.split()[1]
-                    raw_frame.shapedef[
-                        name] = self._parse_shape_definition(data)
-                elif tokens[0] == 'shape':  # monotype
-                    definition = line.strip().split('"')[1]
-                    raw_frame.shapedef[default_type] = \
-                        self._parse_shape_definition(definition)
-                    _assert(len(raw_frame.shapedef) == 1)
-                    monotype = True
-                elif tokens[0] in ('boxMatrix', 'box'):
-                    if len(tokens) == 10:
-                        raw_frame.box = np.array(
-                            [self._num(v) for v in tokens[1:]]).reshape((3, 3))
-                    elif len(tokens) == 4:
-                        raw_frame.box = np.array([
-                            [self._num(tokens[1]), 0, 0],
-                            [0, self._num(tokens[2]), 0],
-                            [0, 0, self._num(tokens[3])]]).reshape((3, 3))
-                else:
-                    # assume we are reading positions now
-                    if not monotype:
-                        name = tokens[0]
-                        _assert(name in raw_frame.shapedef)
-                    else:
-                        name = default_type
-                    if len(tokens) >= 7:
-                        xyz = tokens[-7:-4]
-                        quat = tokens[-4:]
-                    elif len(tokens) >= 3:
-                        xyz = tokens[-3:]
-                        quat = (1, 0, 0, 0)
-                    else:
-                        raise ParserError(line)
-                    raw_frame.types.append(name)
-                    raw_frame.positions.append([self._num(v) for v in xyz])
-                    raw_frame.orientations.append([self._num(v) for v in quat])
-        if len(frames) == 0:
-            raise ParserError("Did not read a single complete frame.")
-        logger.info("Read {} frames.".format(len(frames)))
-        return Trajectory(frames)
 
     def _read_data_section(self, header, stream):
         """Read data section from stream."""
@@ -185,3 +92,128 @@ class PosFileReader(object):
             warnings.warn("Failed to parse shape definition, "
                           "using fallback mode. ({})".format(line))
             return FallbackShapeDefinition(line)
+
+    def read(self):
+        "Read the frame data from the stream."
+        self.stream.seek(self.start)
+        i = line = None
+
+        def _assert(assertion):
+            assert i is not None
+            assert line is not None
+            if not assertion:
+                raise ParserError(
+                    "Failed to read line #{}: {}.".format(i, line))
+        monotype = False
+        raw_frame = _RawFrameData()
+        for i, line in enumerate(self.stream):
+            if _is_comment(line):
+                continue
+            if line.startswith('#'):
+                if line.startswith('#[data]'):
+                    _assert(raw_frame.data is None)
+                    raw_frame.data_keys, raw_frame.data, j = \
+                        self._read_data_section(line, self.stream)
+                    i += j
+                else:
+                    raise ParserError(line)
+            else:
+                tokens = line.rstrip().split()
+                if not tokens:
+                    continue  # empty line
+                elif tokens[0] in TOKENS_SKIP:
+                    continue  # skip these lines
+                if tokens[0] == 'eof':
+                    logger.debug("Reached end of frame.")
+                    break
+                elif tokens[0] == 'def':
+                    definition, data, end = line.strip().split('"')
+                    _assert(len(end) == 0)
+                    name = definition.split()[1]
+                    raw_frame.shapedef[
+                        name] = self._parse_shape_definition(data)
+                elif tokens[0] == 'shape':  # monotype
+                    definition = line.strip().split('"')[1]
+                    raw_frame.shapedef[self.default_type] = \
+                        self._parse_shape_definition(definition)
+                    _assert(len(raw_frame.shapedef) == 1)
+                    monotype = True
+                elif tokens[0] in ('boxMatrix', 'box'):
+                    if len(tokens) == 10:
+                        raw_frame.box = np.array(
+                            [self._num(v) for v in tokens[1:]]).reshape((3, 3))
+                    elif len(tokens) == 4:
+                        raw_frame.box = np.array([
+                            [self._num(tokens[1]), 0, 0],
+                            [0, self._num(tokens[2]), 0],
+                            [0, 0, self._num(tokens[3])]]).reshape((3, 3))
+                else:
+                    # assume we are reading positions now
+                    if not monotype:
+                        name = tokens[0]
+                        _assert(name in raw_frame.shapedef)
+                    else:
+                        name = self.default_type
+                    if len(tokens) >= 7:
+                        xyz = tokens[-7:-4]
+                        quat = tokens[-4:]
+                    elif len(tokens) >= 3:
+                        xyz = tokens[-3:]
+                        quat = (1, 0, 0, 0)
+                    else:
+                        raise ParserError(line)
+                    raw_frame.types.append(name)
+                    raw_frame.positions.append([self._num(v) for v in xyz])
+                    raw_frame.orientations.append([self._num(v) for v in quat])
+        return raw_frame
+
+    def __str__(self):
+        return "Container(stream={}, start={}, end={})".format(
+            self.stream, self.start, self.end)
+
+
+class PosFileReader(object):
+    """Read pos-files with different dialects.
+
+        :param precision: The number of digits to
+                          round floating-point values to.
+        :type precision: int"""
+
+    def __init__(self, precision=None):
+        """Initialize a pos-file reader.
+
+        :param precision: The number of digits to
+                          round floating-point values to.
+        :type precision: int
+        """
+        self._precision = precision or POSFILE_FLOAT_DIGITS
+
+    def scan(self, stream, default_type):
+        start = 0
+        index = 0
+        for line in stream:
+            index += len(line)
+            if line.startswith('eof'):
+                yield PosFileFrame(
+                    stream, start, index,
+                    self._precision, default_type)
+                start = index
+
+    def read(self, stream, default_type='A'):
+        """Read text stream and return a trajectory instance.
+
+        :param stream: The stream, which contains the posfile.
+        :type stream: A file-like textstream.
+        :param default_type: The default particle type for
+                             posfile dialects without type definition.
+        :type default_type: str
+        """
+        # Index the stream
+        frames = list(self.scan(stream, default_type))
+        if len(frames) == 0:
+            raise ParserError("Did not read a single complete frame.")
+        logger.debug("Scanned frames:")
+        for frame in frames:
+            logger.debug(frame)
+        logger.info("Read {} frames.".format(len(frames)))
+        return Trajectory(frames)
