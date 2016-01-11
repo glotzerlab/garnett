@@ -30,7 +30,7 @@ def _num(x):
 class PosFileWriter(object):
     """Write pos-files from a trajectory instance."""
 
-    def write(self, trajectory, file):
+    def write(self, trajectory, file=sys.stdout):
         """Serialize a trajectory into pos-format and write it to file.
 
         :param trajectory: The trajectory to serialize

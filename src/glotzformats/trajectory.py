@@ -196,8 +196,194 @@ class _RawFrameData(object):
         self.shapedef = collections.OrderedDict()
 
 
-class Trajectory(object):
-    """A trajectory is a sequence of :class:`~.FrameData` instances.
+class Frame(object):
+    """A frame is a container object for the actual frame data.
+
+    The frame data is read from the origin stream whenever accessed."""
+
+    def __init__(self):
+        self.frame_data = None
+
+    def load(self):
+        "Load the frame into memory."
+        if self.frame_data is None:
+            logger.debug("Loading frame.")
+            self.frame_data = _raw_frame_to_frame(self.read())
+
+    def unload(self):
+        """Unload the frame from memory.
+
+        Use this method carefully.
+        This method removes the frame reference to the frame data,
+        however any other references that may still exist, will
+        prevent a removal of said data from memory."""
+        logger.debug("Removing frame data reference.")
+        self.frame_data = None
+
+    def __len__(self):
+        "Return the number of particles in this frame."
+        self.load()
+        return len(self.frame_data)
+
+    def __eq__(self, other):
+        self.load()
+        other.load()
+        return self.frame_data == other.frame_data
+
+    def __ne__(self, other):
+        return not self.__eq__(other)
+
+    def make_snapshot(self):
+        "Create a hoomd-blue snapshot object from this frame."
+        self.load()
+        return make_hoomd_blue_snapshot(self.frame_data)
+
+    def copyto_snapshot(self, snapshot):
+        "Copy this frame to a hoomd-blue snapshot."
+        self.load()
+        return copyto_hoomd_blue_snapshot(self.frame_data, snapshot)
+
+    @property
+    def box(self):
+        "Instance of :class:`~.Box`"
+        self.load()
+        return self.frame_data.box
+
+    @box.setter
+    def box(self, value):
+        self.load()
+        self.frame_data.box = value
+
+    @property
+    def types(self):
+        "Nx1 list of types represented as strings."
+        self.load()
+        return self.frame_data.types
+
+    @types.setter
+    def types(self, value):
+        self.load()
+        self.frame_data.types = value
+
+    @property
+    def positions(self):
+        "Nx3 matrix of coordinates for N particles in 3 dimensions."
+        self.load()
+        return self.frame_data.positions
+
+    @positions.setter
+    def positions(self, value):
+        self.load()
+        self.frame_data.positions = value
+
+    @property
+    def orientations(self):
+        "Nx4 matrix of rotational coordinates represented as quaternions."
+        self.load()
+        return self.frame_data.orientations
+
+    @orientations.setter
+    def orientations(self, value):
+        self.load()
+        self.frame_data.orientations = value
+
+    @property
+    def data(self):
+        "A dictionary of lists for each attribute."
+        self.load()
+        return self.frame_data.data
+
+    @data.setter
+    def data(self, value):
+        self.load()
+        self.frame_data.data = value
+
+    @property
+    def data_keys(self):
+        "A list of strings, where each string represents one attribute."
+        self.load()
+        return self.frame_data.data_keys
+
+    @data_keys.setter
+    def data_keys(self, value):
+        self.load()
+        self.frame_data.data_keys = value
+
+    @property
+    def shapedef(self):
+        "A ordered dictionary of instances of :class:`~.ShapeDefinition`."
+        self.load()
+        return self.frame_data.shapedef
+
+    @shapedef.setter
+    def shapedef(self, value):
+        self.load()
+        self.frame_data.shapedef = value
+
+
+class BaseTrajectory(object):
+
+    def __init__(self, frames=None):
+        self.frames = frames or list()
+
+    def __str__(self):
+        try:
+            return "Trajectory(# frames: {})".format(len(self))
+        except TypeError:
+            return "Trajectory(# frames: n/a)"
+
+    def __repr__(self):
+        return str(self)
+
+    def __len__(self):
+        return len(self.frames)
+
+    def __getitem__(self, index):
+        if isinstance(index, slice):
+            return Trajectory(self.frames[index])
+        else:
+            return self.frames[index]
+
+    def __eq__(self, other):
+        if len(self) != len(other):
+            return False
+        for f1, f2 in zip(self, other):
+            if f1 != f2:
+                return False
+        else:
+            return True
+
+
+class ImmutableTrajectory(BaseTrajectory):
+    """The immutable trajectory class is used internally to
+    provide efficient immutable iterators over trajectories."""
+
+    class ImmutableTrajectoryIterator(object):
+
+        def __init__(self, traj):
+            self.frame_iter = iter(traj.frames)
+            self.frame = None
+
+        def __iter__(self):
+            return self
+
+        def __next__(self):
+            if self.frame is not None:
+                self.frame.unload()
+            self.frame = next(self.frame_iter)
+            return self.frame
+
+        next = __next__
+
+    def __init__(self, frames=None):
+        super(ImmutableTrajectory, self).__init__(frames=frames)
+
+    def __iter__(self):
+        return ImmutableTrajectory.ImmutableTrajectoryIterator(self)
+
+
+class Trajectory(BaseTrajectory):
+    """A trajectory is a sequence of :class:`~.Frame` instances.
 
     The length of a trajectory is obtained via `len`.
 
@@ -211,6 +397,10 @@ class Trajectory(object):
 
         for frame in trajectory:
             # do something
+
+    .. warning::
+
+        Iteration allows only read-only (!) access.
 
     Access indivdual frames with indeces:
 
@@ -227,36 +417,8 @@ class Trajectory(object):
 
         sub_trajectory = traj[i:j]"""
 
-    def __init__(self, frames=None):
-        self.frames = frames or list()
-
-    def __str__(self):
-        return "Trajectory(# frames: {})".format(len(self))
-
-    def __repr__(self):
-        return str(self)
-
-    def __len__(self):
-        return len(self.frames)
-
     def __iter__(self):
-        for frame in self.frames:
-            yield frame
-
-    def __getitem__(self, index):
-        if isinstance(index, slice):
-            return Trajectory(self.frames[index])
-        else:
-            return self.frames[index]
-
-    def __eq__(self, other):
-        if len(self) != len(other):
-            return False
-        for f1, f2 in zip(self, other):
-            if f1 != f2:
-                return False
-        else:
-            return True
+        return iter(ImmutableTrajectory(self.frames))
 
 
 def rotate_improper_triclinic(positions, orientations,
@@ -325,8 +487,8 @@ def _raw_frame_to_frame(raw_frame):
     N = len(raw_frame.types)
     ret = FrameData()
     # the box
-    positions = np.array(raw_frame.positions)
-    orientations = np.array(raw_frame.orientations)
+    positions = np.asarray(raw_frame.positions)
+    orientations = np.asarray(raw_frame.orientations)
     ret.positions, ret.orientations, ret.box = rotate_improper_triclinic(
         positions, orientations, raw_frame.box)
     ret.shapedef = raw_frame.shapedef

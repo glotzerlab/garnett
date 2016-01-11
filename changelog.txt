@@ -1,0 +1,4 @@
+0.1.5
+
+	- Frames only loaded into memory on demand.
+	- Improved trajectory iteration logic.

@@ -4,16 +4,19 @@ import sys
 import os
 import io
 import logging
-import tempfile
 import tarfile
 
 import glotzformats
 
 FN_SAMPLE_ARCHIVE = 'samples.tar.gz'
 
+
 def test_read_pos(posfile):
     pos_reader = glotzformats.reader.PosFileReader()
-    pos_reader.read(posfile)
+    traj = pos_reader.read(posfile)
+    for frame in traj:
+        print(frame)
+
 
 def main():
     with tarfile.open(FN_SAMPLE_ARCHIVE) as tar:
