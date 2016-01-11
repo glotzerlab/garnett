@@ -23,7 +23,10 @@ from unittest.mock import MagicMock
 class Mock(MagicMock):
     @classmethod
     def __getattr__(cls, name):
-        return Mock()
+        if name == '_mock_methods':
+            return cls._mock_methods
+        else:
+            return Mock()
 
 MOCK_MODULES = ['numpy']
 sys.modules.update((mod_name, Mock()) for mod_name in MOCK_MODULES)
