@@ -1,6 +1,5 @@
 #!/usr/bin/env python
 
-import sys
 import logging
 
 from glotzformats.reader import PosFileReader
@@ -13,14 +12,12 @@ def main(args):
     pos_reader = PosFileReader()
     pos_writer = PosFileWriter()
     with open(args.posfile) as posfile:
-        traj = pos_reader.read(posfile)
-        for i, frame in enumerate(traj):
-            print(i, frame)
-        pos_writer.write(traj, sys.stdout)
+        pos_writer.write(pos_reader.read(posfile))
     return 0
 
 if __name__ == '__main__':
     import argparse
+    import sys
     parser = argparse.ArgumentParser(
         description="Read a pos-file.")
     parser.add_argument(
