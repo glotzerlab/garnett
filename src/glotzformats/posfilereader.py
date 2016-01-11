@@ -212,8 +212,5 @@ class PosFileReader(object):
         frames = list(self.scan(stream, default_type))
         if len(frames) == 0:
             raise ParserError("Did not read a single complete frame.")
-        logger.debug("Scanned frames:")
-        for frame in frames:
-            logger.debug(frame)
         logger.info("Read {} frames.".format(len(frames)))
         return Trajectory(frames)
