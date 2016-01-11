@@ -168,7 +168,7 @@ class PosFileFrame(Frame):
         return raw_frame
 
     def __str__(self):
-        return "Container(stream={}, start={}, end={})".format(
+        return "PosFileFrame(stream={}, start={}, end={})".format(
             self.stream, self.start, self.end)
 
 
