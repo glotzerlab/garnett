@@ -128,6 +128,75 @@ class PolyShapeDefinition(ShapeDefinition):
             self.color)
 
 
+class FrameData(object):
+    """One FrameData instance manages the data of one frame in a trajectory."""
+
+    def __init__(self):
+        self.box = None
+        "Instance of :class:`~.Box`"
+        self.types = None
+        "Nx1 list of types represented as strings."
+        self.positions = None
+        "Nx3 matrix of coordinates for N particles in 3 dimensions."
+        self.orientations = None
+        "Nx4 matrix of rotational coordinates represented as quaternions."
+        self.data = None
+        "A dictionary of lists for each attribute."
+        self.data_keys = None
+        "A list of strings, where each string represents one attribute."
+        self.shapedef = collections.OrderedDict()
+        "A ordered dictionary of instances of :class:`~.ShapeDefinition`."
+
+    def __len__(self):
+        return len(self.types)
+
+    def __eq__(self, other):
+        if len(self) != len(other):
+            return False
+        else:  # rigorous comparison required
+            return self.box == other.box \
+                and self.types == other.types\
+                and (self.positions == other.positions).all()\
+                and (self.orientations == other.orientations).all()\
+                and self.data == other.data\
+                and self.shapedef == other.shapedef
+
+    def __ne__(self, other):
+        return not self.__eq__(other)
+
+    def __str__(self):
+        return "Frame(N={})".format(len(self))
+
+    def __repr__(self):
+        return str(self)
+
+    def make_snapshot(self):
+        "Create a hoomd-blue snapshot object from this frame."
+        return make_hoomd_blue_snapshot(self)
+
+    def copyto_snapshot(self, snapshot):
+        "Copy this frame to a hoomd-blue snapshot."
+        return copyto_hoomd_blue_snapshot(self, snapshot)
+
+
+class _RawFrameData(object):
+    """Class to capture unprocessed frame data during parsing.
+
+    All matrices are numpy arrays."""
+
+    def __init__(self):
+        # 3x3 matrix (not required to be upper-triangular)
+        self.box = None
+        self.types = list()                         # Nx1
+        self.positions = list()                     # Nx3
+        self.orientations = list()                  # NX4
+        # A dictionary of lists for each attribute
+        self.data = None
+        self.data_keys = None                       # A list of strings
+        # A ordered dictionary of instances of ShapeDefinition
+        self.shapedef = collections.OrderedDict()
+
+
 class Frame(object):
     """A frame is a container object for the actual frame data.
 
@@ -145,9 +214,11 @@ class Frame(object):
     def unload(self):
         """Unload the frame from memory.
 
-        Be advised, that any existing references to frame data
-        will remain in memory."""
-        logger.debug("Unloading frame if loaded.")
+        Use this method carefully.
+        This method removes the frame reference to the frame data,
+        however any other references that may still exist, will
+        prevent a removal of said data from memory."""
+        logger.debug("Removing frame data reference.")
         self.frame_data = None
 
     def __len__(self):
@@ -249,75 +320,6 @@ class Frame(object):
     def shapedef(self, value):
         self.load()
         self.frame_data.shapedef = value
-
-
-class FrameData(object):
-    """One FrameData instance manages the data of one frame in a trajectory."""
-
-    def __init__(self):
-        self.box = None
-        "Instance of :class:`~.Box`"
-        self.types = None
-        "Nx1 list of types represented as strings."
-        self.positions = None
-        "Nx3 matrix of coordinates for N particles in 3 dimensions."
-        self.orientations = None
-        "Nx4 matrix of rotational coordinates represented as quaternions."
-        self.data = None
-        "A dictionary of lists for each attribute."
-        self.data_keys = None
-        "A list of strings, where each string represents one attribute."
-        self.shapedef = collections.OrderedDict()
-        "A ordered dictionary of instances of :class:`~.ShapeDefinition`."
-
-    def __len__(self):
-        return len(self.types)
-
-    def __eq__(self, other):
-        if len(self) != len(other):
-            return False
-        else:  # rigorous comparison required
-            return self.box == other.box \
-                and self.types == other.types\
-                and (self.positions == other.positions).all()\
-                and (self.orientations == other.orientations).all()\
-                and self.data == other.data\
-                and self.shapedef == other.shapedef
-
-    def __ne__(self, other):
-        return not self.__eq__(other)
-
-    def __str__(self):
-        return "Frame(N={})".format(len(self))
-
-    def __repr__(self):
-        return str(self)
-
-    def make_snapshot(self):
-        "Create a hoomd-blue snapshot object from this frame."
-        return make_hoomd_blue_snapshot(self)
-
-    def copyto_snapshot(self, snapshot):
-        "Copy this frame to a hoomd-blue snapshot."
-        return copyto_hoomd_blue_snapshot(self, snapshot)
-
-
-class _RawFrameData(object):
-    """Class to capture unprocessed frame data during parsing.
-
-    All matrices are numpy arrays."""
-
-    def __init__(self):
-        # 3x3 matrix (not required to be upper-triangular)
-        self.box = None
-        self.types = list()                         # Nx1
-        self.positions = list()                     # Nx3
-        self.orientations = list()                  # NX4
-        # A dictionary of lists for each attribute
-        self.data = None
-        self.data_keys = None                       # A list of strings
-        # A ordered dictionary of instances of ShapeDefinition
-        self.shapedef = collections.OrderedDict()
 
 
 class BaseTrajectory(object):
