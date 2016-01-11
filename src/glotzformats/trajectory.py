@@ -7,6 +7,7 @@ trajectories."""
 import logging
 import math
 import collections
+import copy
 
 import numpy as np
 
@@ -137,13 +138,16 @@ class Frame(object):
 
     def load(self):
         "Load the frame into memory."
-        logger.debug("Loading frame.")
         if self.frame_data is None:
+            logger.debug("Loading frame.")
             self.frame_data = _raw_frame_to_frame(self.read())
 
     def unload(self):
-        "Unload the frame from memory."
-        logger.debug("Unloading frame.")
+        """Unload the frame from memory.
+
+        Be advised, that any existing references to frame data
+        will remain in memory."""
+        logger.debug("Unloading frame if loaded.")
         self.frame_data = None
 
     def __len__(self):
@@ -316,8 +320,66 @@ class _RawFrameData(object):
         self.shapedef = collections.OrderedDict()
 
 
-class Trajectory(object):
-    """A trajectory is a sequence of :class:`~.FrameData` instances.
+class BaseTrajectory(object):
+
+    def __init__(self, frames=None):
+        self.frames = frames or list()
+
+    def __str__(self):
+        return "Trajectory(# frames: {})".format(len(self))
+
+    def __repr__(self):
+        return str(self)
+
+    def __len__(self):
+        return len(self.frames)
+
+    def __getitem__(self, index):
+        if isinstance(index, slice):
+            return Trajectory(self.frames[index])
+        else:
+            return self.frames[index]
+
+    def __eq__(self, other):
+        if len(self) != len(other):
+            return False
+        for f1, f2 in zip(self, other):
+            if f1 != f2:
+                return False
+        else:
+            return True
+
+
+class ImmutableTrajectory(BaseTrajectory):
+    """The immutable trajectory class is used internally to
+    provide efficient immutable iterators over trajectories."""
+
+    class ImmutableTrajectoryIterator(object):
+
+        def __init__(self, traj):
+            self.frame_iter = iter(traj.frames)
+            self.frame = None
+
+        def __iter__(self):
+            return self
+
+        def __next__(self):
+            if self.frame is not None:
+                self.frame.unload()
+            self.frame = next(self.frame_iter)
+            return self.frame
+
+        next = __next__
+
+    def __init__(self, frames=None):
+        super(ImmutableTrajectory, self).__init__(frames=frames)
+
+    def __iter__(self):
+        return ImmutableTrajectory.ImmutableTrajectoryIterator(self)
+
+
+class Trajectory(BaseTrajectory):
+    """A trajectory is a sequence of :class:`~.Frame` instances.
 
     The length of a trajectory is obtained via `len`.
 
@@ -331,6 +393,10 @@ class Trajectory(object):
 
         for frame in trajectory:
             # do something
+
+    .. warning::
+
+        Iteration allows only read-only (!) access.
 
     Access indivdual frames with indeces:
 
@@ -347,36 +413,8 @@ class Trajectory(object):
 
         sub_trajectory = traj[i:j]"""
 
-    def __init__(self, frames=None):
-        self.frames = frames or list()
-
-    def __str__(self):
-        return "Trajectory(# frames: {})".format(len(self))
-
-    def __repr__(self):
-        return str(self)
-
-    def __len__(self):
-        return len(self.frames)
-
     def __iter__(self):
-        for frame in self.frames:
-            yield frame
-
-    def __getitem__(self, index):
-        if isinstance(index, slice):
-            return Trajectory(self.frames[index])
-        else:
-            return self.frames[index]
-
-    def __eq__(self, other):
-        if len(self) != len(other):
-            return False
-        for f1, f2 in zip(self, other):
-            if f1 != f2:
-                return False
-        else:
-            return True
+        return iter(ImmutableTrajectory(copy.copy(self.frames)))
 
 
 def rotate_improper_triclinic(positions, orientations,
@@ -445,8 +483,8 @@ def _raw_frame_to_frame(raw_frame):
     N = len(raw_frame.types)
     ret = FrameData()
     # the box
-    positions = np.array(raw_frame.positions)
-    orientations = np.array(raw_frame.orientations)
+    positions = np.asarray(raw_frame.positions)
+    orientations = np.asarray(raw_frame.orientations)
     ret.positions, ret.orientations, ret.box = rotate_improper_triclinic(
         positions, orientations, raw_frame.box)
     ret.shapedef = raw_frame.shapedef
