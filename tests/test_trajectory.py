@@ -92,5 +92,6 @@ class FrameSnapshotExport(TrajectoryTest):
         snapshot = self.make_snapshot(glotzformats.samples.POS_INJAVIS)
 
 if __name__ == '__main__':
-    context.initialize('--mode=cpu')
+    if HOOMD:
+        context.initialize('--mode=cpu')
     unittest.main()
