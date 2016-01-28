@@ -17,8 +17,9 @@ To install this package with pip, execute:
 
 ## Documentation
 
-Documentation for this package is available through the download page or you can build it yourself using sphinx.
-To build documentation using sphinx, execute within the repository:
+**The package's documentation is available at:** [http://glotzerlab.engin.umich.edu/glotzformats/](http://glotzerlab.engin.umich.edu/glotzformats/)
+
+To build the documentation yourself using sphinx, execute within the repository:
 
     cd doc
     make html
