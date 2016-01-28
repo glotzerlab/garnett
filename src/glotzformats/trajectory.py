@@ -27,7 +27,7 @@ class Box(object):
         return self.__dict__ == other.__dict__
 
     def get_box_matrix(self):
-        return [[self.Lx, self.xy * self.Lx, self.xz * self.Lz],
+        return [[self.Lx, self.xy * self.Ly, self.xz * self.Lz],
                 [0, self.Ly, self.yz * self.Lz],
                 [0, 0, self.Lz]]
 
