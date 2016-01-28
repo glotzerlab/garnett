@@ -7,7 +7,6 @@ trajectories."""
 import logging
 import math
 import collections
-import copy
 
 import numpy as np
 
@@ -328,7 +327,10 @@ class BaseTrajectory(object):
         self.frames = frames or list()
 
     def __str__(self):
-        return "Trajectory(# frames: {})".format(len(self))
+        try:
+            return "Trajectory(# frames: {})".format(len(self))
+        except TypeError:
+            return "Trajectory(# frames: n/a)"
 
     def __repr__(self):
         return str(self)
@@ -416,7 +418,7 @@ class Trajectory(BaseTrajectory):
         sub_trajectory = traj[i:j]"""
 
     def __iter__(self):
-        return iter(ImmutableTrajectory(copy.copy(self.frames)))
+        return iter(ImmutableTrajectory(self.frames))
 
 
 def rotate_improper_triclinic(positions, orientations,
