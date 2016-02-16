@@ -17,6 +17,7 @@ glotzformats - documentation
    quickstart
    trajectory
    posfiles
+   development
 
 
 Indices and tables
