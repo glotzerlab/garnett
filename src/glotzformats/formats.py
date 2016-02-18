@@ -55,6 +55,10 @@ class DCDTrajectoryFile(TrajectoryFile):
     pass
 
 
+class GetarTrajectoryFile(TrajectoryFile):
+    pass
+
+
 class LogFile(FileFormat):
     pass
 
