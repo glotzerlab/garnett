@@ -59,6 +59,10 @@ class GetarTrajectoryFile(TrajectoryFile):
     pass
 
 
+class CifTrajectoryFile(TrajectoryFile):
+    pass
+
+
 class LogFile(FileFormat):
     pass
 
