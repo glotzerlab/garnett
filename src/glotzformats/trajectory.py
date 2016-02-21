@@ -432,7 +432,7 @@ def _regularize_box(positions, orientations,
     if 0 == v[1][0] == 0 == v[2][0] == v[2][1]:
         box, positions = _flip_if_required(_calc_box(v, dimensions), positions)
         return positions, orientations, box
-    logger.warning("Box matrix is left-handed, rotating.")
+    logger.info("Box matrix is left-handed, rotating.")
     box = _rotate_improper(v, dimensions, positions, orientations)
     box, positions = _flip_if_required(box, positions)
     return positions, orientations, box
@@ -477,7 +477,7 @@ def _flip_if_required(box, positions):
     m = np.diag(np.where(v < 0, -np.ones(v.shape), np.ones(v.shape)))
     if (m > 0).all():
         return box, positions
-    logger.warning("Box has negative dimensions, flipping.")
+    logger.info("Box has negative dimensions, flipping.")
     v = np.dot(v, np.diag(m))
     positions = np.dot(positions, np.diag(m))
     return _calc_box(v, box.dimensions), positions
