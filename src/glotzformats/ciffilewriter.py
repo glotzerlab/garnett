@@ -5,7 +5,12 @@ Author: Julia Dschemuchadse, Carl Simon Adorf
 .. code::
 
     writer = CifFileWriter()
-    with open('a_ciffile.pos', 'w', encoding='utf-8') as ciffile:
+
+    # write to screen:
+    write.write(trajetory)
+
+    # write to file:
+    with open('a_ciffile.pos', 'w') as ciffile:
         writer.write(trajectory, ciffile)
 """
 
@@ -13,16 +18,12 @@ import io
 import sys
 import logging
 import math
+from collections import defaultdict
 
 import numpy as np
 
 logger = logging.getLogger(__name__)
 PYTHON_2 = sys.version_info[0] == 2
-
-
-def _num(x):
-    "Round x if x is a floating point number."
-    return int(x) if int(x) == x else round(x, CIFFILE_FLOAT_DIGITS)
 
 
 def _determine_unitcell(box):
@@ -44,8 +45,7 @@ def _determine_unitcell(box):
 class CifFileWriter(object):
     """Write cif-files from a trajectory instance."""
 
-    def _write_frame(self, frame, file,
-                     data, particle_type, particle_id, occupancy):
+    def _write_frame(self, frame, file, data, occupancy):
         def _write(msg='', end='\n'):
             if PYTHON_2:
                 file.write(unicode(msg + end))  # noqa
@@ -57,18 +57,12 @@ class CifFileWriter(object):
         # _write("data_" + os.path.splitext(ciffilename)[0])
 
         # write unit cell parameters
-        _write("_cell_length_a                 " +
-               "{:12.7f}".format(unitcell_lengths[0]))
-        _write("_cell_length_b                 " +
-               "{:12.7f}".format(unitcell_lengths[1]))
-        _write("_cell_length_c                 " +
-               "{:12.7f}".format(unitcell_lengths[2]))
-        _write("_cell_angle_alpha              " +
-               "{:12.7f}".format(unitcell_angles[0]))
-        _write("_cell_angle_beta               " +
-               "{:12.7f}".format(unitcell_angles[1]))
-        _write("_cell_angle_gamma              " +
-               "{:12.7f}".format(unitcell_angles[2]))
+        _write("_cell_length_a                 {}".format(unitcell_lengths[0]))
+        _write("_cell_length_b                 {}".format(unitcell_lengths[1]))
+        _write("_cell_length_c                 {}".format(unitcell_lengths[2]))
+        _write("_cell_angle_alpha              {}".format(unitcell_angles[0]))
+        _write("_cell_angle_beta               {}".format(unitcell_angles[1]))
+        _write("_cell_angle_gamma              {}".format(unitcell_angles[2]))
         _write()
 
         # write symmetry - P1
@@ -86,23 +80,19 @@ class CifFileWriter(object):
         _write("_atom_site_fract_z")
 
         # write header particle positions
-        for i, position in enumerate(frame.positions):
-            _write("{pid}{pnum:04d} {ptype} {occ:3.2f} {position}".format(
-                pid=particle_id,
-                pnum=i + 1,
+        type_counter = defaultdict(int)
+        n_digits = len(str(len(frame.positions)))
+        l = "{ptype}{pnum:0"+str(n_digits)+"d} {ptype} {occ:3.2f} {position}"
+        for i, (position, particle_type) in enumerate(zip(frame.positions, frame.types)):
+            _write(l.format(
+                pnum=type_counter[particle_type],
                 ptype=particle_type,
                 occ=occupancy,
-                position=' '.join(('{:10.9f}'.format(p) for p in position))))
-            # _write(
-            #     particle_id + "{:04d}".format(i+1) + " " +
-            #     particle_type + " " + \
-            #     "{:3.2f}".format(occupancy) + " " +
-            #     "{:10.9f}".format(position[0]) + " " +
-            #     "{:10.9f}".format(position[1]) + " " +
-            #     "{:10.9f}".format(position[2]) + " ")
+                position=' '.join((str(p) for p in position))))
+            type_counter[particle_type] += 1
 
-    def write(self, trajectory, file=sys.stdout, data='simulationdata',
-              particle_id='X', particle_type='X', occupancy=1.0):
+    def write(self, trajectory, file=sys.stdout,
+              data='simulation', occupancy=1.0):
         """Serialize a trajectory into cif-format and write it to file.
 
         :param trajectory: The trajectory to serialize
@@ -110,8 +100,10 @@ class CifFileWriter(object):
         :param file: A file-like object."""
         for i, frame in enumerate(trajectory):
             self._write_frame(
-                frame, file, data,
-                particle_id, particle_type, occupancy)
+                frame=frame,
+                file=file,
+                data='{}_frame_{}'.format(data, i),
+                occupancy=occupancy)
             logger.debug("Wrote frame {}.".format(i + 1))
         logger.info("Wrote {} frames.".format(i + 1))
 
