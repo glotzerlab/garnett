@@ -32,14 +32,18 @@ class HoomdBlueXMLFrame(Frame):
         "Read the frame data from the stream."
         raw_frame = _RawFrameData()
         config = self.root.find('configuration')
-        raw_frame.box_matrix = np.asarray(_get_box_matrix(config.find('box')))
+        raw_frame.box = np.asarray(_get_box_matrix(config.find('box')))
         raw_frame.positions = list(_parse_positions(config.find('position')))
+        orientations = config.find('orientation')
+        if orientations is None:
+            raw_frame.orientations = [[1,0,0,0]] * len(raw_frame.positions)
+        else:
+            raw_frame.orientations = list(_parse_orientations(config.find('orietation')))
         raw_frame.types = list(_parse_types(config.find('type')))
         return raw_frame
 
     def __str__(self):
-        return "HoomdBlueXMLFrame(stream={}, start={}, end={})".format(
-            self.stream, self.start, self.end)
+        return "HoomdBlueXMLFrame(root={})".format(self.root)
 
 
 class HoomdBlueXMLReader(object):
@@ -53,7 +57,7 @@ class HoomdBlueXMLReader(object):
         """
         # Index the stream
         try:
-            frames = [HoomdBlueXMLFrame(ET.fomstring(stream.read()))]
+            frames = [HoomdBlueXMLFrame(ET.fromstring(stream.read()))]
         except ET.ParseError as error:
             raise ParserError(error)
         logger.info("Read {} frames.".format(len(frames)))
@@ -61,8 +65,7 @@ class HoomdBlueXMLReader(object):
 
 
 def _get_box_matrix(box):
-    box = config.find('box').attrib
-
+    assert box is not None
     def _get(name, default=None):
         v = box.get(name)
         if v is None and default is None:
@@ -80,10 +83,15 @@ def _get_box_matrix(box):
 
 def _parse_positions(positions):
     for i, position in enumerate(positions.text.splitlines()[1:]):
-        yield position.split()
+        yield (float(x) for x in position.split())
     if i + 1 != int(positions.attrib['num']):
         warnings.warn("Number of positions inconsistent.")
 
+def _parse_orientations(orientations):
+    for i, orientation in enumerate(orientations.text.splitlines()[1:]):
+        yield (float(x) for x in orientation.split())
+    if i + 1 != int(orientations.attrib['num']):
+        warnings.warn("Number of orientations inconsistent.")
 
 def _parse_types(types):
     for i, type in enumerate(types.text.splitlines()[1:]):
