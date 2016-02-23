@@ -16,8 +16,6 @@ import math
 
 import numpy as np
 
-from .ciffilereader import CIFFILE_FLOAT_DIGITS
-
 logger = logging.getLogger(__name__)
 PYTHON_2 = sys.version_info[0] == 2
 
