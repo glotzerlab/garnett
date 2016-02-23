@@ -1,16 +1,25 @@
-import unittest
+import sys
 import io
+import unittest
 
 import numpy as np
 
 import glotzformats
 
 
+PYTHON_2 = sys.version_info[0] == 2
+
+
 class BaseHoomdBlueXMLReaderTest(unittest.TestCase):
 
     def read_trajectory(self):
         reader = glotzformats.reader.HoomdBlueXMLReader()
-        return reader.read(io.StringIO(glotzformats.samples.HOOMD_BLUE_XML))
+        if PYTHON_2:
+            return reader.read(io.StringIO(
+                unicode(glotzformats.samples.HOOMD_BLUE_XML)))  # noqa
+        else:
+            return reader.read(
+                io.StringIO(glotzformats.samples.HOOMD_BLUE_XML))
 
     def test_read(self):
         traj = self.read_trajectory()
@@ -30,7 +39,10 @@ class BaseHoomdBlueXMLReaderTest(unittest.TestCase):
             ])))
         self.assertTrue(np.allclose(
             np.asarray(traj[0].box.get_box_matrix()),
-            np.array([[4.713492870331, 0, 0], [0, 4.713492870331, 0], [0, 0, 4.713492870331]])))
+            np.array([
+                [4.713492870331, 0, 0],
+                [0, 4.713492870331, 0],
+                [0, 0, 4.713492870331]])))
 
 
 if __name__ == '__main__':
