@@ -10,3 +10,10 @@ try:
     __all__.append('GetarFileReader')
 except ImportError:
     logger.warning("Error importing GetarFileReader")
+
+try:
+    from .dcdreader import DCDReader
+    __all__.append('DCDReader')
+except ImportError:
+    logger.warning(
+        "Error importing DCDReader, requires the mdtraj package.")
