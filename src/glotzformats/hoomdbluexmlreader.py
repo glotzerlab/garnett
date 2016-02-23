@@ -36,9 +36,10 @@ class HoomdBlueXMLFrame(Frame):
         raw_frame.positions = list(_parse_positions(config.find('position')))
         orientations = config.find('orientation')
         if orientations is None:
-            raw_frame.orientations = [[1,0,0,0]] * len(raw_frame.positions)
+            raw_frame.orientations = [[1, 0, 0, 0]] * len(raw_frame.positions)
         else:
-            raw_frame.orientations = list(_parse_orientations(config.find('orietation')))
+            raw_frame.orientations = list(
+                _parse_orientations(config.find('orietation')))
         raw_frame.types = list(_parse_types(config.find('type')))
         return raw_frame
 
@@ -66,6 +67,7 @@ class HoomdBlueXMLReader(object):
 
 def _get_box_matrix(box):
     assert box is not None
+
     def _get(name, default=None):
         v = box.get(name)
         if v is None and default is None:
@@ -83,15 +85,17 @@ def _get_box_matrix(box):
 
 def _parse_positions(positions):
     for i, position in enumerate(positions.text.splitlines()[1:]):
-        yield (float(x) for x in position.split())
+        yield [float(x) for x in position.split()]
     if i + 1 != int(positions.attrib['num']):
         warnings.warn("Number of positions inconsistent.")
 
+
 def _parse_orientations(orientations):
     for i, orientation in enumerate(orientations.text.splitlines()[1:]):
-        yield (float(x) for x in orientation.split())
+        yield [float(x) for x in orientation.split()]
     if i + 1 != int(orientations.attrib['num']):
         warnings.warn("Number of orientations inconsistent.")
+
 
 def _parse_types(types):
     for i, type in enumerate(types.text.splitlines()[1:]):
