@@ -489,6 +489,8 @@ def _raw_frame_to_frame(raw_frame):
     # the box
     positions = np.asarray(raw_frame.positions)
     orientations = np.asarray(raw_frame.orientations)
+    if isinstance(raw_frame.box, Box):
+        raw_frame.box = np.asarray(raw_frame.box.get_box_matrix())
     ret.positions, ret.orientations, ret.box = rotate_improper_triclinic(
         positions, orientations, raw_frame.box)
     ret.shapedef = raw_frame.shapedef
