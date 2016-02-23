@@ -62,7 +62,6 @@ class DCDReader(object):
         :type stream: A file-like textstream.
         """
         try:
-            frame.load()
             top = md.Topology()
             [top.add_atom(t, 'X', top.add_residue('x', top.add_chain())) for t in frame.types]
             mdtraj = md.load_dcd(stream.name, top=top)
