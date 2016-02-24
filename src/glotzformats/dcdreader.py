@@ -48,8 +48,8 @@ class DCDFrame(Frame):
         raw_frame = copy.deepcopy(self.t_frame)
         raw_frame.box = np.asarray(raw_frame.box.get_box_matrix())
         B = raw_frame.box
-        p = self.traj.slice(self.frame_index, copy=False).xyz[0]
-        raw_frame.positions = [2*np.dot(B, p_.reshape((3,1))) for p_ in p]
+        p = self.traj.xyz[self.frame_index]
+        raw_frame.positions = [2*np.dot(B, p_) for p_ in p]
         return raw_frame
 
     def __str__(self):
