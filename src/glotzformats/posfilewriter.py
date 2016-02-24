@@ -19,7 +19,7 @@ import numpy as np
 from .posfilereader import POSFILE_FLOAT_DIGITS
 
 logger = logging.getLogger(__name__)
-PYTHON_3 = sys.version_info[0] == 3
+PYTHON_2 = sys.version_info[0] == 2
 
 
 def _num(x):
@@ -37,10 +37,10 @@ class PosFileWriter(object):
         :type trajectory: :class:`~glotzformats.trajectory.Trajectory`
         :param file: A file-like object."""
         def _write(msg, end='\n'):
-            if PYTHON_3:
-                file.write(msg + end)
-            else:
+            if PYTHON_2:
                 file.write(unicode(msg + end))  # noqa
+            else:
+                file.write(msg + end)
         for i, frame in enumerate(trajectory):
             # data section
             if frame.data is not None:
