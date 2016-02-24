@@ -12,7 +12,7 @@ except ImportError:
             raise ImportError(
                 "GetarFileReader requires the gtar package.")
 
-    logger.warning(
+    logger.info(
         "Mocking GetarFileReader, gtar package not available.")
 
 try:
@@ -23,7 +23,7 @@ except ImportError:
             raise ImportError(
                 "DCDFileReader requires the mdtraj package.")
 
-    logger.warning(
+    logger.info(
         "Mocking DCDFileReader, mdtraj package not available.")
 
 __all__ = [
