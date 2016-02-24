@@ -9,6 +9,6 @@ from . import writer
 from . import samples
 from . import trajectory
 
-__version__ = '0.1.6'
+__version__ = '0.1.7a1'
 
 __all__ = ['formats', 'reader', 'writer', 'samples', 'trajectory']
