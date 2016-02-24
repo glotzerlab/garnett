@@ -45,8 +45,12 @@ class DCDFrame(Frame):
 
     def read(self):
         "Read the frame data from the stream."
-        self.t_frame.positions = self.traj[self.frame_index].xyz[0]
-        return self.t_frame
+        raw_frame = copy.deepcopy(self.t_frame)
+        raw_frame.box = np.asarray(raw_frame.box.get_box_matrix())
+        B = raw_frame.box
+        p = self.traj.slice(self.frame_index, copy=False).xyz[0]
+        raw_frame.positions = [2*np.dot(B, p_.reshape((3,1))) for p_ in p]
+        return raw_frame
 
     def __str__(self):
         return "DCDFrame(# frames={}, topology_frame={})".format(len(self.traj), self.t_frame)
@@ -68,6 +72,6 @@ class DCDFileReader(object):
         except AttributeError:
             raise
         else:
-            frames = [DCDFrame(mdtraj, i, copy.copy(frame)) for i in range(len(mdtraj))]
+            frames = [DCDFrame(mdtraj, i, frame) for i in range(len(mdtraj))]
             logger.info("Read {} frames.".format(len(frames)))
             return Trajectory(frames)
