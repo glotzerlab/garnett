@@ -69,7 +69,7 @@ class PosFileWriter(object):
             for name in required:
                 _write('def {} "{}"'.format(name, frame.shapedef[name]))
             for name in not_defined:
-                logger.warning(
+                logger.info(
                     "No shape defined for '{}'. "
                     "Using fallback definition.".format(name))
                 _write('def {} "{}"'.format(name, DEFAULT_SHAPE_DEFINITION))
