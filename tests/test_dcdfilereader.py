@@ -8,12 +8,18 @@ import numpy as np
 
 import glotzformats
 
+try:
+    import mdtraj
+except ImportError:
+    DCD = False
+else:
+    DCD = True
+
 PYTHON_2 = sys.version_info[0] == 2
 
 
-@unittest.skipIf(
-    not hasattr(glotzformats.reader, 'DCDReader'), "requires mdtraj")
-class BaseHoomdBlueXMLReaderTest(unittest.TestCase):
+@unittest.skipIf(not DCD, 'requires mdtraj')
+class BaseDCDFileReaderTest(unittest.TestCase):
 
     def setUp(self):
         self.tmpfile = tempfile.NamedTemporaryFile()
@@ -30,7 +36,7 @@ class BaseHoomdBlueXMLReaderTest(unittest.TestCase):
 
     def test_read(self):
         top_traj = self.read_top_trajectory()
-        dcd_reader = glotzformats.reader.DCDReader()
+        dcd_reader = glotzformats.reader.DCDFileReader()
         with tempfile.NamedTemporaryFile('wb') as file:
             file.write(base64.b64decode(glotzformats.samples.DCD_BASE64))
             file.flush()

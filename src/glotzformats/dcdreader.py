@@ -12,7 +12,7 @@ The example is given for a hoomd-blue xml frame:
 .. code::
 
     xml_reader = HoomdBlueXMLReader()
-    dcd_reader = DCDReader()
+    dcd_reader = DCDFileReader()
 
     with open('init.xml') as xmlfile:
         with open('dump.dcd') as dcdfile:
@@ -52,7 +52,7 @@ class DCDFrame(Frame):
         return "DCDFrame(# frames={}, topology_frame={})".format(len(self.traj), self.t_frame)
 
 
-class DCDReader(object):
+class DCDFileReader(object):
     """Read dcd trajectory files."""
 
     def read(self, stream, frame):

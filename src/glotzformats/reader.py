@@ -3,17 +3,29 @@ logger = logging.getLogger(__name__)
 
 from .posfilereader import PosFileReader
 from .hoomdbluexmlreader import HoomdBlueXMLReader
-__all__ = ['PosFileReader', 'HoomdBlueXMLReader']
 
 try:
     from .getarfilereader import GetarFileReader
-    __all__.append('GetarFileReader')
 except ImportError:
-    logger.warning("Error importing GetarFileReader")
+    class GetarFileReader(object):
+        def __init__(self):
+            raise ImportError(
+                "GetarFileReader requires the gtar package.")
+
+    logger.warning(
+        "Mocking GetarFileReader, gtar package not available.")
 
 try:
-    from .dcdreader import DCDReader
-    __all__.append('DCDReader')
+    from .dcdreader import DCDFileReader
 except ImportError:
+    class DCDFileReader(object):
+        def __init__(self):
+            raise ImportError(
+                "DCDFileReader requires the mdtraj package.")
+
     logger.warning(
-        "Error importing DCDReader, requires the mdtraj package.")
+        "Mocking DCDFileReader, mdtraj package not available.")
+
+__all__ = [
+    'PosFileReader', 'HoomdBlueXMLReader',
+    'GetarFileReader', 'DCDFileReader']
