@@ -2,7 +2,7 @@ import logging
 logger = logging.getLogger(__name__)
 
 from .posfilereader import PosFileReader
-from .hoomdbluexmlreader import HoomdBlueXMLReader
+from .hoomdbluexmlfilereader import HoomdBlueXMLFileReader
 
 try:
     from .getarfilereader import GetarFileReader
@@ -27,5 +27,5 @@ except ImportError:
         "Mocking DCDFileReader, mdtraj package not available.")
 
 __all__ = [
-    'PosFileReader', 'HoomdBlueXMLReader',
+    'PosFileReader', 'HoomdBlueXMLFileReader',
     'GetarFileReader', 'DCDFileReader']

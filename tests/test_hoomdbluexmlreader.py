@@ -10,10 +10,10 @@ import glotzformats
 PYTHON_2 = sys.version_info[0] == 2
 
 
-class BaseHoomdBlueXMLReaderTest(unittest.TestCase):
+class BaseHoomdBlueXMLFileReaderTest(unittest.TestCase):
 
     def read_trajectory(self):
-        reader = glotzformats.reader.HoomdBlueXMLReader()
+        reader = glotzformats.reader.HoomdBlueXMLFileReader()
         if PYTHON_2:
             return reader.read(io.StringIO(
                 unicode(glotzformats.samples.HOOMD_BLUE_XML)))  # noqa

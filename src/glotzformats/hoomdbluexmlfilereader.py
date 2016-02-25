@@ -4,7 +4,7 @@ Authors: Carl Simon Adorf
 
 .. code::
 
-    reader = HoomdBlueXMLReader()
+    reader = HoomdBlueXMLFileReader()
     with open('hoomdblue.xml') as xmlfile:
         return reader.read(xmlfile)
 """
@@ -47,7 +47,7 @@ class HoomdBlueXMLFrame(Frame):
         return "HoomdBlueXMLFrame(root={})".format(self.root)
 
 
-class HoomdBlueXMLReader(object):
+class HoomdBlueXMLFileReader(object):
     """Read hoomdblue-xml-files."""
 
     def read(self, stream):

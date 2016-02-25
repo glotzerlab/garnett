@@ -39,12 +39,12 @@ def main():
     if MDTRAJ:
         for fn in glob.glob('../samples/*.dcd'):
             with open(glob.glob('../samples/*.xml')[0]) as xmlfile:
-                frame = glotzformats.reader.HoomdBlueXMLReader().read(xmlfile)[0]
+                frame = glotzformats.reader.HoomdBlueXMLFileReader().read(xmlfile)[0]
                 with open(fn, 'rb') as file:
                     test_read(file, glotzformats.reader.DCDReader(), frame)
     for fn in glob.glob('../samples/*.xml'):
         with open(fn) as file:
-            test_read(file, glotzformats.reader.HoomdBlueXMLReader())
+            test_read(file, glotzformats.reader.HoomdBlueXMLFileReader())
     for fn in glob.glob('../samples/*.pos'):
         with open(fn) as file:
             test_read(file, glotzformats.reader.PosFileReader())

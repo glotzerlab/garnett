@@ -11,7 +11,7 @@ The example is given for a hoomd-blue xml frame:
 
 .. code::
 
-    xml_reader = HoomdBlueXMLReader()
+    xml_reader = HoomdBlueXMLFileReader()
     dcd_reader = DCDFileReader()
 
     with open('init.xml') as xmlfile:
