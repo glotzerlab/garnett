@@ -101,6 +101,22 @@ class SphereShapeDefinition(ShapeDefinition):
     def __str__(self):
         return "{} {} {}".format(self.shape_class, self.diameter, self.color)
 
+class ArrowShapeDefinition(ShapeDefinition):
+    """Initialize a ShapeDefinition instance.
+
+    :param thickness: The thickness of the arrow.
+    :type thickness: A floating point number.
+    :param color: Definition of a color for the
+                  particular shape (optional).
+    :type color: A str for RGB color definiton."""
+
+    def __init__(self, thickness=0.1, color=None):
+        super(ArrowShapeDefinition, self).__init__(
+            shape_class='arrow', color=color)
+        self.thickness=thickness
+
+    def __str__(self):
+        return "{} {} {}".format(self.shape_class, self.thickness, self.color)
 
 class PolyShapeDefinition(ShapeDefinition):
     """Initialize a ShapeDefinition instance.

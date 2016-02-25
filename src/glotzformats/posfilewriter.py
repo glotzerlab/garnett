@@ -64,7 +64,10 @@ class PosFileWriter(object):
             for name, pos, rot in zip(frame.types, frame.positions,
                                       frame.orientations):
                 _write(name, end=' ')
-                _write(' '.join((str(_num(v)) for v in chain(pos, rot))))
+                if frame.shapedef[name].shape_class == "arrow":
+                    _write(' '.join((str(_num(v)) for v in chain(pos, rot[:3]))))
+                else:
+                    _write(' '.join((str(_num(v)) for v in chain(pos, rot))))
             _write('eof')
             logger.debug("Wrote frame {}.".format(i + 1))
         logger.info("Wrote {} frames.".format(i + 1))
