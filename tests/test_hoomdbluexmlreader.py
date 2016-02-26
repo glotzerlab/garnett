@@ -36,7 +36,7 @@ class BaseHoomdBlueXMLFileReaderTest(unittest.TestCase):
             [-0.880133986473, 0.873030900955, 0.11570763588],
             [-1.39306223392, -0.266534328461, 1.78225398064],
             [-1.27463591099, -2.22765517235, 0.162209749222],
-            ])))
+        ])))
         self.assertTrue(np.allclose(
             np.asarray(traj[0].box.get_box_matrix()),
             np.array([

@@ -30,7 +30,7 @@ class CifFileWriterTest(BaseCifFileWriterTest):
 
     def test_hpmc_dialect(self):
         if PYTHON_2:
-            sample = io.StringIO(unicode(glotzformats.samples.POS_HPMC))
+            sample = io.StringIO(unicode(glotzformats.samples.POS_HPMC))  # noqa
         else:
             sample = io.StringIO(glotzformats.samples.POS_HPMC)
         traj = self.read_trajectory(sample)
@@ -39,7 +39,7 @@ class CifFileWriterTest(BaseCifFileWriterTest):
 
     def test_incsim_dialect(self):
         if PYTHON_2:
-            sample = io.StringIO(unicode(glotzformats.samples.POS_INCSIM))
+            sample = io.StringIO(unicode(glotzformats.samples.POS_INCSIM))  # noqa
         else:
             sample = io.StringIO(glotzformats.samples.POS_INCSIM)
         traj = self.read_trajectory(sample)
@@ -48,7 +48,7 @@ class CifFileWriterTest(BaseCifFileWriterTest):
 
     def test_monotype_dialect(self):
         if PYTHON_2:
-            sample = io.StringIO(unicode(glotzformats.samples.POS_MONOTYPE))
+            sample = io.StringIO(unicode(glotzformats.samples.POS_MONOTYPE))  # noqa
         else:
             sample = io.StringIO(glotzformats.samples.POS_MONOTYPE)
         traj = self.read_trajectory(sample)
@@ -57,7 +57,7 @@ class CifFileWriterTest(BaseCifFileWriterTest):
 
     def test_injavis_dialect(self):
         if PYTHON_2:
-            sample = io.StringIO(unicode(glotzformats.samples.POS_INJAVIS))
+            sample = io.StringIO(unicode(glotzformats.samples.POS_INJAVIS))  # noqa
         else:
             sample = io.StringIO(glotzformats.samples.POS_INJAVIS)
         traj = self.read_trajectory(sample)

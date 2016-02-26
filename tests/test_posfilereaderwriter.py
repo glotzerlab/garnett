@@ -3,15 +3,11 @@ import os
 import sys
 import io
 import tempfile
-import random
-import warnings
 import subprocess
 
 import glotzformats
 
 PYTHON_3 = sys.version_info[0] == 3
-
-#warnings.filterwarnings('error', category=glotzformats.errors.ParserWarning)
 
 try:
     from hoomd_script import context
@@ -23,7 +19,7 @@ else:
 
 if HOOMD:
     try:
-        from hoomd_plugins import hpmc
+        from hoomd_plugins import hpmc  # noqa
     except ImportError:
         HPMC = False
     else:
@@ -31,12 +27,13 @@ if HOOMD:
 else:
     HPMC = False
 
+
 class BasePosFileReaderTest(unittest.TestCase):
 
     def read_trajectory(self, stream, precision=None):
         reader = glotzformats.reader.PosFileReader(precision=precision)
         return reader.read(stream)
-        traj = reader.read(io.StringIO(glotzformats.samples.POS_HPMC))
+
 
 class BasePosFileWriterTest(BasePosFileReaderTest):
 
@@ -48,13 +45,14 @@ class BasePosFileWriterTest(BasePosFileReaderTest):
         writer = glotzformats.writer.PosFileWriter()
         return writer.write(trajectory, file)
 
+
 class PosFileReaderTest(BasePosFileReaderTest):
 
     def test_read_empty(self):
         if PYTHON_3:
             empty_sample = io.StringIO("")
         else:
-            empty_sample = io.StringIO(unicode(''))
+            empty_sample = io.StringIO(unicode(''))  # noqa
         with self.assertRaises(glotzformats.errors.ParserError):
             self.read_trajectory(empty_sample)
 
@@ -68,9 +66,9 @@ class PosFileReaderTest(BasePosFileReaderTest):
         if PYTHON_3:
             sample = io.StringIO(glotzformats.samples.POS_HPMC)
         else:
-            sample = io.StringIO(unicode(glotzformats.samples.POS_HPMC))
+            sample = io.StringIO(unicode(glotzformats.samples.POS_HPMC))  # noqa
         traj = self.read_trajectory(sample)
-        box_expected = glotzformats.trajectory.Box(Lx=10,Ly=10,Lz=10)
+        box_expected = glotzformats.trajectory.Box(Lx=10, Ly=10, Lz=10)
         for frame in traj:
             N = len(frame)
             self.assertEqual(frame.types, ['A'] * N)
@@ -80,9 +78,9 @@ class PosFileReaderTest(BasePosFileReaderTest):
         if PYTHON_3:
             sample = io.StringIO(glotzformats.samples.POS_INCSIM)
         else:
-            sample = io.StringIO(unicode(glotzformats.samples.POS_INCSIM))
+            sample = io.StringIO(unicode(glotzformats.samples.POS_INCSIM))  # noqa
         traj = self.read_trajectory(sample)
-        box_expected = glotzformats.trajectory.Box(Lx=10,Ly=10,Lz=10)
+        box_expected = glotzformats.trajectory.Box(Lx=10, Ly=10, Lz=10)
         for frame in traj:
             N = len(frame)
             self.assertEqual(frame.types, ['A'] * N)
@@ -92,9 +90,9 @@ class PosFileReaderTest(BasePosFileReaderTest):
         if PYTHON_3:
             sample = io.StringIO(glotzformats.samples.POS_MONOTYPE)
         else:
-            sample = io.StringIO(unicode(glotzformats.samples.POS_MONOTYPE))
+            sample = io.StringIO(unicode(glotzformats.samples.POS_MONOTYPE))  # noqa
         traj = self.read_trajectory(sample)
-        box_expected = glotzformats.trajectory.Box(Lx=10,Ly=10,Lz=10)
+        box_expected = glotzformats.trajectory.Box(Lx=10, Ly=10, Lz=10)
         for frame in traj:
             N = len(frame)
             self.assertEqual(frame.types, ['A'] * N)
@@ -104,13 +102,14 @@ class PosFileReaderTest(BasePosFileReaderTest):
         if PYTHON_3:
             sample = io.StringIO(glotzformats.samples.POS_INJAVIS)
         else:
-            sample = io.StringIO(unicode(glotzformats.samples.POS_INJAVIS))
+            sample = io.StringIO(unicode(glotzformats.samples.POS_INJAVIS))  # noqa
         traj = self.read_trajectory(sample)
-        box_expected = glotzformats.trajectory.Box(Lx=10,Ly=10,Lz=10)
+        box_expected = glotzformats.trajectory.Box(Lx=10, Ly=10, Lz=10)
         for frame in traj:
             N = len(frame)
             self.assertEqual(frame.types, ['A'] * N)
             self.assertEqual(frame.box, box_expected)
+
 
 @unittest.skipIf(not HPMC, 'requires HPMC')
 class HPMCPosFileReaderTest(BasePosFileReaderTest):
@@ -128,49 +127,51 @@ class HPMCPosFileReaderTest(BasePosFileReaderTest):
 
     def test_sphere(self):
         from hoomd_script import init, sorter, data, dump, run
-        from hoomd_plugins import hpmc
-        self.system = init.create_empty(N=2, box=data.boxdim(L=10, dimensions=2), particle_types=['A'])
+        self.system = init.create_empty(N=2, box=data.boxdim(
+            L=10, dimensions=2), particle_types=['A'])
         self.addCleanup(init.reset)
         self.addCleanup(self.del_system)
-        self.mc = hpmc.integrate.sphere(seed=10);
+        self.mc = hpmc.integrate.sphere(seed=10)
         self.mc.shape_param.set("A", diameter=1.0)
         self.addCleanup(self.del_mc)
-        self.system.particles[0].position = (0,0,0);
-        self.system.particles[0].orientation = (1,0,0,0);
-        self.system.particles[1].position = (2,0,0);
-        self.system.particles[1].orientation = (1,0,0,0);
+        self.system.particles[0].position = (0, 0, 0)
+        self.system.particles[0].orientation = (1, 0, 0, 0)
+        self.system.particles[1].position = (2, 0, 0)
+        self.system.particles[1].orientation = (1, 0, 0, 0)
         sorter.set_params(grid=8)
-        dump.pos(filename=self.fn_pos, period = 1)
+        dump.pos(filename=self.fn_pos, period=1)
         run(10, quiet=True)
         with open(self.fn_pos, 'r', encoding='utf-8') as posfile:
-            traj = self.read_trajectory(posfile)
+            self.read_trajectory(posfile)
 
     def test_convex_polyhedron(self):
         from hoomd_script import init, sorter, data, dump, run
         from hoomd_plugins import hpmc
-        self.system = init.create_empty(N=2, box=data.boxdim(L=10, dimensions=2), particle_types=['A'])
+        self.system = init.create_empty(N=2, box=data.boxdim(
+            L=10, dimensions=2), particle_types=['A'])
         self.addCleanup(init.reset)
         self.addCleanup(self.del_system)
-        self.mc = hpmc.integrate.convex_polygon(seed=10);
+        self.mc = hpmc.integrate.convex_polygon(seed=10)
         self.addCleanup(self.del_mc)
-        self.mc.shape_param.set("A", vertices=[(-2,-1,-1),
-                                               (-2,1,-1),
-                                               (-2,-1,1),
-                                               (-2,1,1),
-                                               (2,-1,-1),
-                                               (2,1,-1),
-                                               (2,-1,1),
-                                               (2,1,1)]);
-        self.system.particles[0].position = (0,0,0);
-        self.system.particles[0].orientation = (1,0,0,0);
-        self.system.particles[1].position = (2,0,0);
-        self.system.particles[1].orientation = (1,0,0,0);
+        self.mc.shape_param.set("A", vertices=[(-2, -1, -1),
+                                               (-2, 1, -1),
+                                               (-2, -1, 1),
+                                               (-2, 1, 1),
+                                               (2, -1, -1),
+                                               (2, 1, -1),
+                                               (2, -1, 1),
+                                               (2, 1, 1)])
+        self.system.particles[0].position = (0, 0, 0)
+        self.system.particles[0].orientation = (1, 0, 0, 0)
+        self.system.particles[1].position = (2, 0, 0)
+        self.system.particles[1].orientation = (1, 0, 0, 0)
         sorter.set_params(grid=8)
-        pos_writer = dump.pos(filename=self.fn_pos, period = 1)
+        pos_writer = dump.pos(filename=self.fn_pos, period=1)
         self.mc.setup_pos_writer(pos_writer)
         run(10, quiet=True)
         with open(self.fn_pos, 'r', encoding='utf-8') as posfile:
-            traj = self.read_trajectory(posfile)
+            self.read_trajectory(posfile)
+
 
 class PosFileWriterTest(BasePosFileWriterTest):
 
@@ -178,7 +179,7 @@ class PosFileWriterTest(BasePosFileWriterTest):
         if PYTHON_3:
             sample = io.StringIO(glotzformats.samples.POS_HPMC)
         else:
-            sample = io.StringIO(unicode(glotzformats.samples.POS_HPMC))
+            sample = io.StringIO(unicode(glotzformats.samples.POS_HPMC))  # noqa
         traj = self.read_trajectory(sample)
         dump = io.StringIO()
         self.write_trajectory(traj, dump)
@@ -190,7 +191,7 @@ class PosFileWriterTest(BasePosFileWriterTest):
         if PYTHON_3:
             sample = io.StringIO(glotzformats.samples.POS_INCSIM)
         else:
-            sample = io.StringIO(unicode(glotzformats.samples.POS_INCSIM))
+            sample = io.StringIO(unicode(glotzformats.samples.POS_INCSIM))  # noqa
         traj = self.read_trajectory(sample)
         dump = io.StringIO()
         self.write_trajectory(traj, dump)
@@ -202,7 +203,7 @@ class PosFileWriterTest(BasePosFileWriterTest):
         if PYTHON_3:
             sample = io.StringIO(glotzformats.samples.POS_MONOTYPE)
         else:
-            sample = io.StringIO(unicode(glotzformats.samples.POS_MONOTYPE))
+            sample = io.StringIO(unicode(glotzformats.samples.POS_MONOTYPE))  # noqa
         traj = self.read_trajectory(sample)
         dump = io.StringIO()
         self.write_trajectory(traj, dump)
@@ -214,13 +215,14 @@ class PosFileWriterTest(BasePosFileWriterTest):
         if PYTHON_3:
             sample = io.StringIO(glotzformats.samples.POS_INJAVIS)
         else:
-            sample = io.StringIO(unicode(glotzformats.samples.POS_INJAVIS))
+            sample = io.StringIO(unicode(glotzformats.samples.POS_INJAVIS))  # noqa
         traj = self.read_trajectory(sample)
         dump = io.StringIO()
         self.write_trajectory(traj, dump)
         dump.seek(0)
         traj_cmp = self.read_trajectory(dump)
         self.assertEqual(traj, traj_cmp)
+
 
 @unittest.skip("injavis is currently not starting correctly.")
 class InjavisReadWriteTest(BasePosFileWriterTest):
@@ -229,13 +231,15 @@ class InjavisReadWriteTest(BasePosFileWriterTest):
         if PYTHON_3:
             sample_file = io.StringIO(glotzformats.samples.POS_HPMC)
         else:
-            sample_file = io.StringIO(unicode(glotzformats.samples.POS_HPMC))
-        traj0 = self.read_trajectory(sample_file, precision=7) # account for low injavis precision
+            sample_file = io.StringIO(unicode(glotzformats.samples.POS_HPMC))  # noqa
+        # account for low injavis precision
+        traj0 = self.read_trajectory(sample_file, precision=7)
         with tempfile.NamedTemporaryFile('w', suffix='.pos') as tmpfile0:
             with tempfile.NamedTemporaryFile('r', suffix='.pos') as tmpfile1:
                 self.write_trajectory(traj0, tmpfile0)
                 tmpfile0.flush()
-                subprocess.check_call(['injavis', tmpfile0.name, '-o', tmpfile1.name])
+                subprocess.check_call(
+                    ['injavis', tmpfile0.name, '-o', tmpfile1.name])
                 traj1 = self.read_trajectory(tmpfile1)
         # Injavis only writes last frame
         frame0 = traj0[-1]

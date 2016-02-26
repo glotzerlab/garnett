@@ -31,7 +31,7 @@ class BaseGetarFileReaderTest(unittest.TestCase):
     def setup_sample(self, N):
         self.positions = np.random.rand(N, 3)
         self.orientations = np.random.rand(N, 4)
-        types = N//2*[0] + (N - N//2)*[1]
+        types = N // 2 * [0] + (N - N // 2) * [1]
         type_names = ['A', 'B']
         self.box = np.array([1.0, 1.0, 1.0, 0.0, 0.0, 0.0])
         self.types = [type_names[t] for t in types]
