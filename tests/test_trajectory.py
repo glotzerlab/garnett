@@ -19,14 +19,40 @@ class TrajectoryTest(unittest.TestCase):
     def read_trajectory(self, stream, precision=None):
         reader = glotzformats.reader.PosFileReader(precision=precision)
         return reader.read(stream)
-        traj = reader.read(io.StringIO(glotzformats.samples.POS_HPMC))
 
     def get_trajectory(self, sample):
         if PYTHON_3:
-            sample_file = io.StringIO(glotzformats.samples.POS_HPMC)
+            sample_file = io.StringIO(sample)
         else:
-            sample_file = io.StringIO(unicode(glotzformats.samples.POS_HPMC))
+            sample_file = io.StringIO(unicode(sample))
         return self.read_trajectory(sample_file) # account for low injavis precision
+
+    def test_load(self):
+        sample = glotzformats.samples.POS_HPMC
+        if PYTHON_3:
+            sample_file = io.StringIO(sample)
+        else:
+            sample_file = io.StringIO(unicode(sample))
+        traj = glotzformats.reader.PosFileReader().read(sample_file)
+        for i, frame in enumerate(traj):
+            frame.load()
+        self.assertEqual(len(traj), i+1)
+        sample_file.close()
+        with self.assertRaises(ValueError):
+            traj[0].load()
+        if PYTHON_3:
+            sample_file = io.StringIO(sample)
+        else:
+            sample_file = io.StringIO(unicode(sample))
+        traj = glotzformats.reader.PosFileReader().read(sample_file)
+        traj.load()
+        sample_file.close()
+        for i, frame in enumerate(traj):
+            frame.load()
+        self.assertEqual(len(traj), i+1)
+        for i, frame in enumerate(traj):
+            frame.load()
+        self.assertEqual(len(traj), i+1)
 
 
 @unittest.skipIf(not HOOMD, 'requires hoomd-blue')

@@ -204,6 +204,10 @@ class Frame(object):
     def __init__(self):
         self.frame_data = None
 
+    def loaded(self):
+        "Returns True if the frame is loaded into memory."
+        return self.frame_data is not None
+
     def load(self):
         "Load the frame into memory."
         if self.frame_data is None:
@@ -363,14 +367,16 @@ class ImmutableTrajectory(BaseTrajectory):
         def __init__(self, traj):
             self.frame_iter = iter(traj.frames)
             self.frame = None
+            self._unload_last = None
 
         def __iter__(self):
             return self
 
         def __next__(self):
-            if self.frame is not None:
+            if self.frame is not None and self._unload_last:
                 self.frame.unload()
             self.frame = next(self.frame_iter)
+            self._unload_last = not self.frame.loaded()
             return self.frame
 
         next = __next__
@@ -419,6 +425,11 @@ class Trajectory(BaseTrajectory):
 
     def __iter__(self):
         return iter(ImmutableTrajectory(self.frames))
+
+    def load(self):
+        """Load all frames into memory."""
+        for frame in self.frames:
+            frame.load()
 
 
 def _regularize_box(positions, orientations,
