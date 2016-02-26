@@ -7,7 +7,7 @@ import subprocess
 
 import glotzformats
 
-PYTHON_3 = sys.version_info[0] == 3
+PYTHON_2 = sys.version_info[0] == 2
 
 try:
     from hoomd_script import context
@@ -49,24 +49,24 @@ class BasePosFileWriterTest(BasePosFileReaderTest):
 class PosFileReaderTest(BasePosFileReaderTest):
 
     def test_read_empty(self):
-        if PYTHON_3:
-            empty_sample = io.StringIO("")
-        else:
+        if PYTHON_2:
             empty_sample = io.StringIO(unicode(''))  # noqa
+        else:
+            empty_sample = io.StringIO("")
         with self.assertRaises(glotzformats.errors.ParserError):
             self.read_trajectory(empty_sample)
 
-    @unittest.skipIf(not PYTHON_3, 'requires python 3')
+    @unittest.skipIf(PYTHON_2, 'requires python 3')
     def test_read_garbage(self):
         garbage_sample = io.StringIO(str(os.urandom(1024 * 100)))
         with self.assertRaises(glotzformats.errors.ParserError):
             self.read_trajectory(garbage_sample)
 
     def test_hpmc_dialect(self):
-        if PYTHON_3:
-            sample = io.StringIO(glotzformats.samples.POS_HPMC)
-        else:
+        if PYTHON_2:
             sample = io.StringIO(unicode(glotzformats.samples.POS_HPMC))  # noqa
+        else:
+            sample = io.StringIO(glotzformats.samples.POS_HPMC)
         traj = self.read_trajectory(sample)
         box_expected = glotzformats.trajectory.Box(Lx=10, Ly=10, Lz=10)
         for frame in traj:
@@ -75,10 +75,10 @@ class PosFileReaderTest(BasePosFileReaderTest):
             self.assertEqual(frame.box, box_expected)
 
     def test_incsim_dialect(self):
-        if PYTHON_3:
-            sample = io.StringIO(glotzformats.samples.POS_INCSIM)
-        else:
+        if PYTHON_2:
             sample = io.StringIO(unicode(glotzformats.samples.POS_INCSIM))  # noqa
+        else:
+            sample = io.StringIO(glotzformats.samples.POS_INCSIM)
         traj = self.read_trajectory(sample)
         box_expected = glotzformats.trajectory.Box(Lx=10, Ly=10, Lz=10)
         for frame in traj:
@@ -87,10 +87,10 @@ class PosFileReaderTest(BasePosFileReaderTest):
             self.assertEqual(frame.box, box_expected)
 
     def test_monotype_dialect(self):
-        if PYTHON_3:
-            sample = io.StringIO(glotzformats.samples.POS_MONOTYPE)
-        else:
+        if PYTHON_2:
             sample = io.StringIO(unicode(glotzformats.samples.POS_MONOTYPE))  # noqa
+        else:
+            sample = io.StringIO(glotzformats.samples.POS_MONOTYPE)
         traj = self.read_trajectory(sample)
         box_expected = glotzformats.trajectory.Box(Lx=10, Ly=10, Lz=10)
         for frame in traj:
@@ -99,10 +99,10 @@ class PosFileReaderTest(BasePosFileReaderTest):
             self.assertEqual(frame.box, box_expected)
 
     def test_injavis_dialect(self):
-        if PYTHON_3:
-            sample = io.StringIO(glotzformats.samples.POS_INJAVIS)
-        else:
+        if PYTHON_2:
             sample = io.StringIO(unicode(glotzformats.samples.POS_INJAVIS))  # noqa
+        else:
+            sample = io.StringIO(glotzformats.samples.POS_INJAVIS)
         traj = self.read_trajectory(sample)
         box_expected = glotzformats.trajectory.Box(Lx=10, Ly=10, Lz=10)
         for frame in traj:
@@ -176,10 +176,10 @@ class HPMCPosFileReaderTest(BasePosFileReaderTest):
 class PosFileWriterTest(BasePosFileWriterTest):
 
     def test_hpmc_dialect(self):
-        if PYTHON_3:
-            sample = io.StringIO(glotzformats.samples.POS_HPMC)
-        else:
+        if PYTHON_2:
             sample = io.StringIO(unicode(glotzformats.samples.POS_HPMC))  # noqa
+        else:
+            sample = io.StringIO(glotzformats.samples.POS_HPMC)
         traj = self.read_trajectory(sample)
         dump = io.StringIO()
         self.write_trajectory(traj, dump)
@@ -188,10 +188,10 @@ class PosFileWriterTest(BasePosFileWriterTest):
         self.assertEqual(traj, traj_cmp)
 
     def test_incsim_dialect(self):
-        if PYTHON_3:
-            sample = io.StringIO(glotzformats.samples.POS_INCSIM)
-        else:
+        if PYTHON_2:
             sample = io.StringIO(unicode(glotzformats.samples.POS_INCSIM))  # noqa
+        else:
+            sample = io.StringIO(glotzformats.samples.POS_INCSIM)
         traj = self.read_trajectory(sample)
         dump = io.StringIO()
         self.write_trajectory(traj, dump)
@@ -200,10 +200,10 @@ class PosFileWriterTest(BasePosFileWriterTest):
         self.assertEqual(traj, traj_cmp)
 
     def test_monotype_dialect(self):
-        if PYTHON_3:
-            sample = io.StringIO(glotzformats.samples.POS_MONOTYPE)
-        else:
+        if PYTHON_2:
             sample = io.StringIO(unicode(glotzformats.samples.POS_MONOTYPE))  # noqa
+        else:
+            sample = io.StringIO(glotzformats.samples.POS_MONOTYPE)
         traj = self.read_trajectory(sample)
         dump = io.StringIO()
         self.write_trajectory(traj, dump)
@@ -212,10 +212,10 @@ class PosFileWriterTest(BasePosFileWriterTest):
         self.assertEqual(traj, traj_cmp)
 
     def test_injavis_dialect(self):
-        if PYTHON_3:
-            sample = io.StringIO(glotzformats.samples.POS_INJAVIS)
-        else:
+        if PYTHON_2:
             sample = io.StringIO(unicode(glotzformats.samples.POS_INJAVIS))  # noqa
+        else:
+            sample = io.StringIO(glotzformats.samples.POS_INJAVIS)
         traj = self.read_trajectory(sample)
         dump = io.StringIO()
         self.write_trajectory(traj, dump)
@@ -228,10 +228,10 @@ class PosFileWriterTest(BasePosFileWriterTest):
 class InjavisReadWriteTest(BasePosFileWriterTest):
 
     def read_write_injavis(self, sample):
-        if PYTHON_3:
-            sample_file = io.StringIO(glotzformats.samples.POS_HPMC)
-        else:
+        if PYTHON_2:
             sample_file = io.StringIO(unicode(glotzformats.samples.POS_HPMC))  # noqa
+        else:
+            sample_file = io.StringIO(glotzformats.samples.POS_HPMC)
         # account for low injavis precision
         traj0 = self.read_trajectory(sample_file, precision=7)
         with tempfile.NamedTemporaryFile('w', suffix='.pos') as tmpfile0:

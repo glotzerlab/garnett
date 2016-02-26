@@ -5,7 +5,7 @@ import tempfile
 
 import glotzformats
 
-PYTHON_3 = sys.version_info[0] == 3
+PYTHON_2 = sys.version_info[0] == 2
 
 try:
     from hoomd_script import context
@@ -22,19 +22,19 @@ class TrajectoryTest(unittest.TestCase):
         return reader.read(stream)
 
     def get_trajectory(self, sample):
-        if PYTHON_3:
-            sample_file = io.StringIO(sample)
-        else:
+        if PYTHON_2:
             sample_file = io.StringIO(unicode(sample))  # noqa
+        else:
+            sample_file = io.StringIO(sample)
         # account for low injavis precision
         return self.read_trajectory(sample_file)
 
     def test_load(self):
         sample = glotzformats.samples.POS_HPMC
-        if PYTHON_3:
-            sample_file = io.StringIO(sample)
-        else:
+        if PYTHON_2:
             sample_file = io.StringIO(unicode(sample))  # noqa
+        else:
+            sample_file = io.StringIO(sample)
         traj = glotzformats.reader.PosFileReader().read(sample_file)
         for i, frame in enumerate(traj):
             frame.load()
@@ -42,10 +42,10 @@ class TrajectoryTest(unittest.TestCase):
         sample_file.close()
         with self.assertRaises(ValueError):
             traj[0].load()
-        if PYTHON_3:
-            sample_file = io.StringIO(sample)
-        else:
+        if PYTHON_2:
             sample_file = io.StringIO(unicode(sample))  # noqa
+        else:
+            sample_file = io.StringIO(sample)
         traj = glotzformats.reader.PosFileReader().read(sample_file)
         traj.load()
         sample_file.close()
