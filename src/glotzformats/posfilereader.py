@@ -17,7 +17,7 @@ import numpy as np
 
 from .trajectory import _RawFrameData, Frame, Trajectory, \
     SphereShapeDefinition, PolyShapeDefinition,\
-    FallbackShapeDefinition
+    ArrowShapeDefinition, FallbackShapeDefinition
 from .errors import ParserError, ParserWarning
 
 logger = logging.getLogger(__name__)
@@ -73,6 +73,8 @@ class PosFileFrame(Frame):
             shape_class = next(tokens)
             if shape_class.lower() == 'sphere':
                 diameter = float(next(tokens))
+            elif shape_class.lower() == 'arrow':
+                thickness = float(next(tokens))
             else:
                 num_vertices = int(next(tokens))
                 vertices = []
@@ -85,6 +87,8 @@ class PosFileFrame(Frame):
                 color = None
             if shape_class.lower() == 'sphere':
                 return SphereShapeDefinition(diameter=diameter, color=color)
+            elif shape_class.lower() == 'arrow':
+                return ArrowShapeDefinition(thickness=thickness, color=color)
             else:
                 return PolyShapeDefinition(shape_class=shape_class,
                                            vertices=vertices, color=color)
