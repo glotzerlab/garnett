@@ -223,6 +223,24 @@ class PosFileWriterTest(BasePosFileWriterTest):
         traj_cmp = self.read_trajectory(dump)
         self.assertEqual(traj, traj_cmp)
 
+    def test_arrows(self):
+        from glotzformats.trajectory import ArrowShapeDefinition
+        if PYTHON_2:
+            sample = io.StringIO(unicode(glotzformats.samples.POS_INJAVIS))  # noqa
+        else:
+            sample = io.StringIO(glotzformats.samples.POS_INJAVIS)
+        traj = self.read_trajectory(sample)
+        traj.load()
+        for frame in traj:
+            frame.shapedef['A'] = ArrowShapeDefinition()
+        dump = io.StringIO()
+        self.write_trajectory(traj, dump)
+        dump.seek(0)
+        traj_cmp = self.read_trajectory(dump)
+        self.assertEqual(traj, traj_cmp)
+        for frame in traj_cmp:
+            self.assertTrue(isinstance(frame.shapedef['A'], ArrowShapeDefinition))
+
 
 @unittest.skip("injavis is currently not starting correctly.")
 class InjavisReadWriteTest(BasePosFileWriterTest):
