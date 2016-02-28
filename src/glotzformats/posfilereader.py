@@ -158,9 +158,12 @@ class PosFileFrame(Frame):
                         _assert(name in raw_frame.shapedef)
                     else:
                         name = self.default_type
-                    if len(tokens) >= 7:
+                    if len(tokens) > 7:
                         xyz = tokens[-7:-4]
                         quat = tokens[-4:]
+                    elif len(tokens) == 7:
+                        xyz = tokens[-6:-3]
+                        quat = tokens[-3:] + [0]
                     elif len(tokens) >= 3:
                         xyz = tokens[-3:]
                         quat = (1, 0, 0, 0)
