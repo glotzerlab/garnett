@@ -24,7 +24,7 @@ logger = logging.getLogger(__name__)
 
 POSFILE_FLOAT_DIGITS = 11
 COMMENT_CHARACTERS = ['//']
-TOKENS_SKIP = ['rotation', 'antiAliasing']
+TOKENS_SKIP = ['translation', 'rotation', 'antiAliasing', 'zoomFactor']
 
 
 def _is_comment(line):

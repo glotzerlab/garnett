@@ -220,6 +220,10 @@ class Frame(object):
     def __init__(self):
         self.frame_data = None
 
+    def loaded(self):
+        "Returns True if the frame is loaded into memory."
+        return self.frame_data is not None
+
     def load(self):
         "Load the frame into memory."
         if self.frame_data is None:
@@ -379,14 +383,16 @@ class ImmutableTrajectory(BaseTrajectory):
         def __init__(self, traj):
             self.frame_iter = iter(traj.frames)
             self.frame = None
+            self._unload_last = None
 
         def __iter__(self):
             return self
 
         def __next__(self):
-            if self.frame is not None:
+            if self.frame is not None and self._unload_last:
                 self.frame.unload()
             self.frame = next(self.frame_iter)
+            self._unload_last = not self.frame.loaded()
             return self.frame
 
         next = __next__
@@ -436,37 +442,30 @@ class Trajectory(BaseTrajectory):
     def __iter__(self):
         return iter(ImmutableTrajectory(self.frames))
 
+    def load(self):
+        """Load all frames into memory."""
+        for frame in self.frames:
+            frame.load()
 
-def rotate_improper_triclinic(positions, orientations,
-                              box_matrix, dimensions=3):
-    "Transform the box matrix into a upper-triangular matrix \
-     and rotate the system accordingly."
-    N = positions.shape[0]
+
+def _regularize_box(positions, orientations,
+                    box_matrix, dimensions=3):
+    """If necessary, transform the box matrix into an
+    upper-triangular matrix and rotate the system accordingly."""
     v = np.zeros((3, 3))
-    # source: http://codeblue.umich.edu/hoomd-blue/doc/page_box.html
     v[0] = box_matrix[:, 0]
     v[1] = box_matrix[:, 1]
     v[2] = box_matrix[:, 2]
-    Lx = np.sqrt(np.dot(v[0], v[0]))
-    a2x = np.dot(v[0], v[1]) / Lx
-    Ly = np.sqrt(np.dot(v[1], v[1]) - a2x * a2x)
-    xy = a2x / Ly
-    v0xv1 = np.cross(v[0], v[1])
-    v0xv1mag = np.sqrt(np.dot(v0xv1, v0xv1))
-    Lz = np.dot(v[2], v0xv1) / v0xv1mag
-    a3x = np.dot(v[0], v[2]) / Lx
-    xz = a3x / Lz
-    yz = (np.dot(v[1], v[2]) - a2x * a3x) / (Ly * Lz)
-    # end of source
-    assert 1 < dimensions <= 3
-    if dimensions == 2:
-        assert Lz == 1
-        assert xz == yz == 0
-    box = Box(Lx=Lx, Ly=Ly, Lz=Lz, xy=xy, xz=xz, yz=yz, dimensions=dimensions)
-    triclinic = v[0][1] == v[0][2] == v[1][2] == 0
-    if triclinic:
+    if 0 == v[1][0] == 0 == v[2][0] == v[2][1]:
+        box, positions = _flip_if_required(_calc_box(v, dimensions), positions)
         return positions, orientations, box
+    logger.info("Box matrix is left-handed, rotating.")
+    box = _rotate_improper(v, dimensions, positions, orientations)
+    box, positions = _flip_if_required(box, positions)
+    return positions, orientations, box
 
+
+def _rotate_improper(v, dimensions, positions, orientations):
     # unit vector
     e1 = np.array((1.0, 0, 0))
 
@@ -488,14 +487,46 @@ def rotate_improper_triclinic(positions, orientations,
     v[0] = mu.rotateVector(v[0], q_y1intoxy)
     v[1] = mu.rotateVector(v[1], q_y1intoxy)
     v[2] = mu.rotateVector(v[2], q_y1intoxy)
+    box = _calc_box(v, dimensions)
 
-    # Rotate system particles by the appropriate quaternion composition of the
-    # orientations on the system
+    # Rotate system particles by the appropriate
+    # quaternion composition of the orientations on the system
     qboth = mu.quaternionMultiply(q_y1intoxy, qbox0toe1)
-    for i in range(N):
+    for i in range(positions.shape[0]):
         positions[i] = mu.rotateVector(positions[i], qboth)
         orientations[i] = mu.quaternionMultiply(qboth, orientations[i])
-    return positions, orientations, box
+
+    return box
+
+
+def _flip_if_required(box, positions):
+    v = np.asarray(box.get_box_matrix())
+    m = np.diag(np.where(v < 0, -np.ones(v.shape), np.ones(v.shape)))
+    if (m > 0).all():
+        return box, positions
+    logger.info("Box has negative dimensions, flipping.")
+    v = np.dot(v, np.diag(m))
+    positions = np.dot(positions, np.diag(m))
+    return _calc_box(v, box.dimensions), positions
+
+
+def _calc_box(v, dimensions):
+    # source: http://codeblue.umich.edu/hoomd-blue/doc/page_box.html
+    Lx = np.sqrt(np.dot(v[0], v[0]))
+    a2x = np.dot(v[0], v[1]) / Lx
+    Ly = np.sqrt(np.dot(v[1], v[1]) - a2x * a2x)
+    xy = a2x / Ly
+    v0xv1 = np.cross(v[0], v[1])
+    v0xv1mag = np.sqrt(np.dot(v0xv1, v0xv1))
+    Lz = np.dot(v[2], v0xv1) / v0xv1mag
+    a3x = np.dot(v[0], v[2]) / Lx
+    xz = a3x / Lz
+    yz = (np.dot(v[1], v[2]) - a2x * a3x) / (Ly * Lz)
+    assert 1 < dimensions <= 3
+    if dimensions == 2:
+        assert Lz == 1
+        assert xz == yz == 0
+    return Box(Lx=Lx, Ly=Ly, Lz=Lz, xy=xy, xz=xz, yz=yz, dimensions=dimensions)
 
 
 def _raw_frame_to_frame(raw_frame):
@@ -505,7 +536,9 @@ def _raw_frame_to_frame(raw_frame):
     # the box
     positions = np.asarray(raw_frame.positions)
     orientations = np.asarray(raw_frame.orientations)
-    ret.positions, ret.orientations, ret.box = rotate_improper_triclinic(
+    if isinstance(raw_frame.box, Box):
+        raw_frame.box = np.asarray(raw_frame.box.get_box_matrix())
+    ret.positions, ret.orientations, ret.box = _regularize_box(
         positions, orientations, raw_frame.box)
     ret.shapedef = raw_frame.shapedef
     ret.types = raw_frame.types

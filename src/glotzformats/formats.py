@@ -1,26 +1,34 @@
 class FileFormat(object):
 
-    def __init__(self, file_object):
-        self._file_object = file_object
+    def __init__(self, file):
+        self._file = file
+
+    @property
+    def file(self):
+        return self._file
 
     @property
     def data(self):
         return self.read()
 
+    @property
+    def mode(self):
+        return self._file.mode
+
     def read(self, size=-1):
-        return self._file_object.read(size)
+        return self._file.read(size)
 
     def seek(self, offset):
-        return self._file_object.seek(offset)
+        return self._file.seek(offset)
 
     def tell(self):
-        return self._file_object.tell()
+        return self._file.tell()
 
     def __iter__(self):
-        return iter(self._file_object)
+        return iter(self._file)
 
     def close(self):
-        return self._file_object.close()
+        return self._file.close()
 
 
 class XMLFile(FileFormat):
@@ -44,6 +52,14 @@ class PosTrajectoryFile(TrajectoryFile):
 
 
 class DCDTrajectoryFile(TrajectoryFile):
+    pass
+
+
+class GetarTrajectoryFile(TrajectoryFile):
+    pass
+
+
+class CifTrajectoryFile(TrajectoryFile):
     pass
 
 
