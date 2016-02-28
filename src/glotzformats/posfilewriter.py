@@ -17,7 +17,7 @@ from itertools import chain
 import numpy as np
 
 from .posfilereader import POSFILE_FLOAT_DIGITS
-from .trajectory import SphereShapeDefinition
+from .trajectory import SphereShapeDefinition, ArrowShapeDefinition
 
 logger = logging.getLogger(__name__)
 PYTHON_2 = sys.version_info[0] == 2
