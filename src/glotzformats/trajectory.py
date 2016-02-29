@@ -15,6 +15,7 @@ from . import math_utils as mu
 logger = logging.getLogger(__name__)
 
 SHAPE_DEFAULT_COLOR = '005984FF'
+DEFAULT_DTYPE = np.float_
 
 
 class Box(object):
@@ -201,8 +202,9 @@ class Frame(object):
 
     The frame data is read from the origin stream whenever accessed."""
 
-    def __init__(self):
+    def __init__(self, dtype=DEFAULT_DTYPE):
         self.frame_data = None
+        self._dtype=dtype
 
     def loaded(self):
         "Returns True if the frame is loaded into memory."
@@ -212,7 +214,7 @@ class Frame(object):
         "Load the frame into memory."
         if self.frame_data is None:
             logger.debug("Loading frame.")
-            self.frame_data = _raw_frame_to_frame(self.read())
+            self.frame_data = _raw_frame_to_frame(self.read(), self._dtype)
 
     def unload(self):
         """Unload the frame from memory.
@@ -223,6 +225,17 @@ class Frame(object):
         prevent a removal of said data from memory."""
         logger.debug("Removing frame data reference.")
         self.frame_data = None
+
+    @property
+    def dtype(self):
+        return self._dtype
+
+    @dtype.setter
+    def dtype(self, value):
+        if self.loaded():
+            raise RuntimeError(
+                "Can't change data type after frame is loaded.")
+        self._dtype=value
 
     def __len__(self):
         "Return the number of particles in this frame."
@@ -344,7 +357,7 @@ class BaseTrajectory(object):
 
     def __getitem__(self, index):
         if isinstance(index, slice):
-            return Trajectory(self.frames[index])
+            return type(self)(self.frames[index])
         else:
             return self.frames[index]
 
@@ -431,6 +444,10 @@ class Trajectory(BaseTrajectory):
         for frame in self.frames:
             frame.load()
 
+    def set_dtype(self, value):
+        for frame in self.frames:
+            frame.dtype=value
+
 
 def _regularize_box(positions, orientations,
                     box_matrix, dimensions=3):
@@ -513,15 +530,15 @@ def _calc_box(v, dimensions):
     return Box(Lx=Lx, Ly=Ly, Lz=Lz, xy=xy, xz=xz, yz=yz, dimensions=dimensions)
 
 
-def _raw_frame_to_frame(raw_frame):
+def _raw_frame_to_frame(raw_frame, dtype=None):
     """Generate a frame object from a raw frame object."""
     N = len(raw_frame.types)
     ret = FrameData()
     # the box
-    positions = np.asarray(raw_frame.positions)
-    orientations = np.asarray(raw_frame.orientations)
+    positions = np.asarray(raw_frame.positions, dtype=dtype)
+    orientations = np.asarray(raw_frame.orientations, dtype=dtype)
     if isinstance(raw_frame.box, Box):
-        raw_frame.box = np.asarray(raw_frame.box.get_box_matrix())
+        raw_frame.box = np.asarray(raw_frame.box.get_box_matrix(), dtype=dtype)
     ret.positions, ret.orientations, ret.box = _regularize_box(
         positions, orientations, raw_frame.box)
     ret.shapedef = raw_frame.shapedef
