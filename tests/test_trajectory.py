@@ -4,6 +4,7 @@ import unittest
 import tempfile
 
 import glotzformats
+import numpy as np
 
 PYTHON_2 = sys.version_info[0] == 2
 
@@ -55,6 +56,33 @@ class TrajectoryTest(unittest.TestCase):
         for i, frame in enumerate(traj):
             frame.load()
         self.assertEqual(len(traj), i + 1)
+
+    def test_data_type_specification(self):
+        sample = glotzformats.samples.POS_HPMC
+        if PYTHON_2:
+            sample_file = io.StringIO(unicode(sample))  # noqa
+        else:
+            sample_file = io.StringIO(sample)
+        traj = glotzformats.reader.PosFileReader().read(sample_file)
+        for frame in traj:
+            self.assertTrue(isinstance(frame.positions, np.ndarray))
+            self.assertTrue(frame.positions.dtype ==
+                            glotzformats.trajectory.DEFAULT_DTYPE)
+        for dtype in (np.float32, np.float64):
+            traj.set_dtype(dtype)
+            for frame in traj:
+                self.assertTrue(isinstance(frame.positions, np.ndarray))
+                self.assertTrue(frame.positions.dtype == dtype)
+        traj.set_dtype(np.float32)
+        frame0 = traj[0]
+        self.assertTrue(frame0.positions.dtype == np.float32)
+        frame0.load()
+        self.assertTrue(isinstance(frame0.positions, np.ndarray))
+        self.assertTrue(frame0.positions.dtype == np.float32)
+        with self.assertRaises(RuntimeError):
+            traj.set_dtype(np.float64)
+        with self.assertRaises(RuntimeError):
+            frame0.dtype = np.float64
 
 
 @unittest.skipIf(not HOOMD, 'requires hoomd-blue')

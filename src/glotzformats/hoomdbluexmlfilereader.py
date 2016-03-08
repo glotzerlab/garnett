@@ -38,8 +38,7 @@ class HoomdBlueXMLFrame(Frame):
         if orientations is None:
             raw_frame.orientations = [[1, 0, 0, 0]] * len(raw_frame.positions)
         else:
-            raw_frame.orientations = list(
-                _parse_orientations(config.find('orietation')))
+            raw_frame.orientations = list(_parse_orientations(orientations))
         raw_frame.types = list(_parse_types(config.find('type')))
         return raw_frame
 
