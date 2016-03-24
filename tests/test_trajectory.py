@@ -17,12 +17,14 @@ else:
 
 
 class TrajectoryTest(unittest.TestCase):
+    sample = glotzformats.samples.POS_HPMC
+    reader = glotzformats.reader.PosFileReader
 
     def read_trajectory(self, stream, precision=None):
         reader = glotzformats.reader.PosFileReader(precision=precision)
         return reader.read(stream)
 
-    def get_trajectory(self, sample):
+    def get_trajectory(self, sample=glotzformats.samples.POS_HPMC):
         if PYTHON_2:
             sample_file = io.StringIO(unicode(sample))  # noqa
         else:
@@ -30,24 +32,23 @@ class TrajectoryTest(unittest.TestCase):
         # account for low injavis precision
         return self.read_trajectory(sample_file)
 
-    def test_load(self):
-        sample = glotzformats.samples.POS_HPMC
+    def get_sample_file(self):
         if PYTHON_2:
-            sample_file = io.StringIO(unicode(sample))  # noqa
+            return io.StringIO(unicode(self.sample))  # noqa
         else:
-            sample_file = io.StringIO(sample)
-        traj = glotzformats.reader.PosFileReader().read(sample_file)
+            return io.StringIO(self.sample)
+
+    def test_load(self):
+        sample_file = self.get_sample_file()
+        traj = self.reader().read(sample_file)
         for i, frame in enumerate(traj):
             frame.load()
         self.assertEqual(len(traj), i + 1)
         sample_file.close()
         with self.assertRaises(ValueError):
             traj[0].load()
-        if PYTHON_2:
-            sample_file = io.StringIO(unicode(sample))  # noqa
-        else:
-            sample_file = io.StringIO(sample)
-        traj = glotzformats.reader.PosFileReader().read(sample_file)
+        sample_file = self.get_sample_file()
+        traj = self.reader().read(sample_file)
         traj.load()
         sample_file.close()
         for i, frame in enumerate(traj):
@@ -58,12 +59,8 @@ class TrajectoryTest(unittest.TestCase):
         self.assertEqual(len(traj), i + 1)
 
     def test_data_type_specification(self):
-        sample = glotzformats.samples.POS_HPMC
-        if PYTHON_2:
-            sample_file = io.StringIO(unicode(sample))  # noqa
-        else:
-            sample_file = io.StringIO(sample)
-        traj = glotzformats.reader.PosFileReader().read(sample_file)
+        sample_file = self.get_sample_file()
+        traj = self.reader().read(sample_file)
         for frame in traj:
             self.assertTrue(isinstance(frame.positions, np.ndarray))
             self.assertTrue(frame.positions.dtype ==
