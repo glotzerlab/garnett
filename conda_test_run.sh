@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 source activate glotzformats-py27-minimal
 python -m unittest discover tests ${@}
