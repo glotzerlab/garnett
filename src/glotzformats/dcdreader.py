@@ -33,16 +33,16 @@ from .errors import ParserError
 logger = logging.getLogger(__name__)
 
 
-def read_int(file):
-    return struct.unpack('<L', file.read(4))[0]
+def read_int(stream):
+    return struct.unpack('<L', stream.read(4))[0]
 
 
-def read_double(file):
-    return struct.unpack('<d', file.read(8))[0]
+def read_double(stream):
+    return struct.unpack('<d', stream.read(8))[0]
 
 
-def read_float(file):
-    return struct.unpack('<f', file.read(4))[0]
+def read_float(stream):
+    return struct.unpack('<f', stream.read(4))[0]
 
 
 class _DCDFrameHeader(object):
@@ -53,24 +53,24 @@ class _DCDFileHeader(object):
     pass
 
 
-def read_frame_header(file):
+def read_frame_header(stream):
     frame_header = _DCDFrameHeader()
-    frame_header_size = read_int(file)
-    frame_header.box_a = read_double(file)
-    frame_header.box_gamma = read_double(file)
-    frame_header.box_b = read_double(file)
-    frame_header.box_beta = read_double(file)
-    frame_header.box_alpha = read_double(file)
-    frame_header.box_c = read_double(file)
-    assert read_int(file) == frame_header_size
+    frame_header_size = read_int(stream)
+    frame_header.box_a = read_double(stream)
+    frame_header.box_gamma = read_double(stream)
+    frame_header.box_b = read_double(stream)
+    frame_header.box_beta = read_double(stream)
+    frame_header.box_alpha = read_double(stream)
+    frame_header.box_c = read_double(stream)
+    assert read_int(stream) == frame_header_size
     return frame_header
 
 
-def skip_frame(file):
+def skip_frame(stream):
     for i in range(3):
-        len_section = read_int(file)
-        file.seek(len_section, 1)
-        assert read_int(file) == len_section
+        len_section = read_int(stream)
+        stream.seek(len_section, 1)
+        assert read_int(stream) == len_section
 
 
 def box_matrix_from_frame_header(frame_header, tol=1e-12):
@@ -94,9 +94,9 @@ def box_matrix_from_frame_header(frame_header, tol=1e-12):
 
 class DCDFrame(Frame):
 
-    def __init__(self, file, file_header, frame_header, start,
+    def __init__(self, stream, file_header, frame_header, start,
                  t_frame, default_type='A'):
-        self.file = file
+        self.stream = stream
         self.file_header = file_header
         self.frame_header = frame_header
         self.start = start
@@ -108,13 +108,13 @@ class DCDFrame(Frame):
         raw_frame = copy.deepcopy(self.t_frame)
         raw_frame.box = np.asarray(
             box_matrix_from_frame_header(self.frame_header)).T
-        self.file.seek(self.start)
+        self.stream.seek(self.start)
         N = self.file_header.n_particles
         xyz = []
         for i in range(3):
-            len_section = read_int(self.file)
-            xyz.append([read_float(self.file) for j in range(N)])
-            assert read_int(self.file) == len_section
+            len_section = read_int(self.stream)
+            xyz.append([read_float(self.stream) for j in range(N)])
+            assert read_int(self.stream) == len_section
         raw_frame.positions = np.array(xyz).T
         raw_frame.orientations = np.zeros((len(raw_frame.positions), 4))
         raw_frame.types = [self.default_type] * len(raw_frame.positions)
@@ -129,56 +129,56 @@ class DCDFrame(Frame):
 class DCDFileReader(object):
     """Read dcd trajectory files."""
 
-    def _read_file_header(self, file):
+    def _read_file_header(self, stream):
         file_header = _DCDFileHeader()
-        assert read_int(file) == 84
-        assert file.read(4) == b'CORD'
-        file_header.num_frames = read_int(file)
-        file_header.m_start_timestep = read_int(file)
-        file_header.m_period = read_int(file)
-        file_header.timesteps = read_int(file)
+        assert read_int(stream) == 84
+        assert stream.read(4) == b'CORD'
+        file_header.num_frames = read_int(stream)
+        file_header.m_start_timestep = read_int(stream)
+        file_header.m_period = read_int(stream)
+        file_header.timesteps = read_int(stream)
         for i in range(5):
-            read_int(file)
-        file_header.timestep = read_int(file)
-        file_header.include_unitcell = bool(read_int(file))
+            read_int(stream)
+        file_header.timestep = read_int(stream)
+        file_header.include_unitcell = bool(read_int(stream))
         for i in range(8):
-            assert read_int(file) == 0
-        file_header.charmm_version = read_int(file)
-        assert read_int(file) == 84
-        title_section_size = read_int(file)
-        n_titles = read_int(file)
+            assert read_int(stream) == 0
+        file_header.charmm_version = read_int(stream)
+        assert read_int(stream) == 84
+        title_section_size = read_int(stream)
+        n_titles = read_int(stream)
         len_title = int((title_section_size - 4) / 2)
         file_header.titles = []
         for i in range(n_titles):
-            file_header.titles.append(file.read(len_title).decode('ascii'))
-        assert read_int(file) == title_section_size
-        assert read_int(file) == 4
-        file_header.n_particles = read_int(file)
-        assert read_int(file) == 4
+            file_header.titles.append(stream.read(len_title).decode('ascii'))
+        assert read_int(stream) == title_section_size
+        assert read_int(stream) == 4
+        file_header.n_particles = read_int(stream)
+        assert read_int(stream) == 4
         return file_header
 
-    def _scan(self, file, t_frame=None, default_type='A'):
+    def _scan(self, stream, t_frame=None, default_type='A'):
         try:
-            file_header = self._read_file_header(file)
+            file_header = self._read_file_header(stream)
         except Exception as error:
             raise ParserError(
                 "Failed to read dcd file header: '{}'.".format(error))
         for i in range(file_header.num_frames):
             try:
-                frame_header = read_frame_header(file)
-                yield DCDFrame(file=file, file_header=file_header,
-                               frame_header=frame_header, start=file.tell(),
+                frame_header = read_frame_header(stream)
+                yield DCDFrame(stream=stream, file_header=file_header,
+                               frame_header=frame_header, start=stream.tell(),
                                t_frame=t_frame, default_type=default_type)
-                skip_frame(file)
+                skip_frame(stream)
             except Exception as error:
                 raise ParserError(
                     "Failed to read frame #{}: '{}'.".format(i, error))
 
-    def read(self, file, frame=None, default_type='A'):
-        """Read binary file and return a trajectory instance.
+    def read(self, stream, frame=None, default_type='A'):
+        """Read binary stream and return a trajectory instance.
 
-        :param file: The file, which contains the xmlfile.
-        :type file: A file-like textfile.
+        :param stream: The stream, which contains the dcd-file.
+        :type stream: A file-like binary stream
         :param frame: A frame containing topological information
             that cannot be encoded in the dcd-format.
         :type frame: :class:`trajectory.Frame`
@@ -187,7 +187,7 @@ class DCDFileReader(object):
         :type default_type: str"""
         if frame is None:
             frame = _RawFrameData()
-        frames = list(self._scan(file, t_frame=frame,
+        frames = list(self._scan(stream, t_frame=frame,
                                  default_type=default_type))
         logger.info("Read {} frames.".format(len(frames)))
         return Trajectory(frames)
