@@ -33,15 +33,15 @@ from .errors import ParserError
 logger = logging.getLogger(__name__)
 
 
-def read_int(stream):
+def _read_int(stream):
     return struct.unpack('<L', stream.read(4))[0]
 
 
-def read_double(stream):
+def _read_double(stream):
     return struct.unpack('<d', stream.read(8))[0]
 
 
-def read_float(stream):
+def _read_float(stream):
     return struct.unpack('<f', stream.read(4))[0]
 
 
@@ -55,25 +55,25 @@ class _DCDFileHeader(object):
 
 def read_frame_header(stream):
     frame_header = _DCDFrameHeader()
-    frame_header_size = read_int(stream)
-    frame_header.box_a = read_double(stream)
-    frame_header.box_gamma = read_double(stream)
-    frame_header.box_b = read_double(stream)
-    frame_header.box_beta = read_double(stream)
-    frame_header.box_alpha = read_double(stream)
-    frame_header.box_c = read_double(stream)
-    assert read_int(stream) == frame_header_size
+    frame_header_size = _read_int(stream)
+    frame_header.box_a = _read_double(stream)
+    frame_header.box_gamma = _read_double(stream)
+    frame_header.box_b = _read_double(stream)
+    frame_header.box_beta = _read_double(stream)
+    frame_header.box_alpha = _read_double(stream)
+    frame_header.box_c = _read_double(stream)
+    assert _read_int(stream) == frame_header_size
     return frame_header
 
 
-def skip_frame(stream):
+def _skip_frame(stream):
     for i in range(3):
-        len_section = read_int(stream)
+        len_section = _read_int(stream)
         stream.seek(len_section, 1)
-        assert read_int(stream) == len_section
+        assert _read_int(stream) == len_section
 
 
-def box_matrix_from_frame_header(frame_header, tol=1e-12):
+def _box_matrix_from_frame_header(frame_header, tol=1e-12):
     from math import sin, cos, sqrt, pi
     fh = frame_header
 
@@ -107,14 +107,14 @@ class DCDFrame(Frame):
     def read(self):
         raw_frame = copy.deepcopy(self.t_frame)
         raw_frame.box = np.asarray(
-            box_matrix_from_frame_header(self.frame_header)).T
+            _box_matrix_from_frame_header(self.frame_header)).T
         self.stream.seek(self.start)
         N = self.file_header.n_particles
         xyz = []
         for i in range(3):
-            len_section = read_int(self.stream)
-            xyz.append([read_float(self.stream) for j in range(N)])
-            assert read_int(self.stream) == len_section
+            len_section = _read_int(self.stream)
+            xyz.append([_read_float(self.stream) for j in range(N)])
+            assert _read_int(self.stream) == len_section
         raw_frame.positions = np.array(xyz).T
         raw_frame.orientations = np.zeros((len(raw_frame.positions), 4))
         raw_frame.types = [self.default_type] * len(raw_frame.positions)
@@ -131,30 +131,30 @@ class DCDFileReader(object):
 
     def _read_file_header(self, stream):
         file_header = _DCDFileHeader()
-        assert read_int(stream) == 84
+        assert _read_int(stream) == 84
         assert stream.read(4) == b'CORD'
-        file_header.num_frames = read_int(stream)
-        file_header.m_start_timestep = read_int(stream)
-        file_header.m_period = read_int(stream)
-        file_header.timesteps = read_int(stream)
+        file_header.num_frames = _read_int(stream)
+        file_header.m_start_timestep = _read_int(stream)
+        file_header.m_period = _read_int(stream)
+        file_header.timesteps = _read_int(stream)
         for i in range(5):
-            read_int(stream)
-        file_header.timestep = read_int(stream)
-        file_header.include_unitcell = bool(read_int(stream))
+            _read_int(stream)
+        file_header.timestep = _read_int(stream)
+        file_header.include_unitcell = bool(_read_int(stream))
         for i in range(8):
-            assert read_int(stream) == 0
-        file_header.charmm_version = read_int(stream)
-        assert read_int(stream) == 84
-        title_section_size = read_int(stream)
-        n_titles = read_int(stream)
+            assert _read_int(stream) == 0
+        file_header.charmm_version = _read_int(stream)
+        assert _read_int(stream) == 84
+        title_section_size = _read_int(stream)
+        n_titles = _read_int(stream)
         len_title = int((title_section_size - 4) / 2)
         file_header.titles = []
         for i in range(n_titles):
             file_header.titles.append(stream.read(len_title).decode('ascii'))
-        assert read_int(stream) == title_section_size
-        assert read_int(stream) == 4
-        file_header.n_particles = read_int(stream)
-        assert read_int(stream) == 4
+        assert _read_int(stream) == title_section_size
+        assert _read_int(stream) == 4
+        file_header.n_particles = _read_int(stream)
+        assert _read_int(stream) == 4
         return file_header
 
     def _scan(self, stream, t_frame=None, default_type='A'):
@@ -169,7 +169,7 @@ class DCDFileReader(object):
                 yield DCDFrame(stream=stream, file_header=file_header,
                                frame_header=frame_header, start=stream.tell(),
                                t_frame=t_frame, default_type=default_type)
-                skip_frame(stream)
+                _skip_frame(stream)
             except Exception as error:
                 raise ParserError(
                     "Failed to read frame #{}: '{}'.".format(i, error))
