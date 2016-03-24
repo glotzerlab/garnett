@@ -3,7 +3,7 @@ logger = logging.getLogger(__name__)
 
 from .posfilereader import PosFileReader
 from .hoomdbluexmlfilereader import HoomdBlueXMLFileReader
-from .dcdreader import DCDFileReader
+from .dcdfilereader import DCDFileReader
 
 try:
     from .getarfilereader import GetarFileReader
