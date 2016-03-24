@@ -16,7 +16,7 @@ glotzformats - documentation
    installation
    quickstart
    trajectory
-   posfiles
+   readerswriters
    development
 
 

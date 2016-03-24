@@ -4,8 +4,9 @@ import unittest
 import tempfile
 
 import glotzformats
+import numpy as np
 
-PYTHON_3 = sys.version_info[0] == 3
+PYTHON_2 = sys.version_info[0] == 2
 
 try:
     from hoomd_script import context
@@ -14,19 +15,71 @@ except ImportError:
 else:
     HOOMD = True
 
+
 class TrajectoryTest(unittest.TestCase):
+    sample = glotzformats.samples.POS_HPMC
+    reader = glotzformats.reader.PosFileReader
 
     def read_trajectory(self, stream, precision=None):
         reader = glotzformats.reader.PosFileReader(precision=precision)
         return reader.read(stream)
-        traj = reader.read(io.StringIO(glotzformats.samples.POS_HPMC))
 
-    def get_trajectory(self, sample):
-        if PYTHON_3:
-            sample_file = io.StringIO(glotzformats.samples.POS_HPMC)
+    def get_trajectory(self, sample=glotzformats.samples.POS_HPMC):
+        if PYTHON_2:
+            sample_file = io.StringIO(unicode(sample))  # noqa
         else:
-            sample_file = io.StringIO(unicode(glotzformats.samples.POS_HPMC))
-        return self.read_trajectory(sample_file) # account for low injavis precision
+            sample_file = io.StringIO(sample)
+        # account for low injavis precision
+        return self.read_trajectory(sample_file)
+
+    def get_sample_file(self):
+        if PYTHON_2:
+            return io.StringIO(unicode(self.sample))  # noqa
+        else:
+            return io.StringIO(self.sample)
+
+    def test_load(self):
+        sample_file = self.get_sample_file()
+        traj = self.reader().read(sample_file)
+        for i, frame in enumerate(traj):
+            frame.load()
+        self.assertEqual(len(traj), i + 1)
+        sample_file.close()
+        with self.assertRaises(ValueError):
+            traj[0].load()
+        sample_file = self.get_sample_file()
+        traj = self.reader().read(sample_file)
+        traj.load()
+        sample_file.close()
+        for i, frame in enumerate(traj):
+            frame.load()
+        self.assertEqual(len(traj), i + 1)
+        for i, frame in enumerate(traj):
+            frame.load()
+        self.assertEqual(len(traj), i + 1)
+
+    def test_data_type_specification(self):
+        sample_file = self.get_sample_file()
+        traj = self.reader().read(sample_file)
+        for frame in traj:
+            self.assertTrue(isinstance(frame.positions, np.ndarray))
+            self.assertTrue(frame.positions.dtype ==
+                            glotzformats.trajectory.DEFAULT_DTYPE)
+        for dtype in (np.float32, np.float64):
+            traj.set_dtype(dtype)
+            for frame in traj:
+                self.assertTrue(isinstance(frame.positions, np.ndarray))
+                self.assertTrue(frame.positions.dtype == dtype)
+        traj.set_dtype(np.float32)
+        frame0 = traj[0]
+        self.assertTrue(frame0.positions.dtype == np.float32)
+        frame0.load()
+        self.assertTrue(isinstance(frame0.positions, np.ndarray))
+        self.assertTrue(frame0.positions.dtype == np.float32)
+        with self.assertRaises(RuntimeError):
+            traj.set_dtype(np.float64)
+        with self.assertRaises(RuntimeError):
+            frame0.dtype = np.float64
 
 
 @unittest.skipIf(not HOOMD, 'requires hoomd-blue')
@@ -45,25 +98,27 @@ class FrameSnapshotExport(TrajectoryTest):
     def assert_snapshots_equal(self, s0, s1):
         self.assertEqual(s0.particles.N, s1.particles.N)
         self.assertEqual(s0.box.get_metadata(), s1.box.get_metadata())
-        self.assertTrue((s0.particles.position==s1.particles.position).all())
-        self.assertTrue((s0.particles.orientation==s1.particles.orientation).all())
+        self.assertTrue((s0.particles.position == s1.particles.position).all())
+        self.assertTrue((s0.particles.orientation ==
+                         s1.particles.orientation).all())
 
     def test_sphere(self):
         from hoomd_script import init, sorter, data, dump, run
         from hoomd_plugins import hpmc
-        self.system = init.create_empty(N=2, box=data.boxdim(L=10, dimensions=3), particle_types=['A'])
+        self.system = init.create_empty(N=2, box=data.boxdim(
+            L=10, dimensions=3), particle_types=['A'])
         self.addCleanup(init.reset)
         self.addCleanup(self.del_system)
-        self.mc = hpmc.integrate.sphere(seed=10);
+        self.mc = hpmc.integrate.sphere(seed=10)
         self.mc.shape_param.set("A", diameter=1.0)
         self.addCleanup(self.del_mc)
-        self.system.particles[0].position = (1,0,0);
-        self.system.particles[0].orientation = (1,0,0,0);
-        self.system.particles[1].position = (2,0,0);
-        self.system.particles[1].orientation = (1,0,0,0);
+        self.system.particles[0].position = (1, 0, 0)
+        self.system.particles[0].orientation = (1, 0, 0, 0)
+        self.system.particles[1].position = (2, 0, 0)
+        self.system.particles[1].orientation = (1, 0, 0, 0)
         sorter.set_params(grid=8)
         with tempfile.NamedTemporaryFile('r') as tmpfile:
-            pos = dump.pos(filename=tmpfile.name, period = 1)
+            pos = dump.pos(filename=tmpfile.name, period=1)
             run(10, quiet=True)
             snapshot0 = self.system.take_snapshot()
             run(1, quiet=True)  # the hoomd pos-writer lags by one sweep
@@ -83,13 +138,13 @@ class FrameSnapshotExport(TrajectoryTest):
         self.assertEqual(snapshot.particles.types, ['A'] * 3)
 
     def test_incsim_dialect(self):
-        snapshot = self.make_snapshot(glotzformats.samples.POS_INCSIM)
+        self.make_snapshot(glotzformats.samples.POS_INCSIM)
 
     def test_monotype_dialect(self):
-        snapshot = self.make_snapshot(glotzformats.samples.POS_MONOTYPE)
+        self.make_snapshot(glotzformats.samples.POS_MONOTYPE)
 
     def test_injavis_dialect(self):
-        snapshot = self.make_snapshot(glotzformats.samples.POS_INJAVIS)
+        self.make_snapshot(glotzformats.samples.POS_INJAVIS)
 
 if __name__ == '__main__':
     if HOOMD:
