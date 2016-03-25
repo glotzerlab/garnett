@@ -198,6 +198,10 @@ class PosFileReader(object):
                     stream, start, index,
                     self._precision, default_type)
                 start = index
+        if index > start:
+            yield PosFileFrame(
+                    stream, start, index,
+                    self._precision, default_type)
 
     def read(self, stream, default_type='A'):
         """Read text stream and return a trajectory instance.
