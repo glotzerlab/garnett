@@ -12,7 +12,7 @@ from test_trajectory import TrajectoryTest
 PYTHON_2 = sys.version_info[0] == 2
 
 
-class BaseDCDFileReaderTest(TrajectoryTest):
+class BaseGSDHoomdFileReaderTest(TrajectoryTest):
     reader = glotzformats.reader.GSDHoomdFileReader
 
     def setUp(self):
