@@ -1,10 +1,13 @@
-"""DCD-file reader for the Glotzer Group, University of Michigan.
+"""Hoomd-GSD-file reader for the Glotzer Group, University of Michigan.
 
-Authors: Carl Simon Adorf
+Author: Carl Simon Adorf
 
-A gsd file conists only of positions.
+This module provides a wrapper for the gsd.hoomd and the gsd.pygsd
+trajectory reader implementation as part of the gsd package.
+
+A gsd file may not contain all shape information.
 To provide additional information it is possible
-to provide a frame object, whose properties
+to pass a frame object, whose properties
 are copied into each frame of the gsd trajectory.
 
 The example is given for a hoomd-blue xml frame:
@@ -12,12 +15,12 @@ The example is given for a hoomd-blue xml frame:
 .. code::
 
     xml_reader = HoomdBlueXMLFileReader()
-    gsd_reader = DCDFileReader()
+    gsd_reader = GSDHoomdFileReader()
 
     with open('init.xml') as xmlfile:
         with open('dump.gsd') as gsdfile:
             xml_frame = xml_reader.read(xmlfile)[0]
-            traj = reader.read(gsdfile, xml_frame)
+            traj = gsd_reader.read(gsdfile, xml_frame)
 """
 
 import logging
@@ -64,14 +67,14 @@ class GSDHoomdFrame(Frame):
 
 
 class GSDHoomdFileReader(object):
-    """Read gsd trajectory files."""
+    """Read gsd trajectory files with hoomd schema.."""
 
     def read(self, stream, frame=None):
         """Read binary stream and return a trajectory instance.
 
         :param stream: The stream, which contains the gsd-file.
         :type stream: A file-like binary stream
-        :param frame: A frame containing topological information
+        :param frame: A frame containing shape information
             that is not encoded in the GSD-format.
         :type frame: :class:`trajectory.Frame`"""
         if frame is None:
