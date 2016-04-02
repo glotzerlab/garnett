@@ -1,6 +1,6 @@
 """POS-file reader for the Glotzer Group, University of Michigan.
 
-Authors: Richmond Newmann, Carl Simon Adorf
+Authors: Carl Simon Adorf, Richmond Newmann
 
 .. code::
 
@@ -195,7 +195,7 @@ class PosFileReader(object):
         """
         self._precision = precision or POSFILE_FLOAT_DIGITS
 
-    def scan(self, stream, default_type):
+    def _scan(self, stream, default_type):
         start = 0
         index = 0
         for line in stream:
@@ -205,6 +205,10 @@ class PosFileReader(object):
                     stream, start, index,
                     self._precision, default_type)
                 start = index
+        if index > start:
+            yield PosFileFrame(
+                    stream, start, index,
+                    self._precision, default_type)
 
     def read(self, stream, default_type='A'):
         """Read text stream and return a trajectory instance.
@@ -216,7 +220,7 @@ class PosFileReader(object):
         :type default_type: str
         """
         # Index the stream
-        frames = list(self.scan(stream, default_type))
+        frames = list(self._scan(stream, default_type))
         if len(frames) == 0:
             raise ParserError("Did not read a single complete frame.")
         logger.info("Read {} frames.".format(len(frames)))
