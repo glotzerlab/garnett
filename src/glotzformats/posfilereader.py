@@ -198,6 +198,17 @@ class PosFileReader(object):
                     stream, start, index,
                     self._precision, default_type)
                 start = index
+        if index > start:
+            stream.seek(start)
+            for line in stream:
+                if line.startswith('boxMatrix'):
+                    stream.seek(-1)
+                    yield PosFileFrame(
+                            stream, start, index,
+                            self._precision, default_type)
+                    break
+            else:
+                logger.warning("Unexpected file ending.")
 
     def read(self, stream, default_type='A'):
         """Read text stream and return a trajectory instance.
