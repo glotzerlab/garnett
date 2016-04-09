@@ -28,6 +28,13 @@ DCD
     :members:
     :undoc-members:
 
+GSD (hoomd schema)
+------------------
+
+.. automodule:: glotzformats.gsdhoomdfilereader
+    :members:
+    :undoc-members:
+
 CIF
 ---
 

@@ -4,6 +4,7 @@ logger = logging.getLogger(__name__)
 from .posfilereader import PosFileReader
 from .hoomdbluexmlfilereader import HoomdBlueXMLFileReader
 from .dcdfilereader import DCDFileReader
+from .gsdhoomdfilereader import GSDHoomdFileReader
 
 try:
     from .getarfilereader import GetarFileReader
@@ -18,4 +19,5 @@ except ImportError:
 
 __all__ = [
     'PosFileReader', 'HoomdBlueXMLFileReader',
-    'DCDFileReader', 'GetarFileReader']
+    'DCDFileReader', 'GetarFileReader',
+    'GSDHoomdFileReader']
