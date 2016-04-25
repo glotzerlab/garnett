@@ -1,6 +1,6 @@
 """cif-file writer for the Glotzer Group, University of Michigan.
 
-Author: Julia Dschemuchadse, Carl Simon Adorf
+Authors: Julia Dshemuchadse, Carl Simon Adorf
 
 .. code::
 
