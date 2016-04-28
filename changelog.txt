@@ -1,3 +1,7 @@
+0.2.0:
+
+	- Fix HOOMD-blue snapshot type issue.
+
 0.1.9
 
 	- Add GSDHoomdFileReader
