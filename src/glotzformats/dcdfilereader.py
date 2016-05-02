@@ -117,7 +117,9 @@ class DCDFrame(Frame):
             assert _read_int(self.stream) == len_section
         raw_frame.positions = np.array(xyz).T
         raw_frame.orientations = np.zeros((len(raw_frame.positions), 4))
-        raw_frame.types = [self.default_type] * len(raw_frame.positions)
+        if self.default_type is not None:
+            raw_frame.types = [self.default_type] * len(raw_frame.positions)
+        assert len(raw_frame.types) == self.file_header.n_particles
         assert len(raw_frame.positions) == self.file_header.n_particles
         return raw_frame
 
@@ -157,7 +159,7 @@ class DCDFileReader(object):
         assert _read_int(stream) == 4
         return file_header
 
-    def _scan(self, stream, t_frame=None, default_type='A'):
+    def _scan(self, stream, t_frame=None, default_type=None):
         try:
             file_header = self._read_file_header(stream)
         except Exception as error:
@@ -174,7 +176,7 @@ class DCDFileReader(object):
                 raise ParserError(
                     "Failed to read frame #{}: '{}'.".format(i, error))
 
-    def read(self, stream, frame=None, default_type='A'):
+    def read(self, stream, frame=None, default_type=None):
         """Read binary stream and return a trajectory instance.
 
         :param stream: The stream, which contains the dcd-file.
@@ -183,10 +185,14 @@ class DCDFileReader(object):
             that cannot be encoded in the dcd-format.
         :type frame: :class:`trajectory.Frame`
         :param default_type: A type name to be used when no first
-            frame is provided.
+            frame is provided, defaults to 'A'.
         :type default_type: str"""
+        if frame is not None and default_type is not None:
+            raise ValueError(
+                "You can only provide a frame or a default_type, not both.")
         if frame is None:
             frame = _RawFrameData()
+            default_type = 'A'
         frames = list(self._scan(stream, t_frame=frame,
                                  default_type=default_type))
         logger.info("Read {} frames.".format(len(frames)))

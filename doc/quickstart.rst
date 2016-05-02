@@ -111,13 +111,13 @@ Example use with hoomd-blue
     with open('cube.pos') as posfile:
         traj = pos_reader.read(posfile)
 
-    # Initialize from last frame
-    snapshot = traj[-1].make_snapshot()
-    system = init.read_snapshot(snapshot)
+        # Initialize from last frame
+        snapshot = traj[-1].make_snapshot()
+        system = init.read_snapshot(snapshot)
 
-    # Restore last frame
-    snapshot = system.take_snapshot()
-    traj[-1].copyto_snapshot(snapshot)
+        # Restore last frame
+        snapshot = system.take_snapshot()
+        traj[-1].copyto_snapshot(snapshot)
 
 
 .. note::

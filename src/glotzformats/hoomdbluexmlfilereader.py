@@ -85,19 +85,19 @@ def _get_box_matrix(box):
 def _parse_positions(positions):
     for i, position in enumerate(positions.text.splitlines()[1:]):
         yield [float(x) for x in position.split()]
-    if i + 1 != int(positions.attrib['num']):
+    if i + 1 != int(positions.attrib.get('num', i+1)):
         warnings.warn("Number of positions inconsistent.")
 
 
 def _parse_orientations(orientations):
     for i, orientation in enumerate(orientations.text.splitlines()[1:]):
         yield [float(x) for x in orientation.split()]
-    if i + 1 != int(orientations.attrib['num']):
+    if i + 1 != int(orientations.attrib.get('num', i+1)):
         warnings.warn("Number of orientations inconsistent.")
 
 
 def _parse_types(types):
     for i, type in enumerate(types.text.splitlines()[1:]):
         yield str(type)
-    if i + 1 != int(types.attrib['num']):
+    if i + 1 != int(types.attrib.get('num', i)):
         warnings.warn("Number of types inconsistent.")
