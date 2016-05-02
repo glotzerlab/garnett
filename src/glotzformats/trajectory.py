@@ -572,7 +572,11 @@ def copyto_hoomd_blue_snapshot(frame, snapshot):
     return snapshot
 
 def copyfrom_hoomd_blue_snapshot(frame, snapshot):
-    "Copy the hoomd-blue snapshot into the frame. Note that only types, positions and orientations will be copied."
+    "Copy the hoomd-blue snapshot into the frame. Note that only the box, types, positions and orientations will be copied."
+    frame.box.__dict__ = snapshot.box.__dict__
+    particle_types = list(set(snapshot.particles.types))
+    snap_types = [particle_types[i] for i in snapshot.particles.typeid]
+    frame.types = snap_types
     frame.positions = snapshot.particles.position
     frame.orientations = snapshot.particles.orientation
     return frame
