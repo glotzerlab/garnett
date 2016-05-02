@@ -571,6 +571,11 @@ def copyto_hoomd_blue_snapshot(frame, snapshot):
     np.copyto(snapshot.particles.orientation, frame.orientations)
     return snapshot
 
+def copyfrom_hoomd_blue_snapshot(frame, snapshot):
+    "Copy the hoomd-blue snapshot into the frame. Note that only types, positions and orientations will be copied."
+    frame.positions = snapshot.particles.position
+    frame.orientations = snapshot.particles.orientation
+    return frame
 
 def make_hoomd_blue_snapshot(frame):
     "Create a hoomd-blue snapshot from the frame instance."
