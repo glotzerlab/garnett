@@ -151,7 +151,8 @@ class PosFileFrame(Frame):
                     # assume we are reading positions now
                     if not monotype:
                         name = tokens[0]
-                        _assert(name in raw_frame.shapedef)
+                        raw_frame.shapedef.setdefault(
+                            name, self._parse_shape_definition(' '.join(tokens[:3])))
                     else:
                         name = self.default_type
                     if len(tokens) >= 7:
