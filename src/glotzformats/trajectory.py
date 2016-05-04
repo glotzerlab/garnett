@@ -102,6 +102,22 @@ class SphereShapeDefinition(ShapeDefinition):
     def __str__(self):
         return "{} {} {}".format(self.shape_class, self.diameter, self.color)
 
+class ArrowShapeDefinition(ShapeDefinition):
+    """Initialize a ShapeDefinition instance.
+
+    :param thickness: The thickness of the arrow.
+    :type thickness: A floating point number.
+    :param color: Definition of a color for the
+                  particular shape (optional).
+    :type color: A str for RGB color definiton."""
+
+    def __init__(self, thickness=0.1, color=None):
+        super(ArrowShapeDefinition, self).__init__(
+            shape_class='arrow', color=color)
+        self.thickness=thickness
+
+    def __str__(self):
+        return "{} {} {}".format(self.shape_class, self.thickness, self.color)
 
 class PolyShapeDefinition(ShapeDefinition):
     """Initialize a ShapeDefinition instance.
@@ -555,6 +571,15 @@ def copyto_hoomd_blue_snapshot(frame, snapshot):
     np.copyto(snapshot.particles.orientation, frame.orientations)
     return snapshot
 
+def copyfrom_hoomd_blue_snapshot(frame, snapshot):
+    "Copy the hoomd-blue snapshot into the frame. Note that only the box, types, positions and orientations will be copied."
+    frame.box.__dict__ = snapshot.box.__dict__
+    particle_types = list(set(snapshot.particles.types))
+    snap_types = [particle_types[i] for i in snapshot.particles.typeid]
+    frame.types = snap_types
+    frame.positions = snapshot.particles.position
+    frame.orientations = snapshot.particles.orientation
+    return frame
 
 def make_hoomd_blue_snapshot(frame):
     "Create a hoomd-blue snapshot from the frame instance."
