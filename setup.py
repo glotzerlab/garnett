@@ -8,7 +8,7 @@ if not sys.version_info >= (2,7):
 
 setup(
     name = 'glotz-formats',
-    version = '0.2.1rc1',
+    version = '0.2.1',
     package_dir = {'': 'src'},
     packages = find_packages('src'),
 
