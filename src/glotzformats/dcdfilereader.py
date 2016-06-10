@@ -15,7 +15,7 @@ The example is given for a hoomd-blue xml frame:
     dcd_reader = DCDFileReader()
 
     with open('init.xml') as xmlfile:
-        with open('dump.dcd') as dcdfile:
+        with open('dump.dcd', 'rb') as dcdfile:
             xml_frame = xml_reader.read(xmlfile)[0]
             traj = reader.read(dcdfile, xml_frame)
 """
