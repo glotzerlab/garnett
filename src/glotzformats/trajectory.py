@@ -41,7 +41,7 @@ class Box(object):
         The dimensions (Lx,Ly,Lz) are the diagonal."""
         return [[self.Lx, self.xy * self.Ly, self.xz * self.Lz],
                 [0, self.Ly, self.yz * self.Lz],
-                [0, 0, self.  Lz]]
+                [0, 0, self.Lz]]
 
     def __str__(self):
         return "Box(Lx={Lx}, Ly={Ly}, Lz={Lz},"\
