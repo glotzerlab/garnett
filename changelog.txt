@@ -1,3 +1,7 @@
+0.2.1:
+
+	- Fix an issue with injavis pos-files causing parser errors.
+
 0.2.0:
 
 	- Fix HOOMD-blue snapshot type issue.
