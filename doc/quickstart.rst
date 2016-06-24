@@ -108,6 +108,7 @@ Example use with hoomd-blue
     from hoomd_script import init
     # post HOOMDv2.0
     from hoomd import init
+    
     from glotzformats.reader import PosFileReader
 
     pos_reader = PosFileReader()
