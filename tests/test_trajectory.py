@@ -140,6 +140,7 @@ class FrameSnapshotExport(TrajectoryTest):
             from hoomd import init, data, dump, run, hpmc, context, lattice
             from hoomd.update import sort as sorter
             from hoomd.deprecated import dump
+            c=context.initialize('--mode=cpu')
             self.system = init.create_lattice(
                 unitcell=lattice.sq(10),n=(2,1))
             self.addCleanup(context.initialize,"--mode=cpu")
