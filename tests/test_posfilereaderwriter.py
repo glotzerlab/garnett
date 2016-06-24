@@ -26,10 +26,6 @@ else:
     HOOMD_v1 = True
 
 if HOOMD:
-    if HOOMD_v1:
-        context.initialize('--mode=cpu')
-    else:
-        c=context.initialize('--mode=cpu')
     try:
         if HOOMD_v1:
             from hoomd_plugins import hpmc  # noqa
@@ -300,4 +296,8 @@ class InjavisReadWriteTest(BasePosFileWriterTest):
         self.read_write_injavis(glotzformats.samples.POS_INJAVIS)
 
 if __name__ == '__main__':
+    if HOOMD_v1:
+        context.initialize('--mode=cpu')
+    else:
+        c=context.initialize('--mode=cpu')
     unittest.main()
