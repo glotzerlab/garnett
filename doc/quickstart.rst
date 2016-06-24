@@ -104,6 +104,9 @@ Example use with hoomd-blue
 
 .. code-block:: python
 
+    # pre HOOMDv2.0
+    from hoomd_script import init
+    # post HOOMDv2.0
     from hoomd import init
     from glotzformats.reader import PosFileReader
 
