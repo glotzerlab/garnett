@@ -26,6 +26,10 @@ else:
     HOOMD_v1 = True
 
 if HOOMD:
+    if HOOMD_v1:
+        context.initialize('--mode=cpu')
+    else:
+        c=context.initialize('--mode=cpu')
     try:
         if HOOMD_v1:
             from hoomd_plugins import hpmc  # noqa
@@ -157,7 +161,10 @@ class HPMCPosFileReaderTest(BasePosFileReaderTest):
         self.system.particles[0].orientation = (1, 0, 0, 0)
         self.system.particles[1].position = (2, 0, 0)
         self.system.particles[1].orientation = (1, 0, 0, 0)
-        # sorter.set_params(grid=8)
+        if HOOMD_v1:
+            sorter.set_params(grid=8)
+        else:
+            c.sorter.set_params(grid=8)
         dump.pos(filename=self.fn_pos, period=1)
         run(10, quiet=True)
         with open(self.fn_pos, 'r', encoding='utf-8') as posfile:
@@ -192,7 +199,10 @@ class HPMCPosFileReaderTest(BasePosFileReaderTest):
         self.system.particles[0].orientation = (1, 0, 0, 0)
         self.system.particles[1].position = (2, 0, 0)
         self.system.particles[1].orientation = (1, 0, 0, 0)
-        # sorter.set_params(grid=8)
+        if HOOMD_v1:
+            sorter.set_params(grid=8)
+        else:
+            c.sorter.set_params(grid=8)
         pos_writer = dump.pos(filename=self.fn_pos, period=1)
         self.mc.setup_pos_writer(pos_writer)
         run(10, quiet=True)
