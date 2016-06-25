@@ -45,6 +45,13 @@ def _read_float(stream):
     return struct.unpack('<f', stream.read(4))[0]
 
 
+def _euler_to_quaternion(alpha):
+    q = np.zeros((len(alpha), 4))
+    q.T[0] = np.cos(alpha/2)
+    q.T[1] = q.T[2] = q.T[3] = np.sin(alpha/2)
+    return q
+
+
 class _DCDFrameHeader(object):
     pass
 
@@ -121,6 +128,13 @@ class DCDFrame(Frame):
             raw_frame.types = [self.default_type] * len(raw_frame.positions)
         assert len(raw_frame.types) == self.file_header.n_particles
         assert len(raw_frame.positions) == self.file_header.n_particles
+        if self.t_frame.box.dimensions == 2:
+            logger.info(
+                "2-dimensional box, interpreting 3rd dimension "
+                "as euler orientation angle.")
+            raw_frame.orientations = _euler_to_quaternion(
+                raw_frame.positions.T[-1])
+            raw_frame.positions.T[-1] = 0
         return raw_frame
 
     def __str__(self):
