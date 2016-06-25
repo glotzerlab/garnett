@@ -203,6 +203,7 @@ class _RawFrameData(object):
     def __init__(self):
         # 3x3 matrix (not required to be upper-triangular)
         self.box = None
+        self.box_dimensions = 3
         self.types = list()                         # Nx1
         self.positions = list()                     # Nx3
         self.orientations = list()                  # NX4
@@ -555,8 +556,10 @@ def _raw_frame_to_frame(raw_frame, dtype=None):
     orientations = np.asarray(raw_frame.orientations, dtype=dtype)
     if isinstance(raw_frame.box, Box):
         raw_frame.box = np.asarray(raw_frame.box.get_box_matrix(), dtype=dtype)
+        raw_frame.box_dimensions = raw_frame.box.dimensions
+    box_dimensions = getattr(raw_frame, 'box_dimensions', 3)
     ret.positions, ret.orientations, ret.box = _regularize_box(
-        positions, orientations, raw_frame.box)
+        positions, orientations, raw_frame.box, box_dimensions)
     ret.shapedef = raw_frame.shapedef
     ret.types = raw_frame.types
     ret.data = raw_frame.data

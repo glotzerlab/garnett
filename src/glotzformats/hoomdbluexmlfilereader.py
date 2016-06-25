@@ -33,6 +33,7 @@ class HoomdBlueXMLFrame(Frame):
         raw_frame = _RawFrameData()
         config = self.root.find('configuration')
         raw_frame.box = np.asarray(_get_box_matrix(config.find('box')))
+        raw_frame.box_dimensions = int(config.get('dimensions', 3))
         raw_frame.positions = list(_parse_positions(config.find('position')))
         orientations = config.find('orientation')
         if orientations is None:
