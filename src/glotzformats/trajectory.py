@@ -474,7 +474,7 @@ def _regularize_box(positions, orientations,
     v[0] = box_matrix[:, 0]
     v[1] = box_matrix[:, 1]
     v[2] = box_matrix[:, 2]
-    if 0 == v[1][0] == 0 == v[2][0] == v[2][1]:
+    if 0 == v[0][1] == v[0][2] == v[1][2]:
         box, positions = _flip_if_required(_calc_box(v, dimensions), positions)
         return positions, orientations, box
     logger.info("Box matrix is left-handed, rotating.")
@@ -543,7 +543,6 @@ def _calc_box(v, dimensions):
     assert 1 < dimensions <= 3
     if dimensions == 2:
         assert Lz == 1
-        assert xz == yz == 0
     return Box(Lx=Lx, Ly=Ly, Lz=Lz, xy=xy, xz=xz, yz=yz, dimensions=dimensions)
 
 
