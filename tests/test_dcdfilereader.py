@@ -13,7 +13,7 @@ PYTHON_2 = sys.version_info[0] == 2
 
 
 class BaseDCDFileReaderTest(TrajectoryTest):
-    reader = glotzformats.reader.DCDFileReader
+    reader = glotzformats.reader.PyDCDFileReader
 
     def setUp(self):
         self.tmpfile = tempfile.NamedTemporaryFile()
@@ -33,9 +33,8 @@ class BaseDCDFileReaderTest(TrajectoryTest):
 
     def get_traj(self):
         top_traj = self.read_top_trajectory()
-        dcd_reader = glotzformats.reader.DCDFileReader()
         dcdfile = io.BytesIO(base64.b64decode(glotzformats.samples.DCD_BASE64))
-        return dcd_reader.read(dcdfile, top_traj[0])
+        return self.reader().read(dcdfile, top_traj[0])
 
     def test_read(self):
         traj = self.get_traj()
