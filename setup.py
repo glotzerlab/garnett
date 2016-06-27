@@ -5,6 +5,7 @@ try:
     from Cython.Build import cythonize
     import numpy as np
 except ImportError:
+    print("No cython available!", file=sys.stderr)
     CYTHON = False
 else:
     CYTHON = True
