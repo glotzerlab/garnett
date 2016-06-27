@@ -1,6 +1,13 @@
 import sys
 
 from setuptools import setup, find_packages
+try:
+    from Cython.Build import cythonize
+    import numpy as np
+except ImportError:
+    CYTHON = False
+else:
+    CYTHON = True
 
 if not sys.version_info >= (2,7):
     print("This package requires python version >= 2.7.")
@@ -11,6 +18,9 @@ setup(
     version = '0.2.1',
     package_dir = {'': 'src'},
     packages = find_packages('src'),
+
+    ext_modules = cythonize('src/glotzformats/*.pyx') if CYTHON else [],
+    include_dirs = [np.get_include()] if CYTHON else [],
 
     author = 'Carl Simon Adorf',
     author_email = 'csadorf@umich.edu',

@@ -4,6 +4,7 @@ logger = logging.getLogger(__name__)
 from .posfilereader import PosFileReader
 from .hoomdbluexmlfilereader import HoomdBlueXMLFileReader
 from .dcdfilereader import DCDFileReader
+from .pydcdfilereader import PyDCDFileReader
 from .gsdhoomdfilereader import GSDHoomdFileReader
 
 try:
