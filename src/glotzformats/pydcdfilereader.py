@@ -19,10 +19,26 @@ The example is given for a hoomd-blue xml frame:
             xml_frame = xml_reader.read(xmlfile)[0]
             traj = reader.read(dcdfile, xml_frame)
 
+.. note::
+
+    If the topology frame is 2-dimensional, the dcd
+    trajectory positions are interpreted such that
+    the first two values contain the xy-coordinates,
+    the third value is an euler angle.
+
+    The euler angle is converted to a quaternion and stored
+    in the orientation of the frame.
+
+    To retrieve the euler angles, simply convert the quaternion:
+
+    .. code::
+
+        alpha = 2 * np.arccos(traj[0].orientations.T[0])
+
 .. seealso::
 
     This is the pure-python version of the dcd-reader,
-    see :mod:`dcdfilereader` for the cythonized (faster)
+    see :class:`reader.DCDFileReader` for the cythonized (faster)
     version.
 """
 
