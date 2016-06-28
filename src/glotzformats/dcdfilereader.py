@@ -27,8 +27,11 @@ from collections import namedtuple
 import numpy as np
 
 from .trajectory import _RawFrameData, Frame, Trajectory
-from . import dcdreader
 from .pydcdfilereader import _box_matrix_from_frame_header, _euler_to_quaternion
+try:
+    from . import dcdreader
+except ImportError:
+    import dcdreader
 
 
 logger = logging.getLogger(__name__)

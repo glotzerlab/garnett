@@ -28,6 +28,13 @@ DCD
     :members:
     :undoc-members:
 
+DCD (pure-python)
+-----------------
+
+.. automodule:: glotzformats.pydcdfilereader
+    :members:
+    :undoc-members:
+
 GSD (hoomd schema)
 ------------------
 
