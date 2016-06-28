@@ -21,16 +21,38 @@ DEFAULT_DTYPE = np.float_
 class Box(object):
     """A triclinical box class.
 
+    You can access the box size and tilt factors via attributes:
+
+    .. code-block:: python
+
+        # Reading
+        length_x = box.Lx
+        tilt_xy = box.xy
+        # etc.
+
+        # Setting
+        box.lx = 10.0
+        box.ly = box.lz = 5.0
+        box.xy = box.xz = box.yz = 0.01
+        # etc.
+
     .. seealso:: https://codeblue.umich.edu/hoomd-blue/doc/page_box.html"""
 
     def __init__(self, Lx, Ly, Lz, xy=0.0, xz=0.0, yz=0.0, dimensions=3):
         self.Lx = Lx
+        "The box length in x-direction."
         self.Ly = Ly
+        "The box length in y-direction."
         self.Lz = Lz
+        "The box length in z-direction."
         self.xy = xy
+        "The box tilt factor in the xy-plane."
         self.xz = xz
+        "The box tilt factor in the xz-plane."
         self.yz = yz
+        "The box tilt factor in the yz-plane."
         self.dimensions = dimensions
+        "The number of box dimensions (2 or 3)."
 
     def __eq__(self, other):
         return self.__dict__ == other.__dict__
