@@ -14,6 +14,20 @@ POS-Files
     :members:
     :undoc-members:
 
+GSD (hoomd schema)
+------------------
+
+.. automodule:: glotzformats.gsdhoomdfilereader
+    :members:
+    :undoc-members:
+
+GeTAR
+-----
+
+.. automodule:: glotzformats.getarfilereader
+    :members:
+    :undoc-members:
+
 Hoomd-blue XML
 --------------
 
@@ -35,23 +49,9 @@ DCD (pure-python)
     :members:
     :undoc-members:
 
-GSD (hoomd schema)
-------------------
-
-.. automodule:: glotzformats.gsdhoomdfilereader
-    :members:
-    :undoc-members:
-
 CIF
 ---
 
 .. automodule:: glotzformats.ciffilewriter
-    :members:
-    :undoc-members:
-
-GeTAR
------
-
-.. automodule:: glotzformats.getarfilereader
     :members:
     :undoc-members:
