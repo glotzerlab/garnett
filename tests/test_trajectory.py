@@ -24,10 +24,7 @@ else:
     HOOMD_v1 = True
 
 if HOOMD:
-    if HOOMD_v1:
-        context.initialize('--mode=cpu')
-    else:
-        c=context.initialize('--mode=cpu')
+    context.initialize('--mode=cpu')
     try:
         if HOOMD_v1:
             from hoomd_plugins import hpmc  # noqa
@@ -140,7 +137,6 @@ class FrameSnapshotExport(TrajectoryTest):
             from hoomd import init, data, dump, run, hpmc, context, lattice
             from hoomd.update import sort as sorter
             from hoomd.deprecated import dump
-            c=context.initialize('--mode=cpu')
             self.system = init.create_lattice(
                 unitcell=lattice.sq(10),n=(2,1))
             self.addCleanup(context.initialize,"--mode=cpu")
@@ -155,7 +151,7 @@ class FrameSnapshotExport(TrajectoryTest):
         if HOOMD_v1:
             sorter.set_params(grid=8)
         else:
-            c.sorter.set_params(grid=8)
+            context.current.sorter.set_params(grid=8)
         with tempfile.NamedTemporaryFile('r') as tmpfile:
             pos = dump.pos(filename=tmpfile.name, period=1)
             run(10, quiet=True)
@@ -174,10 +170,7 @@ class FrameSnapshotExport(TrajectoryTest):
         self.assertEqual(snapshot.box.Lx, 10.0)
         self.assertEqual(snapshot.box.Ly, 10.0)
         self.assertEqual(snapshot.box.Lz, 10.0)
-        if HOOMD_v1:
-            self.assertEqual(snapshot.particles.types, ['A'] * 3 )
-        else:
-            self.assertEqual(snapshot.particles.types, ['A'] )
+        self.assertEqual(snapshot.particles.types, ['A'] )
 
     def test_incsim_dialect(self):
         self.make_snapshot(glotzformats.samples.POS_INCSIM)

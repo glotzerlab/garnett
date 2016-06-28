@@ -20,10 +20,10 @@ except:
     else:
         HOOMD = True
         HOOMD_v1 = False
-
 else:
     HOOMD = True
     HOOMD_v1 = True
+
 
 if HOOMD:
     try:
@@ -146,9 +146,7 @@ class HPMCPosFileReaderTest(BasePosFileReaderTest):
             from hoomd import init, data, dump, run, context, lattice
             from hoomd.update import sort as sorter
             from hoomd.deprecated import dump
-            c=context.initialize('--mode=cpu')
-            self.system = init.create_lattice(
-                unitcell=lattice.sq(10),n=(2,1))
+            self.system = init.create_lattice(unitcell=lattice.sq(10),n=(2,1))
             self.addCleanup(context.initialize,"--mode=cpu")
         self.addCleanup(self.del_system)
         self.mc = hpmc.integrate.sphere(seed=10)
@@ -161,7 +159,7 @@ class HPMCPosFileReaderTest(BasePosFileReaderTest):
         if HOOMD_v1:
             sorter.set_params(grid=8)
         else:
-            c.sorter.set_params(grid=8)
+            context.current.sorter.set_params(grid=8)
         dump.pos(filename=self.fn_pos, period=1)
         run(10, quiet=True)
         with open(self.fn_pos, 'r', encoding='utf-8') as posfile:
@@ -178,9 +176,7 @@ class HPMCPosFileReaderTest(BasePosFileReaderTest):
             from hoomd import init, data, dump, run, hpmc, context, lattice
             from hoomd.update import sort as sorter
             from hoomd.deprecated import dump
-            c=context.initialize('--mode=cpu')
-            self.system = init.create_lattice(
-                unitcell=lattice.sq(10),n=(2,1))
+            self.system = init.create_lattice(unitcell=lattice.sq(10),n=(2,1))
             self.addCleanup(context.initialize,"--mode=cpu")
         self.addCleanup(self.del_system)
         self.mc = hpmc.integrate.convex_polygon(seed=10)
@@ -200,7 +196,7 @@ class HPMCPosFileReaderTest(BasePosFileReaderTest):
         if HOOMD_v1:
             sorter.set_params(grid=8)
         else:
-            c.sorter.set_params(grid=8)
+            context.current.sorter.set_params(grid=8)
         pos_writer = dump.pos(filename=self.fn_pos, period=1)
         self.mc.setup_pos_writer(pos_writer)
         run(10, quiet=True)
@@ -298,8 +294,5 @@ class InjavisReadWriteTest(BasePosFileWriterTest):
         self.read_write_injavis(glotzformats.samples.POS_INJAVIS)
 
 if __name__ == '__main__':
-    if HOOMD_v1:
-        context.initialize('--mode=cpu')
-    else:
-        c=context.initialize('--mode=cpu')
+    context.initialize("--mode=cpu")
     unittest.main()
