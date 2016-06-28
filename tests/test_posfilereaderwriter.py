@@ -233,6 +233,7 @@ class PosFileWriterTest(BasePosFileWriterTest):
         traj.load()
         for frame in traj:
             frame.shapedef['A'] = ArrowShapeDefinition()
+            frame.orientations.T[3] = 0
         dump = io.StringIO()
         self.write_trajectory(traj, dump)
         dump.seek(0)
