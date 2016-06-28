@@ -1,5 +1,4 @@
-import logging
-logger = logging.getLogger(__name__)
+import warnings
 
 from .posfilereader import PosFileReader
 from .hoomdbluexmlfilereader import HoomdBlueXMLFileReader
@@ -14,16 +13,16 @@ except ImportError:
             raise ImportError(
                 "GetarFileReader requires the gtar package.")
 
-    logger.info(
+    warnings.warn(
         "Mocking GetarFileReader, gtar package not available.")
 try:
     from .dcdfilereader import DCDFileReader
 except ImportError:
-    logger.warning("Failed to import cythonized dcd-reader. "
-        "Using pure-python fallback reader!")
+    warnings.warn("Failed to import cythonized dcd-reader. "
+        "Falling back to pure-python reader!")
     from .pydcdfilereader import PyDCDFileReader as DCDFileReader
 
 __all__ = [
     'PosFileReader', 'HoomdBlueXMLFileReader',
-    'DCDFileReader', 'GetarFileReader',
-    'GSDHoomdFileReader']
+    'PyDCDFileReader', 'DCDFileReader',
+    'GetarFileReader', 'GSDHoomdFileReader']
