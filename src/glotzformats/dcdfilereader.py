@@ -61,11 +61,10 @@ class DCDFrame(Frame):
         raw_frame.data = copy.deepcopy(self.t_frame.data)
         raw_frame.data_keys = copy.deepcopy(self.t_frame.data_keys)
         raw_frame.shapedef = copy.deepcopy(self.t_frame.shapedef)
-        self.stream.seek(self.offset)
         N = int(self.file_header.n_particles)
         xyz = np.zeros((3, N))
         frame_header = _DCDFrameHeader(
-            ** dcdreader.read_frame(self.stream, xyz))
+            ** dcdreader.read_frame(self.stream, xyz, self.offset))
         raw_frame.box = np.asarray(
             _box_matrix_from_frame_header(frame_header)).T
         if self.t_frame.box is None:
@@ -85,8 +84,8 @@ class DCDFrame(Frame):
         return raw_frame
 
     def __str__(self):
-        return "DCDFrame(# frames={}, topology_frame={})".format(
-            len(self.traj), self.t_frame)
+        return "DCDFrame(# particles={}, topology_frame={})".format(
+            len(self), self.t_frame)
 
 
 class DCDFileReader(object):

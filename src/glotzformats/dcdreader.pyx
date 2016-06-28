@@ -104,9 +104,12 @@ def read(stream):
     cfile = fdopen(stream.fileno(), 'rb')
     return _read(cfile)
 
-def read_frame(stream, xyz):
+
+def read_frame(stream, xyz, offset=None):
     cdef FILE* cfile
     cfile = fdopen(stream.fileno(), 'rb')
+    if offset is not None:
+        fseek(cfile, offset, SEEK_SET)
     frame_header = _read_frame_header(cfile)
     _read_frame_body(cfile, xyz)
     return frame_header

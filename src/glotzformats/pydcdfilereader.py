@@ -160,8 +160,8 @@ class DCDFrame(Frame):
         return raw_frame
 
     def __str__(self):
-        return "DCDFrame(# frames={}, topology_frame={})".format(
-            len(self.traj), self.t_frame)
+        return "DCDFrame(# particles={}, topology_frame={})".format(
+            len(self), self.t_frame)
 
 
 class PyDCDFileReader(object):
