@@ -34,7 +34,7 @@ import struct
 from collections import namedtuple
 import sys
 
-__version__ = "0.1.0";
+__version__ = "1.0.0";
 
 logger = logging.getLogger('gsd.pygsd')
 
@@ -128,7 +128,9 @@ class GSDFile(object):
         # validate the header
         if self.__header.magic != 0x65DF65DF65DF65DF:
             raise RuntimeError("Not a GSD file: " + str(self.__file));
-        if self.__header.gsd_version != (0 << 16 | 3):
+        if self.__header.gsd_version < (1 << 16) and self.__header.gsd_version != (0 << 16 | 3):
+            raise RuntimeError("Unsupported GSD file version: " + str(self.__file));
+        if self.__header.gsd_version >= (2 << 16):
             raise RuntimeError("Unsupported GSD file version: " + str(self.__file));
 
         # determine the file size (only works in python 3)
