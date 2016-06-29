@@ -16,7 +16,7 @@ if not sys.version_info >= (2, 7):
     sys.exit(1)
 
 setup(
-    name='glotz-formats',
+    name='glotzformats',
     version='0.2.1',
     packages=find_packages(),
 
