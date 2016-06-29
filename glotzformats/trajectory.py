@@ -21,16 +21,38 @@ DEFAULT_DTYPE = np.float_
 class Box(object):
     """A triclinical box class.
 
+    You can access the box size and tilt factors via attributes:
+
+    .. code-block:: python
+
+        # Reading
+        length_x = box.Lx
+        tilt_xy = box.xy
+        # etc.
+
+        # Setting
+        box.lx = 10.0
+        box.ly = box.lz = 5.0
+        box.xy = box.xz = box.yz = 0.01
+        # etc.
+
     .. seealso:: https://codeblue.umich.edu/hoomd-blue/doc/page_box.html"""
 
     def __init__(self, Lx, Ly, Lz, xy=0.0, xz=0.0, yz=0.0, dimensions=3):
         self.Lx = Lx
+        "The box length in x-direction."
         self.Ly = Ly
+        "The box length in y-direction."
         self.Lz = Lz
+        "The box length in z-direction."
         self.xy = xy
+        "The box tilt factor in the xy-plane."
         self.xz = xz
+        "The box tilt factor in the xz-plane."
         self.yz = yz
+        "The box tilt factor in the yz-plane."
         self.dimensions = dimensions
+        "The number of box dimensions (2 or 3)."
 
     def __eq__(self, other):
         return self.__dict__ == other.__dict__
@@ -102,6 +124,22 @@ class SphereShapeDefinition(ShapeDefinition):
     def __str__(self):
         return "{} {} {}".format(self.shape_class, self.diameter, self.color)
 
+class ArrowShapeDefinition(ShapeDefinition):
+    """Initialize a ShapeDefinition instance.
+
+    :param thickness: The thickness of the arrow.
+    :type thickness: A floating point number.
+    :param color: Definition of a color for the
+                  particular shape (optional).
+    :type color: A str for RGB color definiton."""
+
+    def __init__(self, thickness=0.1, color=None):
+        super(ArrowShapeDefinition, self).__init__(
+            shape_class='arrow', color=color)
+        self.thickness=thickness
+
+    def __str__(self):
+        return "{} {} {}".format(self.shape_class, self.thickness, self.color)
 
 class PolyShapeDefinition(ShapeDefinition):
     """Initialize a ShapeDefinition instance.
@@ -187,6 +225,7 @@ class _RawFrameData(object):
     def __init__(self):
         # 3x3 matrix (not required to be upper-triangular)
         self.box = None
+        self.box_dimensions = 3
         self.types = list()                         # Nx1
         self.positions = list()                     # Nx3
         self.orientations = list()                  # NX4
@@ -457,7 +496,7 @@ def _regularize_box(positions, orientations,
     v[0] = box_matrix[:, 0]
     v[1] = box_matrix[:, 1]
     v[2] = box_matrix[:, 2]
-    if 0 == v[1][0] == 0 == v[2][0] == v[2][1]:
+    if 0 == v[0][1] == v[0][2] == v[1][2]:
         box, positions = _flip_if_required(_calc_box(v, dimensions), positions)
         return positions, orientations, box
     logger.info("Box matrix is left-handed, rotating.")
@@ -526,7 +565,6 @@ def _calc_box(v, dimensions):
     assert 1 < dimensions <= 3
     if dimensions == 2:
         assert Lz == 1
-        assert xz == yz == 0
     return Box(Lx=Lx, Ly=Ly, Lz=Lz, xy=xy, xz=xz, yz=yz, dimensions=dimensions)
 
 
@@ -539,8 +577,10 @@ def _raw_frame_to_frame(raw_frame, dtype=None):
     orientations = np.asarray(raw_frame.orientations, dtype=dtype)
     if isinstance(raw_frame.box, Box):
         raw_frame.box = np.asarray(raw_frame.box.get_box_matrix(), dtype=dtype)
+        raw_frame.box_dimensions = raw_frame.box.dimensions
+    box_dimensions = getattr(raw_frame, 'box_dimensions', 3)
     ret.positions, ret.orientations, ret.box = _regularize_box(
-        positions, orientations, raw_frame.box)
+        positions, orientations, raw_frame.box, box_dimensions)
     ret.shapedef = raw_frame.shapedef
     ret.types = raw_frame.types
     ret.data = raw_frame.data
@@ -555,6 +595,15 @@ def copyto_hoomd_blue_snapshot(frame, snapshot):
     np.copyto(snapshot.particles.orientation, frame.orientations)
     return snapshot
 
+def copyfrom_hoomd_blue_snapshot(frame, snapshot):
+    "Copy the hoomd-blue snapshot into the frame. Note that only the box, types, positions and orientations will be copied."
+    frame.box.__dict__ = snapshot.box.__dict__
+    particle_types = list(set(snapshot.particles.types))
+    snap_types = [particle_types[i] for i in snapshot.particles.typeid]
+    frame.types = snap_types
+    frame.positions = snapshot.particles.position
+    frame.orientations = snapshot.particles.orientation
+    return frame
 
 def make_hoomd_blue_snapshot(frame):
     "Create a hoomd-blue snapshot from the frame instance."

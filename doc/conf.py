@@ -17,19 +17,9 @@ import sys
 import os
 import shlex
 
+
 import sphinx_rtd_theme
-from unittest.mock import MagicMock
 
-class Mock(MagicMock):
-    @classmethod
-    def __getattr__(cls, name):
-        if name == '_mock_methods':
-            return cls._mock_methods
-        else:
-            return Mock()
-
-MOCK_MODULES = ['numpy', 'gtar']
-sys.modules.update((mod_name, Mock()) for mod_name in MOCK_MODULES)
 
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the
@@ -305,3 +295,5 @@ texinfo_documents = [
 
 # Example configuration for intersphinx: refer to the Python standard library.
 intersphinx_mapping = {'https://docs.python.org/': None}
+
+autodoc_mock_imports = ['numpy', 'dcdreader', 'gtar']

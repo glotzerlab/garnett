@@ -12,12 +12,34 @@ The example is given for a hoomd-blue xml frame:
 .. code::
 
     xml_reader = HoomdBlueXMLFileReader()
-    dcd_reader = DCDFileReader()
+    dcd_reader = PyDCDFileReader()
 
     with open('init.xml') as xmlfile:
         with open('dump.dcd', 'rb') as dcdfile:
             xml_frame = xml_reader.read(xmlfile)[0]
             traj = reader.read(dcdfile, xml_frame)
+
+.. note::
+
+    If the topology frame is 2-dimensional, the dcd
+    trajectory positions are interpreted such that
+    the first two values contain the xy-coordinates,
+    the third value is an euler angle.
+
+    The euler angle is converted to a quaternion and stored
+    in the orientation of the frame.
+
+    To retrieve the euler angles, simply convert the quaternion:
+
+    .. code::
+
+        alpha = 2 * np.arccos(traj[0].orientations.T[0])
+
+.. seealso::
+
+    This is the pure-python version of the dcd-reader,
+    see :class:`reader.DCDFileReader` for the cythonized (faster)
+    version.
 """
 
 import logging
@@ -43,6 +65,13 @@ def _read_double(stream):
 
 def _read_float(stream):
     return struct.unpack('<f', stream.read(4))[0]
+
+
+def _euler_to_quaternion(alpha):
+    q = np.zeros((len(alpha), 4))
+    q.T[0] = np.cos(alpha/2)
+    q.T[1] = q.T[2] = q.T[3] = np.sin(alpha/2)
+    return q
 
 
 class _DCDFrameHeader(object):
@@ -74,22 +103,33 @@ def _skip_frame(stream):
 
 
 def _box_matrix_from_frame_header(frame_header, tol=1e-12):
-    from math import sin, cos, sqrt, pi
+    from math import cos, sqrt, pi
     fh = frame_header
 
     def almost_zero(r):
         return 0.0 if r < tol else r
 
-    alpha = fh.box_alpha or pi / 2
-    beta = fh.box_beta or pi / 2
-    gamma = fh.box_gamma or pi / 2
-    a = [fh.box_a, 0, 0]
-    b = [almost_zero(fh.box_b * cos(gamma)), fh.box_b * sin(gamma), 0]
-    c1 = fh.box_c * cos(beta)
-    c2 = fh.box_c * (cos(alpha) - cos(beta) * cos(gamma)) / sin(gamma)
-    c3 = sqrt(fh.box_c**2 - c1**2 - c2**2)
-    c = [almost_zero(c1), almost_zero(c2), c3]
-    return [a, b, c]
+    alpha = 90 - fh.box_alpha
+    beta = 90 - fh.box_beta
+    gamma = 90 - fh.box_gamma
+    c_alpha = cos(alpha * pi / 180)
+    c_beta = cos(beta * pi / 180)
+    c_gamma = cos(gamma * pi / 180)
+
+    lx = fh.box_a
+    xy = fh.box_b * c_gamma
+    xz = fh.box_c * c_beta
+    ly = sqrt(fh.box_b*fh.box_b - xy*xy)
+    yz = (fh.box_b*fh.box_c*c_alpha - xy*xz) / lx
+    lz = sqrt(fh.box_c*fh.box_c - xz*xz - yz*yz)
+
+    xy /= ly
+    xz /= lz
+    yz /= lz
+    return [
+        [lx, 0.0, 0.0],
+        [almost_zero(xy * ly), ly, 0.0],
+        [almost_zero(xz * lz), (yz * lz), lz]]
 
 
 class DCDFrame(Frame):
@@ -105,9 +145,17 @@ class DCDFrame(Frame):
         super(DCDFrame, self).__init__()
 
     def read(self):
-        raw_frame = copy.deepcopy(self.t_frame)
+        raw_frame = _RawFrameData()
+        raw_frame.types = copy.deepcopy(self.t_frame.types)
+        raw_frame.data = copy.deepcopy(self.t_frame.data)
+        raw_frame.data_keys = copy.deepcopy(self.t_frame.data_keys)
+        raw_frame.shapedef = copy.deepcopy(self.t_frame.shapedef)
         raw_frame.box = np.asarray(
             _box_matrix_from_frame_header(self.frame_header)).T
+        if self.t_frame.box is None:
+            raw_frame.box_dimensions = self.t_frame.box_dimensions
+        else:
+            raw_frame.box_dimensions = self.t_frame.box.dimensions
         self.stream.seek(self.start)
         N = self.file_header.n_particles
         xyz = []
@@ -121,14 +169,18 @@ class DCDFrame(Frame):
             raw_frame.types = [self.default_type] * len(raw_frame.positions)
         assert len(raw_frame.types) == self.file_header.n_particles
         assert len(raw_frame.positions) == self.file_header.n_particles
+        if raw_frame.box_dimensions == 2:
+            raw_frame.orientations = _euler_to_quaternion(
+                raw_frame.positions.T[-1])
+            raw_frame.positions.T[-1] = 0
         return raw_frame
 
     def __str__(self):
-        return "DCDFrame(# frames={}, topology_frame={})".format(
-            len(self.traj), self.t_frame)
+        return "DCDFrame(# particles={}, topology_frame={})".format(
+            len(self), self.t_frame)
 
 
-class DCDFileReader(object):
+class PyDCDFileReader(object):
     """Read dcd trajectory files."""
 
     def _read_file_header(self, stream):
@@ -193,6 +245,10 @@ class DCDFileReader(object):
         if frame is None:
             frame = _RawFrameData()
             default_type = 'A'
+        elif frame.box.dimensions == 2:
+            logger.info(
+                "2-dimensional box, interpreting 3rd dimension "
+                "as euler orientation angle.")
         frames = list(self._scan(stream, t_frame=frame,
                                  default_type=default_type))
         logger.info("Read {} frames.".format(len(frames)))
