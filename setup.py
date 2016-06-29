@@ -18,10 +18,9 @@ if not sys.version_info >= (2, 7):
 setup(
     name='glotz-formats',
     version='0.2.1',
-    package_dir={'': 'src'},
-    packages=find_packages('src'),
+    packages=find_packages(),
 
-    ext_modules=cythonize('src/glotzformats/*.pyx') if CYTHON else [],
+    ext_modules=cythonize('glotzformats/*.pyx') if CYTHON else [],
     include_dirs=[np.get_include()] if CYTHON else [],
 
     author='Carl Simon Adorf',
