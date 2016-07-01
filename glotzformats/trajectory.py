@@ -609,11 +609,9 @@ def make_hoomd_blue_snapshot(frame):
     "Create a hoomd-blue snapshot from the frame instance."
     try:
         from hoomd import data
-    except:
-        try:
-            from hoomd_script import data
-        except ImportError:
-            print("Running a HOOMD dependant funciton without an accessible install")
+    except ImportError:
+        # hoomd < 2.x
+        from hoomd_script import data
     particle_types = list(set(frame.types))
     type_ids = [particle_types.index(t) for t in frame.types]
     snapshot = data.make_snapshot(
