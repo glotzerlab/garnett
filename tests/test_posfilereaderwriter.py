@@ -11,24 +11,22 @@ PYTHON_2 = sys.version_info[0] == 2
 
 
 try:
-    from hoomd_script import context
-except:
     try:
-         from hoomd import context
+        from hoomd import context
     except ImportError:
-        HOOMD = False
+        from hoomd_script import context
+        HOOMD_v1 = True
     else:
-        HOOMD = True
         HOOMD_v1 = False
+except ImportError:
+    HOOMD = False
 else:
     HOOMD = True
-    HOOMD_v1 = True
-
 
 if HOOMD:
     try:
         if HOOMD_v1:
-            from hoomd_plugins import hpmc  # noqa
+            from hoomd_plugins import hpmc
         else:
             from hoomd import hpmc
     except ImportError:
@@ -143,11 +141,12 @@ class HPMCPosFileReaderTest(BasePosFileReaderTest):
                 L=10, dimensions=2), particle_types=['A'])
             self.addCleanup(init.reset)
         else:
-            from hoomd import init, data, dump, run, context, lattice
+            from hoomd import init, data, run, context, lattice
             from hoomd.update import sort as sorter
             from hoomd.deprecated import dump
-            self.system = init.create_lattice(unitcell=lattice.sq(10),n=(2,1))
-            self.addCleanup(context.initialize,"--mode=cpu")
+            self.system = init.create_lattice(
+                unitcell=lattice.sq(10), n=(2, 1))
+            self.addCleanup(context.initialize, "--mode=cpu")
         self.addCleanup(self.del_system)
         self.mc = hpmc.integrate.sphere(seed=10)
         self.mc.shape_param.set("A", diameter=1.0)
@@ -173,11 +172,12 @@ class HPMCPosFileReaderTest(BasePosFileReaderTest):
                 L=10, dimensions=2), particle_types=['A'])
             self.addCleanup(init.reset)
         else:
-            from hoomd import init, data, dump, run, hpmc, context, lattice
+            from hoomd import init, data, run, hpmc, context, lattice
             from hoomd.update import sort as sorter
             from hoomd.deprecated import dump
-            self.system = init.create_lattice(unitcell=lattice.sq(10),n=(2,1))
-            self.addCleanup(context.initialize,"--mode=cpu")
+            self.system = init.create_lattice(
+                unitcell=lattice.sq(10), n=(2, 1))
+            self.addCleanup(context.initialize, "--mode=cpu")
         self.addCleanup(self.del_system)
         self.mc = hpmc.integrate.convex_polygon(seed=10)
         self.addCleanup(self.del_mc)
@@ -271,7 +271,8 @@ class PosFileWriterTest(BasePosFileWriterTest):
         traj_cmp = self.read_trajectory(dump)
         self.assertEqual(traj, traj_cmp)
         for frame in traj_cmp:
-            self.assertTrue(isinstance(frame.shapedef['A'], ArrowShapeDefinition))
+            self.assertTrue(isinstance(
+                frame.shapedef['A'], ArrowShapeDefinition))
 
 
 @unittest.skip("injavis is currently not starting correctly.")
