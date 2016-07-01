@@ -159,7 +159,10 @@ class FrameSnapshotExport(TrajectoryTest):
             run(1, quiet=True)  # the hoomd pos-writer lags by one sweep
             tmpfile.flush()
             traj = self.read_trajectory(tmpfile)
-            snapshot1 = traj[-1].make_snapshot()
+            f_1 = traj[-1]
+            # Pos-files don't support box dimensions.
+            f_1.box.dimensions = self.system.box.dimensions
+            snapshot1 = f_1.make_snapshot()
             self.assert_snapshots_equal(snapshot0, snapshot1)
             self.system.restore_snapshot(snapshot1)
             pos.disable()
