@@ -607,7 +607,14 @@ def copyfrom_hoomd_blue_snapshot(frame, snapshot):
 
 def make_hoomd_blue_snapshot(frame):
     "Create a hoomd-blue snapshot from the frame instance."
-    from hoomd_script import data
+    try:
+        from hoomd import data
+    except ImportError:
+        try:
+            # Try importing from hoomd 1.x
+            from hoomd_script import data
+        except ImportError:
+            raise ImportError('hoomd')
     particle_types = list(set(frame.types))
     type_ids = [particle_types.index(t) for t in frame.types]
     snapshot = data.make_snapshot(

@@ -8,12 +8,35 @@ import numpy as np
 
 PYTHON_2 = sys.version_info[0] == 2
 
+
 try:
-    from hoomd_script import context
+    try:
+        from hoomd import context
+    except ImportError:
+        from hoomd_script import context
+        HOOMD_v1 = True
+    else:
+        HOOMD_v1 = False
 except ImportError:
     HOOMD = False
 else:
     HOOMD = True
+    HOOMD_v1 = True
+
+
+if HOOMD:
+    context.initialize('--mode=cpu')
+    try:
+        if HOOMD_v1:
+            from hoomd_plugins import hpmc
+        else:
+            from hoomd import hpmc
+    except ImportError:
+        HPMC = False
+    else:
+        HPMC = True
+else:
+    HPMC = False
 
 
 class TrajectoryTest(unittest.TestCase):
@@ -102,12 +125,20 @@ class FrameSnapshotExport(TrajectoryTest):
         self.assertTrue((s0.particles.orientation ==
                          s1.particles.orientation).all())
 
+    @unittest.skipIf(not HPMC, 'requires HPMC')
     def test_sphere(self):
-        from hoomd_script import init, sorter, data, dump, run
-        from hoomd_plugins import hpmc
-        self.system = init.create_empty(N=2, box=data.boxdim(
-            L=10, dimensions=3), particle_types=['A'])
-        self.addCleanup(init.reset)
+        if HOOMD_v1:
+            from hoomd_script import init, sorter, data, dump, run
+            self.system = init.create_empty(N=2, box=data.boxdim(
+                L=10, dimensions=2), particle_types=['A'])
+            self.addCleanup(init.reset)
+        else:
+            from hoomd import init, data, run, context, lattice
+            from hoomd.update import sort as sorter
+            from hoomd.deprecated import dump
+            self.system = init.create_lattice(
+                unitcell=lattice.sq(10), n=(2, 1))
+            self.addCleanup(context.initialize, "--mode=cpu")
         self.addCleanup(self.del_system)
         self.mc = hpmc.integrate.sphere(seed=10)
         self.mc.shape_param.set("A", diameter=1.0)
@@ -116,7 +147,10 @@ class FrameSnapshotExport(TrajectoryTest):
         self.system.particles[0].orientation = (1, 0, 0, 0)
         self.system.particles[1].position = (2, 0, 0)
         self.system.particles[1].orientation = (1, 0, 0, 0)
-        sorter.set_params(grid=8)
+        if HOOMD_v1:
+            sorter.set_params(grid=8)
+        else:
+            context.current.sorter.set_params(grid=8)
         with tempfile.NamedTemporaryFile('r') as tmpfile:
             pos = dump.pos(filename=tmpfile.name, period=1)
             run(10, quiet=True)
@@ -124,7 +158,10 @@ class FrameSnapshotExport(TrajectoryTest):
             run(1, quiet=True)  # the hoomd pos-writer lags by one sweep
             tmpfile.flush()
             traj = self.read_trajectory(tmpfile)
-            snapshot1 = traj[-1].make_snapshot()
+            f_1 = traj[-1]
+            # Pos-files don't support box dimensions.
+            f_1.box.dimensions = self.system.box.dimensions
+            snapshot1 = f_1.make_snapshot()
             self.assert_snapshots_equal(snapshot0, snapshot1)
             self.system.restore_snapshot(snapshot1)
             pos.disable()
@@ -135,7 +172,7 @@ class FrameSnapshotExport(TrajectoryTest):
         self.assertEqual(snapshot.box.Lx, 10.0)
         self.assertEqual(snapshot.box.Ly, 10.0)
         self.assertEqual(snapshot.box.Lz, 10.0)
-        self.assertEqual(snapshot.particles.types, ['A'] * 3)
+        self.assertEqual(snapshot.particles.types, ['A'])
 
     def test_incsim_dialect(self):
         self.make_snapshot(glotzformats.samples.POS_INCSIM)
@@ -147,6 +184,4 @@ class FrameSnapshotExport(TrajectoryTest):
         self.make_snapshot(glotzformats.samples.POS_INJAVIS)
 
 if __name__ == '__main__':
-    if HOOMD:
-        context.initialize('--mode=cpu')
     unittest.main()
