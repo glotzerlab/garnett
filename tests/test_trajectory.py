@@ -104,6 +104,30 @@ class TrajectoryTest(unittest.TestCase):
         with self.assertRaises(RuntimeError):
             frame0.dtype = np.float64
 
+    def test_types(self):
+        sample_file = self.get_sample_file()
+        traj = self.reader().read(sample_file)
+        self.assertTrue(np.issubdtype(traj.types.dtype, np.str_))
+        self.assertTrue(traj.types.shape == (len(traj), len(traj[0])))
+        self.assertTrue((traj.types[0] == traj[0].types).all())
+
+    def test_positions(self):
+        sample_file = self.get_sample_file()
+        traj = self.reader().read(sample_file)
+        self.assertTrue(np.issubdtype(
+            traj.positions.dtype, glotzformats.trajectory.DEFAULT_DTYPE))
+        self.assertTrue(traj.positions.shape == (len(traj), len(traj[0]), 3))
+        self.assertTrue((traj.positions[0] == traj[0].positions).all())
+
+    def test_orientations(self):
+        sample_file = self.get_sample_file()
+        traj = self.reader().read(sample_file)
+        self.assertTrue(np.issubdtype(
+            traj.orientations.dtype, glotzformats.trajectory.DEFAULT_DTYPE))
+        self.assertTrue(
+            traj.orientations.shape == (len(traj), len(traj[0]), 4))
+        self.assertTrue((traj.orientations[0] == traj[0].orientations).all())
+
 
 @unittest.skipIf(not HOOMD, 'requires hoomd-blue')
 class FrameSnapshotExport(TrajectoryTest):
