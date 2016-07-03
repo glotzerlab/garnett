@@ -475,6 +475,15 @@ class Trajectory(BaseTrajectory):
 
         sub_trajectory = traj[i:j]"""
 
+    def __init__(self, frames=None, dtype=None):
+        super(Trajectory, self).__init__(frames=frames)
+        if dtype is None:
+            dtype = DEFAULT_DTYPE
+        self._dtype = dtype
+        self._types = None
+        self._positions = None
+        self._orientations = None
+
     def __iter__(self):
         return iter(ImmutableTrajectory(self.frames))
 
@@ -484,8 +493,48 @@ class Trajectory(BaseTrajectory):
             frame.load()
 
     def set_dtype(self, value):
+        self._dtype = value
+        for x in (self._types, self._positions, self._orientations):
+            if x is not None:
+                x = x.astype(value)
         for frame in self.frames:
-            frame.dtype=value
+            frame.dtype = value
+
+    @property
+    def types(self):
+        if self._types is None:
+            self.load()
+            N = max(len(f) for f in self.frames)
+            typ = np.zeros((len(self), N), dtype=np.str_)
+            for i, frame in enumerate(self.frames):
+                s = len(frame.types)
+                typ[i][:s] = frame.types
+            self._types = typ
+        return self._types
+
+    @property
+    def positions(self):
+        if self._positions is None:
+            self.load()
+            N = max(len(f) for f in self.frames)
+            pos = np.zeros((len(self), N, 3), dtype=self._dtype)
+            for i, frame in enumerate(self.frames):
+                s = frame.positions.shape
+                pos[i][:s[0], :s[1]] = frame.positions
+            self._positions = pos
+        return self._positions
+
+    @property
+    def orientations(self):
+        if self._orientations is None:
+            self.load()
+            N = max(len(f) for f in self.frames)
+            ort = np.zeros((len(self), N, 4), dtype=self._dtype)
+            for i, frame in enumerate(self.frames):
+                s = frame.orientations.shape
+                ort[i][:s[0], :s[1]] = frame.orientations
+            self._orientations = ort
+        return self._orientations
 
 
 def _regularize_box(positions, orientations,
