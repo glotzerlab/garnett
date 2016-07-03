@@ -124,6 +124,7 @@ class SphereShapeDefinition(ShapeDefinition):
     def __str__(self):
         return "{} {} {}".format(self.shape_class, self.diameter, self.color)
 
+
 class ArrowShapeDefinition(ShapeDefinition):
     """Initialize a ShapeDefinition instance.
 
@@ -136,10 +137,11 @@ class ArrowShapeDefinition(ShapeDefinition):
     def __init__(self, thickness=0.1, color=None):
         super(ArrowShapeDefinition, self).__init__(
             shape_class='arrow', color=color)
-        self.thickness=thickness
+        self.thickness = thickness
 
     def __str__(self):
         return "{} {} {}".format(self.shape_class, self.thickness, self.color)
+
 
 class PolyShapeDefinition(ShapeDefinition):
     """Initialize a ShapeDefinition instance.
@@ -243,7 +245,7 @@ class Frame(object):
 
     def __init__(self, dtype=DEFAULT_DTYPE):
         self.frame_data = None
-        self._dtype=dtype
+        self._dtype = dtype
 
     def loaded(self):
         "Returns True if the frame is loaded into memory."
@@ -274,7 +276,7 @@ class Frame(object):
         if self.loaded():
             raise RuntimeError(
                 "Can't change data type after frame is loaded.")
-        self._dtype=value
+        self._dtype = value
 
     def __len__(self):
         "Return the number of particles in this frame."
@@ -644,6 +646,7 @@ def copyto_hoomd_blue_snapshot(frame, snapshot):
     np.copyto(snapshot.particles.orientation, frame.orientations)
     return snapshot
 
+
 def copyfrom_hoomd_blue_snapshot(frame, snapshot):
     "Copy the hoomd-blue snapshot into the frame. Note that only the box, types, positions and orientations will be copied."
     frame.box.__dict__ = snapshot.box.__dict__
@@ -653,6 +656,7 @@ def copyfrom_hoomd_blue_snapshot(frame, snapshot):
     frame.positions = snapshot.particles.position
     frame.orientations = snapshot.particles.orientation
     return frame
+
 
 def make_hoomd_blue_snapshot(frame):
     "Create a hoomd-blue snapshot from the frame instance."
