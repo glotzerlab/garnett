@@ -494,6 +494,17 @@ class Trajectory(BaseTrajectory):
         for frame in self.frames:
             frame.load()
 
+    def loaded(self):
+        return all((f.loaded() for f in self.frames))
+
+    def _assert_loaded(self):
+        if not self.loaded():
+            raise RuntimeError("Trajectory not loaded.")
+
+    def _max_N(self):
+        self._assert_loaded()
+        return max((len(f) for f in self.frames))
+
     def set_dtype(self, value):
         self._dtype = value
         for x in (self._types, self._positions, self._orientations):
@@ -505,8 +516,7 @@ class Trajectory(BaseTrajectory):
     @property
     def types(self):
         if self._types is None:
-            self.load()
-            N = max(len(f) for f in self.frames)
+            N = self._max_N()
             typ = np.zeros((len(self), N), dtype=np.str_)
             for i, frame in enumerate(self.frames):
                 s = len(frame.types)
@@ -517,8 +527,7 @@ class Trajectory(BaseTrajectory):
     @property
     def positions(self):
         if self._positions is None:
-            self.load()
-            N = max(len(f) for f in self.frames)
+            N = self._max_N()
             pos = np.zeros((len(self), N, 3), dtype=self._dtype)
             for i, frame in enumerate(self.frames):
                 s = frame.positions.shape
@@ -529,8 +538,7 @@ class Trajectory(BaseTrajectory):
     @property
     def orientations(self):
         if self._orientations is None:
-            self.load()
-            N = max(len(f) for f in self.frames)
+            N = self._max_N()
             ort = np.zeros((len(self), N, 4), dtype=self._dtype)
             for i, frame in enumerate(self.frames):
                 s = frame.orientations.shape
