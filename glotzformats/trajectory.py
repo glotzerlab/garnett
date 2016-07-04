@@ -398,7 +398,11 @@ class BaseTrajectory(object):
 
     def __getitem__(self, index):
         if isinstance(index, slice):
-            return type(self)(self.frames[index])
+            traj = type(self)(self.frames[index])
+            for x in ('_types', '_positions', '_orientations'):
+                if getattr(self, x) is not None:
+                    setattr(traj, x, getattr(self, x)[index])
+            return traj
         else:
             return self.frames[index]
 
