@@ -61,6 +61,12 @@ class TrajectoryTest(unittest.TestCase):
         else:
             return io.StringIO(self.sample)
 
+    def test_str(self):
+        from glotzformats.trajectory import Frame
+        sample_file = self.get_sample_file()
+        traj = self.reader().read(sample_file)
+        str(traj)
+
     def test_frame_inheritance(self):
         from glotzformats.trajectory import Frame
         sample_file = self.get_sample_file()
