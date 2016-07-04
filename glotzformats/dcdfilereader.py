@@ -73,39 +73,70 @@ class DCDFrame(Frame):
         self.offset = offset
         self.t_frame = t_frame
         self.default_type = default_type
+        self._types = None
         self._box = None
         self._positions = None
+        self._orientations = None
         super(DCDFrame, self).__init__()
 
+    def __len__(self):
+        return int(self.file_header.n_particles)
+
     def _read(self):
-        N = int(self.file_header.n_particles)
+        N = len(self)
         xyz = np.zeros((3, N))
         frame_header = _DCDFrameHeader(
             ** dcdreader.read_frame(self.stream, xyz, self.offset))
-        box = np.asarray(_box_matrix_from_frame_header(frame_header)).T
-        self._box = box
+        self._box = np.asarray(_box_matrix_from_frame_header(frame_header)).T
         self._positions = xyz.T
 
-    def read(self):
+    def _load(self):
+        N = int(self.file_header.n_particles)
         self._read()
-        raw_frame = _RawFrameData()
         if self.t_frame is None:
-            raw_frame.types = [self.default_type] * len(self._positions)
+            self._types = np.repeat(np.str_(self.default_type), len(self))
         else:
-            raw_frame.types = copy.deepcopy(self.t_frame.types)
+            self._types = np.copy(self.t_frame.types)
+        if self.t_frame is None or self.t_frame.box.dimensions == 3:
+            self._orientations = np.zeros((N, 4))
+            self._orientations.T[0] = 1.0
+        elif self.t_frame.box.dimensions == 2:
+            self._orientations = _euler_to_quaternion(
+                self._positions.T[-1])
+            self._positions.T[-1] = 0
+        else:
+            raise ValueError(self.t_frame.box.dimensions)
+
+    def _loaded(self):
+        return not (self._types is None or
+                    self._box is None or
+                    self._positions is None or
+                    self._orientations is None)
+
+    def read(self):
+        raw_frame = _RawFrameData()
+        if self.t_frame is not None:
             raw_frame.data = copy.deepcopy(self.t_frame.data)
             raw_frame.data_keys = copy.deepcopy(self.t_frame.data_keys)
             raw_frame.shapedef = copy.deepcopy(self.t_frame.shapedef)
+            raw_frame.box_dimensions = self.t_frame.box.dimensions
+        if not self._loaded():
+            self._load()
+        assert self._loaded()
         raw_frame.box = self._box
+        raw_frame.types = self._types
         raw_frame.positions = self._positions
-        raw_frame.orientations = np.zeros((len(raw_frame.positions), 4))
+        raw_frame.orientations = self._orientations
         assert len(raw_frame.types) == self.file_header.n_particles
         assert len(raw_frame.positions) == self.file_header.n_particles
-        if raw_frame.box_dimensions == 2:
-            raw_frame.orientations = _euler_to_quaternion(
-                raw_frame.positions.T[-1])
-            raw_frame.positions.T[-1] = 0
         return raw_frame
+
+    def unload(self):
+        self._types = None
+        self._box = None
+        self._positions = None
+        self._orientations = None
+        super(DCDFrame, self).unload()
 
     def __str__(self):
         return "DCDFrame(# particles={}, topology_frame={})".format(
@@ -114,47 +145,22 @@ class DCDFrame(Frame):
 
 class DCDTrajectory(Trajectory):
 
-    def _create_arrays(self):
-        frame_0 = self.frames[0]
-        t_frame = frame_0
-        if t_frame is None:
-            typ = np.repeat(np.str_(frame_0.default_type),
-                            len(self) * len(frame_0))
-        else:
-            typ = np.repeat(np.asarray(
-                t_frame.types, dtype=np.str_), len(self))
-        typ.shape = (len(self), len(frame_0))
-        pos = np.zeros((len(self), len(self.frames[0]), 3))
-        ort = np.zeros((len(self), len(self.frames[0]), 4))
-        for i, frame in enumerate(self.frames):
-            pos[i] = frame.positions
-            ort[i] = frame.orientations
-        self._types = typ
-        self._positions = pos
-        self._orientations = ort
+    def load_arrays(self):
+        for frame in self.frames:
+            if not frame._loaded():
+                frame._load()
+        self._positions = np.stack((f._positions for f in self.frames))
+        self._orientations = np.stack((f._orientations for f in self.frames))
+        self._types = np.vstack((f._types for f in self.frames))
 
-    def load(self):
-        self._create_arrays()
+    def xyz(self):
+        """Return the xyz coordinates of the dcd file.
 
-    def loaded(self):
-        return not(self._types is None
-                   or self._positions is None
-                   or self._orientations is None)
-
-    @property
-    def types(self):
-        self._assert_loaded()
-        return self._types
-
-    @property
-    def positions(self):
-        self._assert_loaded()
-        return self._positions
-
-    @property
-    def orientations(self):
-        self._assert_loaded()
-        return self._orientations
+        Use this function if you only want to read xyz coordinates
+        and nothin else."""
+        for frame in self.frames:
+            frame._read()
+        return np.vstack((f._positions for f in self.frames))
 
 
 class DCDFileReader(object):

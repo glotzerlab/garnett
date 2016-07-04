@@ -495,21 +495,30 @@ class Trajectory(BaseTrajectory):
 
     def load(self):
         """Load all frames into memory."""
+        self.load_arrays()
         for frame in self.frames:
             frame.load()
 
     def loaded(self):
         return all((f.loaded() for f in self.frames))
 
+    def _arrays_loaded(self):
+        return not (self._types is None or
+                    self._positions is None or
+                    self._orientations is None)
+
     def _assert_loaded(self):
         if not self.loaded():
             raise RuntimeError("Trajectory not loaded.")
 
+    def _assert_arrays_loaded(self):
+        if not self._arrays_loaded():
+            raise RuntimeError("Trajectory arrays not loaded.")
+
     def _max_N(self):
-        self._assert_loaded()
         return max((len(f) for f in self.frames))
 
-    def _create_arrays(self):
+    def load_arrays(self):
         N = self._max_N()
         typ = np.zeros((len(self), N), dtype=np.str_)
         pos = np.zeros((len(self), N, 3), dtype=self._dtype)
@@ -535,20 +544,17 @@ class Trajectory(BaseTrajectory):
 
     @property
     def types(self):
-        if self._types is None:
-            self._create_arrays()
+        self._assert_arrays_loaded()
         return self._types
 
     @property
     def positions(self):
-        if self._positions is None:
-            self._create_arrays()
+        self._assert_arrays_loaded()
         return self._positions
 
     @property
     def orientations(self):
-        if self._orientations is None:
-            self._create_arrays()
+        self._assert_arrays_loaded()
         return self._orientations
 
 
