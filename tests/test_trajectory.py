@@ -61,6 +61,15 @@ class TrajectoryTest(unittest.TestCase):
         else:
             return io.StringIO(self.sample)
 
+    def test_frame_inheritance(self):
+        from glotzformats.trajectory import Frame
+        sample_file = self.get_sample_file()
+        traj = self.reader().read(sample_file)
+        for frame in traj:
+            self.assertTrue(isinstance(frame, Frame))
+        for i in range(len(traj)):
+            self.assertTrue(isinstance(traj[i], Frame))
+
     def test_load(self):
         sample_file = self.get_sample_file()
         traj = self.reader().read(sample_file)
