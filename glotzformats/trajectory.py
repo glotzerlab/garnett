@@ -509,6 +509,22 @@ class Trajectory(BaseTrajectory):
         self._assert_loaded()
         return max((len(f) for f in self.frames))
 
+    def _create_arrays(self):
+        N = self._max_N()
+        typ = np.zeros((len(self), N), dtype=np.str_)
+        pos = np.zeros((len(self), N, 3), dtype=self._dtype)
+        ort = np.zeros((len(self), N, 4), dtype=self._dtype)
+        for i, frame in enumerate(self.frames):
+            st = len(frame.types)
+            typ[i][:st] = frame.types
+            sp = frame.positions.shape
+            pos[i][:sp[0], :sp[1]] = frame.positions
+            so = frame.orientations.shape
+            ort[i][:so[0], :so[1]] = frame.orientations
+        self._types = typ
+        self._positions = pos
+        self._orientations = ort
+
     def set_dtype(self, value):
         self._dtype = value
         for x in (self._types, self._positions, self._orientations):
@@ -520,34 +536,19 @@ class Trajectory(BaseTrajectory):
     @property
     def types(self):
         if self._types is None:
-            N = self._max_N()
-            typ = np.zeros((len(self), N), dtype=np.str_)
-            for i, frame in enumerate(self.frames):
-                s = len(frame.types)
-                typ[i][:s] = frame.types
-            self._types = typ
+            self._create_arrays()
         return self._types
 
     @property
     def positions(self):
         if self._positions is None:
-            N = self._max_N()
-            pos = np.zeros((len(self), N, 3), dtype=self._dtype)
-            for i, frame in enumerate(self.frames):
-                s = frame.positions.shape
-                pos[i][:s[0], :s[1]] = frame.positions
-            self._positions = pos
+            self._create_arrays()
         return self._positions
 
     @property
     def orientations(self):
         if self._orientations is None:
-            N = self._max_N()
-            ort = np.zeros((len(self), N, 4), dtype=self._dtype)
-            for i, frame in enumerate(self.frames):
-                s = frame.orientations.shape
-                ort[i][:s[0], :s[1]] = frame.orientations
-            self._orientations = ort
+            self._create_arrays()
         return self._orientations
 
 
@@ -660,7 +661,10 @@ def copyto_hoomd_blue_snapshot(frame, snapshot):
 
 
 def copyfrom_hoomd_blue_snapshot(frame, snapshot):
-    "Copy the hoomd-blue snapshot into the frame. Note that only the box, types, positions and orientations will be copied."
+    """"Copy the hoomd-blue snapshot into the frame.
+
+    Note that only the box, types, positions and
+    orientations will be copied."""
     frame.box.__dict__ = snapshot.box.__dict__
     particle_types = list(set(snapshot.particles.types))
     snap_types = [particle_types[i] for i in snapshot.particles.typeid]
