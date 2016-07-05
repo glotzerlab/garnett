@@ -147,16 +147,15 @@ class DCDFrame(Frame):
         return int(self.file_header.n_particles)
 
     def _read(self, xyz):
-        N = len(self)
         frame_header = _DCDFrameHeader(
             ** self.dcdreader.read_frame(self.stream, xyz, self.offset))
         self._box = np.asarray(_box_matrix_from_frame_header(frame_header)).T
-        self._positions = xyz
+        self._positions = xyz.swapaxes(0, 1).astype(self._dtype, copy=False)
 
     def _load(self, xyz=None, ort=None):
         N = int(self.file_header.n_particles)
         if xyz is None:
-            xyz = np.zeros((N, 3), dtype=self._dtype)
+            xyz = np.zeros((3, N), dtype=np.float32)
         if ort is None:
             ort = np.zeros((N, 4), dtype=self._dtype)
         self._read(xyz=xyz)
@@ -212,24 +211,34 @@ class DCDFrame(Frame):
 class DCDTrajectory(Trajectory):
 
     def load_arrays(self):
-        xyz = np.zeros((len(self), len(self.frames[0]), 3))
-        ort = np.zeros((len(self), len(self.frames[0]), 4))
+        xyz = np.ascontiguousarray(
+            np.zeros((len(self), 3, len(self.frames[0]))),
+            dtype=np.float32)
+        ort = np.zeros(
+            (len(self), len(self.frames[0]), 4),
+            dtype=self._dtype)
         for i, frame in enumerate(self.frames):
             if not frame._loaded():
                 frame._load(xyz=xyz[i], ort=ort[i])
-        self._positions = xyz
-        self._orientations = ort
+        self._positions = xyz.swapaxes(1, 2).astype(self._dtype, copy=False)
+        self._orientations = ort.astype(self._dtype, copy=False)
         self._types = np.vstack((f._types for f in self.frames))
 
-    def xyz(self):
+    def xyz(self, xyz=None):
         """Return the xyz coordinates of the dcd file.
 
         Use this function if you only want to read xyz coordinates
         and nothin else."""
-        xyz = np.zeros((len(self), len(self.frames[0]), 3))
+        shape = (len(self), 3, len(self.frames[0]))
+        if xyz is None:
+            xyz = np.zeros(shape, dtype=np.float32)
+        else:
+            assert xyz.flags['C_CONTIGUOUS']
+            assert xyz.dtype == np.float32
+            assert xyz.shape == shape
         for i, frame in enumerate(self.frames):
             frame._read(xyz[i])
-        return xyz
+        return xyz.swapaxes(1, 2).astype(self._dtype, copy=False)
 
 
 class _DCDFileReader(object):

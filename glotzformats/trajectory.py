@@ -15,7 +15,7 @@ from . import math_utils as mu
 logger = logging.getLogger(__name__)
 
 SHAPE_DEFAULT_COLOR = '005984FF'
-DEFAULT_DTYPE = np.float_
+DEFAULT_DTYPE = np.float32
 
 
 class Box(object):

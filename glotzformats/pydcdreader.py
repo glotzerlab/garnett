@@ -70,11 +70,11 @@ def _read_frame_header(stream):
 
 
 def _read_frame_body(stream, xyz):
-    N = len(xyz)
+    N = xyz.shape[1]
     for i in range(3):
         len_section = _read_int(stream)
         for j in range(N):
-            xyz[j][i] = _read_float(stream)
+            xyz[i][j] = _read_float(stream)
         assert _read_int(stream) == len_section
 
 
@@ -88,8 +88,8 @@ def scan(stream):
     return file_header.__dict__, offsets
 
 
-def read_frame(stream, xyz, offset=None):
-    if offset is not None:
+def read_frame(stream, xyz, offset=-1):
+    if offset >= 0:
         stream.seek(offset)
     frame_header = _read_frame_header(stream)
     _read_frame_body(stream, xyz)
