@@ -41,17 +41,78 @@ import copy
 from collections import namedtuple
 
 import numpy as np
+from numpy.core import numeric as _nx
+from numpy.core.numeric import asanyarray
 
 from .trajectory import _RawFrameData, Frame, Trajectory
-from .pydcdfilereader import _box_matrix_from_frame_header
-from .pydcdfilereader import _euler_to_quaternion
-try:
-    from . import dcdreader
-except ImportError:
-    import dcdreader
-
+from . import pydcdreader
 
 logger = logging.getLogger(__name__)
+
+
+def _euler_to_quaternion(alpha):
+    q = np.zeros((len(alpha), 4))
+    q.T[0] = np.cos(alpha/2)
+    q.T[1] = q.T[2] = q.T[3] = np.sin(alpha/2)
+    return q
+
+
+def _box_matrix_from_frame_header(frame_header, tol=1e-12):
+    from math import cos, sqrt, pi
+    fh = frame_header
+
+    def almost_zero(r):
+        return 0.0 if r < tol else r
+
+    alpha = 90 - fh.box_alpha
+    beta = 90 - fh.box_beta
+    gamma = 90 - fh.box_gamma
+    c_alpha = cos(alpha * pi / 180)
+    c_beta = cos(beta * pi / 180)
+    c_gamma = cos(gamma * pi / 180)
+
+    lx = fh.box_a
+    xy = fh.box_b * c_gamma
+    xz = fh.box_c * c_beta
+    ly = sqrt(fh.box_b*fh.box_b - xy*xy)
+    yz = (fh.box_b*fh.box_c*c_alpha - xy*xz) / lx
+    lz = sqrt(fh.box_c*fh.box_c - xz*xz - yz*yz)
+
+    xy /= ly
+    xz /= lz
+    yz /= lz
+    return [
+        [lx, 0.0, 0.0],
+        [almost_zero(xy * ly), ly, 0.0],
+        [almost_zero(xz * lz), (yz * lz), lz]]
+
+
+def _np_stack(arrays, axis=0):
+    """Join a sequence of arrays along a new axis.
+
+    Copyright (c) 2005-2016, NumPy Developers.
+    All rights reserved.
+
+    From numpy/core/shape_base.py (requires numpy>=1.10),
+    included to avoid numpy dependency >=1.10."""
+    arrays = [asanyarray(arr) for arr in arrays]
+    if not arrays:
+        raise ValueError('need at least one array to stack')
+
+    shapes = set(arr.shape for arr in arrays)
+    if len(shapes) != 1:
+        raise ValueError('all input arrays must have the same shape')
+
+    result_ndim = arrays[0].ndim + 1
+    if not -result_ndim <= axis < result_ndim:
+        msg = 'axis {0} out of bounds [-{1}, {1})'.format(axis, result_ndim)
+        raise IndexError(msg)
+    if axis < 0:
+        axis += result_ndim
+
+    sl = (slice(None),) * axis + (_nx.newaxis,)
+    expanded_arrays = [arr[sl] for arr in arrays]
+    return _nx.concatenate(expanded_arrays, axis=axis)
 
 
 _DCDFileHeader = namedtuple(
@@ -67,7 +128,10 @@ _DCDFrameHeader = namedtuple(
 
 class DCDFrame(Frame):
 
-    def __init__(self, stream, file_header, offset, t_frame, default_type='A'):
+    def __init__(self, dcdreader, stream, file_header,
+                 offset, t_frame, default_type='A',
+                 dtype=None):
+        self.dcdreader = dcdreader
         self.stream = stream
         self.file_header = _DCDFileHeader(** file_header)
         self.offset = offset
@@ -77,35 +141,37 @@ class DCDFrame(Frame):
         self._box = None
         self._positions = None
         self._orientations = None
-        super(DCDFrame, self).__init__()
+        super(DCDFrame, self).__init__(dtype=dtype)
 
     def __len__(self):
         return int(self.file_header.n_particles)
 
-    def _read(self):
+    def _read(self, xyz):
         N = len(self)
-        xyz = np.zeros((3, N))
         frame_header = _DCDFrameHeader(
-            ** dcdreader.read_frame(self.stream, xyz, self.offset))
+            ** self.dcdreader.read_frame(self.stream, xyz, self.offset))
         self._box = np.asarray(_box_matrix_from_frame_header(frame_header)).T
-        self._positions = xyz.T
+        self._positions = xyz
 
-    def _load(self):
+    def _load(self, xyz=None, ort=None):
         N = int(self.file_header.n_particles)
-        self._read()
+        if xyz is None:
+            xyz = np.zeros((N, 3), dtype=self._dtype)
+        if ort is None:
+            ort = np.zeros((N, 4), dtype=self._dtype)
+        self._read(xyz=xyz)
         if self.t_frame is None:
             self._types = np.repeat(np.str_(self.default_type), len(self))
         else:
             self._types = np.copy(self.t_frame.types)
         if self.t_frame is None or self.t_frame.box.dimensions == 3:
-            self._orientations = np.zeros((N, 4))
-            self._orientations.T[0] = 1.0
+            ort.T[0] = 1.0
         elif self.t_frame.box.dimensions == 2:
-            self._orientations = _euler_to_quaternion(
-                self._positions.T[-1])
+            ort = _euler_to_quaternion(self._positions.T[-1])
             self._positions.T[-1] = 0
         else:
             raise ValueError(self.t_frame.box.dimensions)
+        self._orientations = ort
 
     def _loaded(self):
         return not (self._types is None or
@@ -146,11 +212,13 @@ class DCDFrame(Frame):
 class DCDTrajectory(Trajectory):
 
     def load_arrays(self):
-        for frame in self.frames:
+        xyz = np.zeros((len(self), len(self.frames[0]), 3))
+        ort = np.zeros((len(self), len(self.frames[0]), 4))
+        for i, frame in enumerate(self.frames):
             if not frame._loaded():
-                frame._load()
-        self._positions = np.stack((f._positions for f in self.frames))
-        self._orientations = np.stack((f._orientations for f in self.frames))
+                frame._load(xyz=xyz[i], ort=ort[i])
+        self._positions = xyz
+        self._orientations = ort
         self._types = np.vstack((f._types for f in self.frames))
 
     def xyz(self):
@@ -158,18 +226,21 @@ class DCDTrajectory(Trajectory):
 
         Use this function if you only want to read xyz coordinates
         and nothin else."""
-        for frame in self.frames:
-            frame._read()
-        return np.vstack((f._positions for f in self.frames))
+        xyz = np.zeros((len(self), len(self.frames[0]), 3))
+        for i, frame in enumerate(self.frames):
+            frame._read(xyz[i])
+        return xyz
 
 
-class DCDFileReader(object):
+class _DCDFileReader(object):
     """Read dcd trajectory files."""
+    dcdreader = pydcdreader
 
     def _scan(self, stream, t_frame=None, default_type=None):
-        file_header, offsets = dcdreader.scan(stream)
+        file_header, offsets = self.dcdreader.scan(stream)
         for offset in offsets:
             yield DCDFrame(
+                dcdreader=self.dcdreader,
                 stream=stream, file_header=file_header, offset=offset,
                 t_frame=t_frame, default_type=default_type)
 

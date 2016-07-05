@@ -2,7 +2,8 @@ import warnings
 
 from .posfilereader import PosFileReader
 from .hoomdbluexmlfilereader import HoomdBlueXMLFileReader
-from .pydcdfilereader import PyDCDFileReader
+from .dcdfilereader import _DCDFileReader as PyDCDFileReader
+from . import pydcdreader
 from .gsdhoomdfilereader import GSDHoomdFileReader
 
 try:
@@ -15,12 +16,22 @@ except ImportError:
 
     warnings.warn(
         "Mocking GetarFileReader, gtar package not available.")
+
+
 try:
-    from .dcdfilereader import DCDFileReader
+    try:
+        from . import dcdreader
+    except ImportError:
+        import dcdreader
 except ImportError:
-    warnings.warn("Failed to import cythonized dcd-reader. "
-        "Falling back to pure-python reader!")
-    from .pydcdfilereader import PyDCDFileReader as DCDFileReader
+    warnings.warn("Failed to import dcd-reader. "
+                  "Falling back to pure-python reader!")
+
+    class DCDFileReader(PyDCDFileReader):
+        pass
+else:
+    class DCDFileReader(PyDCDFileReader):
+        dcdreader = dcdreader
 
 __all__ = [
     'PosFileReader', 'HoomdBlueXMLFileReader',

@@ -243,7 +243,9 @@ class Frame(object):
 
     The frame data is read from the origin stream whenever accessed."""
 
-    def __init__(self, dtype=DEFAULT_DTYPE):
+    def __init__(self, dtype=None):
+        if dtype is None:
+            dtype = DEFAULT_DTYPE
         self.frame_data = None
         self._dtype = dtype
 

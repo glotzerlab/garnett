@@ -70,39 +70,19 @@ cdef _scan(FILE *cfile):
     return file_header, offsets
 
 cdef _read_frame_body(FILE * cfile, np.ndarray xyz):
-    N = len(xyz.T)
+    N = len(xyz)
     for i in range(3):
         len_section = _read_int(cfile)
         for j in range(N):
-            xyz[i][j] = _read_float(cfile)
+            xyz[j][i] = _read_float(cfile)
         assert _read_int(cfile) == len_section
     fflush(cfile)
-
-
-cdef _read(FILE *cfile):
-    file_header = _read_file_header(cfile)
-    n_frames = int(file_header.num_frames)
-    frames = []
-    for i in range(n_frames):
-        frame_header = _read_frame_header(cfile)
-        N = int(file_header.n_particles)
-        xyz = np.zeros((3, N))
-        _read_frame_body(cfile, xyz)
-        frames.append(xyz)
-    fflush(cfile)
-    return frames
 
 
 def scan(stream):
     cdef FILE* cfile
     cfile = fdopen(stream.fileno(), 'rb')
     return _scan(cfile)
-
-
-def read(stream):
-    cdef FILE* cfile
-    cfile = fdopen(stream.fileno(), 'rb')
-    return _read(cfile)
 
 
 def read_frame(stream, xyz, offset=None):
