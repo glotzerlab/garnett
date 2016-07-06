@@ -3,7 +3,6 @@ import warnings
 from .posfilereader import PosFileReader
 from .hoomdbluexmlfilereader import HoomdBlueXMLFileReader
 from .dcdfilereader import _DCDFileReader as PyDCDFileReader
-from . import pydcdreader
 from .gsdhoomdfilereader import GSDHoomdFileReader
 
 try:
