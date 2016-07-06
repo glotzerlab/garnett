@@ -192,8 +192,9 @@ class DCDFrame(Frame):
         raw_frame.types = copy.copy(self._types)
         raw_frame.positions = self._positions
         raw_frame.orientations = self._orientations
-        assert len(raw_frame.types) == self.file_header.n_particles
-        assert len(raw_frame.positions) == self.file_header.n_particles
+        assert len(raw_frame.types) == len(self)
+        assert len(raw_frame.positions) == len(self)
+        assert len(raw_frame.orientations) == len(self)
         return raw_frame
 
     def unload(self):
