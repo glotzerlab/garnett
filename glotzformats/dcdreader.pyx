@@ -1,8 +1,11 @@
+cimport cython
+
 import numpy as np
 cimport numpy as np
 
-DTYPE = np.float
-ctypedef np.float DTYPE_t
+DTYPE = np.float32
+ctypedef np.float32_t DTYPE_t
+
 
 cdef _DCDFileHeader _read_file_header(FILE *cfile):
     cdef _DCDFileHeader file_header
@@ -69,28 +72,21 @@ cdef _scan(FILE *cfile):
         _skip_frame(cfile)
     return file_header, offsets
 
-cdef _read_frame_body(FILE * cfile, np.ndarray xyz):
-    N = len(xyz.T)
+
+@cython.boundscheck(False)
+@cython.wraparound(False)
+cdef _read_frame_body(FILE * cfile, np.ndarray[DTYPE_t, ndim=2] xyz):
+    cdef DTYPE_t * p
+    cdef np.ndarray[DTYPE_t, ndim=1] d
+    N = <size_t> xyz.shape[1]
     for i in range(3):
+        d = <np.ndarray[DTYPE_t, ndim=1]> xyz[i]
+        p = <DTYPE_t *> d.data
         len_section = _read_int(cfile)
-        for j in range(N):
-            xyz[i][j] = _read_float(cfile)
+        n = fread(p, 4, N, cfile)
+        assert n == N
         assert _read_int(cfile) == len_section
     fflush(cfile)
-
-
-cdef _read(FILE *cfile):
-    file_header = _read_file_header(cfile)
-    n_frames = int(file_header.num_frames)
-    frames = []
-    for i in range(n_frames):
-        frame_header = _read_frame_header(cfile)
-        N = int(file_header.n_particles)
-        xyz = np.zeros((3, N))
-        _read_frame_body(cfile, xyz)
-        frames.append(xyz)
-    fflush(cfile)
-    return frames
 
 
 def scan(stream):
@@ -99,16 +95,11 @@ def scan(stream):
     return _scan(cfile)
 
 
-def read(stream):
+def read_frame(stream, xyz, int offset=-1):
     cdef FILE* cfile
+    assert xyz.flags['C_CONTIGUOUS']
     cfile = fdopen(stream.fileno(), 'rb')
-    return _read(cfile)
-
-
-def read_frame(stream, xyz, offset=None):
-    cdef FILE* cfile
-    cfile = fdopen(stream.fileno(), 'rb')
-    if offset is not None:
+    if offset >= 0:
         fseek(cfile, offset, SEEK_SET)
     frame_header = _read_frame_header(cfile)
     _read_frame_body(cfile, xyz)

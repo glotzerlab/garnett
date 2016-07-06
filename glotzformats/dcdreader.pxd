@@ -45,15 +45,7 @@ cdef inline double _read_double(FILE *fd):
     return d
 
 
-
 cdef inline float _read_float(FILE *fd):
     cdef float f
     assert fread(& f, sizeof(f), 1, fd) == 1
     return f
-
-
-cdef inline _euler_to_quaternion(alpha):
-    q = np.zeros((len(alpha), 4))
-    q.T[0] = np.cos(alpha/2)
-    q.T[1] = q.T[2] = q.T[3] = np.sin(alpha/2)
-    return q

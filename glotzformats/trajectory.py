@@ -15,7 +15,7 @@ from . import math_utils as mu
 logger = logging.getLogger(__name__)
 
 SHAPE_DEFAULT_COLOR = '005984FF'
-DEFAULT_DTYPE = np.float_
+DEFAULT_DTYPE = np.float32
 
 
 class Box(object):
@@ -124,6 +124,7 @@ class SphereShapeDefinition(ShapeDefinition):
     def __str__(self):
         return "{} {} {}".format(self.shape_class, self.diameter, self.color)
 
+
 class ArrowShapeDefinition(ShapeDefinition):
     """Initialize a ShapeDefinition instance.
 
@@ -136,10 +137,11 @@ class ArrowShapeDefinition(ShapeDefinition):
     def __init__(self, thickness=0.1, color=None):
         super(ArrowShapeDefinition, self).__init__(
             shape_class='arrow', color=color)
-        self.thickness=thickness
+        self.thickness = thickness
 
     def __str__(self):
         return "{} {} {}".format(self.shape_class, self.thickness, self.color)
+
 
 class PolyShapeDefinition(ShapeDefinition):
     """Initialize a ShapeDefinition instance.
@@ -241,9 +243,11 @@ class Frame(object):
 
     The frame data is read from the origin stream whenever accessed."""
 
-    def __init__(self, dtype=DEFAULT_DTYPE):
+    def __init__(self, dtype=None):
+        if dtype is None:
+            dtype = DEFAULT_DTYPE
         self.frame_data = None
-        self._dtype=dtype
+        self._dtype = dtype
 
     def loaded(self):
         "Returns True if the frame is loaded into memory."
@@ -274,7 +278,7 @@ class Frame(object):
         if self.loaded():
             raise RuntimeError(
                 "Can't change data type after frame is loaded.")
-        self._dtype=value
+        self._dtype = value
 
     def __len__(self):
         "Return the number of particles in this frame."
@@ -396,7 +400,11 @@ class BaseTrajectory(object):
 
     def __getitem__(self, index):
         if isinstance(index, slice):
-            return type(self)(self.frames[index])
+            traj = type(self)(self.frames[index])
+            for x in ('_types', '_positions', '_orientations'):
+                if getattr(self, x) is not None:
+                    setattr(traj, x, getattr(self, x)[index])
+            return traj
         else:
             return self.frames[index]
 
@@ -475,17 +483,81 @@ class Trajectory(BaseTrajectory):
 
         sub_trajectory = traj[i:j]"""
 
+    def __init__(self, frames=None, dtype=None):
+        super(Trajectory, self).__init__(frames=frames)
+        if dtype is None:
+            dtype = DEFAULT_DTYPE
+        self._dtype = dtype
+        self._types = None
+        self._positions = None
+        self._orientations = None
+
     def __iter__(self):
         return iter(ImmutableTrajectory(self.frames))
 
     def load(self):
         """Load all frames into memory."""
+        self.load_arrays()
         for frame in self.frames:
             frame.load()
 
+    def loaded(self):
+        return all((f.loaded() for f in self.frames))
+
+    def _arrays_loaded(self):
+        return not (self._types is None or
+                    self._positions is None or
+                    self._orientations is None)
+
+    def _assert_loaded(self):
+        if not self.loaded():
+            raise RuntimeError("Trajectory not loaded.")
+
+    def _assert_arrays_loaded(self):
+        if not self._arrays_loaded():
+            raise RuntimeError("Trajectory arrays not loaded.")
+
+    def _max_N(self):
+        return max((len(f) for f in self.frames))
+
+    def load_arrays(self):
+        N = self._max_N()
+        typ = np.zeros((len(self), N), dtype=np.str_)
+        pos = np.zeros((len(self), N, 3), dtype=self._dtype)
+        ort = np.zeros((len(self), N, 4), dtype=self._dtype)
+        for i, frame in enumerate(self.frames):
+            st = len(frame.types)
+            typ[i][:st] = frame.types
+            sp = frame.positions.shape
+            pos[i][:sp[0], :sp[1]] = frame.positions
+            so = frame.orientations.shape
+            ort[i][:so[0], :so[1]] = frame.orientations
+        self._types = typ
+        self._positions = pos
+        self._orientations = ort
+
     def set_dtype(self, value):
+        self._dtype = value
+        for x in (self._types, self._positions, self._orientations):
+            if x is not None:
+                x = x.astype(value)
         for frame in self.frames:
-            frame.dtype=value
+            frame.dtype = value
+
+    @property
+    def types(self):
+        self._assert_arrays_loaded()
+        return np.asarray(self._types, dtype=np.str_)
+
+    @property
+    def positions(self):
+        self._assert_arrays_loaded()
+        return np.asarray(self._positions, dtype=self._dtype)
+
+    @property
+    def orientations(self):
+        self._assert_arrays_loaded()
+        return np.asarray(self._orientations, dtype=self._dtype)
 
 
 def _regularize_box(positions, orientations,
@@ -595,8 +667,12 @@ def copyto_hoomd_blue_snapshot(frame, snapshot):
     np.copyto(snapshot.particles.orientation, frame.orientations)
     return snapshot
 
+
 def copyfrom_hoomd_blue_snapshot(frame, snapshot):
-    "Copy the hoomd-blue snapshot into the frame. Note that only the box, types, positions and orientations will be copied."
+    """"Copy the hoomd-blue snapshot into the frame.
+
+    Note that only the box, types, positions and
+    orientations will be copied."""
     frame.box.__dict__ = snapshot.box.__dict__
     particle_types = list(set(snapshot.particles.types))
     snap_types = [particle_types[i] for i in snapshot.particles.typeid]
@@ -604,6 +680,7 @@ def copyfrom_hoomd_blue_snapshot(frame, snapshot):
     frame.positions = snapshot.particles.position
     frame.orientations = snapshot.particles.orientation
     return frame
+
 
 def make_hoomd_blue_snapshot(frame):
     "Create a hoomd-blue snapshot from the frame instance."

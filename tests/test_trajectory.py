@@ -61,6 +61,21 @@ class TrajectoryTest(unittest.TestCase):
         else:
             return io.StringIO(self.sample)
 
+    def test_str(self):
+        from glotzformats.trajectory import Frame
+        sample_file = self.get_sample_file()
+        traj = self.reader().read(sample_file)
+        str(traj)
+
+    def test_frame_inheritance(self):
+        from glotzformats.trajectory import Frame
+        sample_file = self.get_sample_file()
+        traj = self.reader().read(sample_file)
+        for frame in traj:
+            self.assertTrue(isinstance(frame, Frame))
+        for i in range(len(traj)):
+            self.assertTrue(isinstance(traj[i], Frame))
+
     def test_load(self):
         sample_file = self.get_sample_file()
         traj = self.reader().read(sample_file)
@@ -76,7 +91,10 @@ class TrajectoryTest(unittest.TestCase):
         sample_file.close()
         for i, frame in enumerate(traj):
             frame.load()
+            self.assertTrue(frame.loaded())
         self.assertEqual(len(traj), i + 1)
+        for frame in traj:
+            self.assertTrue(frame.loaded())
         for i, frame in enumerate(traj):
             frame.load()
         self.assertEqual(len(traj), i + 1)
@@ -103,6 +121,38 @@ class TrajectoryTest(unittest.TestCase):
             traj.set_dtype(np.float64)
         with self.assertRaises(RuntimeError):
             frame0.dtype = np.float64
+
+    def test_types(self):
+        sample_file = self.get_sample_file()
+        traj = self.reader().read(sample_file)
+        with self.assertRaises(RuntimeError):
+            traj.types
+        traj.load_arrays()
+        self.assertTrue(np.issubdtype(traj.types.dtype, np.str_))
+        self.assertEqual(traj.types.shape, (len(traj), len(traj[0])))
+        self.assertTrue((traj.types[0] == traj[0].types).all())
+
+    def test_positions(self):
+        sample_file = self.get_sample_file()
+        traj = self.reader().read(sample_file)
+        with self.assertRaises(RuntimeError):
+            traj.positions
+        traj.load_arrays()
+        self.assertTrue(np.issubdtype(
+            traj.positions.dtype, glotzformats.trajectory.DEFAULT_DTYPE))
+        self.assertEqual(traj.positions.shape, (len(traj), len(traj[0]), 3))
+        self.assertTrue((traj.positions[0] == traj[0].positions).all())
+
+    def test_orientations(self):
+        sample_file = self.get_sample_file()
+        traj = self.reader().read(sample_file)
+        with self.assertRaises(RuntimeError):
+            traj.orientations
+        traj.load_arrays()
+        self.assertTrue(np.issubdtype(
+            traj.orientations.dtype, glotzformats.trajectory.DEFAULT_DTYPE))
+        self.assertEqual(traj.orientations.shape, (len(traj), len(traj[0]), 4))
+        self.assertTrue((traj.orientations[0] == traj[0].orientations).all())
 
 
 @unittest.skipIf(not HOOMD, 'requires hoomd-blue')
