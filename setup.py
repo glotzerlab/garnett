@@ -17,7 +17,7 @@ if not sys.version_info >= (2, 7):
 
 setup(
     name='glotzformats',
-    version='0.2.1',
+    version='0.3.0',
     packages=find_packages(),
 
     ext_modules=cythonize('glotzformats/*.pyx') if CYTHON else [],
