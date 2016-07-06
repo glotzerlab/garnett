@@ -6,52 +6,52 @@ This is the API documentation for all readers and writers provided by glotzforma
 POS-Files
 ---------
 
-.. automodule:: glotzformats.posfilereader
+.. autoclass:: glotzformats.reader.PosFileReader
     :members:
     :undoc-members:
 
-.. automodule:: glotzformats.posfilewriter
+.. autoclass:: glotzformats.writer.PosFileWriter
     :members:
     :undoc-members:
 
 GSD (hoomd schema)
 ------------------
 
-.. automodule:: glotzformats.gsdhoomdfilereader
+.. autoclass:: glotzformats.reader.GSDHoomdFileReader
     :members:
     :undoc-members:
 
 GeTAR
 -----
 
-.. automodule:: glotzformats.getarfilereader
+.. autoclass:: glotzformats.reader.GetarFileReader
     :members:
     :undoc-members:
 
 Hoomd-blue XML
 --------------
 
-.. automodule:: glotzformats.hoomdbluexmlfilereader
+.. autoclass:: glotzformats.reader.HoomdBlueXMLFileReader
     :members:
     :undoc-members:
 
 DCD
 ---
 
-.. automodule:: glotzformats.dcdfilereader
+.. autoclass:: glotzformats.reader.DCDFileReader
     :members:
     :undoc-members:
 
 DCD (pure-python)
 -----------------
 
-.. automodule:: glotzformats.pydcdfilereader
+.. autoclass:: glotzformats.reader.PyDCDFileReader
     :members:
     :undoc-members:
 
 CIF
 ---
 
-.. automodule:: glotzformats.ciffilewriter
+.. autoclass:: glotzformats.writer.CifFileWriter
     :members:
     :undoc-members:
