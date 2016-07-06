@@ -2,7 +2,7 @@ import warnings
 
 from .posfilereader import PosFileReader
 from .hoomdbluexmlfilereader import HoomdBlueXMLFileReader
-from .dcdfilereader import _DCDFileReader as PyDCDFileReader
+from .dcdfilereader import _DCDFileReader
 from .gsdhoomdfilereader import GSDHoomdFileReader
 
 try:
@@ -16,6 +16,15 @@ except ImportError:
     warnings.warn(
         "Mocking GetarFileReader, gtar package not available.")
 
+class PyDCDFileReader(_DCDFileReader):
+    """Pure-python DCD-file reader for the Glotzer Group.
+
+    This class is a pure python dcd-reader implementation
+    which should only be used when the more efficient
+    cythonized dcd-reader is not available.
+
+    .. seealso:: The API is identical to: :py:class:`~.DCDFileReader`"""
+    pass
 
 try:
     try:
@@ -30,7 +39,45 @@ except ImportError:
         pass
 else:
     class DCDFileReader(PyDCDFileReader):
-        dcdreader = dcdreader
+        """DCD-file reader for the Glotzer Group, University of Michigan.
+
+        Author: Carl Simon Adorf
+
+        A dcd file consists only of positions.
+        To provide additional information it is possible
+        to provide a frame object, whose properties
+        are copied into each frame of the dcd trajectory.
+
+        The example is given for a HOOMD-blue xml frame:
+
+        .. code::
+
+            xml_reader = HoomdBlueXMLFileReader()
+            dcd_reader = DCDFileReader()
+
+            with open('init.xml') as xmlfile:
+                with open('dump.dcd', 'rb') as dcdfile:
+                    xml_frame = xml_reader.read(xmlfile)[0]
+                    traj = reader.read(dcdfile, xml_frame)
+
+        .. note::
+
+            If the topology frame is 2-dimensional, the dcd
+            trajectory positions are interpreted such that
+            the first two values contain the xy-coordinates,
+            the third value is an euler angle.
+
+            The euler angle is converted to a quaternion and stored
+            in the orientation of the frame.
+
+            To retrieve the euler angles, simply convert the quaternion:
+
+            .. code::
+
+                alpha = 2 * np.arccos(traj[0].orientations.T[0])
+        """
+        _dcdreader = dcdreader
+
 
 __all__ = [
     'PosFileReader', 'HoomdBlueXMLFileReader',
