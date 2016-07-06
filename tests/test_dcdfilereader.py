@@ -31,7 +31,7 @@ class BaseDCDFileReaderTest(TrajectoryTest):
         return tmp
 
     def read_top_trajectory(self):
-        top_reader = glotzformats.reader.HoomdBlueXMLFileReader()
+        top_reader = glotzformats.reader.HOOMDXMLFileReader()
         if PYTHON_2:
             return top_reader.read(io.StringIO(
                 unicode(glotzformats.samples.HOOMD_BLUE_XML)))  # noqa

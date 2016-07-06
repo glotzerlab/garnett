@@ -4,7 +4,7 @@ Authors: Carl Simon Adorf
 
 .. code::
 
-    reader = HoomdBlueXMLFileReader()
+    reader = HOOMDXMLFileReader()
     with open('hoomdblue.xml') as xmlfile:
         return reader.read(xmlfile)
 """
@@ -22,11 +22,11 @@ from .errors import ParserError
 logger = logging.getLogger(__name__)
 
 
-class HoomdBlueXMLFrame(Frame):
+class HOOMDXMLFrame(Frame):
 
     def __init__(self, root):
         self.root = root
-        super(HoomdBlueXMLFrame, self).__init__()
+        super(HOOMDXMLFrame, self).__init__()
 
     def read(self):
         "Read the frame data from the stream."
@@ -44,10 +44,10 @@ class HoomdBlueXMLFrame(Frame):
         return raw_frame
 
     def __str__(self):
-        return "HoomdBlueXMLFrame(root={})".format(self.root)
+        return "HOOMDXMLFrame(root={})".format(self.root)
 
 
-class HoomdBlueXMLFileReader(object):
+class HOOMDXMLFileReader(object):
     """Read hoomdblue-xml-files."""
 
     def read(self, stream):
@@ -58,7 +58,7 @@ class HoomdBlueXMLFileReader(object):
         """
         # Index the stream
         try:
-            frames = [HoomdBlueXMLFrame(ET.fromstring(stream.read()))]
+            frames = [HOOMDXMLFrame(ET.fromstring(stream.read()))]
         except ET.ParseError as error:
             raise ParserError(error)
         logger.info("Read {} frames.".format(len(frames)))

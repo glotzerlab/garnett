@@ -14,7 +14,7 @@ The example is given for a hoomd-blue xml frame:
 
 .. code::
 
-    xml_reader = HoomdBlueXMLFileReader()
+    xml_reader = HOOMDXMLFileReader()
     gsd_reader = GSDHOOMDFileReader()
 
     with open('init.xml') as xmlfile:
@@ -83,7 +83,7 @@ class GSDHOOMDFileReader(object):
 
     .. code::
 
-        xml_reader = HoomdBlueXMLFileReader()
+        xml_reader = HOOMDXMLFileReader()
         gsd_reader = GSDHOOMDFileReader()
 
         with open('init.xml') as xmlfile:

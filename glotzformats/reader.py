@@ -1,7 +1,7 @@
 import warnings
 
 from .posfilereader import PosFileReader
-from .hoomdbluexmlfilereader import HoomdBlueXMLFileReader
+from .hoomdxmlfilereader import HOOMDXMLFileReader
 from .dcdfilereader import _DCDFileReader
 from .gsdhoomdfilereader import GSDHOOMDFileReader
 
@@ -52,7 +52,7 @@ else:
 
         .. code::
 
-            xml_reader = HoomdBlueXMLFileReader()
+            xml_reader = HOOMDXMLFileReader()
             dcd_reader = DCDFileReader()
 
             with open('init.xml') as xmlfile:
@@ -87,8 +87,18 @@ class GSDHoomdFileReader(GSDHOOMDFileReader):
         super(GSDHoomdFileReader, self).__init__(*args, **kwargs)
 
 
+class HoomdBlueXMLFileReader(HOOMDXMLFileReader):
+
+    def __init__(self, *args, **kwargs):
+        warnings.warn(
+            "This class has been renamed to HOOMDXMLFileReader!",
+            DeprecationWarning)
+        super(HoomdBlueXMLFileReader, self).__init__(*args, **kwargs)
+
+
 __all__ = [
-    'PosFileReader', 'HoomdBlueXMLFileReader',
+    'PosFileReader',
+    'HOOMDXMLFileReader', 'HoomdBlueXMLFileReader',
     'PyDCDFileReader', 'DCDFileReader',
     'GetarFileReader',
     'GSDHOOMDFileReader', 'GSDHoomdFileReader']

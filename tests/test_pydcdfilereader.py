@@ -23,7 +23,7 @@ class BaseDCDFileReaderTest(TrajectoryTest):
         return io.BytesIO(base64.b64decode(glotzformats.samples.DCD_BASE64))
 
     def read_top_trajectory(self):
-        top_reader = glotzformats.reader.HoomdBlueXMLFileReader()
+        top_reader = glotzformats.reader.HOOMDXMLFileReader()
         if PYTHON_2:
             return top_reader.read(io.StringIO(
                 unicode(glotzformats.samples.HOOMD_BLUE_XML)))  # noqa
