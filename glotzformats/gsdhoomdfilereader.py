@@ -15,7 +15,7 @@ The example is given for a hoomd-blue xml frame:
 .. code::
 
     xml_reader = HoomdBlueXMLFileReader()
-    gsd_reader = GSDHoomdFileReader()
+    gsd_reader = GSDHOOMDFileReader()
 
     with open('init.xml') as xmlfile:
         with open('dump.gsd') as gsdfile:
@@ -66,8 +66,31 @@ class GSDHoomdFrame(Frame):
         return "GSDHoomdFrame(# frames={})".format(len(self.traj))
 
 
-class GSDHoomdFileReader(object):
-    """Read gsd trajectory files with hoomd schema.."""
+class GSDHOOMDFileReader(object):
+    """Hoomd-GSD-file reader for the Glotzer Group, University of Michigan.
+
+    Author: Carl Simon Adorf
+
+    This class provides a wrapper for the gsd.hoomd and the gsd.pygsd
+    trajectory reader implementation as part of the gsd package.
+
+    A gsd file may not contain all shape information.
+    To provide additional information it is possible
+    to pass a frame object, whose properties
+    are copied into each frame of the gsd trajectory.
+
+    The example is given for a hoomd-blue xml frame:
+
+    .. code::
+
+        xml_reader = HoomdBlueXMLFileReader()
+        gsd_reader = GSDHOOMDFileReader()
+
+        with open('init.xml') as xmlfile:
+            with open('dump.gsd', 'rb') as gsdfile:
+                xml_frame = xml_reader.read(xmlfile)[0]
+                traj = gsd_reader.read(gsdfile, xml_frame)
+    """
 
     def read(self, stream, frame=None):
         """Read binary stream and return a trajectory instance.

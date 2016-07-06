@@ -3,7 +3,7 @@ import warnings
 from .posfilereader import PosFileReader
 from .hoomdbluexmlfilereader import HoomdBlueXMLFileReader
 from .dcdfilereader import _DCDFileReader
-from .gsdhoomdfilereader import GSDHoomdFileReader
+from .gsdhoomdfilereader import GSDHOOMDFileReader
 
 try:
     from .getarfilereader import GetarFileReader
@@ -78,8 +78,17 @@ else:
         """
         _dcdreader = dcdreader
 
+class GSDHoomdFileReader(GSDHOOMDFileReader):
+
+    def __init__(self, *args, **kwargs):
+        warnings.warn(
+            "This class has been renamed to GSDHOOMDFileReader!",
+            DeprecationWarning)
+        super(GSDHoomdFileReader, self).__init__(*args, **kwargs)
+
 
 __all__ = [
     'PosFileReader', 'HoomdBlueXMLFileReader',
     'PyDCDFileReader', 'DCDFileReader',
-    'GetarFileReader', 'GSDHoomdFileReader']
+    'GetarFileReader',
+    'GSDHOOMDFileReader', 'GSDHoomdFileReader']
