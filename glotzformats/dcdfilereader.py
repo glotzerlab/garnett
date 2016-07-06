@@ -50,11 +50,9 @@ from . import pydcdreader
 logger = logging.getLogger(__name__)
 
 
-def _euler_to_quaternion(alpha):
-    q = np.zeros((len(alpha), 4))
+def _euler_to_quaternion(alpha, q):
     q.T[0] = np.cos(alpha/2)
     q.T[1] = q.T[2] = q.T[3] = np.sin(alpha/2)
-    return q
 
 
 def _box_matrix_from_frame_header(frame_header, tol=1e-12):
@@ -165,8 +163,10 @@ class DCDFrame(Frame):
             self._types = self.t_frame.types
         if self.t_frame is None or self.t_frame.box.dimensions == 3:
             ort.T[0] = 1.0
+            ort.T[1:] = 0
         elif self.t_frame.box.dimensions == 2:
-            ort = _euler_to_quaternion(self._positions.T[-1])
+            _euler_to_quaternion(
+                self._positions.T[-1], ort)
             self._positions.T[-1] = 0
         else:
             raise ValueError(self.t_frame.box.dimensions)
