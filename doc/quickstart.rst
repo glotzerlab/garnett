@@ -1,8 +1,11 @@
+==========
 Quickstart
 ==========
 
 Reading and writing
--------------------
+===================
+
+Readers and writers are defined in the ``reader`` and ``writer`` modules.
 
 .. code-block:: python
 
@@ -25,28 +28,33 @@ Reading and writing
 
 
 Data access
------------
+===========
 
-Access individual frames or create sub-trajectories by slicing:
+Once you read a trajectory, access individual frames or sub-trajectories by indexing and slicing:
 
 .. code-block:: python
 
-    # Select individual frames
+    # Select individual frames:
     first_frame = traj[0]
     last_frame = traj[-1]
     n_th_frame = traj[n]
     # and so on
 
     # Create a sub-trajectory from the ith frame
-    # to the (j-1)th frame.
+    # to the (j-1)th frame:
     sub_trajectory = traj[i:j]
 
     # We can use advanced slicing techniques:
     every_second_frame = traj[::2]
     the_last_ten_frames = traj[-10::]
 
-You can access trajectory positions, orientations and types
-as numpy arrays:
+The actual trajectory data is then either accessed on a *per trajectory* or *per frame* basis.
+
+Trajectory array access
+-----------------------
+
+Access positions, orientations and types as coherent numpy arrays, by calling the :py:meth:`~.trajectory.Trajectory.load_arrays` method.
+This method will load the complete trajectory into memory and make positions, orientations and types available via properties:
 
 .. code-block:: python
 
@@ -57,20 +65,10 @@ as numpy arrays:
 
     # where M=len(traj), N=max((len(f) for f in traj))
 
+Individual frame access
+-----------------------
 
-You can iterate over trajectories for memory-efficient data access:
-
-.. code-block:: python
-
-    # Iterate over a trajectory directly for read-only data access
-    for frame in traj:
-      print(frame.positions)
-
-    # Iterate over an index for data modification
-    for i in range(len(traj)):
-        traj[i].box = # ...
-
-Access properties of individual frames:
+Inidividual frame objects can be accessed via indexing of a (sub-)trajectory object:
 
 .. code-block:: python
 
@@ -83,12 +81,19 @@ Access properties of individual frames:
     frame.data_key      # A list of strings
     frame.shapedef      # A ordered dictionary of instances of ShapeDefinition.
 
-All arrays are instances of :py:class:`numpy.ndarray`.
+Iterating over trajectories
+---------------------------
 
-Efficient trajectory modification
----------------------------------
+Iterating over trajectories it the most **memory-efficient** form of data access.
+Each frame will be loaded prior to access and unloaded post access, such that there is only one frame loaded into memory at the same time.
 
-Memory-efficient modification of large trajectory data requires live reading and writing to disk.
+.. code-block:: python
+
+    # Iterate over a trajectory directly for read-only data access
+    for frame in traj:
+      print(frame.positions)
+
+Use a combination of reading, writing and iteration for **memory-efficient** modification of large trajectory data.
 This is an example on how to modify frames in-place:
 
 .. code-block:: python
@@ -111,15 +116,51 @@ This is an example on how to modify frames in-place:
         traj_centered = Trajectory((center(frame) for frame in traj))
         pos_writer.write(traj_centered)
 
+Loading trajectories into memory
+--------------------------------
+
+The :py:class:`~.trajectory.Trajectory` is designed to be as *memory-efficient* as possible by default.
+This means that loading trajectory data into memory requires an explicit call of the :py:meth:`~.Trajectory.load` or :py:meth:`~.Trajectory.load_arrays` methods.
+
+.. code-block:: python
+
+    # Make trajectory data accessible via arrays:
+    traj.load_arrays()
+    traj.positions
+
+    # Load all frames:
+    traj.load()
+    frame = traj[i]
+    traj.positions    # load() also loads arrays
+
+.. note::
+
+    In general, :py:meth:`~.Trajectory.load` is more expensive than :py:meth:`~.Trajectory.load_arrays`.
+    Loading all frames also loads the arrays.
+
+Sub-trajectories inherit already loaded data:
+
+.. code-block:: python
+
+    traj.load_arrays()
+    sub_traj = traj[i:j]
+    sub_traj.positions
+
+.. tip::
+
+    If you are only interested in sub-trajectory data, consider to call :py:meth:`~.Trajectory.load` or :py:meth:`~.Trajectory.load_arrays` only for the sub-trajectory.
+
 
 Example use with HOOMD-blue
----------------------------
+===========================
+
+The **glotzformats** frames can be used to initialize HOOMD-blue by creating snapshots with the :py:meth:`~.Frame.make_snapshot` method or by copying the frame data to existing snapshots with the :py:meth:`~.Frame.copyto_snapshot` methods:
 
 .. code-block:: python
 
     from hoomd import init
     # For versions <2.x: from hoomd_script import init
-    
+
     from glotzformats.reader import PosFileReader
 
     pos_reader = PosFileReader()
