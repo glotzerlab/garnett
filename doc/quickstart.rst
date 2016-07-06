@@ -27,11 +27,11 @@ Reading and writing
 Data access
 -----------
 
-Access individual frames or create sub-trajectories by indexing.
+Access individual frames or create sub-trajectories by slicing:
 
 .. code-block:: python
 
-    # Select individual frams
+    # Select individual frames
     first_frame = traj[0]
     last_frame = traj[-1]
     n_th_frame = traj[n]
@@ -45,15 +45,28 @@ Access individual frames or create sub-trajectories by indexing.
     every_second_frame = traj[::2]
     the_last_ten_frames = traj[-10::]
 
-You can iterate over trajectories for fast data access.
+You can access trajectory positions, orientations and types
+as numpy arrays:
 
 .. code-block:: python
 
-    # Iterate over a trajectory directly for data access
+    traj.load_arrays()
+    traj.positions      # MxNx3 array
+    traj.orientations   # MxNx4 array
+    traj.types          # MxN array
+
+    # where M=len(traj), N=max((len(f) for f in traj))
+
+
+You can iterate over trajectories for memory-efficient data access:
+
+.. code-block:: python
+
+    # Iterate over a trajectory directly for read-only data access
     for frame in traj:
       print(frame.positions)
 
-    # Iterate over indeces for data modification
+    # Iterate over an index for data modification
     for i in range(len(traj)):
         traj[i].box = # ...
 
@@ -62,25 +75,25 @@ Access properties of individual frames:
 .. code-block:: python
 
     frame = traj[i]
-    frame.box           # 3x3 matrix
-    frame.types         # Nx1
-    frame.positions     # Nx3
-    frame.orientations  # Nx4
+    frame.box           # 3x3 array
+    frame.positions     # Nx3 array
+    frame.orientations  # Nx4 array
+    frame.types         # Nx1 array
     frame.data          # A dictionary of lists for each attribute
     frame.data_key      # A list of strings
     frame.shapedef      # A ordered dictionary of instances of ShapeDefinition.
 
-All matrices are `numpy` arrays.
+All arrays are instances of :py:class:`numpy.ndarray`.
 
 Efficient trajectory modification
 ---------------------------------
 
-Modification of big trajectory data without keeping all data in memory requires live reading and writing to disk.
+Memory-efficient modification of large trajectory data requires live reading and writing to disk.
 This is an example on how to modify frames in-place:
 
 .. code-block:: python
 
-    import numpy
+    import numpy as np
 
     from glotzformats.reader import PosFileReader
     from glotzformats.reader import PosFileWriter
@@ -99,15 +112,13 @@ This is an example on how to modify frames in-place:
         pos_writer.write(traj_centered)
 
 
-Example use with hoomd-blue
+Example use with HOOMD-blue
 ---------------------------
 
 .. code-block:: python
 
-    # pre HOOMDv2.0
-    from hoomd_script import init
-    # post HOOMDv2.0
     from hoomd import init
+    # For versions <2.x: from hoomd_script import init
     
     from glotzformats.reader import PosFileReader
 
@@ -122,8 +133,3 @@ Example use with hoomd-blue
         # Restore last frame
         snapshot = system.take_snapshot()
         traj[-1].copyto_snapshot(snapshot)
-
-
-.. note::
-
-    Use hoomd's native pos-file *writer* whenever possible.

@@ -31,7 +31,16 @@ def _num(x):
 
 
 class PosFileWriter(object):
-    """Write pos-files from a trajectory instance."""
+    """POS-file writer for the Glotzer Group, University of Michigan.
+
+    Author: Carl Simon Adorf
+
+    .. code::
+
+        writer = PosFileWriter()
+        with open('a_posfile.pos', 'w', encoding='utf-8') as posfile:
+            writer.write(trajectory, posfile)
+    """
 
     def write(self, trajectory, file=sys.stdout):
         """Serialize a trajectory into pos-format and write it to file.

@@ -129,7 +129,7 @@ class DCDFrame(Frame):
     def __init__(self, dcdreader, stream, file_header,
                  offset, t_frame, default_type='A',
                  dtype=None):
-        self.dcdreader = dcdreader
+        self._dcdreader = dcdreader
         self.stream = stream
         self.file_header = _DCDFileHeader(** file_header)
         self.offset = offset
@@ -146,7 +146,7 @@ class DCDFrame(Frame):
 
     def _read(self, xyz):
         frame_header = _DCDFrameHeader(
-            ** self.dcdreader.read_frame(self.stream, xyz, self.offset))
+            ** self._dcdreader.read_frame(self.stream, xyz, self.offset))
         self._box = np.asarray(_box_matrix_from_frame_header(frame_header)).T
         self._positions = xyz.swapaxes(0, 1)
 
@@ -228,8 +228,9 @@ class DCDTrajectory(Trajectory):
     def xyz(self, xyz=None):
         """Return the xyz coordinates of the dcd file.
 
-        Use this function if you only want to read xyz coordinates
-        and nothin else."""
+        This is the most efficient way to acess xyz coordinates
+        of dcd trajectories. Use this function for best
+        performance."""
         shape = (len(self), 3, len(self.frames[0]))
         if xyz is None:
             xyz = np.zeros(shape, dtype=np.float32)
@@ -243,14 +244,50 @@ class DCDTrajectory(Trajectory):
 
 
 class _DCDFileReader(object):
-    """Read dcd trajectory files."""
-    dcdreader = pydcdreader
+    """DCD-file reader for the Glotzer Group, University of Michigan.
+
+    Author: Carl Simon Adorf
+
+    A dcd file consists only of positions.
+    To provide additional information it is possible
+    to provide a frame object, whose properties
+    are copied into each frame of the dcd trajectory.
+
+    The example is given for a hoomd-blue xml frame:
+
+    .. code::
+
+        xml_reader = HoomdBlueXMLFileReader()
+        dcd_reader = DCDFileReader()
+
+        with open('init.xml') as xmlfile:
+            with open('dump.dcd', 'rb') as dcdfile:
+                xml_frame = xml_reader.read(xmlfile)[0]
+                traj = reader.read(dcdfile, xml_frame)
+
+    .. note::
+
+        If the topology frame is 2-dimensional, the dcd
+        trajectory positions are interpreted such that
+        the first two values contain the xy-coordinates,
+        the third value is an euler angle.
+
+        The euler angle is converted to a quaternion and stored
+        in the orientation of the frame.
+
+        To retrieve the euler angles, simply convert the quaternion:
+
+        .. code::
+
+            alpha = 2 * np.arccos(traj[0].orientations.T[0])
+    """
+    _dcdreader = pydcdreader
 
     def _scan(self, stream, t_frame=None, default_type=None):
-        file_header, offsets = self.dcdreader.scan(stream)
+        file_header, offsets = self._dcdreader.scan(stream)
         for offset in offsets:
             yield DCDFrame(
-                dcdreader=self.dcdreader,
+                dcdreader=self._dcdreader,
                 stream=stream, file_header=file_header, offset=offset,
                 t_frame=t_frame, default_type=default_type)
 
@@ -264,7 +301,9 @@ class _DCDFileReader(object):
         :type frame: :class:`trajectory.Frame`
         :param default_type: A type name to be used when no first
             frame is provided, defaults to 'A'.
-        :type default_type: str"""
+        :type default_type: str
+        :returns: A trajectory instance.
+        :rtype: :class:`~.DCDTrajectory`"""
         if frame is not None and default_type is not None:
             raise ValueError(
                 "You can only provide a frame or a default_type, not both.")

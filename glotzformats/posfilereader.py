@@ -183,7 +183,15 @@ class PosFileFrame(Frame):
 
 
 class PosFileReader(object):
-    """Read pos-files with different dialects.
+    """POS-file reader for the Glotzer Group, University of Michigan.
+
+        Authors: Carl Simon Adorf, Richmond Newmann
+
+        .. code::
+
+            reader = PosFileReader()
+            with open('a_posfile.pos', 'r', encoding='utf-8') as posfile:
+                return reader.read(posfile)
 
         :param precision: The number of digits to
                           round floating-point values to.

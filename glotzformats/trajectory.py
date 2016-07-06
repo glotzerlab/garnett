@@ -36,7 +36,7 @@ class Box(object):
         box.xy = box.xz = box.yz = 0.01
         # etc.
 
-    .. seealso:: https://codeblue.umich.edu/hoomd-blue/doc/page_box.html"""
+    .. seealso:: https://codeblue.umich.edu/HOOMD-blue/doc/page_box.html"""
 
     def __init__(self, Lx, Ly, Lz, xy=0.0, xz=0.0, yz=0.0, dimensions=3):
         self.Lx = Lx
@@ -211,11 +211,11 @@ class FrameData(object):
         return str(self)
 
     def make_snapshot(self):
-        "Create a hoomd-blue snapshot object from this frame."
+        "Create a HOOMD-blue snapshot object from this frame."
         return make_hoomd_blue_snapshot(self)
 
     def copyto_snapshot(self, snapshot):
-        "Copy this frame to a hoomd-blue snapshot."
+        "Copy this frame to a HOOMD-blue snapshot."
         return copyto_hoomd_blue_snapshot(self, snapshot)
 
 
@@ -241,7 +241,10 @@ class _RawFrameData(object):
 class Frame(object):
     """A frame is a container object for the actual frame data.
 
-    The frame data is read from the origin stream whenever accessed."""
+    The frame data is read from the origin stream whenever accessed.
+
+    :param dtype: The data type for frame data.
+    """
 
     def __init__(self, dtype=None):
         if dtype is None:
@@ -271,13 +274,18 @@ class Frame(object):
 
     @property
     def dtype(self):
+        "Return the data type for frame data."
         return self._dtype
 
     @dtype.setter
     def dtype(self, value):
+        """Change the data type for frame data.
+
+        :param value: The data type value.
+        :raises RuntimeError: If called for a loaded frame."""
         if self.loaded():
             raise RuntimeError(
-                "Can't change data type after frame is loaded.")
+                "Cannot change the data type after frame is loaded.")
         self._dtype = value
 
     def __len__(self):
@@ -294,12 +302,12 @@ class Frame(object):
         return not self.__eq__(other)
 
     def make_snapshot(self):
-        "Create a hoomd-blue snapshot object from this frame."
+        "Create a HOOMD-blue snapshot object from this frame."
         self.load()
         return make_hoomd_blue_snapshot(self.frame_data)
 
     def copyto_snapshot(self, snapshot):
-        "Copy this frame to a hoomd-blue snapshot."
+        "Copy this frame to a HOOMD-blue snapshot."
         self.load()
         return copyto_hoomd_blue_snapshot(self.frame_data, snapshot)
 
@@ -455,20 +463,18 @@ class Trajectory(BaseTrajectory):
 
     .. code::
 
-        N = len(trajectory)
+        M = len(trajectory)
 
-    You can iterate through individual frames like this:
+    Trajectory data can either be accessed as a coherent numpy array:
 
     .. code::
 
-        for frame in trajectory:
-            # do something
+        traj.load_arrays()
+        pos = traj.positions     # MxNx3
+        ort = traj.orientations  # MxNx4
+        typ = traj.types         # MxNx1
 
-    .. warning::
-
-        Iteration allows only read-only (!) access.
-
-    Access indivdual frames with indeces:
+    or by individual frames:
 
     .. code::
 
@@ -476,12 +482,27 @@ class Trajectory(BaseTrajectory):
         last_frame = traj[-1]
         n_th_frame = traj[n]
 
+        pos = first_frame.positions     # Nx3
+        ort = first_frame.orientations  # Nx4
+        typ = first_frame.types         # Nx1
+
+    You can iterate through individual frames like this:
+
+    .. code::
+
+        for frame in trajectory:
+            print(frame.positions)
 
     Create a sub-trajectory from the i'th to the (j-1)'th frame:
 
     .. code::
 
-        sub_trajectory = traj[i:j]"""
+        sub_trajectory = traj[i:j]
+
+    :param frames: The individual frames of this trajectory.
+    :type frames: :class:`~.Frame`
+    :param dtype: The default data type for trajectory data.
+    """
 
     def __init__(self, frames=None, dtype=None):
         super(Trajectory, self).__init__(frames=frames)
@@ -496,32 +517,84 @@ class Trajectory(BaseTrajectory):
         return iter(ImmutableTrajectory(self.frames))
 
     def load(self):
-        """Load all frames into memory."""
+        """Load all frames into memory.
+
+        By default, only frames which are accessed are loaded
+        into memory. Using this function, all frames are loaded
+        at once.
+
+        This can be useful, e.g., if the trajectory resource cannot
+        remain open, however in all other cases this should be
+        avoided.
+
+        See also: :meth:`~.load_arrays`
+        """
         self.load_arrays()
         for frame in self.frames:
             frame.load()
 
     def loaded(self):
+        """Returns True if all frames are loaded into memory.
+
+        See also: :meth:`~.Trajectory.load`"""
         return all((f.loaded() for f in self.frames))
 
-    def _arrays_loaded(self):
+    def arrays_loaded(self):
+        """Returns true if arrays are loaded into memory.
+
+        See also: :meth:`~.load_arrays`"""
         return not (self._types is None or
                     self._positions is None or
                     self._orientations is None)
 
     def _assert_loaded(self):
+        "Raises a RuntimeError if trajectory is not loaded."
         if not self.loaded():
             raise RuntimeError("Trajectory not loaded! Use load().")
 
-    def _assert_arrays_loaded(self):
-        if not self._arrays_loaded():
+    def _assertarrays_loaded(self):
+        "Raises a RuntimeError if trajectory arrays are not loaded."
+        if not self.arrays_loaded():
             raise RuntimeError(
                 "Trajectory arrays not loaded! Use load_arrays() or load().")
 
     def _max_N(self):
+        "Returns the size of the largest frame within this trajectory."
         return max((len(f) for f in self.frames))
 
     def load_arrays(self):
+        """Load positions, orientations and types into memory.
+
+        After calling this function, positions, orientations
+        and types can be accessed as coherent numpy arrays:
+
+        .. code::
+
+            traj.load_arrays()
+            pos = traj.positions     # MxNx3
+            ort = traj.orientations  # MxNx4
+            typ = traj.types         # MxNx1
+
+        .. note::
+
+            It is not necessary to call this function again when
+            accessing sub trajectories:
+
+            .. code::
+
+                traj.load_arrays()
+                sub_traj = traj[m:n]
+                sub_traj.positions
+
+            However, it may be more efficient to call :meth:`~.load_arrays`
+            only for the sub trajectory if other data is not of interest:
+
+            .. code::
+
+                sub_traj = traj[m:n]
+                sub_traj.load_arrays()
+                sub_traj.positions
+        """
         N = self._max_N()
         self._types = [f.types for f in self.frames]
         pos = np.zeros((len(self), N, 3), dtype=self._dtype)
@@ -535,8 +608,14 @@ class Trajectory(BaseTrajectory):
         self._orientations = ort
 
     def set_dtype(self, value):
+        """Change the data type of this trajectory.
+
+        This function cannot be called if any frame
+        is already loaded.
+
+        :param value: The new data type value."""
         self._dtype = value
-        for x in (self._types, self._positions, self._orientations):
+        for x in (self._positions, self._orientations):
             if x is not None:
                 x = x.astype(value)
         for frame in self.frames:
@@ -544,17 +623,40 @@ class Trajectory(BaseTrajectory):
 
     @property
     def types(self):
-        self._assert_arrays_loaded()
+        """Access the particle types as numpy array.
+
+        :returns: particles types as (Nx1) array
+        :rtype: :class:`numpy.ndarray` (dtype= :class:`numpy.str_` )
+        :raises RuntimeError: When accessed before
+            calling :meth:`~.load_arrays` or
+            :meth:`~.Trajectory.load`."""
+        self._assertarrays_loaded()
         return np.asarray(self._types, dtype=np.str_)
 
     @property
     def positions(self):
-        self._assert_arrays_loaded()
+        """Access the particle positions as numpy array.
+
+        :returns: particle positions as (Nx3) array
+        :rtype: :class:`numpy.ndarray`
+        :raises RuntimeError: When accessed before
+            calling :meth:`~.load_arrays` or
+            :meth:`~.Trajectory.load`."""
+        self._assertarrays_loaded()
         return np.asarray(self._positions, dtype=self._dtype)
 
     @property
     def orientations(self):
-        self._assert_arrays_loaded()
+        """Access the particle orientations as numpy array.
+
+        Orientations are stored as quaternions.
+
+        :returns: particle orientations as (Nx4) array
+        :rtype: :class:`numpy.ndarray`
+        :raises RuntimeError: When accessed before
+            calling :meth:`~.load_arrays` or
+            :meth:`~.Trajectory.load`."""
+        self._assertarrays_loaded()
         return np.asarray(self._orientations, dtype=self._dtype)
 
 
@@ -621,7 +723,7 @@ def _flip_if_required(box, positions):
 
 
 def _calc_box(v, dimensions):
-    # source: http://codeblue.umich.edu/hoomd-blue/doc/page_box.html
+    # source: http://codeblue.umich.edu/HOOMD-blue/doc/page_box.html
     Lx = np.sqrt(np.dot(v[0], v[0]))
     a2x = np.dot(v[0], v[1]) / Lx
     Ly = np.sqrt(np.dot(v[1], v[1]) - a2x * a2x)
@@ -660,14 +762,14 @@ def _raw_frame_to_frame(raw_frame, dtype=None):
 
 
 def copyto_hoomd_blue_snapshot(frame, snapshot):
-    "Copy the frame into a hoomd-blue snapshot."
+    "Copy the frame into a HOOMD-blue snapshot."
     np.copyto(snapshot.particles.position, frame.positions)
     np.copyto(snapshot.particles.orientation, frame.orientations)
     return snapshot
 
 
 def copyfrom_hoomd_blue_snapshot(frame, snapshot):
-    """"Copy the hoomd-blue snapshot into the frame.
+    """"Copy the HOOMD-blue snapshot into the frame.
 
     Note that only the box, types, positions and
     orientations will be copied."""
@@ -681,7 +783,7 @@ def copyfrom_hoomd_blue_snapshot(frame, snapshot):
 
 
 def make_hoomd_blue_snapshot(frame):
-    "Create a hoomd-blue snapshot from the frame instance."
+    "Create a HOOMD-blue snapshot from the frame instance."
     try:
         from hoomd import data
     except ImportError:

@@ -9,17 +9,20 @@ POS-Files
 .. autoclass:: glotzformats.reader.PosFileReader
     :members:
     :undoc-members:
+    :inherited-members:
 
 .. autoclass:: glotzformats.writer.PosFileWriter
     :members:
     :undoc-members:
+    :inherited-members:
 
 GSD (hoomd schema)
 ------------------
 
-.. autoclass:: glotzformats.reader.GSDHoomdFileReader
+.. autoclass:: glotzformats.reader.GSDHOOMDFileReader
     :members:
     :undoc-members:
+    :inherited-members:
 
 GeTAR
 -----
@@ -27,6 +30,7 @@ GeTAR
 .. autoclass:: glotzformats.reader.GetarFileReader
     :members:
     :undoc-members:
+    :inherited-members:
 
 Hoomd-blue XML
 --------------
@@ -34,6 +38,7 @@ Hoomd-blue XML
 .. autoclass:: glotzformats.reader.HoomdBlueXMLFileReader
     :members:
     :undoc-members:
+    :inherited-members:
 
 DCD
 ---
@@ -41,13 +46,12 @@ DCD
 .. autoclass:: glotzformats.reader.DCDFileReader
     :members:
     :undoc-members:
+    :inherited-members:
 
-DCD (pure-python)
------------------
+.. autoclass:: glotzformats.dcdfilereader.DCDTrajectory
+    :members:
 
 .. autoclass:: glotzformats.reader.PyDCDFileReader
-    :members:
-    :undoc-members:
 
 CIF
 ---
@@ -55,3 +59,4 @@ CIF
 .. autoclass:: glotzformats.writer.CifFileWriter
     :members:
     :undoc-members:
+    :inherited-members:

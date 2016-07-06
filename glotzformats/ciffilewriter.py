@@ -45,7 +45,21 @@ def _determine_unitcell(box):
 
 
 class CifFileWriter(object):
-    """Write cif-files from a trajectory instance."""
+    """cif-file writer for the Glotzer Group, University of Michigan.
+
+    Authors: Julia Dshemuchadse, Carl Simon Adorf
+
+    .. code::
+
+        writer = CifFileWriter()
+
+        # write to screen:
+        write.write(trajetory)
+
+        # write to file:
+        with open('a_ciffile.pos', 'w') as ciffile:
+            writer.write(trajectory, ciffile)
+    """
 
     def _write_frame(self, frame, file, data, occupancy):
         from . import __version__
