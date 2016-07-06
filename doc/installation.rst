@@ -1,6 +1,11 @@
 Installation
 ============
 
+Requirements
+------------
+
+Installing the **glotzformats** package requires python 2.7.x or 3.x, and **numpy**.
+
 With conda
 ----------
 
