@@ -56,7 +56,7 @@ master_doc = 'index'
 
 # General information about the project.
 project = 'glotzformats'
-copyright = '2015, Carl Simon Adorf'
+copyright = '2015-2016, Carl Simon Adorf'
 author = 'Carl Simon Adorf'
 
 # The version info for the project you're documenting, acts as replacement for
