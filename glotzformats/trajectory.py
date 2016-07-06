@@ -547,17 +547,17 @@ class Trajectory(BaseTrajectory):
     @property
     def types(self):
         self._assert_arrays_loaded()
-        return self._types
+        return np.asarray(self._types, dtype=np.str_)
 
     @property
     def positions(self):
         self._assert_arrays_loaded()
-        return self._positions
+        return np.asarray(self._positions, dtype=self._dtype)
 
     @property
     def orientations(self):
         self._assert_arrays_loaded()
-        return self._orientations
+        return np.asarray(self._orientations, dtype=self._dtype)
 
 
 def _regularize_box(positions, orientations,

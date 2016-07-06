@@ -150,7 +150,7 @@ class DCDFrame(Frame):
         frame_header = _DCDFrameHeader(
             ** self.dcdreader.read_frame(self.stream, xyz, self.offset))
         self._box = np.asarray(_box_matrix_from_frame_header(frame_header)).T
-        self._positions = xyz.swapaxes(0, 1).astype(self._dtype, copy=False)
+        self._positions = xyz.swapaxes(0, 1)
 
     def _load(self, xyz=None, ort=None):
         N = int(self.file_header.n_particles)
@@ -160,9 +160,9 @@ class DCDFrame(Frame):
             ort = np.zeros((N, 4), dtype=self._dtype)
         self._read(xyz=xyz)
         if self.t_frame is None:
-            self._types = np.repeat(np.str_(self.default_type), len(self))
+            self._types = [self.default_type] * len(self)
         else:
-            self._types = np.copy(self.t_frame.types)
+            self._types = self.t_frame.types
         if self.t_frame is None or self.t_frame.box.dimensions == 3:
             ort.T[0] = 1.0
         elif self.t_frame.box.dimensions == 2:
@@ -189,7 +189,7 @@ class DCDFrame(Frame):
             self._load()
         assert self._loaded()
         raw_frame.box = self._box
-        raw_frame.types = self._types
+        raw_frame.types = copy.copy(self._types)
         raw_frame.positions = self._positions
         raw_frame.orientations = self._orientations
         assert len(raw_frame.types) == self.file_header.n_particles
@@ -220,9 +220,9 @@ class DCDTrajectory(Trajectory):
         for i, frame in enumerate(self.frames):
             if not frame._loaded():
                 frame._load(xyz=xyz[i], ort=ort[i])
-        self._positions = xyz.swapaxes(1, 2).astype(self._dtype, copy=False)
-        self._orientations = ort.astype(self._dtype, copy=False)
-        self._types = np.vstack((f._types for f in self.frames))
+        self._positions = xyz.swapaxes(1, 2)
+        self._orientations = ort
+        self._types = [f._types for f in self.frames]
 
     def xyz(self, xyz=None):
         """Return the xyz coordinates of the dcd file.
@@ -238,7 +238,7 @@ class DCDTrajectory(Trajectory):
             assert xyz.shape == shape
         for i, frame in enumerate(self.frames):
             frame._read(xyz[i])
-        return xyz.swapaxes(1, 2).astype(self._dtype, copy=False)
+        return xyz.swapaxes(1, 2)
 
 
 class _DCDFileReader(object):

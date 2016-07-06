@@ -48,7 +48,7 @@ class BaseDCDFileReaderTest(TrajectoryTest):
         traj = self.get_traj()
         self.assertEqual(len(traj), 10)
         self.assertEqual(len(traj[0]), 10)
-        self.assertTrue((traj[0].types == ['A']*10).all())
+        self.assertTrue((traj[0].types == np.asarray(['A']*10)).all())
         self.assertTrue(np.allclose(
             np.asarray(traj[0].box.get_box_matrix()),
             np.array([
