@@ -6,14 +6,6 @@ Authors: Matthew Spellings, Carl Simon Adorf
 
     reader = GetarFileReader()
     traj = reader.read(open('trajectory.tar', 'rb'))
-
-.. note::
-
-    The current implementation of the reader's read() method
-    requres a file-like object as argument, however the file-like
-    object needs to have a 'name' attribute, as the underlying
-    library is reading the file directly from disc.
-    The file object syntax is used for future compatibility.
 """
 
 import json
@@ -87,26 +79,37 @@ class GetarFrame(Frame):
 
 
 class GetarFileReader(object):
-    """Read GEneric Trajectory ARchive files, a binary format designed
-    for efficient, extensible storage of trajectory data."""
+    """getar-file reader for the Glotzer Group, University of Michigan.
 
-    def read(self, stream, default_type='A', default_box=np.diag([1.0] * 3)):
+    Authors: Matthew Spellings, Carl Simon Adorf
+
+    Read GEneric Trajectory ARchive files, a binary format designed
+    for efficient, extensible storage of trajectory data.
+
+    This class provides a wrapper for the gtar library.
+
+    .. code::
+
+        reader = GetarFileReader()
+        with open('trajectory.tar', 'rb') as file:
+            traj = reader.read(file)
+    """
+
+    def read(self, stream, default_type='A', default_box=None):
         """Read binary stream and return a trajectory instance.
-
-        .. note::
-
-            The current implementation of the reader's read() method
-            requres a file-like object as argument, however the file-like
-            object needs to have a 'name' attribute, as the underlying
-            library is reading the file directly from disc.
-            The file object syntax is used for future compatibility.
 
         :param stream: The stream, which contains the GeTarFile.
         :type stream: A file-like binary stream.
         :param default_type: The default particle type for
                              posfile dialects without type definition.
         :type default_type: str
+        :param default_box: The default_box value is used if no
+                            box is specified in the libgetar file.
+                            Defaults to [Lx=Ly=Lz=1.0].
+        :type default_box: :class:`numpy.ndarray`
         """
+        if default_box is None:
+            default_box = np.diag([1.0] * 3)
         try:
             filename = stream.name
         except AttributeError:

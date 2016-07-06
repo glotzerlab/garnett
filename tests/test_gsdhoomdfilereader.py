@@ -12,8 +12,8 @@ from test_trajectory import TrajectoryTest
 PYTHON_2 = sys.version_info[0] == 2
 
 
-class BaseGSDHoomdFileReaderTest(TrajectoryTest):
-    reader = glotzformats.reader.GSDHoomdFileReader
+class BaseGSDHOOMDFileReaderTest(TrajectoryTest):
+    reader = glotzformats.reader.GSDHOOMDFileReader
 
     def setUp(self):
         self.tmpfile = tempfile.NamedTemporaryFile()
@@ -23,7 +23,7 @@ class BaseGSDHoomdFileReaderTest(TrajectoryTest):
         return io.BytesIO(base64.b64decode(glotzformats.samples.GSD_BASE64))
 
     def read_top_trajectory(self):
-        top_reader = glotzformats.reader.HoomdBlueXMLFileReader()
+        top_reader = glotzformats.reader.HOOMDXMLFileReader()
         if PYTHON_2:
             return top_reader.read(io.StringIO(
                 unicode(glotzformats.samples.HOOMD_BLUE_XML)))  # noqa
@@ -33,7 +33,7 @@ class BaseGSDHoomdFileReaderTest(TrajectoryTest):
 
     def get_traj(self):
         top_traj = self.read_top_trajectory()
-        gsd_reader = glotzformats.reader.GSDHoomdFileReader()
+        gsd_reader = self.reader()
         gsdfile = io.BytesIO(base64.b64decode(glotzformats.samples.GSD_BASE64))
         return gsd_reader.read(gsdfile, top_traj[0])
 

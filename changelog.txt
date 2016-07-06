@@ -1,3 +1,13 @@
+0.3.0:
+
+	- Allow trajectory data acess via coherent numpy arrays.
+	- Provide a highly optimized cythonized DCDFileReader.
+	- Fix and optimize the pure-python DCDFileReader.
+	- Make snapshot creation and copying HOOMD-blue 2.0 compatible.
+	- Update the GSD module.
+	- Improve the Box class documentation.
+	- Overall improvement of the documentation.
+
 0.2.1:
 
 	- Fix an issue with injavis pos-files causing parser errors.

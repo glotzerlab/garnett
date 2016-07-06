@@ -37,7 +37,8 @@ To implement a new reader:
 
           :stream: A file-like object.
           :returns: :class:`.trajectory.Trajectory`
+
     7. Add your reader class to the `__all__` directive in the `src/glotzformats/reader.py` module.
     8. Provide a unit test for your reader, that reads a sample and generates a trajectory object accordingly.
 
-For an example, please see the :py:class:`.PosFileReader` implementation.
+For an example, please see the :py:class:`.GSDHOOMDFileReader` implementation.

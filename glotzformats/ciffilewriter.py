@@ -45,7 +45,21 @@ def _determine_unitcell(box):
 
 
 class CifFileWriter(object):
-    """Write cif-files from a trajectory instance."""
+    """cif-file writer for the Glotzer Group, University of Michigan.
+
+    Authors: Julia Dshemuchadse, Carl Simon Adorf
+
+    .. code::
+
+        writer = CifFileWriter()
+
+        # write to screen:
+        write.write(trajetory)
+
+        # write to file:
+        with open('a_ciffile.pos', 'w') as ciffile:
+            writer.write(trajectory, ciffile)
+    """
 
     def _write_frame(self, frame, file, data, occupancy):
         from . import __version__
@@ -107,7 +121,14 @@ class CifFileWriter(object):
 
         :param trajectory: The trajectory to serialize
         :type trajectory: :class:`~glotzformats.trajectory.Trajectory`
-        :param file: A file-like object."""
+        :param file: The file to write the trajectory to.
+        :type file: A file-like object.
+        :param data: Identifier which be will written to the file,
+            signifying the origin of the data.
+        :type data: str
+        :param occupancy: The default occupancy of individual particles.
+        :type occupancy: int
+        """
         for i, frame in enumerate(trajectory):
             self._write_frame(
                 frame=frame,
@@ -117,12 +138,18 @@ class CifFileWriter(object):
             logger.debug("Wrote frame {}.".format(i + 1))
         logger.info("Wrote {} frames.".format(i + 1))
 
-    def dump(self, trajectory):
+    def dump(self, trajectory, data='simulation', occupancy=1.0):
         """Serialize trajectory into cif-format.
 
         :param trajectory: The trajectory to serialize.
         :type trajectory: :class:`~glotzformats.trajectory.Trajectory`
-        :rtype: str"""
+        :param data: Identifier which be will written to the file,
+            signifying the origin of the data.
+        :type data: str
+        :param occupancy: The default occupancy of individual particles.
+        :type occupancy: int
+        :rtype: str
+        """
         f = io.StringIO()
         self.write(trajectory, f)
         return f.getvalue()

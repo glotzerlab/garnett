@@ -17,7 +17,7 @@ from itertools import chain
 import numpy as np
 
 from .posfilereader import POSFILE_FLOAT_DIGITS
-from .trajectory import SphereShapeDefinition
+from .trajectory import SphereShapeDefinition, ArrowShapeDefinition
 
 logger = logging.getLogger(__name__)
 PYTHON_2 = sys.version_info[0] == 2
@@ -31,7 +31,16 @@ def _num(x):
 
 
 class PosFileWriter(object):
-    """Write pos-files from a trajectory instance."""
+    """POS-file writer for the Glotzer Group, University of Michigan.
+
+    Author: Carl Simon Adorf
+
+    .. code::
+
+        writer = PosFileWriter()
+        with open('a_posfile.pos', 'w', encoding='utf-8') as posfile:
+            writer.write(trajectory, posfile)
+    """
 
     def write(self, trajectory, file=sys.stdout):
         """Serialize a trajectory into pos-format and write it to file.
@@ -79,6 +88,8 @@ class PosFileWriter(object):
                 shapedef = frame.shapedef.get(name, DEFAULT_SHAPE_DEFINITION)
                 if isinstance(shapedef, SphereShapeDefinition):
                     _write(' '.join((str(_num(v)) for v in pos)))
+                elif isinstance(shapedef, ArrowShapeDefinition):
+                    _write(' '.join((str(_num(v)) for v in chain(pos, rot[:3]))))
                 else:
                     _write(' '.join((str(_num(v)) for v in chain(pos, rot))))
             _write('eof')

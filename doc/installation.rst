@@ -1,12 +1,17 @@
 Installation
 ============
 
+Requirements
+------------
+
+Installing the **glotzformats** package requires python 2.7.x or 3.x, and **numpy**.
+
 With conda
 ----------
 
 .. sidebar:: Closed-source
 
-    **glotzformats** is not yet publicly released, installation via conda therefore requires access to the *private* Glotzer channel.
+    **glotzformats** is not publicly released, installation via conda therefore requires access to the *private* Glotzer channel.
 
 To install the package with conda_, execute
 

@@ -1,8 +1,12 @@
+==========
 Quickstart
 ==========
 
-Reading and writing
--------------------
+Reading and writing of trajectories
+===================================
+
+Readers and writers are defined in the ``reader`` and ``writer`` modules.
+The following code uses the :py:class:`~.reader.PosFileReader` and :py:class:`~.writer.PosFileWriter` as example.
 
 .. code-block:: python
 
@@ -25,62 +29,83 @@ Reading and writing
 
 
 Data access
------------
+===========
 
-Access individual frames or create sub-trajectories by indexing.
+Indexing and slicing
+--------------------
+
+Once you read a trajectory, access individual frames or sub-trajectories by indexing and slicing:
 
 .. code-block:: python
 
-    # Select individual frams
+    # Select individual frames:
     first_frame = traj[0]
     last_frame = traj[-1]
     n_th_frame = traj[n]
     # and so on
 
     # Create a sub-trajectory from the ith frame
-    # to the (j-1)th frame.
+    # to the (j-1)th frame:
     sub_trajectory = traj[i:j]
 
     # We can use advanced slicing techniques:
     every_second_frame = traj[::2]
     the_last_ten_frames = traj[-10::]
 
-You can iterate over trajectories for fast data access.
+The actual trajectory data is then either accessed on a *per trajectory* or *per frame* basis.
+
+Trajectory array access
+-----------------------
+
+Access positions, orientations and types as coherent numpy arrays, by calling the :py:meth:`~.trajectory.Trajectory.load_arrays` method.
+This method will load the complete trajectory into memory and make positions, orientations and types available via properties:
 
 .. code-block:: python
 
-    # Iterate over a trajectory directly for data access
-    for frame in traj:
-      print(frame.positions)
+    traj.load_arrays()
+    traj.positions      # MxNx3 array
+    traj.orientations   # MxNx4 array
+    traj.types          # MxN array
 
-    # Iterate over indeces for data modification
-    for i in range(len(traj)):
-        traj[i].box = # ...
+    # where M=len(traj), N=max((len(f) for f in traj))
 
-Access properties of individual frames:
+Individual frame access
+-----------------------
+
+Inidividual frame objects can be accessed via indexing of a (sub-)trajectory object:
 
 .. code-block:: python
 
     frame = traj[i]
-    frame.box           # 3x3 matrix
-    frame.types         # Nx1
-    frame.positions     # Nx3
-    frame.orientations  # Nx4
+    frame.box           # Instance of trajectory.box
+    frame.positions     # Nx3 array
+    frame.orientations  # Nx4 array
+    frame.types         # Nx1 array
     frame.data          # A dictionary of lists for each attribute
     frame.data_key      # A list of strings
     frame.shapedef      # A ordered dictionary of instances of ShapeDefinition.
 
-All matrices are `numpy` arrays.
+Iterating over trajectories
+---------------------------
 
-Efficient trajectory modification
----------------------------------
+Iterating over trajectories it the most **memory-efficient** form of data access.
+Each frame will be loaded *prior* to access and unloaded *post* access, such that there is only one frame loaded into memory at the same time.
 
-Modification of big trajectory data without keeping all data in memory requires live reading and writing to disk.
+.. code-block:: python
+
+    # Iterate over a trajectory directly for read-only data access
+    for frame in traj:
+        print(frame.positions)
+
+Efficient modification of trajectories
+======================================
+
+Use a combination of reading, writing, and iteration for **memory-efficient** modification of large trajectory data.
 This is an example on how to modify frames in-place:
 
 .. code-block:: python
 
-    import numpy
+    import numpy as np
 
     from glotzformats.reader import PosFileReader
     from glotzformats.reader import PosFileWriter
@@ -98,13 +123,51 @@ This is an example on how to modify frames in-place:
         traj_centered = Trajectory((center(frame) for frame in traj))
         pos_writer.write(traj_centered)
 
+Loading trajectories into memory
+================================
 
-Example use with hoomd-blue
----------------------------
+The :py:class:`~.trajectory.Trajectory` class is designed to be *memory-efficient*.
+This means that loading all trajectory data into memory requires an explicit call of the :py:meth:`~.Trajectory.load` or :py:meth:`~.Trajectory.load_arrays` methods.
 
 .. code-block:: python
 
-    from hoomd_script import init
+    # Make trajectory data accessible via arrays:
+    traj.load_arrays()
+    traj.positions
+
+    # Load all frames:
+    traj.load()
+    frame = traj[i]
+    traj.positions    # load() also loads arrays
+
+.. note::
+
+    In general, loading all frames with :py:meth:`~.Trajectory.load` is more expensive than just loading arrays with :py:meth:`~.Trajectory.load_arrays`.
+    Loading all frames also loads the arrays.
+
+Sub-trajectories inherit already loaded data:
+
+.. code-block:: python
+
+    traj.load_arrays()
+    sub_traj = traj[i:j]
+    sub_traj.positions
+
+.. tip::
+
+    If you are only interested in sub-trajectory data, consider to call :py:meth:`~.Trajectory.load` or :py:meth:`~.Trajectory.load_arrays` only for the sub-trajectory.
+
+
+Example use with HOOMD-blue
+===========================
+
+The **glotzformats** frames can be used to initialize HOOMD-blue by creating snapshots with the :py:meth:`~.Frame.make_snapshot` method or by copying the frame data to existing snapshots with the :py:meth:`~.Frame.copyto_snapshot` methods:
+
+.. code-block:: python
+
+    from hoomd import init
+    # For versions <2.x: from hoomd_script import init
+
     from glotzformats.reader import PosFileReader
 
     pos_reader = PosFileReader()
@@ -118,8 +181,3 @@ Example use with hoomd-blue
         # Restore last frame
         snapshot = system.take_snapshot()
         traj[-1].copyto_snapshot(snapshot)
-
-
-.. note::
-
-    Use hoomd's native pos-file *writer* whenever possible.
