@@ -511,11 +511,12 @@ class Trajectory(BaseTrajectory):
 
     def _assert_loaded(self):
         if not self.loaded():
-            raise RuntimeError("Trajectory not loaded.")
+            raise RuntimeError("Trajectory not loaded! Use load().")
 
     def _assert_arrays_loaded(self):
         if not self._arrays_loaded():
-            raise RuntimeError("Trajectory arrays not loaded.")
+            raise RuntimeError(
+                "Trajectory arrays not loaded! Use load_arrays() or load().")
 
     def _max_N(self):
         return max((len(f) for f in self.frames))
