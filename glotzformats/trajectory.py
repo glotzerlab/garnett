@@ -457,22 +457,19 @@ class ImmutableTrajectory(BaseTrajectory):
 
 
 class Trajectory(BaseTrajectory):
-    """A trajectory is a sequence of :class:`~.Frame` instances.
+    """Manages a particle trajectory data resource.
 
-    The length of a trajectory is obtained via `len`.
+    A trajectory is basically a sequence of :class:`~.Frame` instances.
 
-    .. code::
-
-        M = len(trajectory)
-
-    Trajectory data can either be accessed as a coherent numpy array:
+    Trajectory data can either be accessed as coherent numpy arrays:
 
     .. code::
 
         traj.load_arrays()
-        pos = traj.positions     # MxNx3
-        ort = traj.orientations  # MxNx4
-        typ = traj.types         # MxNx1
+        M = len(traj)
+        traj.positions     # MxNx3
+        traj.orientations  # MxNx4
+        traj.types         # MxNx1
 
     or by individual frames:
 
@@ -482,18 +479,18 @@ class Trajectory(BaseTrajectory):
         last_frame = traj[-1]
         n_th_frame = traj[n]
 
-        pos = first_frame.positions     # Nx3
-        ort = first_frame.orientations  # Nx4
-        typ = first_frame.types         # Nx1
+        first_frame.positions     # Nx3
+        first_frame.orientations  # Nx4
+        first_frame.types         # Nx1
 
-    You can iterate through individual frames like this:
+    You can iterate through individual frames:
 
     .. code::
 
         for frame in trajectory:
             print(frame.positions)
 
-    Create a sub-trajectory from the i'th to the (j-1)'th frame:
+    and create a sub-trajectory from the *i'th* to the *(j-1)'th* frame:
 
     .. code::
 
@@ -571,9 +568,9 @@ class Trajectory(BaseTrajectory):
         .. code::
 
             traj.load_arrays()
-            pos = traj.positions     # MxNx3
-            ort = traj.orientations  # MxNx4
-            typ = traj.types         # MxNx1
+            traj.positions     # MxNx3
+            traj.orientations  # MxNx4
+            traj.types         # MxNx1
 
         .. note::
 

@@ -228,9 +228,20 @@ class DCDTrajectory(Trajectory):
     def xyz(self, xyz=None):
         """Return the xyz coordinates of the dcd file.
 
-        This is the most efficient way to acess xyz coordinates
-        of dcd trajectories. Use this function for best
-        performance."""
+        Use this function to access xyz-coordinates with minimal
+        overhead and maximal performance.
+
+        You can provide a reference to an existing numpy.ndarray
+        with shape (Mx3xN), where M is the length of the trajectory
+        and N is the number of particles.
+        Please note that the array needs to be of data type float32
+        and in-memory contiguous.
+
+        :param xyz: A numpy array of shape (Mx3xN).
+        :type xyz: numpy.ndarray
+        :returns: A view or a copy of the xyz-array of shape (MxNx3).
+        :rtype: numpy.ndarray
+        """
         shape = (len(self), 3, len(self.frames[0]))
         if xyz is None:
             xyz = np.zeros(shape, dtype=np.float32)

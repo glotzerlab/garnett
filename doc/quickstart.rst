@@ -2,10 +2,11 @@
 Quickstart
 ==========
 
-Reading and writing
-===================
+Reading and writing of trajectories
+===================================
 
 Readers and writers are defined in the ``reader`` and ``writer`` modules.
+The following code uses the :py:class:`~.reader.PosFileReader` and :py:class:`~.writer.PosFileWriter` as example.
 
 .. code-block:: python
 
@@ -29,6 +30,9 @@ Readers and writers are defined in the ``reader`` and ``writer`` modules.
 
 Data access
 ===========
+
+Indexing and slicing
+--------------------
 
 Once you read a trajectory, access individual frames or sub-trajectories by indexing and slicing:
 
@@ -73,7 +77,7 @@ Inidividual frame objects can be accessed via indexing of a (sub-)trajectory obj
 .. code-block:: python
 
     frame = traj[i]
-    frame.box           # 3x3 array
+    frame.box           # Instance of trajectory.box
     frame.positions     # Nx3 array
     frame.orientations  # Nx4 array
     frame.types         # Nx1 array
@@ -85,15 +89,18 @@ Iterating over trajectories
 ---------------------------
 
 Iterating over trajectories it the most **memory-efficient** form of data access.
-Each frame will be loaded prior to access and unloaded post access, such that there is only one frame loaded into memory at the same time.
+Each frame will be loaded *prior* to access and unloaded *post* access, such that there is only one frame loaded into memory at the same time.
 
 .. code-block:: python
 
     # Iterate over a trajectory directly for read-only data access
     for frame in traj:
-      print(frame.positions)
+        print(frame.positions)
 
-Use a combination of reading, writing and iteration for **memory-efficient** modification of large trajectory data.
+Efficient modification of trajectories
+======================================
+
+Use a combination of reading, writing, and iteration for **memory-efficient** modification of large trajectory data.
 This is an example on how to modify frames in-place:
 
 .. code-block:: python
@@ -117,10 +124,10 @@ This is an example on how to modify frames in-place:
         pos_writer.write(traj_centered)
 
 Loading trajectories into memory
---------------------------------
+================================
 
-The :py:class:`~.trajectory.Trajectory` is designed to be as *memory-efficient* as possible by default.
-This means that loading trajectory data into memory requires an explicit call of the :py:meth:`~.Trajectory.load` or :py:meth:`~.Trajectory.load_arrays` methods.
+The :py:class:`~.trajectory.Trajectory` class is designed to be *memory-efficient*.
+This means that loading all trajectory data into memory requires an explicit call of the :py:meth:`~.Trajectory.load` or :py:meth:`~.Trajectory.load_arrays` methods.
 
 .. code-block:: python
 
@@ -135,7 +142,7 @@ This means that loading trajectory data into memory requires an explicit call of
 
 .. note::
 
-    In general, :py:meth:`~.Trajectory.load` is more expensive than :py:meth:`~.Trajectory.load_arrays`.
+    In general, loading all frames with :py:meth:`~.Trajectory.load` is more expensive than just loading arrays with :py:meth:`~.Trajectory.load_arrays`.
     Loading all frames also loads the arrays.
 
 Sub-trajectories inherit already loaded data:

@@ -21,7 +21,8 @@ class PyDCDFileReader(_DCDFileReader):
 
     This class is a pure python dcd-reader implementation
     which should only be used when the more efficient
-    cythonized dcd-reader is not available.
+    cythonized dcd-reader is not available or you want to
+    work with non-standard file-like objects.
 
     .. seealso:: The API is identical to: :py:class:`~.DCDFileReader`"""
     pass

@@ -1,5 +1,8 @@
-Access to Trajectory Data
-=========================
+Trajectory API
+==============
+
+Instances of :py:class:`~.trajectory.Trajectory` give access to trajectory data stored in files and *file-like* objects.
+In the simplest case, trajectories are just a sequence of :py:class:`~.trajectory.Frame` instances.
 
 Trajectories
 ------------
@@ -12,6 +15,8 @@ Trajectories
 Frames
 ------
 
+Trajectory data can be accessed via individual frames.
+
 .. autoclass:: glotzformats.trajectory.Frame
    :members:
    :undoc-members:
@@ -19,6 +24,8 @@ Frames
 
 Box
 ---
+
+The box instance gives access to the box of individual frames.
 
 .. autoclass:: glotzformats.trajectory.Box
    :members:
@@ -28,6 +35,8 @@ Box
 
 Shape Definitions
 -----------------
+
+Shape definitions contain information about the shape of individual particles.
 
 .. autoclass:: glotzformats.trajectory.ShapeDefinition
    :members:

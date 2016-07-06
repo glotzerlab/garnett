@@ -48,7 +48,7 @@ class HOOMDXMLFrame(Frame):
 
 
 class HOOMDXMLFileReader(object):
-    """Read hoomdblue-xml-files."""
+    "Reader for XML-files containing HOOMD-blue snapshots."
 
     def read(self, stream):
         """Read text stream and return a trajectory instance.

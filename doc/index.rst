@@ -17,6 +17,7 @@ glotzformats - documentation
    quickstart
    readerswriters
    trajectory
+   formats
    development
 
 
