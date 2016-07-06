@@ -523,17 +523,14 @@ class Trajectory(BaseTrajectory):
 
     def load_arrays(self):
         N = self._max_N()
-        typ = np.zeros((len(self), N), dtype=np.str_)
+        self._types = [f.types for f in self.frames]
         pos = np.zeros((len(self), N, 3), dtype=self._dtype)
         ort = np.zeros((len(self), N, 4), dtype=self._dtype)
         for i, frame in enumerate(self.frames):
-            st = len(frame.types)
-            typ[i][:st] = frame.types
             sp = frame.positions.shape
             pos[i][:sp[0], :sp[1]] = frame.positions
             so = frame.orientations.shape
             ort[i][:so[0], :so[1]] = frame.orientations
-        self._types = typ
         self._positions = pos
         self._orientations = ort
 
