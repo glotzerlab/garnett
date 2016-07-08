@@ -1,3 +1,7 @@
+0.3.1:
+
+	- Update the GSD hoomd module.
+
 0.3.0:
 
 	- Allow trajectory data acess via coherent numpy arrays.
