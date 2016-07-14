@@ -53,7 +53,12 @@ class GSDHoomdFrame(Frame):
         super(GSDHoomdFrame, self).__init__()
 
     def read(self):
-        raw_frame = copy.deepcopy(self.t_frame)
+        raw_frame = _RawFrameData()
+        if self.t_frame is not None:
+            raw_frame.data = copy.deepcopy(self.t_frame.data)
+            raw_frame.data_keys = copy.deepcopy(self.t_frame.data_keys)
+            raw_frame.shapedef = copy.deepcopy(self.t_frame.shapedef)
+            raw_frame.box_dimensions = self.t_frame.box.dimensions
         frame = self.traj.read_frame(self.frame_index)
         raw_frame.box = _box_matrix(frame.configuration.box)
         raw_frame.types = [frame.particles.types[t]
