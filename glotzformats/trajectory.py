@@ -467,9 +467,11 @@ class Trajectory(BaseTrajectory):
 
         traj.load_arrays()
         M = len(traj)
+        traj.N             # M
         traj.positions     # MxNx3
         traj.orientations  # MxNx4
-        traj.types         # MxNx1
+        traj.types         # MxN
+        traj.type_ids      # MxN
 
     or by individual frames:
 
@@ -574,11 +576,11 @@ class Trajectory(BaseTrajectory):
         .. code::
 
             traj.load_arrays()
-            traj.N             # Mx1
+            traj.N             # M -- frame sizes
             traj.positions     # MxNx3
             traj.orientations  # MxNx4
-            traj.types         # MxNx1
-            traj.type_ids      # MxNx1
+            traj.types         # MxN
+            traj.type_ids      # MxN
 
         .. note::
 
@@ -651,8 +653,14 @@ class Trajectory(BaseTrajectory):
     def N(self):
         """Access the frame sizes as numpy array.
 
-        :returns: frame size as (Mx1) array
-        :rtype :class:`numpy.ndarray` (dtype= :class:`numpy.int_)
+        Mostly important when the trajectory has varying size.
+
+        .. code::
+
+            pos_i = traj.positions[i][0:traj.N[i]]
+
+        :returns: frame size as array with length M
+        :rtype: :class:`numpy.ndarray` (dtype= :class:`numpy.int_`)
         :raises RuntimeError: When accessed before
             calling :meth:`~.load_arrays` or
             :meth:`~.Trajectory.load`."""
@@ -663,7 +671,7 @@ class Trajectory(BaseTrajectory):
     def types(self):
         """Access the particle types as numpy array.
 
-        :returns: particles types as (MxNx1) array
+        :returns: particles types as (MxN) array
         :rtype: :class:`numpy.ndarray` (dtype= :class:`numpy.str_` )
         :raises RuntimeError: When accessed before
             calling :meth:`~.load_arrays` or
@@ -673,7 +681,15 @@ class Trajectory(BaseTrajectory):
 
     @property
     def type(self):
-        """Access the particle type array.
+        """List of type names ordered by type_id.
+
+        Use the type list to map between type_ids and type names:
+
+        .. code::
+
+            type_name = traj.type[type_id]
+
+        See also: :attr:`~.Trajectory.type_ids`
 
         :returns: particle types in order of type id.
         :rtype: list
@@ -687,7 +703,9 @@ class Trajectory(BaseTrajectory):
     def type_ids(self):
         """Access the particle type ids as numpy array.
 
-        :returns: particle type ids as (MxNx1) array.
+        See also: :attr:`~.Trajectory.type`
+
+        :returns: particle type ids as (MxN) array.
         :rtype: :class:`numpy.ndarray` (dtype= :class:`numpy.int_` )
         :raises RuntimeError: When accessed before
             calling :meth:`~.load_arrays` or

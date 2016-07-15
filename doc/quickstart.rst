@@ -63,9 +63,12 @@ This method will load the complete trajectory into memory and make positions, or
 .. code-block:: python
 
     traj.load_arrays()
+    traj.N              # M  -- frame sizes
     traj.positions      # MxNx3 array
     traj.orientations   # MxNx4 array
     traj.types          # MxN array
+    traj.type_ids       # MxN array
+    traj.type           # list of type names ordered by type_id
 
     # where M=len(traj), N=max((len(f) for f in traj))
 
