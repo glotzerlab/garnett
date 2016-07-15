@@ -44,7 +44,8 @@ import numpy as np
 from numpy.core import numeric as _nx
 from numpy.core.numeric import asanyarray
 
-from .trajectory import _RawFrameData, Frame, Trajectory
+from .trajectory import Frame, Trajectory
+from .trajectory import _RawFrameData, _generate_type_id_array
 from . import pydcdreader
 
 logger = logging.getLogger(__name__)
@@ -212,18 +213,36 @@ class DCDFrame(Frame):
 class DCDTrajectory(Trajectory):
 
     def load_arrays(self):
-        xyz = np.ascontiguousarray(
-            np.zeros((len(self), 3, len(self.frames[0]))),
-            dtype=np.float32)
-        ort = np.zeros(
-            (len(self), len(self.frames[0]), 4),
-            dtype=self._dtype)
+        # Determine array shapes
+        M = len(self)
+        N = len(self.frames[0])
+        _N = np.ones(M) * N
+
+        # Coordinates
+        xyz = np.zeros((M, 3, N), dtype=np.float32)
+        ort = np.zeros((M, N, 4), dtype=self._dtype)
         for i, frame in enumerate(self.frames):
             if not frame._loaded():
                 frame._load(xyz=xyz[i], ort=ort[i])
-        self._positions = xyz.swapaxes(1, 2)
-        self._orientations = ort
-        self._types = [f._types for f in self.frames]
+
+        # Types, Can only be handled after frame._load() calls.
+        types = [f._types for f in self.frames]
+        type_ids = np.zeros((len(self), N), dtype=np.int_)
+        _type = _generate_type_id_array(types, type_ids)
+
+        try:
+            # Perform swap
+            self._N = _N
+            self._type = _type
+            self._types = types
+            self._type_ids = type_ids
+            self._positions = xyz.swapaxes(1, 2)
+            self._orientations = ort
+        except Exception:
+            # Ensure consistent error state
+            self._N = self._type = self._types = self._type_ids = \
+                self._positions = self._orientations = None
+            raise
 
     def xyz(self, xyz=None):
         """Return the xyz coordinates of the dcd file.
