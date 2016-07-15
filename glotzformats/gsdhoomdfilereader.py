@@ -105,8 +105,6 @@ class GSDHOOMDFileReader(object):
         :param frame: A frame containing shape information
             that is not encoded in the GSD-format.
         :type frame: :class:`trajectory.Frame`"""
-        if frame is None:
-            frame = _RawFrameData()
         traj = gsdhoomd.HOOMDTrajectory(pygsd.GSDFile(stream))
         frames = [GSDHoomdFrame(traj, i, t_frame=frame)
                   for i in range(len(traj))]
