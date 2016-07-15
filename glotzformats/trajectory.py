@@ -467,9 +467,11 @@ class Trajectory(BaseTrajectory):
 
         traj.load_arrays()
         M = len(traj)
+        traj.N             # M
         traj.positions     # MxNx3
         traj.orientations  # MxNx4
-        traj.types         # MxNx1
+        traj.types         # MxN
+        traj.type_ids      # MxN
 
     or by individual frames:
 
@@ -506,7 +508,10 @@ class Trajectory(BaseTrajectory):
         if dtype is None:
             dtype = DEFAULT_DTYPE
         self._dtype = dtype
+        self._N = None
+        self._type = None
         self._types = None
+        self._type_ids = None
         self._positions = None
         self._orientations = None
 
@@ -540,7 +545,10 @@ class Trajectory(BaseTrajectory):
         """Returns true if arrays are loaded into memory.
 
         See also: :meth:`~.load_arrays`"""
-        return not (self._types is None or
+        return not (self._N is None or
+                    self._type is None or
+                    self._types is None or
+                    self._type_ids is None or
                     self._positions is None or
                     self._orientations is None)
 
@@ -568,9 +576,11 @@ class Trajectory(BaseTrajectory):
         .. code::
 
             traj.load_arrays()
+            traj.N             # M -- frame sizes
             traj.positions     # MxNx3
             traj.orientations  # MxNx4
-            traj.types         # MxNx1
+            traj.types         # MxN
+            traj.type_ids      # MxN
 
         .. note::
 
@@ -592,17 +602,38 @@ class Trajectory(BaseTrajectory):
                 sub_traj.load_arrays()
                 sub_traj.positions
         """
-        N = self._max_N()
-        self._types = [f.types for f in self.frames]
-        pos = np.zeros((len(self), N, 3), dtype=self._dtype)
-        ort = np.zeros((len(self), N, 4), dtype=self._dtype)
+        # Determine array shapes
+        _N = np.array([len(f) for f in self.frames], dtype=np.int_)
+        M = len(self)
+        N = _N.max()
+
+        # Types
+        types = [f.types for f in self.frames]
+        type_ids = np.zeros((M, N), dtype=np.int_)
+        _type = _generate_type_id_array(types, type_ids)
+
+        # Coordinates
+        pos = np.zeros((M, N, 3), dtype=self._dtype)
+        ort = np.zeros((M, N, 4), dtype=self._dtype)
         for i, frame in enumerate(self.frames):
             sp = frame.positions.shape
             pos[i][:sp[0], :sp[1]] = frame.positions
             so = frame.orientations.shape
             ort[i][:so[0], :so[1]] = frame.orientations
-        self._positions = pos
-        self._orientations = ort
+
+        try:
+            # Perform swap
+            self._N = _N
+            self._type = _type
+            self._types = types
+            self._type_ids = type_ids
+            self._positions = pos
+            self._orientations = ort
+        except Exception:
+            # Ensure consistent error state
+            self._N = self._type = self._types = self._type_ids = \
+                self._positions = self._orientations = None
+            raise
 
     def set_dtype(self, value):
         """Change the data type of this trajectory.
@@ -619,16 +650,68 @@ class Trajectory(BaseTrajectory):
             frame.dtype = value
 
     @property
+    def N(self):
+        """Access the frame sizes as numpy array.
+
+        Mostly important when the trajectory has varying size.
+
+        .. code::
+
+            pos_i = traj.positions[i][0:traj.N[i]]
+
+        :returns: frame size as array with length M
+        :rtype: :class:`numpy.ndarray` (dtype= :class:`numpy.int_`)
+        :raises RuntimeError: When accessed before
+            calling :meth:`~.load_arrays` or
+            :meth:`~.Trajectory.load`."""
+        self._assertarrays_loaded()
+        return np.asarray(self._N, dtype=np.int_)
+
+    @property
     def types(self):
         """Access the particle types as numpy array.
 
-        :returns: particles types as (Nx1) array
+        :returns: particles types as (MxN) array
         :rtype: :class:`numpy.ndarray` (dtype= :class:`numpy.str_` )
         :raises RuntimeError: When accessed before
             calling :meth:`~.load_arrays` or
             :meth:`~.Trajectory.load`."""
         self._assertarrays_loaded()
         return np.asarray(self._types, dtype=np.str_)
+
+    @property
+    def type(self):
+        """List of type names ordered by type_id.
+
+        Use the type list to map between type_ids and type names:
+
+        .. code::
+
+            type_name = traj.type[type_id]
+
+        See also: :attr:`~.Trajectory.type_ids`
+
+        :returns: particle types in order of type id.
+        :rtype: list
+        :raises RuntimeError: When accessed before
+            calling :meth:`~.load_arrays` or
+            :meth:`~.Trajectory.load`."""
+        self._assertarrays_loaded()
+        return self._type
+
+    @property
+    def type_ids(self):
+        """Access the particle type ids as numpy array.
+
+        See also: :attr:`~.Trajectory.type`
+
+        :returns: particle type ids as (MxN) array.
+        :rtype: :class:`numpy.ndarray` (dtype= :class:`numpy.int_` )
+        :raises RuntimeError: When accessed before
+            calling :meth:`~.load_arrays` or
+            :meth:`~.Trajectory.load`."""
+        self._assertarrays_loaded()
+        return np.asarray(self._type_ids, dtype=np.int_)
 
     @property
     def positions(self):
@@ -735,6 +818,15 @@ def _calc_box(v, dimensions):
     if dimensions == 2:
         assert Lz == 1
     return Box(Lx=Lx, Ly=Ly, Lz=Lz, xy=xy, xz=xz, yz=yz, dimensions=dimensions)
+
+
+def _generate_type_id_array(types, type_ids):
+    "Generate type_id array."
+    _type = sorted(set(t_ for t in types for t_ in t))
+    for i, t in enumerate(types):
+        for j, t_ in enumerate(t):
+            type_ids[i][j] = _type.index(t_)
+    return _type
 
 
 def _raw_frame_to_frame(raw_frame, dtype=None):

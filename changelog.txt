@@ -1,3 +1,9 @@
+0.3.2:
+
+	- Add trajectory.N, trajectory.type and trajectory.type_ids as
+		an alternative mode to access frame length and type information.
+	- Fix bug in GSDHOOMDFileReader when not providing template frame.
+
 0.3.1:
 
 	- Update the GSD hoomd module.
