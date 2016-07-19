@@ -815,8 +815,6 @@ def _calc_box(v, dimensions):
     xz = a3x / Lz
     yz = (np.dot(v[1], v[2]) - a2x * a3x) / (Ly * Lz)
     assert 1 < dimensions <= 3
-    if dimensions == 2:
-        assert Lz == 1
     return Box(Lx=Lx, Ly=Ly, Lz=Lz, xy=xy, xz=xz, yz=yz, dimensions=dimensions)
 
 
