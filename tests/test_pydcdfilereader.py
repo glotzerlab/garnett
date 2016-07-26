@@ -13,22 +13,14 @@ PYTHON_2 = sys.version_info[0] == 2
 
 
 class BaseDCDFileReaderTest(TrajectoryTest):
-    reader = glotzformats.reader.DCDFileReader
+    reader = glotzformats.reader.PyDCDFileReader
 
     def setUp(self):
-        self.tmpfiles = []
-
-    def close_tmp(self):
-        self.tmpfiles.pop().close()
+        self.tmpfile = tempfile.NamedTemporaryFile()
+        self.addCleanup(self.tmpfile.close)
 
     def get_sample_file(self):
-        tmp = tempfile.TemporaryFile()
-        self.tmpfiles.append(tmp)
-        self.addCleanup(self.close_tmp)
-        tmp.write(base64.b64decode(glotzformats.samples.DCD_BASE64))
-        tmp.flush()
-        tmp.seek(0)
-        return tmp
+        return io.BytesIO(base64.b64decode(glotzformats.samples.DCD_BASE64))
 
     def read_top_trajectory(self):
         top_reader = glotzformats.reader.HOOMDXMLFileReader()
@@ -41,14 +33,13 @@ class BaseDCDFileReaderTest(TrajectoryTest):
 
     def get_traj(self):
         top_traj = self.read_top_trajectory()
-        return self.reader().read(self.get_sample_file(), top_traj[0])
+        dcdfile = io.BytesIO(base64.b64decode(glotzformats.samples.DCD_BASE64))
+        return self.reader().read(dcdfile, top_traj[0])
 
     def test_read(self):
-        top_traj = self.read_top_trajectory()
         traj = self.get_traj()
         self.assertEqual(len(traj), 10)
         self.assertEqual(len(traj[0]), 10)
-        self.assertTrue((traj[0].types == np.asarray(['A']*10)).all())
         self.assertTrue(np.allclose(
             np.asarray(traj[0].box.get_box_matrix()),
             np.array([

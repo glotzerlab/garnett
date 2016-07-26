@@ -17,14 +17,14 @@ import numpy as np
 
 from .trajectory import _RawFrameData, Frame, Trajectory, \
     SphereShapeDefinition, PolyShapeDefinition,\
-    FallbackShapeDefinition
+    ArrowShapeDefinition, FallbackShapeDefinition
 from .errors import ParserError, ParserWarning
 
 logger = logging.getLogger(__name__)
 
 POSFILE_FLOAT_DIGITS = 11
 COMMENT_CHARACTERS = ['//']
-TOKENS_SKIP = ['translation', 'rotation', 'antiAliasing', 'zoomFactor']
+TOKENS_SKIP = ['translation', 'rotation', 'antiAliasing', 'zoomFactor', 'connection']
 
 
 def _is_comment(line):
@@ -73,6 +73,8 @@ class PosFileFrame(Frame):
             shape_class = next(tokens)
             if shape_class.lower() == 'sphere':
                 diameter = float(next(tokens))
+            elif shape_class.lower() == 'arrow':
+                thickness = float(next(tokens))
             else:
                 num_vertices = int(next(tokens))
                 vertices = []
@@ -85,6 +87,8 @@ class PosFileFrame(Frame):
                 color = None
             if shape_class.lower() == 'sphere':
                 return SphereShapeDefinition(diameter=diameter, color=color)
+            elif shape_class.lower() == 'arrow':
+                return ArrowShapeDefinition(thickness=thickness, color=color)
             else:
                 return PolyShapeDefinition(shape_class=shape_class,
                                            vertices=vertices, color=color)
@@ -151,10 +155,16 @@ class PosFileFrame(Frame):
                     # assume we are reading positions now
                     if not monotype:
                         name = tokens[0]
-                        _assert(name in raw_frame.shapedef)
+                        if not name in raw_frame.shapedef:
+                            raw_frame.shapedef.setdefault(
+                                name, self._parse_shape_definition(' '.join(tokens[:3])))
                     else:
                         name = self.default_type
-                    if len(tokens) >= 7:
+                    if len(tokens) == 7 and isinstance(
+                            raw_frame.shapedef[name], ArrowShapeDefinition):
+                        xyz = tokens[-6:-3]
+                        quat = tokens[-3:] + [0]
+                    elif len(tokens) >= 7:
                         xyz = tokens[-7:-4]
                         quat = tokens[-4:]
                     elif len(tokens) >= 3:
@@ -173,7 +183,15 @@ class PosFileFrame(Frame):
 
 
 class PosFileReader(object):
-    """Read pos-files with different dialects.
+    """POS-file reader for the Glotzer Group, University of Michigan.
+
+        Authors: Carl Simon Adorf, Richmond Newmann
+
+        .. code::
+
+            reader = PosFileReader()
+            with open('a_posfile.pos', 'r', encoding='utf-8') as posfile:
+                return reader.read(posfile)
 
         :param precision: The number of digits to
                           round floating-point values to.

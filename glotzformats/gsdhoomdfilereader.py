@@ -14,8 +14,8 @@ The example is given for a hoomd-blue xml frame:
 
 .. code::
 
-    xml_reader = HoomdBlueXMLFileReader()
-    gsd_reader = GSDHoomdFileReader()
+    xml_reader = HOOMDXMLFileReader()
+    gsd_reader = GSDHOOMDFileReader()
 
     with open('init.xml') as xmlfile:
         with open('dump.gsd') as gsdfile:
@@ -53,7 +53,12 @@ class GSDHoomdFrame(Frame):
         super(GSDHoomdFrame, self).__init__()
 
     def read(self):
-        raw_frame = copy.deepcopy(self.t_frame)
+        raw_frame = _RawFrameData()
+        if self.t_frame is not None:
+            raw_frame.data = copy.deepcopy(self.t_frame.data)
+            raw_frame.data_keys = copy.deepcopy(self.t_frame.data_keys)
+            raw_frame.shapedef = copy.deepcopy(self.t_frame.shapedef)
+            raw_frame.box_dimensions = self.t_frame.box.dimensions
         frame = self.traj.read_frame(self.frame_index)
         raw_frame.box = _box_matrix(frame.configuration.box)
         raw_frame.types = [frame.particles.types[t]
@@ -66,8 +71,31 @@ class GSDHoomdFrame(Frame):
         return "GSDHoomdFrame(# frames={})".format(len(self.traj))
 
 
-class GSDHoomdFileReader(object):
-    """Read gsd trajectory files with hoomd schema.."""
+class GSDHOOMDFileReader(object):
+    """Hoomd-GSD-file reader for the Glotzer Group, University of Michigan.
+
+    Author: Carl Simon Adorf
+
+    This class provides a wrapper for the gsd.hoomd and the gsd.pygsd
+    trajectory reader implementation as part of the gsd package.
+
+    A gsd file may not contain all shape information.
+    To provide additional information it is possible
+    to pass a frame object, whose properties
+    are copied into each frame of the gsd trajectory.
+
+    The example is given for a hoomd-blue xml frame:
+
+    .. code::
+
+        xml_reader = HOOMDXMLFileReader()
+        gsd_reader = GSDHOOMDFileReader()
+
+        with open('init.xml') as xmlfile:
+            with open('dump.gsd', 'rb') as gsdfile:
+                xml_frame = xml_reader.read(xmlfile)[0]
+                traj = gsd_reader.read(gsdfile, xml_frame)
+    """
 
     def read(self, stream, frame=None):
         """Read binary stream and return a trajectory instance.
@@ -77,8 +105,6 @@ class GSDHoomdFileReader(object):
         :param frame: A frame containing shape information
             that is not encoded in the GSD-format.
         :type frame: :class:`trajectory.Frame`"""
-        if frame is None:
-            frame = _RawFrameData()
         traj = gsdhoomd.HOOMDTrajectory(pygsd.GSDFile(stream))
         frames = [GSDHoomdFrame(traj, i, t_frame=frame)
                   for i in range(len(traj))]

@@ -9,17 +9,26 @@ import glotzformats
 
 PYTHON_2 = sys.version_info[0] == 2
 
+
 try:
-    from hoomd_script import context
+    try:
+        from hoomd import context
+    except ImportError:
+        from hoomd_script import context
+        HOOMD_v1 = True
+    else:
+        HOOMD_v1 = False
 except ImportError:
     HOOMD = False
 else:
-    context.initialize('--mode=cpu')
     HOOMD = True
 
 if HOOMD:
     try:
-        from hoomd_plugins import hpmc  # noqa
+        if HOOMD_v1:
+            from hoomd_plugins import hpmc
+        else:
+            from hoomd import hpmc
     except ImportError:
         HPMC = False
     else:
@@ -126,10 +135,18 @@ class HPMCPosFileReaderTest(BasePosFileReaderTest):
         del self.mc
 
     def test_sphere(self):
-        from hoomd_script import init, sorter, data, dump, run
-        self.system = init.create_empty(N=2, box=data.boxdim(
-            L=10, dimensions=2), particle_types=['A'])
-        self.addCleanup(init.reset)
+        if HOOMD_v1:
+            from hoomd_script import init, sorter, data, dump, run
+            self.system = init.create_empty(N=2, box=data.boxdim(
+                L=10, dimensions=2), particle_types=['A'])
+            self.addCleanup(init.reset)
+        else:
+            from hoomd import init, data, run, context, lattice
+            from hoomd.update import sort as sorter
+            from hoomd.deprecated import dump
+            self.system = init.create_lattice(
+                unitcell=lattice.sq(10), n=(2, 1))
+            self.addCleanup(context.initialize, "--mode=cpu")
         self.addCleanup(self.del_system)
         self.mc = hpmc.integrate.sphere(seed=10)
         self.mc.shape_param.set("A", diameter=1.0)
@@ -138,18 +155,29 @@ class HPMCPosFileReaderTest(BasePosFileReaderTest):
         self.system.particles[0].orientation = (1, 0, 0, 0)
         self.system.particles[1].position = (2, 0, 0)
         self.system.particles[1].orientation = (1, 0, 0, 0)
-        sorter.set_params(grid=8)
+        if HOOMD_v1:
+            sorter.set_params(grid=8)
+        else:
+            context.current.sorter.set_params(grid=8)
         dump.pos(filename=self.fn_pos, period=1)
         run(10, quiet=True)
         with open(self.fn_pos, 'r', encoding='utf-8') as posfile:
             self.read_trajectory(posfile)
 
     def test_convex_polyhedron(self):
-        from hoomd_script import init, sorter, data, dump, run
-        from hoomd_plugins import hpmc
-        self.system = init.create_empty(N=2, box=data.boxdim(
-            L=10, dimensions=2), particle_types=['A'])
-        self.addCleanup(init.reset)
+        if HOOMD_v1:
+            from hoomd_script import init, sorter, data, dump, run
+            from hoomd_plugins import hpmc
+            self.system = init.create_empty(N=2, box=data.boxdim(
+                L=10, dimensions=2), particle_types=['A'])
+            self.addCleanup(init.reset)
+        else:
+            from hoomd import init, data, run, hpmc, context, lattice
+            from hoomd.update import sort as sorter
+            from hoomd.deprecated import dump
+            self.system = init.create_lattice(
+                unitcell=lattice.sq(10), n=(2, 1))
+            self.addCleanup(context.initialize, "--mode=cpu")
         self.addCleanup(self.del_system)
         self.mc = hpmc.integrate.convex_polygon(seed=10)
         self.addCleanup(self.del_mc)
@@ -165,7 +193,10 @@ class HPMCPosFileReaderTest(BasePosFileReaderTest):
         self.system.particles[0].orientation = (1, 0, 0, 0)
         self.system.particles[1].position = (2, 0, 0)
         self.system.particles[1].orientation = (1, 0, 0, 0)
-        sorter.set_params(grid=8)
+        if HOOMD_v1:
+            sorter.set_params(grid=8)
+        else:
+            context.current.sorter.set_params(grid=8)
         pos_writer = dump.pos(filename=self.fn_pos, period=1)
         self.mc.setup_pos_writer(pos_writer)
         run(10, quiet=True)
@@ -223,6 +254,26 @@ class PosFileWriterTest(BasePosFileWriterTest):
         traj_cmp = self.read_trajectory(dump)
         self.assertEqual(traj, traj_cmp)
 
+    def test_arrows(self):
+        from glotzformats.trajectory import ArrowShapeDefinition
+        if PYTHON_2:
+            sample = io.StringIO(unicode(glotzformats.samples.POS_INJAVIS))  # noqa
+        else:
+            sample = io.StringIO(glotzformats.samples.POS_INJAVIS)
+        traj = self.read_trajectory(sample)
+        traj.load()
+        for frame in traj:
+            frame.shapedef['A'] = ArrowShapeDefinition()
+            frame.orientations.T[3] = 0
+        dump = io.StringIO()
+        self.write_trajectory(traj, dump)
+        dump.seek(0)
+        traj_cmp = self.read_trajectory(dump)
+        self.assertEqual(traj, traj_cmp)
+        for frame in traj_cmp:
+            self.assertTrue(isinstance(
+                frame.shapedef['A'], ArrowShapeDefinition))
+
 
 @unittest.skip("injavis is currently not starting correctly.")
 class InjavisReadWriteTest(BasePosFileWriterTest):
@@ -263,4 +314,5 @@ class InjavisReadWriteTest(BasePosFileWriterTest):
         self.read_write_injavis(glotzformats.samples.POS_INJAVIS)
 
 if __name__ == '__main__':
+    context.initialize("--mode=cpu")
     unittest.main()

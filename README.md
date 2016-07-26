@@ -45,7 +45,7 @@ with open('posfile2.pos', 'w') as posfile:
 
 ### Data access
 
-Access individual frames or create sub trajectories by indexing
+Access individual frames by indexing or create sub trajectories with slicing:
 ```
 #!python
 first_frame = traj[0]
@@ -54,6 +54,16 @@ n_th_frame = traj[n]
 # and so on
 
 sub_trajectory = traj[i:j]
+```
+
+Access properties of trajectories:
+```
+traj.load_arrays()
+traj.positions      # MxNx3
+traj.orientations   # MxNx4
+traj.types          # MxNx1
+
+# where M=len(traj) and N=max((len(f) for f in traj))
 ```
 
 Access properties of individual frames:
@@ -69,7 +79,7 @@ frame.shapedef         # A ordered dictionary of instances of ShapeDefinition
 ```
 All matrices are `numpy` arrays.
 
-## Example use with HPMC
+## Example use with HOOMD-blue
 
 Click [here](https://bitbucket.org/glotzer/glotz-formats/src/master/examples/) for more examples.
 
@@ -88,11 +98,10 @@ snapshot = system.take_snapshot()
 traj[-1].copyto_snapshot(snapshot)
 
 ```
-*Note: Always use hoomd's own pos-file **writer** when possible.*
 
 ## Testing
 
-Ideally, you test with hoomd and hpmc in the testing environment.
+Ideally, you test with HOOMD-blue installed in your testing environment.
 
 In this case, execute tests with
 
