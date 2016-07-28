@@ -150,8 +150,8 @@ class SphereUnionShapeDefinition(ShapeDefinition):
     :type shape_class: str
     :param diameters: A list of sphere diameters
     :type diameters: A sequence of floats
-    :param vertices: A list of vertex vectors, if applicable.
-    :type vertices: A sequence of 3-tuple of numbers (Nx3).
+    :param centers: A list of vertex vectors, if applicable.
+    :type centers: A sequence of 3-tuple of numbers (Nx3).
     :param colors: Definition of a color for every sphere
     :type colors: A sequence of str for RGB color definiton.
         """
