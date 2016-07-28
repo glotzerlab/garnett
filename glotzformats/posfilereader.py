@@ -75,6 +75,16 @@ class PosFileFrame(Frame):
                 diameter = float(next(tokens))
             elif shape_class.lower() == 'arrow':
                 thickness = float(next(tokens))
+            elif shape_class.lower() == 'sphere_union':
+                num_vertices = int(next(tokens))
+                vertices = []
+                diameters = []
+                colors = []
+                for i in range(num_vertices):
+                    diameters.append(float(next(tokens)))
+                    xyz = next(tokens), next(tokens), next(tokens)
+                    colors.append(next(tokens))
+                    vertices.append([self._num(v) for v in xyz])
             else:
                 num_vertices = int(next(tokens))
                 vertices = []
@@ -89,6 +99,8 @@ class PosFileFrame(Frame):
                 return SphereShapeDefinition(diameter=diameter, color=color)
             elif shape_class.lower() == 'arrow':
                 return ArrowShapeDefinition(thickness=thickness, color=color)
+            elif shape_class.lower() == 'sphere_union':
+                return SphereUnionDefinition(diameters=diameters, vertices=vertices, colors=colors)
             else:
                 return PolyShapeDefinition(shape_class=shape_class,
                                            vertices=vertices, color=color)
