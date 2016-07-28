@@ -142,6 +142,35 @@ class ArrowShapeDefinition(ShapeDefinition):
     def __str__(self):
         return "{} {} {}".format(self.shape_class, self.thickness, self.color)
 
+class SphereUnionShapeDefinition(ShapeDefinition):
+    """Initialize a ShapeDefinition instance.
+
+    :param shape_class: The shape class definition,
+                        e.g. 'sphere' or 'poly3d'.
+    :type shape_class: str
+    :param diameters: A list of sphere diameters
+    :type diameters: A sequence of floats
+    :param centers: A list of vertex vectors, if applicable.
+    :type centers: A sequence of 3-tuple of numbers (Nx3).
+    :param colors: Definition of a color for every sphere
+    :type colors: A sequence of str for RGB color definiton.
+        """
+
+    def __init__(self, shape_class, diameters=None, centers=None, colors=None):
+        super(SphereUnionShapeDefinition, self).__init__(
+            shape_class=shape_class, color='')
+        self.diameters = diameters
+        self.centers = centers
+        self.colors = colors
+
+    def __str__(self):
+        shape_def = '{} {} '.format(self.shape_class,len(self.centers))
+        for d,p,c in zip(self.diameters, self.centers, self.colors):
+            shape_def += '{0} '.format(d)
+            shape_def += '{0} {1} {2} '.format(*p)
+            shape_def += '{0} '.format(c)
+
+        return shape_def
 
 class PolyShapeDefinition(ShapeDefinition):
     """Initialize a ShapeDefinition instance.

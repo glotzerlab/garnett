@@ -17,7 +17,7 @@ import numpy as np
 
 from .trajectory import _RawFrameData, Frame, Trajectory, \
     SphereShapeDefinition, PolyShapeDefinition,\
-    ArrowShapeDefinition, FallbackShapeDefinition
+    ArrowShapeDefinition, SphereUnionShapeDefinition, FallbackShapeDefinition
 from .errors import ParserError, ParserWarning
 
 logger = logging.getLogger(__name__)
@@ -75,6 +75,16 @@ class PosFileFrame(Frame):
                 diameter = float(next(tokens))
             elif shape_class.lower() == 'arrow':
                 thickness = float(next(tokens))
+            elif shape_class.lower() == 'sphere_union':
+                num_centers = int(next(tokens))
+                centers = []
+                diameters = []
+                colors = []
+                for i in range(num_centers):
+                    diameters.append(float(next(tokens)))
+                    xyz = next(tokens), next(tokens), next(tokens)
+                    colors.append(next(tokens))
+                    centers.append([self._num(v) for v in xyz])
             else:
                 num_vertices = int(next(tokens))
                 vertices = []
@@ -89,6 +99,8 @@ class PosFileFrame(Frame):
                 return SphereShapeDefinition(diameter=diameter, color=color)
             elif shape_class.lower() == 'arrow':
                 return ArrowShapeDefinition(thickness=thickness, color=color)
+            elif shape_class.lower() == 'sphere_union':
+                return SphereUnionShapeDefinition(shape_class=shape_class,diameters=diameters, centers=centers, colors=colors)
             else:
                 return PolyShapeDefinition(shape_class=shape_class,
                                            vertices=vertices, color=color)
