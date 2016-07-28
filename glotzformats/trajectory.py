@@ -156,19 +156,19 @@ class SphereUnionShapeDefinition(ShapeDefinition):
     :type colors: A sequence of str for RGB color definiton.
         """
 
-    def __init__(self, shape_class, diameters=None, vertices=None, colors=None):
+    def __init__(self, shape_class, diameters=None, centers=None, colors=None):
         super(SphereUnionShapeDefinition, self).__init__(
-            shape_class=shape_class, color=color)
+            shape_class=shape_class, color='')
         self.diameters = diameters
-        self.vertices = vertices
+        self.centers = centers
         self.colors = colors
 
     def __str__(self):
-        shape_def = '{} {0}'.format(self.shape_class,len(vertices))
-        for d,p,c in zip(self.diameters, self.vertices, self.colors):
+        shape_def = '{} {} '.format(self.shape_class,len(self.centers))
+        for d,p,c in zip(self.diameters, self.centers, self.colors):
             shape_def += '{0} '.format(d)
             shape_def += '{0} {1} {2} '.format(*p)
-            shape_def += '{ }'.format(c)
+            shape_def += '{0} '.format(c)
 
         return shape_def
 
