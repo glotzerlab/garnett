@@ -157,7 +157,7 @@ class SphereUnionShapeDefinition(ShapeDefinition):
         """
 
     def __init__(self, shape_class, diameters=None, vertices=None, colors=None):
-        super(PolyShapeDefinition, self).__init__(
+        super(SphereUnionShapeDefinition, self).__init__(
             shape_class=shape_class, color=color)
         self.diameters = diameters
         self.vertices = vertices
