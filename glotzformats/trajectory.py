@@ -887,8 +887,8 @@ def _raw_frame_to_frame(raw_frame, dtype=None):
         orientations = np.asarray([[1, 0, 0, 0]] * len(positions))
 
     if isinstance(raw_frame.box, Box):
-        raw_frame.box = np.asarray(raw_frame.box.get_box_matrix(), dtype=dtype)
         raw_frame.box_dimensions = raw_frame.box.dimensions
+        raw_frame.box = np.asarray(raw_frame.box.get_box_matrix(), dtype=dtype)
     box_dimensions = getattr(raw_frame, 'box_dimensions', 3)
     ret.positions, ret.velocities, ret.orientations, ret.box = _regularize_box(
         positions, velocities, orientations, raw_frame.box, box_dimensions)
