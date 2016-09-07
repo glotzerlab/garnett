@@ -142,6 +142,35 @@ class ArrowShapeDefinition(ShapeDefinition):
     def __str__(self):
         return "{} {} {}".format(self.shape_class, self.thickness, self.color)
 
+class SphereUnionShapeDefinition(ShapeDefinition):
+    """Initialize a ShapeDefinition instance.
+
+    :param shape_class: The shape class definition,
+                        e.g. 'sphere' or 'poly3d'.
+    :type shape_class: str
+    :param diameters: A list of sphere diameters
+    :type diameters: A sequence of floats
+    :param centers: A list of vertex vectors, if applicable.
+    :type centers: A sequence of 3-tuple of numbers (Nx3).
+    :param colors: Definition of a color for every sphere
+    :type colors: A sequence of str for RGB color definiton.
+        """
+
+    def __init__(self, shape_class, diameters=None, centers=None, colors=None):
+        super(SphereUnionShapeDefinition, self).__init__(
+            shape_class=shape_class, color='')
+        self.diameters = diameters
+        self.centers = centers
+        self.colors = colors
+
+    def __str__(self):
+        shape_def = '{} {} '.format(self.shape_class,len(self.centers))
+        for d,p,c in zip(self.diameters, self.centers, self.colors):
+            shape_def += '{0} '.format(d)
+            shape_def += '{0} {1} {2} '.format(*p)
+            shape_def += '{0} '.format(c)
+
+        return shape_def
 
 class PolyShapeDefinition(ShapeDefinition):
     """Initialize a ShapeDefinition instance.
@@ -178,6 +207,8 @@ class FrameData(object):
         "Nx1 list of types represented as strings."
         self.positions = None
         "Nx3 matrix of coordinates for N particles in 3 dimensions."
+        self.velocities = None
+        "Nx3 matrix of velocities for N particles in 3 dimensions."
         self.orientations = None
         "Nx4 matrix of rotational coordinates represented as quaternions."
         self.data = None
@@ -197,6 +228,7 @@ class FrameData(object):
             return self.box == other.box \
                 and self.types == other.types\
                 and (self.positions == other.positions).all()\
+                and (self.velocities == other.velocities).all()\
                 and (self.orientations == other.orientations).all()\
                 and self.data == other.data\
                 and self.shapedef == other.shapedef
@@ -230,6 +262,7 @@ class _RawFrameData(object):
         self.box_dimensions = 3
         self.types = list()                         # Nx1
         self.positions = list()                     # Nx3
+        self.velocities = list()                     # Nx3
         self.orientations = list()                  # NX4
         # A dictionary of lists for each attribute
         self.data = None
@@ -343,6 +376,17 @@ class Frame(object):
     def positions(self, value):
         self.load()
         self.frame_data.positions = value
+    
+    @property
+    def velocities(self):
+        "Nx3 matrix of velocities for N particles in 3 dimensions."
+        self.load()
+        return self.frame_data.velocities
+
+    @velocities.setter
+    def velocities(self, value):
+        self.load()
+        self.frame_data.velocities = value
 
     @property
     def orientations(self):
@@ -740,7 +784,7 @@ class Trajectory(BaseTrajectory):
         return np.asarray(self._orientations, dtype=self._dtype)
 
 
-def _regularize_box(positions, orientations,
+def _regularize_box(positions, velocities, orientations,
                     box_matrix, dimensions=3):
     """If necessary, transform the box matrix into an
     upper-triangular matrix and rotate the system accordingly."""
@@ -749,15 +793,15 @@ def _regularize_box(positions, orientations,
     v[1] = box_matrix[:, 1]
     v[2] = box_matrix[:, 2]
     if 0 == v[0][1] == v[0][2] == v[1][2]:
-        box, positions = _flip_if_required(_calc_box(v, dimensions), positions)
-        return positions, orientations, box
+        box, positions, velocities = _flip_if_required(_calc_box(v, dimensions), positions, velocities)
+        return positions, velocities, orientations, box
     logger.info("Box matrix is left-handed, rotating.")
-    box = _rotate_improper(v, dimensions, positions, orientations)
-    box, positions = _flip_if_required(box, positions)
-    return positions, orientations, box
+    box = _rotate_improper(v, dimensions, positions, velocities, orientations)
+    box, positions, velocities = _flip_if_required(box, positions, velocities)
+    return positions, velocities, orientations, box
 
 
-def _rotate_improper(v, dimensions, positions, orientations):
+def _rotate_improper(v, dimensions, positions, velocities, orientations):
     # unit vector
     e1 = np.array((1.0, 0, 0))
 
@@ -786,20 +830,22 @@ def _rotate_improper(v, dimensions, positions, orientations):
     qboth = mu.quaternionMultiply(q_y1intoxy, qbox0toe1)
     for i in range(positions.shape[0]):
         positions[i] = mu.rotateVector(positions[i], qboth)
+        velocities[i] = mu.rotateVector(velocities[i], qboth)
         orientations[i] = mu.quaternionMultiply(qboth, orientations[i])
 
     return box
 
 
-def _flip_if_required(box, positions):
+def _flip_if_required(box, positions, velocities):
     v = np.asarray(box.get_box_matrix())
     m = np.diag(np.where(v < 0, -np.ones(v.shape), np.ones(v.shape)))
     if (m > 0).all():
-        return box, positions
+        return box, positions, velocities
     logger.info("Box has negative dimensions, flipping.")
     v = np.dot(v, np.diag(m))
     positions = np.dot(positions, np.diag(m))
-    return _calc_box(v, box.dimensions), positions
+    velocities = np.dot(velocities, np.diag(m))
+    return _calc_box(v, box.dimensions), positions, velocities
 
 
 def _calc_box(v, dimensions):
@@ -833,18 +879,24 @@ def _raw_frame_to_frame(raw_frame, dtype=None):
     ret = FrameData()
     # the box
     positions = np.asarray(raw_frame.positions, dtype=dtype)
+    velocities = np.asarray(raw_frame.velocities, dtype=dtype)
+    if len(velocities) == 0:
+        velocities = np.asarray([[0, 0, 0]] * len(positions))
     orientations = np.asarray(raw_frame.orientations, dtype=dtype)
+    if len(orientations) == 0:
+        orientations = np.asarray([[1, 0, 0, 0]] * len(positions))
+
     if isinstance(raw_frame.box, Box):
-        raw_frame.box = np.asarray(raw_frame.box.get_box_matrix(), dtype=dtype)
         raw_frame.box_dimensions = raw_frame.box.dimensions
+        raw_frame.box = np.asarray(raw_frame.box.get_box_matrix(), dtype=dtype)
     box_dimensions = getattr(raw_frame, 'box_dimensions', 3)
-    ret.positions, ret.orientations, ret.box = _regularize_box(
-        positions, orientations, raw_frame.box, box_dimensions)
+    ret.positions, ret.velocities, ret.orientations, ret.box = _regularize_box(
+        positions, velocities, orientations, raw_frame.box, box_dimensions)
     ret.shapedef = raw_frame.shapedef
     ret.types = raw_frame.types
     ret.data = raw_frame.data
     ret.data_keys = raw_frame.data_keys
-    assert N == len(ret.types) == len(ret.positions) == len(ret.orientations)
+    assert N == len(ret.types) == len(ret.positions) == len(ret.velocities) == len(ret.orientations)
     return ret
 
 
