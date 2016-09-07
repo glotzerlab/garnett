@@ -232,7 +232,7 @@ class PosFileReader(object):
             stream.seek(start)
             for line in stream:
                 if line.startswith('boxMatrix'):
-                    stream.seek(-1)
+                    stream.seek(0, 2)
                     yield PosFileFrame(
                             stream, start, index,
                             self._precision, default_type)
