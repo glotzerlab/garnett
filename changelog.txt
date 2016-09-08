@@ -1,3 +1,13 @@
+0.3.4:
+
+  - Support velocities in HOOMD-blue XML files.
+	- Support SphereUnionShape in PosFileReader
+	- Support Pos-Files using the keyword 'box' instead of boxMatrix
+	- Fix bug in PosFileReader which occured with non-standard
+		pos-file in python 3.5
+  - Fix bug, which occured when constructing frames from
+	  raw frames using box instances instead of a box matrix.
+
 0.3.3:
 
 	- Fix bug related to 2-dimensional systems and a box
