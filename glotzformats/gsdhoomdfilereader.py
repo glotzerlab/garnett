@@ -14,13 +14,13 @@ The example is given for a hoomd-blue xml frame:
 
 .. code::
 
-    xml_reader = HOOMDXMLFileReader()
+    pos_reader = PosFileReader()
     gsd_reader = GSDHOOMDFileReader()
 
-    with open('init.xml') as xmlfile:
+    with open('init.pos') as posfile:
         with open('dump.gsd') as gsdfile:
-            xml_frame = xml_reader.read(xmlfile)[0]
-            traj = gsd_reader.read(gsdfile, xml_frame)
+            pos_frame = pos_reader.read(posfile)[0]
+            traj = gsd_reader.read(gsdfile, pos_frame)
 """
 
 import logging
