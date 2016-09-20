@@ -1,7 +1,9 @@
 0.3.5:
 
+	- GSDHOOMDFileReader uses the native gsd library if installed.
 	- Fix bug that caused the GSDHOOMDFileReader to ignore dimensions
 		specified in the GSD file.
+	- Reduced warning verbosity.
 
 0.3.4:
 
