@@ -13,8 +13,6 @@ except ImportError:
             raise ImportError(
                 "GetarFileReader requires the gtar package.")
 
-    warnings.warn(
-        "Mocking GetarFileReader, gtar package not available.")
 
 class PyDCDFileReader(_DCDFileReader):
     """Pure-python DCD-file reader for the Glotzer Group.
@@ -33,11 +31,13 @@ try:
     except ImportError:
         import dcdreader
 except ImportError:
-    warnings.warn("Failed to import dcd-reader. "
-                  "Falling back to pure-python reader!")
 
     class DCDFileReader(PyDCDFileReader):
-        pass
+        def __init__(self):
+            warnings.warn("Failed to import dcdreader library. "
+                          "Falling back to pure-python reader!")
+            super(DCDFileReader, self).__init__()
+
 else:
     class DCDFileReader(PyDCDFileReader):
         """DCD-file reader for the Glotzer Group, University of Michigan.
