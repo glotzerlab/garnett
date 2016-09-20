@@ -13,8 +13,6 @@ except ImportError:
             raise ImportError(
                 "GetarFileReader requires the gtar package.")
 
-    warnings.warn(
-        "Mocking GetarFileReader, gtar package not available.")
 
 class PyDCDFileReader(_DCDFileReader):
     """Pure-python DCD-file reader for the Glotzer Group.
