@@ -61,6 +61,7 @@ class GSDHoomdFrame(Frame):
             raw_frame.box_dimensions = self.t_frame.box.dimensions
         frame = self.traj.read_frame(self.frame_index)
         raw_frame.box = _box_matrix(frame.configuration.box)
+        raw_frame.box_dimensions = int(frame.configuration.dimensions)
         raw_frame.types = [frame.particles.types[t]
                            for t in frame.particles.typeid]
         raw_frame.positions = frame.particles.position
