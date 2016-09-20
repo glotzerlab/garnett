@@ -2,8 +2,8 @@
 
 Author: Carl Simon Adorf
 
-This module provides a wrapper for the gsd.hoomd and the gsd.pygsd
-trajectory reader implementation as part of the gsd package.
+This module provides a wrapper for the trajectory reader
+implementation as part of the gsd package.
 
 A gsd file may not contain all shape information.
 To provide additional information it is possible
@@ -29,7 +29,12 @@ import copy
 import numpy as np
 
 from .trajectory import _RawFrameData, Frame, Trajectory
-from . import pygsd
+try:
+    from gsd.fl import GSDFile
+    NATIVE = True
+except ImportError:
+    NATIVE = False
+from .pygsd import GSDFile as PyGSDFile
 from . import gsdhoomd
 
 
@@ -77,8 +82,8 @@ class GSDHOOMDFileReader(object):
 
     Author: Carl Simon Adorf
 
-    This class provides a wrapper for the gsd.hoomd and the gsd.pygsd
-    trajectory reader implementation as part of the gsd package.
+    This class provides a wrapper for the trajectory reader
+    implementation as part of the gsd package.
 
     A gsd file may not contain all shape information.
     To provide additional information it is possible
@@ -106,7 +111,18 @@ class GSDHOOMDFileReader(object):
         :param frame: A frame containing shape information
             that is not encoded in the GSD-format.
         :type frame: :class:`trajectory.Frame`"""
-        traj = gsdhoomd.HOOMDTrajectory(pygsd.GSDFile(stream))
+        if NATIVE:
+            try:
+                traj = gsdhoomd.HOOMDTrajectory(GSDFile(stream.name, stream.mode))
+            except AttributeError:
+                logger.info(
+                    "Unable to open file stream natively, falling back "
+                    "to pure python GSD reader.")
+                traj = gsdhoomd.HOOMDTrajectory(PyGSDFile(stream))
+        else:
+            logger.warning("Native GSD library not available. "
+                           "Falling back to pure python reader.")
+            traj = gsdhoomd.HOOMDTrajectory(PyGSDFile(stream))
         frames = [GSDHoomdFrame(traj, i, t_frame=frame)
                   for i in range(len(traj))]
         logger.info("Read {} frames.".format(len(frames)))
