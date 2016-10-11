@@ -309,7 +309,7 @@ class _DCDFileReader(object):
 
         .. code::
 
-            alpha = 2 * np.arccos(traj[0].orientations.T[0])
+            alpha = 2 * np.arctan2(ort[:, 3], ort[:, 0])
     """
     _dcdreader = pydcdreader
 
