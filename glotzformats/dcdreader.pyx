@@ -95,7 +95,7 @@ def scan(stream):
     return _scan(cfile)
 
 
-def read_frame(stream, xyz, int offset=-1):
+def read_frame(stream, xyz, long offset=-1):
     cdef FILE* cfile
     assert xyz.flags['C_CONTIGUOUS']
     cfile = fdopen(stream.fileno(), 'rb')
