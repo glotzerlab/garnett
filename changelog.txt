@@ -1,4 +1,4 @@
-master:
+0.3.6:
 
 	- Fix quaternion to euler angle conversion example in the
 		dcd file reader documentation.
