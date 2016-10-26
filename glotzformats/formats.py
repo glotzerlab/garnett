@@ -34,13 +34,13 @@ class FileFormat(object):
         """
         return self._file.read(size)
 
-    def seek(self, offset):
+    def seek(self, offset, from_what=0):
         """Seek the file to the offset position.
 
         :param offset: The index of the byte/character to seek to.
         :type offset: int
         """
-        return self._file.seek(offset)
+        return self._file.seek(offset, from_what)
 
     def tell(self):
         """Return the current offset position."""
