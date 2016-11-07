@@ -63,18 +63,11 @@ def _box_matrix_from_frame_header(frame_header, tol=1e-12):
     def almost_zero(r):
         return 0.0 if r < tol else r
 
-    alpha = 90 - fh.box_alpha
-    beta = 90 - fh.box_beta
-    gamma = 90 - fh.box_gamma
-    c_alpha = cos(alpha * pi / 180)
-    c_beta = cos(beta * pi / 180)
-    c_gamma = cos(gamma * pi / 180)
-
     lx = fh.box_a
-    xy = fh.box_b * c_gamma
-    xz = fh.box_c * c_beta
+    xy = fh.box_b * fh.box_gamma
+    xz = fh.box_c * fh.box_beta
     ly = sqrt(fh.box_b*fh.box_b - xy*xy)
-    yz = (fh.box_b*fh.box_c*c_alpha - xy*xz) / lx
+    yz = (fh.box_b*fh.box_c*fh.box_alpha - xy*xz) / lx
     lz = sqrt(fh.box_c*fh.box_c - xz*xz - yz*yz)
 
     xy /= ly
