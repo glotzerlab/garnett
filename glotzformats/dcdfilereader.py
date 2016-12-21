@@ -52,16 +52,14 @@ logger = logging.getLogger(__name__)
 
 
 def _euler_to_quaternion(alpha, q):
-    q.T[0] = np.cos(alpha/2)
-    q.T[1] = q.T[2] = q.T[3] = np.sin(alpha/2)
+    q.T[0] = np.cos(alpha * 0.5)
+    q.T[1] = q.T[2] = 0.0
+    q.T[3] = np.sin(alpha * 0.5)
 
 
 def _box_matrix_from_frame_header(frame_header, tol=1e-12):
     from math import cos, sqrt, pi
     fh = frame_header
-
-    def almost_zero(r):
-        return 0.0 if r < tol else r
 
     lx = fh.box_a
     xy = fh.box_b * fh.box_gamma
@@ -75,8 +73,8 @@ def _box_matrix_from_frame_header(frame_header, tol=1e-12):
     yz /= lz
     return [
         [lx, 0.0, 0.0],
-        [almost_zero(xy * ly), ly, 0.0],
-        [almost_zero(xz * lz), (yz * lz), lz]]
+        [(xy * ly), ly, 0.0],
+        [(xz * lz), (yz * lz), lz]]
 
 
 def _np_stack(arrays, axis=0):
