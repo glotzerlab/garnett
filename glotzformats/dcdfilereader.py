@@ -33,7 +33,8 @@ The example is given for a hoomd-blue xml frame:
 
     .. code::
 
-        alpha = 2 * np.arccos(traj[0].orientations.T[0])
+        ort = traj[0].orientations
+        alpha = 2 * np.arctan2(ort[:, 3], ort[:, 0])
 """
 
 import logging
