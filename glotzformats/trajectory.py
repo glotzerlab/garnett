@@ -196,6 +196,35 @@ class PolyShapeDefinition(ShapeDefinition):
             ' '.join((str(v) for xyz in self.vertices for v in xyz)),
             self.color)
 
+class GeneralPolyShapeDefinition(ShapeDefinition):
+    """Initialize a ShapeDefinition instance.
+
+    :param shape_class: The shape class definition,
+                        e.g. 'sphere' or 'poly3d'.
+    :type shape_class: str
+    :param vertices: A list of vertice vectors.
+    :type vertices: A sequence of 3-tuple of numbers (Nx3).
+    :param faces: A list of lists of vertex indices per face.
+    :type faces: A list of lists of integer numbers.
+    :param color: Definition of a color for the particular shape.
+    :type color: A str for RGB color definiton.
+        """
+
+    def __init__(self, shape_class, vertices=None, faces=None, color=None):
+        super(GeneralPolyShapeDefinition, self).__init__(
+            shape_class=shape_class, color=color)
+        self.vertices = vertices
+        self.faces = faces
+
+    def __str__(self):
+        return "{} {} {} {} {} {}".format(
+            self.shape_class,
+            len(self.vertices),
+            ' '.join((str(v) for xyz in self.vertices for v in xyz)),
+            len(self.faces),
+            ' '.join((str(fv) for f in self.faces for fv in [len(f)]+f)),
+            self.color)
+
 
 class FrameData(object):
     """One FrameData instance manages the data of one frame in a trajectory."""
