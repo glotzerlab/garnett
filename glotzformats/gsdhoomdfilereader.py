@@ -71,6 +71,7 @@ class GSDHoomdFrame(Frame):
                            for t in frame.particles.typeid]
         raw_frame.positions = frame.particles.position
         raw_frame.orientations = frame.particles.orientation
+        raw_frame.velocities = frame.particles.velocity
         return raw_frame
 
     def __str__(self):
