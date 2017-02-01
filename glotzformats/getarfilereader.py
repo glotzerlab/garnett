@@ -63,8 +63,8 @@ class GetarFrame(Frame):
 
         if 'box' in self._records:
             dimensions = (
-                self._trajectory.getRecord(self._records['dimension'], self._frame)
-                    if 'dimension' in self._records else 3)
+                self._trajectory.getRecord(self._records['dimensions'], self._frame)[0]
+                    if 'dimensions' in self._records else 3)
             box = self._trajectory.getRecord(self._records['box'], self._frame)
             gbox = Box(
                     **dict(
@@ -72,6 +72,7 @@ class GetarFrame(Frame):
                         dimensions=dimensions)
                     )
             raw_frame.box = np.array(gbox.get_box_matrix())
+            raw_frame.box_dimensions = dimensions
         else:
             raw_frame.box = self._default_box
 
