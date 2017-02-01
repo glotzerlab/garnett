@@ -72,7 +72,7 @@ class GetarFrame(Frame):
                         dimensions=dimensions)
                     )
             raw_frame.box = np.array(gbox.get_box_matrix())
-            raw_frame.box_dimensions = dimensions
+            raw_frame.box_dimensions = int(dimensions)
         else:
             raw_frame.box = self._default_box
 
