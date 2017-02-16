@@ -120,7 +120,7 @@ class GetarFileReader(object):
                 "as the underlying library is reading the file by filename "
                 "and not directly from the stream.")
         _trajectory = gtar.GTAR(filename, 'r')
-        _records = {rec.getName(): rec for rec in _trajectory.getRecordTypes()}
+        _records = {rec.getName(): rec for rec in _trajectory.getRecordTypes() if not rec.getGroup()}
         # assume that we care primarily about positions
         try:
             self._frames = _trajectory.queryFrames(_records['position'])
