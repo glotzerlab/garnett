@@ -63,8 +63,8 @@ class GetarFrame(Frame):
 
         if 'box' in self._records:
             dimensions = (
-                self._trajectory.getRecord(self._records['dimension'], self._frame)
-                    if 'dimension' in self._records else 3)
+                self._trajectory.getRecord(self._records['dimensions'], self._frame)[0]
+                    if 'dimensions' in self._records else 3)
             box = self._trajectory.getRecord(self._records['box'], self._frame)
             gbox = Box(
                     **dict(
@@ -72,6 +72,7 @@ class GetarFrame(Frame):
                         dimensions=dimensions)
                     )
             raw_frame.box = np.array(gbox.get_box_matrix())
+            raw_frame.box_dimensions = int(dimensions)
         else:
             raw_frame.box = self._default_box
 
@@ -119,7 +120,7 @@ class GetarFileReader(object):
                 "as the underlying library is reading the file by filename "
                 "and not directly from the stream.")
         _trajectory = gtar.GTAR(filename, 'r')
-        _records = {rec.getName(): rec for rec in _trajectory.getRecordTypes()}
+        _records = {rec.getName(): rec for rec in _trajectory.getRecordTypes() if not rec.getGroup()}
         # assume that we care primarily about positions
         try:
             self._frames = _trajectory.queryFrames(_records['position'])

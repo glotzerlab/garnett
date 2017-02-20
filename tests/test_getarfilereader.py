@@ -61,5 +61,25 @@ class BaseGetarFileReaderTest(unittest.TestCase):
         self.assertEqual(frame.types, self.types)
 
 
+@unittest.skipIf(not GTAR, 'GetarFileReader requires the gtar module.')
+class NoTypesGetarFileReaderTest(BaseGetarFileReaderTest):
+    """This test makes sure that when angle (or other non-particle) types
+    are stored in a file, they do not get interpreted as particle
+    types."""
+
+    def setup_sample(self, N):
+        self.positions = np.random.rand(N, 3)
+        self.orientations = np.random.rand(N, 4)
+        self.box = np.array([1.0, 1.0, 1.0, 0.0, 0.0, 0.0])
+        self.types = N*['A']
+
+        with gtar.GTAR(self.getar_file_fn, 'w') as traj:
+            traj.writePath('frames/0/position.f32.ind', self.positions)
+            traj.writePath('frames/0/orientation.f32.ind', self.orientations)
+            traj.writePath('frames/0/box.f32.ind', self.box)
+            traj.writePath('angle/type.u32.ind', [0])
+            traj.writePath('angle/type_names.json', '["Angle_A"]')
+
+
 if __name__ == '__main__':
     unittest.main()
