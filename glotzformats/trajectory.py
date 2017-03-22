@@ -189,7 +189,7 @@ class PolyUnionShapeDefinition(ShapeDefinition):
         """
 
     def __init__(self, shape_class, vertices=None, centers=None, orientations=None, colors=None):
-        super(SphereUnionShapeDefinition, self).__init__(
+        super(PolyUnionShapeDefinition, self).__init__(
             shape_class=shape_class, color='')
         self.vertices = vertices
         self.centers = centers

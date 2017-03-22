@@ -87,9 +87,9 @@ class PosFileFrame(Frame):
                     xyz = next(tokens), next(tokens), next(tokens)
                     colors.append(next(tokens))
                     centers.append([self._num(v) for v in xyz])
-            elif shape_class.lower() == 'convex_polyhedron_union':
+            elif shape_class.lower() == 'poly3d_union':
                 num_centers = int(next(tokens))
-                vertices = []
+                vertices = [[] for p in range(num_centers)]
                 centers = []
                 orientations = []
                 colors = []
@@ -97,7 +97,7 @@ class PosFileFrame(Frame):
                     num_vertices = int(next(tokens))
                     for j in range(num_vertices):
                         xyz = next(tokens), next(tokens), next(tokens)
-                        vertices.append([self._num(v) for v in xyz])
+                        vertices[i].append([self._num(v) for v in xyz])
                     xyz = next(tokens), next(tokens), next(tokens)
                     centers.append([self._num(v) for v in xyz])
                     quat = next(tokens), next(tokens), next(tokens), next(tokens)
@@ -133,7 +133,7 @@ class PosFileFrame(Frame):
                 return ArrowShapeDefinition(thickness=thickness, color=color)
             elif shape_class.lower() == 'sphere_union':
                 return SphereUnionShapeDefinition(shape_class=shape_class, diameters=diameters, centers=centers, colors=colors)
-            elif shape_class.lower() == 'convex_polyhedron_union':
+            elif shape_class.lower() == 'poly3d_union':
                 return PolyUnionShapeDefinition(shape_class=shape_class, vertices=vertices, centers=centers, orientations=orientations, colors=colors)
             elif shape_class.lower() == 'polyv':
                 return GeneralPolyShapeDefinition(shape_class=shape_class, vertices=vertices, faces=faces)
