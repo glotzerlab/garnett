@@ -18,7 +18,7 @@ import numpy as np
 from .trajectory import _RawFrameData, Frame, Trajectory, \
     SphereShapeDefinition, PolyShapeDefinition,\
     ArrowShapeDefinition, SphereUnionShapeDefinition, \
-    GeneralPolyShapeDefinition, FallbackShapeDefinition
+    PolyUnionShapeDefinition, GeneralPolyShapeDefinition, FallbackShapeDefinition
 
 from .errors import ParserError, ParserWarning
 
@@ -87,6 +87,22 @@ class PosFileFrame(Frame):
                     xyz = next(tokens), next(tokens), next(tokens)
                     colors.append(next(tokens))
                     centers.append([self._num(v) for v in xyz])
+            elif shape_class.lower() == 'poly3d_union':
+                num_centers = int(next(tokens))
+                vertices = [[] for p in range(num_centers)]
+                centers = []
+                orientations = []
+                colors = []
+                for i in range(num_centers):
+                    num_vertices = int(next(tokens))
+                    for j in range(num_vertices):
+                        xyz = next(tokens), next(tokens), next(tokens)
+                        vertices[i].append([self._num(v) for v in xyz])
+                    xyz = next(tokens), next(tokens), next(tokens)
+                    centers.append([self._num(v) for v in xyz])
+                    quat = next(tokens), next(tokens), next(tokens), next(tokens)
+                    orientations.append([self._num(q) for q in quat])
+                    colors.append(next(tokens))
             elif shape_class.lower() == 'polyv':
                 num_vertices = int(next(tokens))
                 vertices = []
@@ -116,7 +132,9 @@ class PosFileFrame(Frame):
             elif shape_class.lower() == 'arrow':
                 return ArrowShapeDefinition(thickness=thickness, color=color)
             elif shape_class.lower() == 'sphere_union':
-                return SphereUnionShapeDefinition(shape_class=shape_class,diameters=diameters, centers=centers, colors=colors)
+                return SphereUnionShapeDefinition(shape_class=shape_class, diameters=diameters, centers=centers, colors=colors)
+            elif shape_class.lower() == 'poly3d_union':
+                return PolyUnionShapeDefinition(shape_class=shape_class, vertices=vertices, centers=centers, orientations=orientations, colors=colors)
             elif shape_class.lower() == 'polyv':
                 return GeneralPolyShapeDefinition(shape_class=shape_class, vertices=vertices, faces=faces)
             else:

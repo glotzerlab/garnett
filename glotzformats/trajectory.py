@@ -172,6 +172,42 @@ class SphereUnionShapeDefinition(ShapeDefinition):
 
         return shape_def
 
+class PolyUnionShapeDefinition(ShapeDefinition):
+    """Initialize a ShapeDefinition instance.
+
+    :param shape_class: The shape class definition,
+                        e.g. 'sphere' or 'poly3d'.
+    :type shape_class: str
+    :param vertices: A list of lists of the vertices of the polyhedra in particle coordinates
+    :type vertices: A list of lists of 3-tuples
+    :param centers: A list of the centers of the polyhedra in particle coordinates
+    :type centers: A list of 3-tuples
+    :param orientations: A list of the orientations of the polyhedra
+    :type orientations: A list of 4-tuples
+    :param colors: Definition of a color for every polyhedron
+    :type colors: A sequence of str for RGB color definiton.
+        """
+
+    def __init__(self, shape_class, vertices=None, centers=None, orientations=None, colors=None):
+        super(PolyUnionShapeDefinition, self).__init__(
+            shape_class=shape_class, color='')
+        self.vertices = vertices
+        self.centers = centers
+        self.orientations = orientations
+        self.colors = colors
+
+    def __str__(self):
+        shape_def = '{} {} '.format(self.shape_class,len(self.centers))
+        for verts,p,q,c in zip(self.vertices, self.centers, self.orientations, self.colors):
+            shape_def += '{0} '.format(len(verts))
+            for v in verts:
+                shape_def += '{0} {1} {2} '.format(*v)
+            shape_def += '{0} {1} {2} '.format(*p)
+            shape_def += '{0} {1} {2} {3} '.format(*q)
+            shape_def += '{0} '.format(c)
+
+        return shape_def
+
 class PolyShapeDefinition(ShapeDefinition):
     """Initialize a ShapeDefinition instance.
 
@@ -405,7 +441,7 @@ class Frame(object):
     def positions(self, value):
         self.load()
         self.frame_data.positions = value
-    
+
     @property
     def velocities(self):
         "Nx3 matrix of velocities for N particles in 3 dimensions."
