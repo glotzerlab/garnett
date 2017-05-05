@@ -13,6 +13,14 @@ except ImportError:
             raise ImportError(
                 "GetarFileReader requires the gtar package.")
 
+try:
+    from .ciffilereader import CifFileReader
+except ImportError:
+    class CifFileReader(object):
+        def __init__(self, *args, **kwargs):
+            raise ImportError(
+                "CifFileReader requires the PyCifRW package.")
+
 
 class PyDCDFileReader(_DCDFileReader):
     """Pure-python DCD-file reader for the Glotzer Group.
@@ -102,4 +110,5 @@ __all__ = [
     'HOOMDXMLFileReader', 'HoomdBlueXMLFileReader',
     'PyDCDFileReader', 'DCDFileReader',
     'GetarFileReader',
-    'GSDHOOMDFileReader', 'GSDHoomdFileReader']
+    'GSDHOOMDFileReader', 'GSDHoomdFileReader',
+    'CifFileReader']

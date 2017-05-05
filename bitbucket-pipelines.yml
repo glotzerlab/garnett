@@ -11,13 +11,21 @@ pipelines:
           - python3.6 --version
           - pip3.6 --version
           - tox --version
-          - pip2.7 install -U numpy cython
-          - pip3.4 install -U numpy cython
-          - pip3.5 install -U numpy cython
-          - pip3.6 install -U numpy cython
-          - wget https://bitbucket.org/glotzer/gsd/get/master.tar.gz
-          - tar -xvzf master.tar.gz
+          - pip2.7 install -U numpy cython pycifrw
+          - pip3.4 install -U numpy cython pycifrw
+          - pip3.5 install -U numpy cython pycifrw
+          - pip3.6 install -U numpy cython pycifrw
+          - wget https://bitbucket.org/glotzer/gsd/get/master.tar.gz -O gsd.tar.gz
+          - tar -xvzf gsd.tar.gz
           - cd glotzer-gsd-*
+          - python2.7 setup.py install
+          - python3.4 setup.py install
+          - python3.5 setup.py install
+          - python3.6 setup.py install
+          - cd ..
+          - wget https://bitbucket.org/glotzer/libgetar/get/master.tar.gz -O libgetar.tar.gz
+          - tar -xvzf libgetar.tar.gz
+          - cd glotzer-libgetar-*
           - python2.7 setup.py install
           - python3.4 setup.py install
           - python3.5 setup.py install
@@ -26,6 +34,8 @@ pipelines:
           - python3.6 -c "import numpy; print('numpy', numpy.__version__)"
           - python3.6 -c "import cython; print('cython', cython.__version__)"
           - python3.6 -c "import gsd; print('gsd', gsd.__version__)"
+          - python3.6 -c "import gtar; print('gtar', gtar.__version__)"
+          - python3.6 -c "import pkg_resources; print('pycifrw', pkg_resources.require('pycifrw')[0].version)"
           - python3.6 setup.py build
           - python3.6 -m unittest discover tests/ -v
           - tox
