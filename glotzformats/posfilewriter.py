@@ -89,6 +89,10 @@ class PosFileWriter(object):
                 if isinstance(shapedef, SphereShapeDefinition):
                     _write(' '.join((str(_num(v)) for v in pos)))
                 elif isinstance(shapedef, ArrowShapeDefinition):
+                    # The arrow shape actually has two position vectors of
+                    # three elements since it has start.{x,y,z} and end.{x,y,z}.
+                    # That is, "rot" is not an accurate variable name, since it
+                    # does not represent a quaternion.
                     _write(' '.join((str(_num(v)) for v in chain(pos, rot[:3]))))
                 else:
                     _write(' '.join((str(_num(v)) for v in chain(pos, rot))))

@@ -85,12 +85,11 @@ class FallbackShapeDefinition(str):
 class ShapeDefinition(object):
     """Initialize a ShapeDefinition instance.
 
-    :param shape_class: The shape class definition,
-                        e.g. 'sphere' or 'poly3d'.
+    :param shape_class: The shape class definition, e.g. 'sphere' or 'poly3d'.
     :type shape_class: str
     :param color: Definition of a color for the
                   particular shape (optional).
-    :type color: A str for RGB color definiton.
+    :type color: A hexadecimal color string in format RRGGBBAA.
     """
 
     def __init__(self, shape_class, color=None):
@@ -108,13 +107,14 @@ class ShapeDefinition(object):
 
 
 class SphereShapeDefinition(ShapeDefinition):
-    """Initialize a ShapeDefinition instance.
+    """Initialize a SphereShapeDefinition instance.
 
     :param diameter: The diameter of the sphere.
     :type diameter: A floating point number.
     :param color: Definition of a color for the
                   particular shape (optional).
-    :type color: A str for RGB color definiton."""
+    :type color: A hexadecimal color string in format RRGGBBAA.
+    """
 
     def __init__(self, diameter, color=None):
         super(SphereShapeDefinition, self).__init__(
@@ -126,13 +126,14 @@ class SphereShapeDefinition(ShapeDefinition):
 
 
 class ArrowShapeDefinition(ShapeDefinition):
-    """Initialize a ShapeDefinition instance.
+    """Initialize an ArrowShapeDefinition instance.
 
     :param thickness: The thickness of the arrow.
     :type thickness: A floating point number.
     :param color: Definition of a color for the
                   particular shape (optional).
-    :type color: A str for RGB color definiton."""
+    :type color: A hexadecimal color string in format RRGGBBAA.
+    """
 
     def __init__(self, thickness=0.1, color=None):
         super(ArrowShapeDefinition, self).__init__(
@@ -143,18 +144,18 @@ class ArrowShapeDefinition(ShapeDefinition):
         return "{} {} {}".format(self.shape_class, self.thickness, self.color)
 
 class SphereUnionShapeDefinition(ShapeDefinition):
-    """Initialize a ShapeDefinition instance.
+    """Initialize a SphereUnionShapeDefinition instance.
 
     :param shape_class: The shape class definition,
-                        e.g. 'sphere' or 'poly3d'.
+                        e.g. 'sphere_union'.
     :type shape_class: str
     :param diameters: A list of sphere diameters
     :type diameters: A sequence of floats
     :param centers: A list of vertex vectors, if applicable.
-    :type centers: A sequence of 3-tuple of numbers (Nx3).
+    :type centers: A sequence of 3-tuples of numbers (Nx3).
     :param colors: Definition of a color for every sphere
-    :type colors: A sequence of str for RGB color definiton.
-        """
+    :type colors: A sequence of hexadecimal color strings in format RRGGBBAA.
+    """
 
     def __init__(self, shape_class, diameters=None, centers=None, colors=None):
         super(SphereUnionShapeDefinition, self).__init__(
@@ -209,16 +210,16 @@ class PolyUnionShapeDefinition(ShapeDefinition):
         return shape_def
 
 class PolyShapeDefinition(ShapeDefinition):
-    """Initialize a ShapeDefinition instance.
+    """Initialize a PolyShapeDefinition instance.
 
     :param shape_class: The shape class definition,
-                        e.g. 'sphere' or 'poly3d'.
+                        e.g. 'poly3d'.
     :type shape_class: str
     :param vertices: A list of vertice vectors, if applicable.
     :type vertices: A sequence of 3-tuple of numbers (Nx3).
     :param color: Definition of a color for the particular shape.
-    :type color: A str for RGB color definiton.
-        """
+    :type color: A hexadecimal color string in format RRGGBBAA.
+    """
 
     def __init__(self, shape_class, vertices=None, color=None):
         super(PolyShapeDefinition, self).__init__(
@@ -232,25 +233,54 @@ class PolyShapeDefinition(ShapeDefinition):
             ' '.join((str(v) for xyz in self.vertices for v in xyz)),
             self.color)
 
-class GeneralPolyShapeDefinition(ShapeDefinition):
-    """Initialize a ShapeDefinition instance.
+class SpheroPolyShapeDefinition(ShapeDefinition):
+    """Initialize a SpheroPolyShapeDefinition instance.
 
     :param shape_class: The shape class definition,
-                        e.g. 'sphere' or 'poly3d'.
+                        e.g. 'spoly3d'.
     :type shape_class: str
-    :param vertices: A list of vertice vectors.
+    :param vertices: A list of vertex vectors, if applicable.
+    :type vertices: A sequence of 3-tuple of numbers (Nx3).
+    :param rounding_radius: Rounding radius applied to the spheropolyhedron.
+    :type rounding_radius: A floating-point number.
+    :param color: Definition of a color for the particular shape.
+    :type color: A hexadecimal color string in format RRGGBBAA.
+    """
+
+    def __init__(self, shape_class, vertices=None, rounding_radius=None, color=None):
+        super(SpheroPolyShapeDefinition, self).__init__(
+            shape_class=shape_class, color=color)
+        self.vertices = vertices
+        self.rounding_radius = rounding_radius
+
+    def __str__(self):
+        return "{} {} {} {} {}".format(
+            self.shape_class,
+            self.rounding_radius,
+            len(self.vertices),
+            ' '.join((str(v) for xyz in self.vertices for v in xyz)),
+            self.color)
+
+class GeneralPolyShapeDefinition(ShapeDefinition):
+    """Initialize a GeneralPolyShapeDefinition instance.
+
+    :param shape_class: The shape class definition,
+                        e.g. 'polyv'.
+    :type shape_class: str
+    :param vertices: A list of vertex vectors.
     :type vertices: A sequence of 3-tuple of numbers (Nx3).
     :param faces: A list of lists of vertex indices per face.
     :type faces: A list of lists of integer numbers.
     :param color: Definition of a color for the particular shape.
-    :type color: A str for RGB color definiton.
-        """
+    :type color: A hexadecimal color string in format RRGGBBAA.
+    """
 
-    def __init__(self, shape_class, vertices=None, faces=None, color=None):
+    def __init__(self, shape_class, vertices=None, faces=None, color=None, facet_colors=None):
         super(GeneralPolyShapeDefinition, self).__init__(
             shape_class=shape_class, color=color)
         self.vertices = vertices
         self.faces = faces
+        self.facet_colors = facet_colors
 
     def __str__(self):
         return "{} {} {} {} {} {}".format(
