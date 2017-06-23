@@ -182,6 +182,8 @@ class PosFileFrame(Frame):
                     definition, data, end = line.strip().split('"')
                     _assert(len(end) == 0)
                     name = definition.split()[1]
+                    if name in raw_frame.shapedef:
+                        warnings.warn("Redifinition of type '{}'.".format(name))
                     raw_frame.shapedef[
                         name] = self._parse_shape_definition(data)
                 elif tokens[0] == 'shape':  # monotype
