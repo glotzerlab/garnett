@@ -73,6 +73,17 @@ class Box(object):
     def __repr__(self):
         return str(self)
 
+    def round(self, decimals=0):
+        "Return box instance with all values rounded up to the given precision."
+        return Box(
+            Lx=np.round(self.Lx, decimals),
+            Ly=np.round(self.Ly, decimals),
+            Lz=np.round(self.Lz, decimals),
+            xy=np.round(self.xy, decimals),
+            xz=np.round(self.xz, decimals),
+            yz=np.round(self.yz, decimals),
+            dimensions=self.dimensions)
+
 
 class FallbackShapeDefinition(str):
     """This shape definition class is used when no specialized
@@ -878,86 +889,60 @@ class Trajectory(BaseTrajectory):
         self._assertarrays_loaded()
         return np.asarray(self._orientations, dtype=self._dtype)
 
-
 def _regularize_box(positions, velocities, orientations,
-                    box_matrix, dimensions=3):
-    """If necessary, transform the box matrix into an
-    upper-triangular matrix and rotate the system accordingly."""
-    v = np.zeros((3, 3))
-    v[0] = box_matrix[:, 0]
-    v[1] = box_matrix[:, 1]
-    v[2] = box_matrix[:, 2]
-    if 0 == v[0][1] == v[0][2] == v[1][2]:
-        box, positions, velocities = _flip_if_required(_calc_box(v, dimensions), positions, velocities)
-        return positions, velocities, orientations, box
-    logger.info("Box matrix is left-handed, rotating.")
-    box = _rotate_improper(v, dimensions, positions, velocities, orientations)
-    box, positions, velocities = _flip_if_required(box, positions, velocities)
+                    box_matrix, dtype=None, dimensions=3):
+    """ Convert box into a right-handed coordinate frame with
+    only upper triangular entries. Also convert corresponding
+    positions and orientations."""
+    # First use QR decomposition to compute the new basis
+    Q, R = np.linalg.qr(box_matrix)
+    Q = Q.astype(dtype)
+    R = R.astype(dtype)
+
+    if not np.allclose(Q, np.eye(dimensions)):
+        # If Q is not the identity matrix, then we will be
+        # changing data, so we have to copy. This only causes
+        # actual failures for non-writeable GSD frames, but could
+        # cause unexpected data corruption for other cases
+        positions = np.copy(positions)
+        orientations = np.copy(orientations)
+        velocities = np.copy(velocities)
+
+        # Since we'll be performing a quaternion operation,
+        # we have to ensure that Q is a pure rotation
+        sign = np.linalg.det(Q)
+        Q = Q*sign
+        R = R*sign
+
+        # First rotate positions and velocities; since they are
+        # vectors, we can use the matrix directly. Conveniently,
+        # instead of transposing Q we can just reverse the order
+        # of multiplication here
+        positions = positions.dot(Q)
+        velocities = velocities.dot(Q)
+
+        # For orientations, we use the quaternion
+        quat = mu.quaternion_from_matrix(Q.T)
+        for i in range(orientations.shape[0]):
+            orientations[i, :] = mu.quaternionMultiply(quat, orientations[i, :])
+
+        # Now we have to ensure that the box is right-handed. We
+        # do this as a second step to avoid introducing reflections
+        # into the rotation matrix before making the quaternion
+        signs = np.diag(np.diag(np.where(R < 0, -np.ones(R.shape), np.ones(R.shape))))
+        box = R.dot(signs)
+        positions = positions.dot(signs)
+        velocities = velocities.dot(signs)
+    else:
+        box = box_matrix
+
+    # Construct the box
+    Lx, Ly, Lz = np.diag(box).flatten().tolist()
+    xy = box[0, 1]/Ly
+    xz = box[0, 2]/Lz
+    yz = box[1, 2]/Lz
+    box = Box(Lx = Lx, Ly = Ly, Lz = Lz, xy = xy, xz = xz, yz = yz)
     return positions, velocities, orientations, box
-
-
-def _rotate_improper(v, dimensions, positions, velocities, orientations):
-    # unit vector
-    e1 = np.array((1.0, 0, 0))
-
-    # Transforming particle orientations
-    # Rotation of v[0] into direction x, and v[1] into xy plane
-    # Rotation of system, so that v[0] is aligned with x and v[1] in xy-plane
-    qbox0toe1 = mu.quaternionRotateVectorOntoVector(v[0], e1)
-
-    # Rotate v[0] into x-direction
-    v[0] = mu.rotateVector(v[0], qbox0toe1)
-    v[1] = mu.rotateVector(v[1], qbox0toe1)
-    v[2] = mu.rotateVector(v[2], qbox0toe1)
-
-    # Rotate system about x-axis, so that v[1] is in xy-plane
-    # Angle between v[1] and ex, in the YZ plane
-    theta_yz = math.atan2(v[1][2], v[1][1])
-    q_y1intoxy = mu.quaternionAxisAngle(e1, -theta_yz)
-
-    v[0] = mu.rotateVector(v[0], q_y1intoxy)
-    v[1] = mu.rotateVector(v[1], q_y1intoxy)
-    v[2] = mu.rotateVector(v[2], q_y1intoxy)
-    box = _calc_box(v, dimensions)
-
-    # Rotate system particles by the appropriate
-    # quaternion composition of the orientations on the system
-    qboth = mu.quaternionMultiply(q_y1intoxy, qbox0toe1)
-    for i in range(positions.shape[0]):
-        positions[i] = mu.rotateVector(positions[i], qboth)
-        velocities[i] = mu.rotateVector(velocities[i], qboth)
-        orientations[i] = mu.quaternionMultiply(qboth, orientations[i])
-
-    return box
-
-
-def _flip_if_required(box, positions, velocities):
-    v = np.asarray(box.get_box_matrix())
-    m = np.diag(np.where(v < 0, -np.ones(v.shape), np.ones(v.shape)))
-    if (m > 0).all():
-        return box, positions, velocities
-    logger.info("Box has negative dimensions, flipping.")
-    v = np.dot(v, np.diag(m))
-    positions = np.dot(positions, np.diag(m))
-    velocities = np.dot(velocities, np.diag(m))
-    return _calc_box(v, box.dimensions), positions, velocities
-
-
-def _calc_box(v, dimensions):
-    # source: http://codeblue.umich.edu/HOOMD-blue/doc/page_box.html
-    Lx = np.sqrt(np.dot(v[0], v[0]))
-    a2x = np.dot(v[0], v[1]) / Lx
-    Ly = np.sqrt(np.dot(v[1], v[1]) - a2x * a2x)
-    xy = a2x / Ly
-    v0xv1 = np.cross(v[0], v[1])
-    v0xv1mag = np.sqrt(np.dot(v0xv1, v0xv1))
-    Lz = np.dot(v[2], v0xv1) / v0xv1mag
-    a3x = np.dot(v[0], v[2]) / Lx
-    xz = a3x / Lz
-    yz = (np.dot(v[1], v[2]) - a2x * a3x) / (Ly * Lz)
-    assert 1 < dimensions <= 3
-    return Box(Lx=Lx, Ly=Ly, Lz=Lz, xy=xy, xz=xz, yz=yz, dimensions=dimensions)
-
 
 def _generate_type_id_array(types, type_ids):
     "Generate type_id array."
@@ -986,7 +971,7 @@ def _raw_frame_to_frame(raw_frame, dtype=None):
         raw_frame.box = np.asarray(raw_frame.box.get_box_matrix(), dtype=dtype)
     box_dimensions = getattr(raw_frame, 'box_dimensions', 3)
     ret.positions, ret.velocities, ret.orientations, ret.box = _regularize_box(
-        positions, velocities, orientations, raw_frame.box, box_dimensions)
+        positions, velocities, orientations, raw_frame.box, dtype, box_dimensions)
     ret.shapedef = raw_frame.shapedef
     ret.types = raw_frame.types
     ret.data = raw_frame.data

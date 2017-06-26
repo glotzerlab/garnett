@@ -35,5 +35,5 @@ setup(
         "Topic :: Scientific/Engineering :: Physics",
     ],
 
-    tests_require=['nose'],
+    tests_require=['nose', 'ddt'],
 )

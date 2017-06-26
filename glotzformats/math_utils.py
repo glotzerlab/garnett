@@ -77,3 +77,33 @@ def unitBisector(v1, v2):
 def quaternionRotateVectorOntoVector(v1, v2):
     bis = unitBisector(v1, v2)
     return quaternionAxisAngle(bis, math.pi)
+
+# Convert a rotation matrix into a quaternion
+def quaternion_from_matrix(T):
+    tr = numpy.trace(T)
+    q = [1,0,0,0]
+    if tr > 0:
+        S = math.sqrt(1.0+tr)*2
+        q[0] = 0.25 * S
+        q[1] = (T[2][1] - T[1][2])/S
+        q[2] = (T[0][2] - T[2][0])/S
+        q[3] = (T[1][0] - T[0][1])/S
+    elif ((T[0][0] > T[1][1]) and (T[0][0] > T[2][2])):
+        S = math.sqrt(1.0+T[0][0]-T[1][1]-T[2][2])*2.0
+        q[0] = (T[2][1]-T[1][2])/S
+        q[1] = 0.25 * S
+        q[2] = (T[0][1]+T[1][0])/S
+        q[3] = (T[0][2]+T[2][0])/S
+    elif (T[1][1] > T[2][2]):
+        S = math.sqrt(1.0+T[1][1] - T[0][0] - T[2][2]) *2
+        q[0] = (T[0][2] - T[2][0])/S
+        q[1] = (T[0][1] + T[1][0])/S
+        q[2] = 0.25 *S
+        q[3] = (T[1][2] + T[2][1])/S
+    else:
+        S = math.sqrt(1.0 + T[2][2] - T[0][0] - T[1][1]) * 2
+        q[0] = (T[1][0] - T[0][1])/S
+        q[1] = (T[0][2] + T[2][0])/S
+        q[2] = (T[1][2] + T[2][1])/S
+        q[3] = 0.25 * S
+    return q
