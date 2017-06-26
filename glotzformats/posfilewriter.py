@@ -12,12 +12,18 @@ Author: Carl Simon Adorf
 import io
 import sys
 import logging
+import warnings
+import math
 from itertools import chain
 
 import numpy as np
 
 from .posfilereader import POSFILE_FLOAT_DIGITS
 from .trajectory import SphereShapeDefinition, ArrowShapeDefinition
+from .math_utils import toEulerAngles
+from .math_utils import rotateVector
+from .math_utils import quaternionMultiply
+
 
 logger = logging.getLogger(__name__)
 PYTHON_2 = sys.version_info[0] == 2
@@ -41,6 +47,12 @@ class PosFileWriter(object):
         with open('a_posfile.pos', 'w', encoding='utf-8') as posfile:
             writer.write(trajectory, posfile)
     """
+    def __init__(self, rotate=False):
+        self._rotate = rotate
+        if self._rotate:
+            warnings.warn(
+                "Rotating the system with a view rotation leads to significant "
+                "numerical precision loss!")
 
     def write(self, trajectory, file=sys.stdout):
         """Serialize a trajectory into pos-format and write it to file.
@@ -66,10 +78,20 @@ class PosFileWriter(object):
                 for row in rows:
                     _write(' '.join(row))
                 _write('#[done]')
-            # boxMatrix
+
+            # boxMatrix and rotation
             box_matrix = np.array(frame.box.get_box_matrix())
+            if self._rotate and frame.view_rotation is not None:
+                for i in range(3):
+                    box_matrix[:, i] = rotateVector(box_matrix[:, i], frame.view_rotation)
+
+            if frame.view_rotation is not None and not self._rotate:
+                angles = toEulerAngles(frame.view_rotation) * 180 / math.pi
+                _write('rotation ' + ' '.join((str(_num(_)) for _ in angles)))
+
             _write('boxMatrix ', end='')
             _write(' '.join((str(_num(v)) for v in box_matrix.flatten())))
+
             # shape defs
             required = set(frame.types).intersection(
                 set(frame.shapedef.keys()))
@@ -84,8 +106,14 @@ class PosFileWriter(object):
                 _write('def {} "{}"'.format(name, DEFAULT_SHAPE_DEFINITION))
             for name, pos, rot in zip(frame.types, frame.positions,
                                       frame.orientations):
+
                 _write(name, end=' ')
                 shapedef = frame.shapedef.get(name, DEFAULT_SHAPE_DEFINITION)
+
+                if self._rotate and frame.view_rotation is not None:
+                    pos = rotateVector(pos, frame.view_rotation)
+                    rot = quaternionMultiply(frame.view_rotation, rot)
+
                 if isinstance(shapedef, SphereShapeDefinition):
                     _write(' '.join((str(_num(v)) for v in pos)))
                 elif isinstance(shapedef, ArrowShapeDefinition):

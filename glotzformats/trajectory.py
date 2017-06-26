@@ -323,6 +323,7 @@ class FrameData(object):
         "A list of strings, where each string represents one attribute."
         self.shapedef = collections.OrderedDict()
         "A ordered dictionary of instances of :class:`~.ShapeDefinition`."
+        self.view_rotation = None
 
     def __len__(self):
         return len(self.types)
@@ -375,6 +376,8 @@ class _RawFrameData(object):
         self.data_keys = None                       # A list of strings
         # A ordered dictionary of instances of ShapeDefinition
         self.shapedef = collections.OrderedDict()
+        # A view rotation (does not affect the actual trajectory)
+        self.view_rotation = None
 
 
 class Frame(object):
@@ -537,6 +540,11 @@ class Frame(object):
     def shapedef(self, value):
         self.load()
         self.frame_data.shapedef = value
+
+    @property
+    def view_rotation(self):
+        self.load()
+        return self.frame_data.view_rotation
 
 
 class BaseTrajectory(object):
@@ -966,6 +974,7 @@ def _raw_frame_to_frame(raw_frame, dtype=None):
     if len(orientations) == 0:
         orientations = np.asarray([[1, 0, 0, 0]] * len(positions))
 
+    assert raw_frame.box is not None
     if isinstance(raw_frame.box, Box):
         raw_frame.box_dimensions = raw_frame.box.dimensions
         raw_frame.box = np.asarray(raw_frame.box.get_box_matrix(), dtype=dtype)
@@ -976,6 +985,7 @@ def _raw_frame_to_frame(raw_frame, dtype=None):
     ret.types = raw_frame.types
     ret.data = raw_frame.data
     ret.data_keys = raw_frame.data_keys
+    ret.view_rotation = raw_frame.view_rotation
     assert N == len(ret.types) == len(ret.positions) == len(ret.velocities) == len(ret.orientations)
     return ret
 

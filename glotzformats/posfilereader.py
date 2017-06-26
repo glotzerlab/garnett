@@ -19,6 +19,7 @@ from .trajectory import _RawFrameData, Frame, Trajectory, \
     SphereShapeDefinition, PolyShapeDefinition,\
     ArrowShapeDefinition, SphereUnionShapeDefinition, \
     PolyUnionShapeDefinition, GeneralPolyShapeDefinition, FallbackShapeDefinition
+from .math_utils import toQuaternion
 
 from .errors import ParserError, ParserWarning
 
@@ -26,7 +27,7 @@ logger = logging.getLogger(__name__)
 
 POSFILE_FLOAT_DIGITS = 11
 COMMENT_CHARACTERS = ['//']
-TOKENS_SKIP = ['translation', 'rotation', 'antiAliasing', 'zoomFactor', 'connection']
+TOKENS_SKIP = ['translation', 'antiAliasing', 'zoomFactor', 'connection']
 
 
 def _is_comment(line):
@@ -158,6 +159,7 @@ class PosFileFrame(Frame):
                     "Failed to read line #{}: {}.".format(i, line))
         monotype = False
         raw_frame = _RawFrameData()
+        raw_frame.view_rotation = None
         for i, line in enumerate(self.stream):
             if _is_comment(line):
                 continue
@@ -201,6 +203,10 @@ class PosFileFrame(Frame):
                             [self._num(tokens[1]), 0, 0],
                             [0, self._num(tokens[2]), 0],
                             [0, 0, self._num(tokens[3])]]).reshape((3, 3))
+                elif tokens[0] == 'rotation':
+                    euler_angles = np.array([float(t) for t in tokens[1:]])
+                    euler_angles *= np.pi / 180
+                    raw_frame.view_rotation = toQuaternion(* euler_angles)
                 else:
                     # assume we are reading positions now
                     if not monotype:
