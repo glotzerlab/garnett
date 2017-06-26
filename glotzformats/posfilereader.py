@@ -18,7 +18,8 @@ import numpy as np
 from .trajectory import _RawFrameData, Frame, Trajectory, \
     SphereShapeDefinition, PolyShapeDefinition,\
     ArrowShapeDefinition, SphereUnionShapeDefinition, \
-    GeneralPolyShapeDefinition, FallbackShapeDefinition
+    PolyUnionShapeDefinition, GeneralPolyShapeDefinition, FallbackShapeDefinition
+from .math_utils import toQuaternion
 
 from .errors import ParserError, ParserWarning
 
@@ -26,7 +27,7 @@ logger = logging.getLogger(__name__)
 
 POSFILE_FLOAT_DIGITS = 11
 COMMENT_CHARACTERS = ['//']
-TOKENS_SKIP = ['translation', 'rotation', 'antiAliasing', 'zoomFactor', 'connection']
+TOKENS_SKIP = ['translation', 'antiAliasing', 'zoomFactor', 'connection']
 
 
 def _is_comment(line):
@@ -87,6 +88,22 @@ class PosFileFrame(Frame):
                     xyz = next(tokens), next(tokens), next(tokens)
                     colors.append(next(tokens))
                     centers.append([self._num(v) for v in xyz])
+            elif shape_class.lower() == 'poly3d_union':
+                num_centers = int(next(tokens))
+                vertices = [[] for p in range(num_centers)]
+                centers = []
+                orientations = []
+                colors = []
+                for i in range(num_centers):
+                    num_vertices = int(next(tokens))
+                    for j in range(num_vertices):
+                        xyz = next(tokens), next(tokens), next(tokens)
+                        vertices[i].append([self._num(v) for v in xyz])
+                    xyz = next(tokens), next(tokens), next(tokens)
+                    centers.append([self._num(v) for v in xyz])
+                    quat = next(tokens), next(tokens), next(tokens), next(tokens)
+                    orientations.append([self._num(q) for q in quat])
+                    colors.append(next(tokens))
             elif shape_class.lower() == 'polyv':
                 num_vertices = int(next(tokens))
                 vertices = []
@@ -116,7 +133,9 @@ class PosFileFrame(Frame):
             elif shape_class.lower() == 'arrow':
                 return ArrowShapeDefinition(thickness=thickness, color=color)
             elif shape_class.lower() == 'sphere_union':
-                return SphereUnionShapeDefinition(shape_class=shape_class,diameters=diameters, centers=centers, colors=colors)
+                return SphereUnionShapeDefinition(shape_class=shape_class, diameters=diameters, centers=centers, colors=colors)
+            elif shape_class.lower() == 'poly3d_union':
+                return PolyUnionShapeDefinition(shape_class=shape_class, vertices=vertices, centers=centers, orientations=orientations, colors=colors)
             elif shape_class.lower() == 'polyv':
                 return GeneralPolyShapeDefinition(shape_class=shape_class, vertices=vertices, faces=faces)
             else:
@@ -140,6 +159,7 @@ class PosFileFrame(Frame):
                     "Failed to read line #{}: {}.".format(i, line))
         monotype = False
         raw_frame = _RawFrameData()
+        raw_frame.view_rotation = None
         for i, line in enumerate(self.stream):
             if _is_comment(line):
                 continue
@@ -164,6 +184,8 @@ class PosFileFrame(Frame):
                     definition, data, end = line.strip().split('"')
                     _assert(len(end) == 0)
                     name = definition.split()[1]
+                    if name in raw_frame.shapedef:
+                        warnings.warn("Redifinition of type '{}'.".format(name))
                     raw_frame.shapedef[
                         name] = self._parse_shape_definition(data)
                 elif tokens[0] == 'shape':  # monotype
@@ -181,11 +203,15 @@ class PosFileFrame(Frame):
                             [self._num(tokens[1]), 0, 0],
                             [0, self._num(tokens[2]), 0],
                             [0, 0, self._num(tokens[3])]]).reshape((3, 3))
+                elif tokens[0] == 'rotation':
+                    euler_angles = np.array([float(t) for t in tokens[1:]])
+                    euler_angles *= np.pi / 180
+                    raw_frame.view_rotation = toQuaternion(* euler_angles)
                 else:
                     # assume we are reading positions now
                     if not monotype:
                         name = tokens[0]
-                        if not name in raw_frame.shapedef:
+                        if name not in raw_frame.shapedef:
                             raw_frame.shapedef.setdefault(
                                 name, self._parse_shape_definition(' '.join(tokens[:3])))
                     else:

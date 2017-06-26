@@ -1,12 +1,21 @@
+Contributors to the glotz-formats code base (roughly) in
+chronologocial order of contribution:
+
 Carl Simon Adorf
 Richmond Newmann
+Paul Dodd
 Matthew Spellings
+Erin Teich
+Pablo Damasceno
 Julia Dshemuchadse
 James Proctor
 Jens Glaser
 Mayank Agrawal
 Eric Harper
+Rose Cersonsky
 James Antonaglia
 Chengyu Dai
 James Antonaglia
 Eric Harper
+Vyas Ramasubramani
+Bradley Dice

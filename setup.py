@@ -17,7 +17,7 @@ if not sys.version_info >= (2, 7):
 
 setup(
     name='glotzformats',
-    version='0.3.9',
+    version='0.4.0',
     packages=find_packages(),
 
     ext_modules=cythonize('glotzformats/*.pyx') if CYTHON else [],
@@ -35,5 +35,5 @@ setup(
         "Topic :: Scientific/Engineering :: Physics",
     ],
 
-    tests_require=['nose'],
+    tests_require=['nose', 'ddt'],
 )

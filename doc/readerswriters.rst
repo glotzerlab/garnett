@@ -74,6 +74,11 @@ See also: `<http://gsd.readthedocs.io>`_
     :undoc-members:
     :inherited-members:
 
+.. autoclass:: glotzformats.writer.GSDHOOMDFileWriter
+    :members:
+    :undoc-members:
+    :inherited-members:
+
 GeTAR
 -----
 
@@ -124,6 +129,11 @@ CIF
 ---
 
 The *cif*-format is a *text-based* format primarily used in the context of crystallography.
+
+.. autoclass:: glotzformats.reader.CifFileReader
+    :members:
+    :undoc-members:
+    :inherited-members:
 
 .. autoclass:: glotzformats.writer.CifFileWriter
     :members:

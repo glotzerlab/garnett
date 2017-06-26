@@ -28,7 +28,7 @@ PYTHON_2 = sys.version_info[0] == 2
 
 
 def _determine_unitcell(box):
-    lengths = np.array([box.Lx, box.Ly, box.Lz])  # a, b, c
+    lengths = np.sqrt(np.sum(np.array(box.get_box_matrix())**2, axis=0)) # a, b, c
     gamma = math.degrees(
         np.arccos(
             box.xy / math.sqrt(1 + box.xy ** 2)))
@@ -102,17 +102,21 @@ class CifFileWriter(object):
         _write("_atom_site_fract_z")
 
         # write header particle positions
-        b = np.diag(frame.box.get_box_matrix())
+        invbox = np.linalg.inv(frame.box.get_box_matrix())
+        fractions = np.dot(invbox, frame.positions.T).T
+        # fraction (0, 0, 0) should be a corner of the box
+        fractions += 0.5
+
         type_counter = defaultdict(int)
         n_digits = len(str(len(frame.positions)))
         l = "{ptype}{pnum:0" + str(n_digits) + \
             "d} {ptype} {occ:3.2f} {position}"
-        for i, (position, particle_type) in enumerate(zip(frame.positions, frame.types)):
+        for i, (position, particle_type) in enumerate(zip(fractions, frame.types)):
             _write(l.format(
                 pnum=type_counter[particle_type],
                 ptype=particle_type,
                 occ=occupancy,
-                position=' '.join((str(p) for p in (position / b)))))
+                position=' '.join(map(str, position))))
             type_counter[particle_type] += 1
 
     def write(self, trajectory, file=sys.stdout,

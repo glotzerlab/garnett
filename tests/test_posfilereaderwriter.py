@@ -2,12 +2,20 @@ import unittest
 import os
 import sys
 import io
+import warnings
 import tempfile
 import subprocess
+from itertools import chain
+
+from ddt import ddt, data
 
 import glotzformats
+import numpy as np
 
 PYTHON_2 = sys.version_info[0] == 2
+
+PATH = os.path.join(glotzformats.__path__[0], '..')
+IN_PATH = os.path.abspath(PATH) == os.path.abspath(os.getcwd())
 
 
 try:
@@ -50,9 +58,21 @@ class BasePosFileWriterTest(BasePosFileReaderTest):
         writer = glotzformats.writer.PosFileWriter()
         return writer.dump(trajectory)
 
-    def write_trajectory(self, trajectory, file):
-        writer = glotzformats.writer.PosFileWriter()
+    def write_trajectory(self, trajectory, file, rotate=False):
+        writer = glotzformats.writer.PosFileWriter(rotate=rotate)
         return writer.write(trajectory, file)
+
+    def assert_approximately_equal_frames(self, a, b,
+                                          decimals=6, atol=1e-5, ignore_orientations=False):
+        self.assertEqual(a.box.round(decimals), b.box.round(decimals))
+        self.assertEqual(a.types, b.types)
+        self.assertTrue(np.allclose(a.positions, b.positions, atol=atol))
+        self.assertTrue(np.allclose(a.velocities, b.velocities, atol=atol))
+        if not ignore_orientations:
+            self.assertTrue(np.allclose(a.orientations, b.orientations, atol=atol))
+        self.assertEqual(a.data, b.data)
+        for key in chain(a.shapedef, b.shapedef):
+            self.assertEqual(a.shapedef[key], b.shapedef[key])
 
 
 class PosFileReaderTest(BasePosFileReaderTest):
@@ -204,6 +224,7 @@ class HPMCPosFileReaderTest(BasePosFileReaderTest):
             self.read_trajectory(posfile)
 
 
+@ddt
 class PosFileWriterTest(BasePosFileWriterTest):
 
     def test_hpmc_dialect(self):
@@ -274,6 +295,60 @@ class PosFileWriterTest(BasePosFileWriterTest):
             self.assertTrue(isinstance(
                 frame.shapedef['A'], ArrowShapeDefinition))
 
+    @unittest.skipIf(not IN_PATH, 'tests not executed from repository root')
+    @data(
+        'hpmc_sphere',
+        'hpmc_sphere_rotated',
+        'FeSiUC',
+        'Henzie_lithium_cubic_uc',
+        'Henzie_lithium_triclinic',
+        'cubic_onep',
+        'cubic_twop',
+        #'hex_onep',    # These tests are deactivated, because we currently
+        #'hex_twop',    # do not have a solution to keep the reference orientation
+        #'rand_test',   # the same. The systems are otherwise identical.
+        'scc',
+        'switch_FeSiUC',
+        'switch_scc')
+    def test_read_write_read(self, name):
+        fn = os.path.join(PATH, 'samples', name + '.pos')
+        with open(fn) as samplefile:
+            traj0 = self.read_trajectory(samplefile)
+            with tempfile.NamedTemporaryFile('w', suffix='.pos') as tmpfile:
+                self.write_trajectory(traj0, tmpfile, rotate=False)
+                tmpfile.flush()
+                with open(tmpfile.name) as tmpfile_read:
+                    traj1 = self.read_trajectory(tmpfile_read)
+                    for f0, f1 in zip(traj0, traj1):
+                        self.assert_approximately_equal_frames(f0, f1)
+
+    @unittest.skipIf(not IN_PATH, 'tests not executed from repository root')
+    @data(
+        'hpmc_sphere',
+        'hpmc_sphere_rotated',
+        'xtalslice3_small',
+        'FeSiUC',
+        # For the following two, the box has a different sign...
+        #'xtalslice3_small_rotated',
+        #'switch_FeSiUC',
+        )
+    def test_read_write_read_rotated(self, name):
+        fn = os.path.join(PATH, 'samples', name + '.pos')
+        with open(fn) as samplefile:
+            traj0 = self.read_trajectory(samplefile)
+            with tempfile.NamedTemporaryFile('w', suffix='.pos') as tmpfile:
+                with warnings.catch_warnings():
+                    warnings.simplefilter('ignore')
+                    self.write_trajectory(traj0, tmpfile, rotate=True)
+                tmpfile.flush()
+                with open(tmpfile.name) as tmpfile_read:
+                    traj1 = self.read_trajectory(tmpfile_read)
+                    for f0, f1 in zip(traj0, traj1):
+                        self.assert_approximately_equal_frames(
+                            f0, f1, decimals=4, atol=1e-6,
+                            ignore_orientations=True # The shapes themselves are differently oriented
+                            )
+
 
 @unittest.skip("injavis is currently not starting correctly.")
 class InjavisReadWriteTest(BasePosFileWriterTest):
@@ -312,6 +387,7 @@ class InjavisReadWriteTest(BasePosFileWriterTest):
 
     def test_injavis_dialect(self):
         self.read_write_injavis(glotzformats.samples.POS_INJAVIS)
+
 
 if __name__ == '__main__':
     context.initialize("--mode=cpu")

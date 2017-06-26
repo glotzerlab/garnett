@@ -77,3 +77,76 @@ def unitBisector(v1, v2):
 def quaternionRotateVectorOntoVector(v1, v2):
     bis = unitBisector(v1, v2)
     return quaternionAxisAngle(bis, math.pi)
+
+
+# Convert euler angles to quaternion (3-2-1 convention)
+def toQuaternion(a1, a2, a3):
+   # copied from injavis:
+    a1 *= 0.5
+    a2 *= 0.5
+    a3 *= 0.5
+    c1 = math.cos(a1)
+    c2 = math.cos(a2)
+    c3 = math.cos(a3)
+    s1 = math.sin(a1)
+    s2 = math.sin(a2)
+    s3 = math.sin(a3)
+    r = c1 * c2 * c3 + s1 * s2 * s3
+    i = s1 * c2 * c3 - c1 * s2 * s3
+    j = c1 * s2 * c3 + s1 * c2 * s3
+    k = c1 * c2 * s3 - s1 * s2 * c3
+    return numpy.array([r, i, j, k])
+
+# Convert quaternion to euler angles
+
+def toEulerAngles(q):
+    # copied from injavis:
+    r, i, j, k = q
+    q00 = r * r
+    q11 = i * i
+    q22 = j * j
+    q33 = k * k
+    q01 = r * i
+    q02 = r * j
+    q03 = r * k
+    q12 = i * j
+    q13 = i * k
+    q23 = j * k
+    angle1 = math.atan2(2.0 * (q01 + q23), q00 - q11 - q22 + q33)
+    angle2 = math.asin (2.0 * (q02 - q13))
+    angle3 = math.atan2(2.0 * (q03 + q12), q00 + q11 - q22 - q33)
+    angle1 = 0.5 * math.pi if numpy.isnan(angle1) else angle1
+    angle2 = 0.5 * math.pi if numpy.isnan(angle2) else angle2
+    angle3 = 0.5 * math.pi if numpy.isnan(angle1) else angle3
+    return numpy.array([angle1, angle2, angle3])
+
+
+# Convert a rotation matrix into a quaternion
+def quaternion_from_matrix(T):
+    tr = numpy.trace(T)
+    q = [1,0,0,0]
+    if tr > 0:
+        S = math.sqrt(1.0+tr)*2
+        q[0] = 0.25 * S
+        q[1] = (T[2][1] - T[1][2])/S
+        q[2] = (T[0][2] - T[2][0])/S
+        q[3] = (T[1][0] - T[0][1])/S
+    elif ((T[0][0] > T[1][1]) and (T[0][0] > T[2][2])):
+        S = math.sqrt(1.0+T[0][0]-T[1][1]-T[2][2])*2.0
+        q[0] = (T[2][1]-T[1][2])/S
+        q[1] = 0.25 * S
+        q[2] = (T[0][1]+T[1][0])/S
+        q[3] = (T[0][2]+T[2][0])/S
+    elif (T[1][1] > T[2][2]):
+        S = math.sqrt(1.0+T[1][1] - T[0][0] - T[2][2]) *2
+        q[0] = (T[0][2] - T[2][0])/S
+        q[1] = (T[0][1] + T[1][0])/S
+        q[2] = 0.25 *S
+        q[3] = (T[1][2] + T[2][1])/S
+    else:
+        S = math.sqrt(1.0 + T[2][2] - T[0][0] - T[1][1]) * 2
+        q[0] = (T[1][0] - T[0][1])/S
+        q[1] = (T[0][2] + T[2][0])/S
+        q[2] = (T[1][2] + T[2][1])/S
+        q[3] = 0.25 * S
+    return q

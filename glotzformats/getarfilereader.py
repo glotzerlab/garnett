@@ -15,8 +15,36 @@ import numpy as np
 import gtar
 
 from .trajectory import _RawFrameData, Box, Frame, Trajectory
+from .trajectory import SphereShapeDefinition, GeneralPolyShapeDefinition, PolyShapeDefinition, SpheroPolyShapeDefinition
 
 logger = logging.getLogger(__name__)
+
+
+def _parse_shape_definition(shape):
+    rounding_radius = shape.get('rounding_radius', 0)
+
+    shapedef = None
+    if rounding_radius == 0:
+        if shape['type'].lower() == 'sphere':
+            shapedef = SphereShapeDefinition(
+                shape_class='sphere', diameter=shape['diameter'], color=None)
+        elif shape['type'].lower() == 'polyhedron':
+            shapedef = GeneralPolyShapeDefinition(shape_class='polyV', vertices=shape[
+                                                  'vertices'], faces=shape['faces'], facet_colors=shape['colors'], color=None)
+        elif shape['type'].lower() == 'convexpolyhedron':
+            shapedef = PolyShapeDefinition(shape_class='poly3d', vertices=shape[
+                                           'vertices'], color=None)
+    else:
+        # Rounded shapes
+        if shape['type'].lower() == 'convexpolyhedron':
+            shapedef = SpheroPolyShapeDefinition(shape_class='spoly3d', vertices=shape[
+                                                 'vertices'], rounding_radius=rounding_radius, color=None)
+
+    if shapedef is None:
+        logger.error("Failed to parse shape definition: shape not supported.")
+        raise RuntimeError("Failed to parse shape definition.")
+
+    return shapedef
 
 
 class GetarFrame(Frame):
@@ -63,18 +91,28 @@ class GetarFrame(Frame):
 
         if 'box' in self._records:
             dimensions = (
-                self._trajectory.getRecord(self._records['dimensions'], self._frame)[0]
-                    if 'dimensions' in self._records else 3)
+                self._trajectory.getRecord(
+                    self._records['dimensions'], self._frame)[0]
+                if 'dimensions' in self._records else 3)
             box = self._trajectory.getRecord(self._records['box'], self._frame)
             gbox = Box(
-                    **dict(
-                        zip(['Lx', 'Ly', 'Lz', 'xy', 'xz', 'yz'], box),
-                        dimensions=dimensions)
-                    )
+                **dict(
+                    zip(['Lx', 'Ly', 'Lz', 'xy', 'xz', 'yz'], box),
+                    dimensions=dimensions)
+            )
             raw_frame.box = np.array(gbox.get_box_matrix())
             raw_frame.box_dimensions = int(dimensions)
         else:
             raw_frame.box = self._default_box
+
+        if 'type_names.json' in self._records and 'type_shapes.json' in self._records:
+            names = json.loads(self._trajectory.getRecord(
+                self._records['type_names.json'], self._frame))
+            shapes = json.loads(self._trajectory.getRecord(
+                self._records['type_shapes.json'], self._frame))
+            for name, shape in zip(names, shapes):
+                shape_def = _parse_shape_definition(shape)
+                raw_frame.shapedef.update({name: shape_def})
 
         return raw_frame
 
@@ -120,7 +158,7 @@ class GetarFileReader(object):
                 "as the underlying library is reading the file by filename "
                 "and not directly from the stream.")
         _trajectory = gtar.GTAR(filename, 'r')
-        _records = {rec.getName(): rec for rec in _trajectory.getRecordTypes()}
+        _records = {rec.getName(): rec for rec in _trajectory.getRecordTypes() if not rec.getGroup()}
         # assume that we care primarily about positions
         try:
             self._frames = _trajectory.queryFrames(_records['position'])
