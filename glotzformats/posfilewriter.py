@@ -46,6 +46,10 @@ class PosFileWriter(object):
         writer = PosFileWriter()
         with open('a_posfile.pos', 'w', encoding='utf-8') as posfile:
             writer.write(trajectory, posfile)
+
+    :param rotate: Rotate the system into the view rotation instead of adding
+        it to the metadata with the 'rotation' keyword.
+    :type rotate: bool
     """
     def __init__(self, rotate=False):
         self._rotate = rotate
