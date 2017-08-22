@@ -907,7 +907,7 @@ def _regularize_box(positions, velocities, orientations,
     Q = Q.astype(dtype)
     R = R.astype(dtype)
 
-    if not np.allclose(Q, np.eye(dimensions)):
+    if not np.allclose(Q[:dimensions, :dimensions], np.eye(dimensions)):
         # If Q is not the identity matrix, then we will be
         # changing data, so we have to copy. This only causes
         # actual failures for non-writeable GSD frames, but could
