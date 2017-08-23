@@ -1,3 +1,7 @@
+0.4.1
+
+	- Fix minor bug related to QR check for 2d boxes.
+
 0.4.0
 
 	- Added readers/writers:
