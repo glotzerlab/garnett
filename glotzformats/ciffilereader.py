@@ -1,4 +1,4 @@
-"""POS-file reader for the Glotzer Group, University of Michigan.
+"""CIF-file reader for the Glotzer Group, University of Michigan.
 
 Authors: Matthew Spellings
 
@@ -6,7 +6,7 @@ Authors: Matthew Spellings
 
     reader = CifFileReader()
     with open('a_ciffile.cif', 'r', encoding='utf-8') as ciffile:
-        return reader.read(ciffile)
+        traj = reader.read(ciffile)
 """
 
 import collections
@@ -174,23 +174,18 @@ class CifFileReader(object):
 
             reader = CifFileReader()
             with open('a_ciffile.cif', 'r') as ciffile:
-                return reader.read(ciffile)
+                traj = reader.read(ciffile)
 
         :param precision: The number of digits to
                           round floating-point values to.
         :type precision: int
+        :param tolerance: Floating-point tolerance of particle
+                          identity as symmetry operations are applied
+        :type tolerance: float
     """
 
     def __init__(self, precision=None, tolerance=1e-5):
-        """Initialize a cif-file reader.
-
-        :param precision: The number of digits to
-                          round floating-point values to.
-        :param tolerance: Floating-point tolerance of particle
-                          identity as symmetry operations are applied
-        :type precision: int
-        :type tolerance: float
-        """
+        """Initialize a cif-file reader."""
         self._precision = precision or CIFFILE_FLOAT_DIGITS
         self._tolerance = tolerance
 

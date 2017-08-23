@@ -74,6 +74,11 @@ See also: `<http://gsd.readthedocs.io>`_
     :undoc-members:
     :inherited-members:
 
+.. autoclass:: glotzformats.writer.GSDHOOMDFileWriter
+    :members:
+    :undoc-members:
+    :inherited-members:
+
 GeTAR
 -----
 

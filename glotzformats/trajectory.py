@@ -324,6 +324,7 @@ class FrameData(object):
         self.shapedef = collections.OrderedDict()
         "A ordered dictionary of instances of :class:`~.ShapeDefinition`."
         self.view_rotation = None
+        "A quaternion specifying a rotation that should be applied for visualization."
 
     def __len__(self):
         return len(self.types)

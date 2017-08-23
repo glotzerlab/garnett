@@ -1,3 +1,20 @@
+0.4.0
+
+	- Added readers/writers:
+		- cif reader
+		- gsd writer
+	- Improved algorithm for the normalization of frames with non-standard box
+	- New supported shape definitions:
+		- spheropoly
+		- polyunion
+		- convexpolyhedron_union
+	- The GetarFileReader also reads shape definitions.
+	- Add `gf2pos` script - convert to pos-file from any supported format
+	- Other minor updates:
+		- GetarFileReader skips records that have a non-empty group field.
+		- Interpret the pos-file rotation key word.
+		- Various documentation updates
+
 0.3.9
 
 	- Fix bug related to trajectory arrays when slicing the array.
