@@ -120,7 +120,7 @@ class PosFileFrame(Frame):
                     faces.append(fv)
 
             elif shape_class.lower() == 'spoly3d':
-                rounding_radius = next(tokens)
+                rounding_radius = float(next(tokens))
                 num_vertices = int(next(tokens))
                 vertices = []
                 for i in range(num_vertices):
@@ -148,11 +148,12 @@ class PosFileFrame(Frame):
             elif shape_class.lower() == 'polyv':
                 return GeneralPolyShapeDefinition(shape_class=shape_class, vertices=vertices, faces=faces)
             elif shape_class.lower() == 'spoly3d':
-                return SpheroPolyShapeDefinition(shape_class=shap_class, vertices=vertices, rounding_radius=rounding_radius, color=color)
+                return SpheroPolyShapeDefinition(shape_class=shape_class, vertices=vertices, rounding_radius=rounding_radius, color=color)
             else:
                 return PolyShapeDefinition(shape_class=shape_class,
                                            vertices=vertices, color=color)
         except Exception:
+            print(Exception)
             warnings.warn("Failed to parse shape definition, "
                           "using fallback mode. ({})".format(line))
             return FallbackShapeDefinition(line)
