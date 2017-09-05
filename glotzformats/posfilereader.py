@@ -16,7 +16,7 @@ import warnings
 import numpy as np
 
 from .trajectory import _RawFrameData, Frame, Trajectory, \
-    SphereShapeDefinition, PolyShapeDefinition,\
+    SphereShapeDefinition, PolyShapeDefinition, SpheroPolyShapeDefinition, \
     ArrowShapeDefinition, SphereUnionShapeDefinition, \
     PolyUnionShapeDefinition, GeneralPolyShapeDefinition, FallbackShapeDefinition
 from .math_utils import toQuaternion
@@ -118,6 +118,15 @@ class PosFileFrame(Frame):
                     for j in range(nvert):
                         fv.append(int(next(tokens)))
                     faces.append(fv)
+
+            elif shape_class.lower() == 'spoly3d':
+                rounding_radius = next(tokens)
+                num_vertices = int(next(tokens))
+                vertices = []
+                for i in range(num_vertices):
+                    xyz = next(tokens), next(tokens), next(tokens)
+                    vertices.append([self._num(v) for v in xyz])
+
             else:
                 num_vertices = int(next(tokens))
                 vertices = []
@@ -138,6 +147,8 @@ class PosFileFrame(Frame):
                 return PolyUnionShapeDefinition(shape_class=shape_class, vertices=vertices, centers=centers, orientations=orientations, colors=colors)
             elif shape_class.lower() == 'polyv':
                 return GeneralPolyShapeDefinition(shape_class=shape_class, vertices=vertices, faces=faces)
+            elif shape_class.lower() == 'spoly3d':
+                return SpheroPolyShapeDefinition(shape_class=shap_class, vertices=vertices, rounding_radius=rounding_radius, color=color)
             else:
                 return PolyShapeDefinition(shape_class=shape_class,
                                            vertices=vertices, color=color)
