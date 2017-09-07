@@ -153,7 +153,6 @@ class PosFileFrame(Frame):
                 return PolyShapeDefinition(shape_class=shape_class,
                                            vertices=vertices, color=color)
         except Exception:
-            print(Exception)
             warnings.warn("Failed to parse shape definition, "
                           "using fallback mode. ({})".format(line))
             return FallbackShapeDefinition(line)
