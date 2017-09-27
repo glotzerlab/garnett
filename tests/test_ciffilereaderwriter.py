@@ -6,12 +6,19 @@ import unittest
 import numpy as np
 
 import glotzformats
+try:
+    import CifFile
+except ImportError:
+    NO_PyCifRW = True
+else:
+    NO_PyCifRW = False
 
 logger = logging.getLogger(__name__)
 
 PYTHON_2 = sys.version_info[0] == 2
 
 
+@unittest.skipIf(NO_PyCifRW, 'CifFileReader tests require the PyCifRW package.')
 class BaseCifFileReaderTest(unittest.TestCase):
 
     def read_pos_trajectory(self, stream, precision=None):
