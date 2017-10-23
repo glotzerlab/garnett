@@ -143,10 +143,6 @@ class CifFileFrame(Frame):
             else:
                 unique_types = len(unique_points)*[self.default_type]
 
-        # shift so that (0, 0, 0) in fractional coordinates goes to a
-        # corner of the box, not the center of the box
-        unique_points -= 0.5
-
         coordinates = np.sum(
             unique_points[:, np.newaxis, :]*box_matrix[np.newaxis, :, :], axis=2)
 
