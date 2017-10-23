@@ -102,11 +102,11 @@ class CifFileWriter(object):
         _write("_atom_site_fract_z")
 
         # write header particle positions
-        if not fractional:
+        if fractional:
+            fractions = frame.positions.copy()
+        else:
             invbox = np.linalg.inv(frame.box.get_box_matrix())
             fractions = np.dot(invbox, frame.positions.T).T
-        else:
-            fractions = frame.positions.copy()
 
         type_counter = defaultdict(int)
         n_digits = len(str(len(frame.positions)))
@@ -121,7 +121,7 @@ class CifFileWriter(object):
             type_counter[particle_type] += 1
 
     def write(self, trajectory, file=sys.stdout,
-              data='simulation', occupancy=1.0, fractional = False):
+              data='simulation', occupancy=1.0, fractional=False):
         """Serialize a trajectory into cif-format and write it to file.
 
         :param trajectory: The trajectory to serialize
@@ -141,7 +141,8 @@ class CifFileWriter(object):
                 frame=frame,
                 file=file,
                 data='{}_frame_{}'.format(data, i),
-                occupancy=occupancy, fractional = fractional)
+                occupancy=occupancy,
+                fractional=fractional)
             logger.debug("Wrote frame {}.".format(i + 1))
         logger.info("Wrote {} frames.".format(i + 1))
 
