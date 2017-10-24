@@ -128,11 +128,8 @@ class PosFileFrame(Frame):
                     vertices.append([self._num(v) for v in xyz])
 
             else:
-                num_vertices = int(next(tokens))
-                vertices = []
-                for i in range(num_vertices):
-                    xyz = next(tokens), next(tokens), next(tokens)
-                    vertices.append([self._num(v) for v in xyz])
+                raise RuntimeError("Unknown shape.")
+
             try:
                 color = next(tokens)
             except StopIteration:
