@@ -395,6 +395,34 @@ class Frame(object):
         self.frame_data = None
         self._dtype = dtype
 
+    def _raw_frame_to_frame(self, raw_frame, dtype=None):
+        """Generate a frame object from a raw frame object."""
+        N = len(raw_frame.types)
+        ret = FrameData()
+        # the box
+        positions = np.asarray(raw_frame.positions, dtype=dtype)
+        velocities = np.asarray(raw_frame.velocities, dtype=dtype)
+        if len(velocities) == 0:
+            velocities = np.asarray([[0, 0, 0]] * len(positions))
+        orientations = np.asarray(raw_frame.orientations, dtype=dtype)
+        if len(orientations) == 0:
+            orientations = np.asarray([[1, 0, 0, 0]] * len(positions))
+
+        assert raw_frame.box is not None
+        if isinstance(raw_frame.box, Box):
+            raw_frame.box_dimensions = raw_frame.box.dimensions
+            raw_frame.box = np.asarray(raw_frame.box.get_box_matrix(), dtype=dtype)
+        box_dimensions = getattr(raw_frame, 'box_dimensions', 3)
+        ret.positions, ret.velocities, ret.orientations, ret.box = _regularize_box(
+            positions, velocities, orientations, raw_frame.box, dtype, box_dimensions)
+        ret.shapedef = raw_frame.shapedef
+        ret.types = raw_frame.types
+        ret.data = raw_frame.data
+        ret.data_keys = raw_frame.data_keys
+        ret.view_rotation = raw_frame.view_rotation
+        assert N == len(ret.types) == len(ret.positions) == len(ret.velocities) == len(ret.orientations)
+        return ret
+
     def loaded(self):
         "Returns True if the frame is loaded into memory."
         return self.frame_data is not None
@@ -403,7 +431,7 @@ class Frame(object):
         "Load the frame into memory."
         if self.frame_data is None:
             logger.debug("Loading frame.")
-            self.frame_data = _raw_frame_to_frame(self.read(), self._dtype)
+            self.frame_data = self._raw_frame_to_frame(self.read(), dtype=self._dtype)
 
     def unload(self):
         """Unload the frame from memory.
@@ -961,34 +989,6 @@ def _generate_type_id_array(types, type_ids):
             type_ids[i][j] = _type.index(t_)
     return _type
 
-
-def _raw_frame_to_frame(raw_frame, dtype=None):
-    """Generate a frame object from a raw frame object."""
-    N = len(raw_frame.types)
-    ret = FrameData()
-    # the box
-    positions = np.asarray(raw_frame.positions, dtype=dtype)
-    velocities = np.asarray(raw_frame.velocities, dtype=dtype)
-    if len(velocities) == 0:
-        velocities = np.asarray([[0, 0, 0]] * len(positions))
-    orientations = np.asarray(raw_frame.orientations, dtype=dtype)
-    if len(orientations) == 0:
-        orientations = np.asarray([[1, 0, 0, 0]] * len(positions))
-
-    assert raw_frame.box is not None
-    if isinstance(raw_frame.box, Box):
-        raw_frame.box_dimensions = raw_frame.box.dimensions
-        raw_frame.box = np.asarray(raw_frame.box.get_box_matrix(), dtype=dtype)
-    box_dimensions = getattr(raw_frame, 'box_dimensions', 3)
-    ret.positions, ret.velocities, ret.orientations, ret.box = _regularize_box(
-        positions, velocities, orientations, raw_frame.box, dtype, box_dimensions)
-    ret.shapedef = raw_frame.shapedef
-    ret.types = raw_frame.types
-    ret.data = raw_frame.data
-    ret.data_keys = raw_frame.data_keys
-    ret.view_rotation = raw_frame.view_rotation
-    assert N == len(ret.types) == len(ret.positions) == len(ret.velocities) == len(ret.orientations)
-    return ret
 
 
 def copyto_hoomd_blue_snapshot(frame, snapshot):
