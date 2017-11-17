@@ -36,7 +36,7 @@ class Box(object):
         box.xy = box.xz = box.yz = 0.01
         # etc.
 
-    .. seealso:: https://codeblue.umich.edu/HOOMD-blue/doc/page_box.html"""
+    .. seealso:: http://hoomd-blue.readthedocs.io/en/stable/box.html"""
 
     def __init__(self, Lx, Ly, Lz, xy=0.0, xz=0.0, yz=0.0, dimensions=3):
         self.Lx = Lx
