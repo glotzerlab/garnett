@@ -39,6 +39,14 @@ def _parse_division(match):
     return str(float(match.group('num'))/float(match.group('denom')))
 
 
+class _RawCifFrameData(_RawFrameData):
+    """Extend base class to support raw CIF coordinates"""
+
+    def __init__(self):
+        # Append the cif_coordinates to the dataset
+        super(_RawCifFrameData, self).__init__()
+        self.cif_coordinates = list()               # Nx3
+
 class CifFileFrame(Frame):
 
     def __init__(self, parsed, precision, default_type, tolerance=1e-5):
@@ -82,6 +90,24 @@ class CifFileFrame(Frame):
         return np.array([[lx, xy, xz],
                          [ 0, ly, yz],
                          [ 0,  0, lz]])
+
+    @property
+    def cif_coordinates(self):
+        "Nx3 matrix of exact coordinates provided in the CIF file."
+        self.load()
+        return self.frame_data.cif_coordinates
+
+    @cif_coordinates.setter
+    def cif_coordinates(self, value):
+        self.load()
+        self.frame_data.cif_coordinates = value
+
+    def _raw_frame_to_frame(self, raw_frame, dtype=None):
+        """Extend parent function to also incorporate cif_coordinates"""
+        ret = super(CifFileFrame, self)._raw_frame_to_frame(raw_frame, dtype)
+        ret.cif_coordinates = np.asarray(raw_frame.cif_coordinates, dtype=dtype)
+        assert len(ret.positions) == len(ret.cif_coordinates)
+        return ret
 
     def read(self):
         "Read the frame data from the stream."
@@ -143,6 +169,13 @@ class CifFileFrame(Frame):
             else:
                 unique_types = len(unique_points)*[self.default_type]
 
+        # Safe the exact points
+        cif_coordinates = unique_points.copy()
+
+        # shift so that (0, 0, 0) in fractional coordinates goes to a
+        # corner of the box, not the center of the box
+        unique_points -= 0.5
+
         coordinates = np.sum(
             unique_points[:, np.newaxis, :]*box_matrix[np.newaxis, :, :], axis=2)
 
@@ -150,6 +183,7 @@ class CifFileFrame(Frame):
         raw_frame.box = box_matrix
         raw_frame.types = unique_types
         raw_frame.positions = coordinates
+        raw_frame.cif_coordinates = cif_coordinates
         raw_frame.velocities = np.zeros_like(coordinates)
         raw_frame.orientations = np.zeros((coordinates.shape[0], 4), dtype=np.float32)
         return raw_frame

@@ -161,7 +161,12 @@ class CifFileReaderTest(CifFileWriterTest):
         logger.debug(traj[-1].positions)
         logger.debug('original positions:')
         logger.debug(ref_positions)
+        cif_coordinates = np.array(
+                [[0.333333333, 0.6666666667, 0.25],
+                 [0.6666666667, 0.333333333, 0.75]])
+
         self.assertTrue(np.allclose(traj[-1].positions, ref_positions))
+        self.assertTrue(np.allclose(traj[-1].cif_coordinates, cif_coordinates))
 
 
 if __name__ == '__main__':
