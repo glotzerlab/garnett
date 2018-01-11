@@ -512,6 +512,16 @@ class Frame(object):
 
     @positions.setter
     def positions(self, value):
+        # Various sanity checks
+        try:
+            value = np.asarray(value, dtype=self._dtype)
+        except ValueError:
+            raise ValueError("Positions can only be set to numeric arrays.")
+        if not np.all(np.isfinite(value)):
+            raise ValueError("Positions being set must all be finite numbers.")
+        elif not len(value.shape) == 2 or value.shape[1] != self.box.dimensions:
+            raise ValueError("Input array must be of shape (N,{}) where N is the number of particles.".format(self.box.dimensions))
+
         self.load()
         self.frame_data.positions = value
 
@@ -523,6 +533,14 @@ class Frame(object):
 
     @velocities.setter
     def velocities(self, value):
+        try:
+            value = np.asarray(value, dtype=self._dtype)
+        except ValueError:
+            raise ValueError("Velocities can only be set to numeric arrays.")
+        if not np.all(np.isfinite(value)):
+            raise ValueError("Velocities being set must all be finite numbers.")
+        elif not len(value.shape) == 2 or value.shape[1] != self.box.dimensions:
+            raise ValueError("Input array must be of shape (N,{}) where N is the number of particles.".format(self.box.dimensions))
         self.load()
         self.frame_data.velocities = value
 
@@ -534,6 +552,15 @@ class Frame(object):
 
     @orientations.setter
     def orientations(self, value):
+        try:
+            value = np.asarray(value, dtype=self._dtype)
+        except ValueError:
+            raise ValueError("Orientations can only be set to numeric arrays.")
+        if not np.all(np.isfinite(value)):
+            raise ValueError("Orientations being set must all be finite numbers.")
+        elif not len(value.shape) == 2 or value.shape[1] != 4:
+            raise ValueError("Input array must be of shape (N,4) where N is the number of particles.")
+
         self.load()
         self.frame_data.orientations = value
 
