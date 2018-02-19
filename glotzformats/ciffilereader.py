@@ -99,6 +99,15 @@ class CifFileFrame(Frame):
 
     @cif_coordinates.setter
     def cif_coordinates(self, value):
+        try:
+            value = np.asarray(value, dtype=self._dtype)
+        except ValueError:
+            raise ValueError("CIF coordinates can only be set to numeric arrays.")
+        if not np.all(np.isfinite(value)):
+            raise ValueError("CIF coordinates being set must all be finite numbers.")
+        elif not len(value.shape) == 2 or value.shape[1] != self.box.dimensions:
+            raise ValueError("Input array must be of shape (N,{}) where N is the number of particles.".format(self.box.dimensions))
+
         self.load()
         self.frame_data.cif_coordinates = value
 

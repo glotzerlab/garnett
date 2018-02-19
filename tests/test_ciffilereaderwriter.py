@@ -168,6 +168,13 @@ class CifFileReaderTest(CifFileWriterTest):
         self.assertTrue(np.allclose(traj[-1].positions, ref_positions))
         self.assertTrue(np.allclose(traj[-1].cif_coordinates, cif_coordinates))
 
+        with self.assertRaises(ValueError):
+            traj[-1].cif_coordinates = 'hello'
+        with self.assertRaises(ValueError):
+            # This should fail since it's using 2d positions
+            traj[-1].cif_coordinates = [[0, 0], [0, 0]]
+
+
 
 if __name__ == '__main__':
     unittest.main()
