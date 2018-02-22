@@ -27,7 +27,7 @@ def _parse_shape_definition(shape):
     if rounding_radius == 0:
         if shape['type'].lower() == 'sphere':
             shapedef = SphereShapeDefinition(
-                shape_class='sphere', diameter=shape['diameter'], color=None)
+                diameter=shape['diameter'], color=None)
         elif shape['type'].lower() == 'polyhedron':
             shapedef = GeneralPolyShapeDefinition(shape_class='polyV', vertices=shape[
                                                   'vertices'], faces=shape['faces'], facet_colors=shape['colors'], color=None)
