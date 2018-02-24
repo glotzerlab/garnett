@@ -24,6 +24,7 @@ The example is given for a hoomd-blue xml frame:
 """
 
 import logging
+import warnings
 import copy
 
 import numpy as np
@@ -99,16 +100,16 @@ def _parse_shape_definitions(frame, gsdfile, frame_index):
 
     # Shapes supported by state/hpmc but not glotzformats ShapeDefinitions:
     if get_chunk(frame_index, 'state/hpmc/ellipsoid/a') is not None:
-        logger.warn('ellipsoid is not supported by glotzformats.')
+        warnings.warn('ellipsoid is not supported by glotzformats.')
 
     if get_chunk(frame_index, 'state/hpmc/convex_polygon/N') is not None:
-        logger.warn('convex_polygon is not supported by glotzformats.')
+        warnings.warn('convex_polygon is not supported by glotzformats.')
 
     if get_chunk(frame_index, 'state/hpmc/convex_spheropolygon/N') is not None:
-        logger.warn('convex_spheropolygon is not supported by glotzformats.')
+        warnings.warn('convex_spheropolygon is not supported by glotzformats.')
 
     if get_chunk(frame_index, 'state/hpmc/simple_polygon/N') is not None:
-        logger.warn('simple_polygon is not supported by glotzformats.')
+        warnings.warn('simple_polygon is not supported by glotzformats.')
 
     return shapedefs
 
