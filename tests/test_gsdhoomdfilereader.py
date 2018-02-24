@@ -3,14 +3,16 @@ import sys
 import io
 import unittest
 import base64
-import tempfile
-
 import numpy as np
 
 import glotzformats
 from test_trajectory import TrajectoryTest
 
 PYTHON_2 = sys.version_info[0] == 2
+if PYTHON_2:
+    from tempdir import TemporaryDirectory
+else:
+    from tempfile import TemporaryDirectory
 
 try:
     import hoomd
@@ -30,7 +32,7 @@ class BaseGSDHOOMDFileReaderTest(TrajectoryTest):
     reader = glotzformats.reader.GSDHOOMDFileReader
 
     def setUp(self):
-        self.tmp_dir = tempfile.TemporaryDirectory()
+        self.tmp_dir = TemporaryDirectory()
         self.addCleanup(self.tmp_dir.cleanup)
         self.fn_gsd = os.path.join(self.tmp_dir.name, 'test.gsd')
 
