@@ -30,7 +30,8 @@ import copy
 import numpy as np
 
 from .trajectory import _RawFrameData, Frame, Trajectory
-from .trajectory import SphereShapeDefinition, PolyShapeDefinition, SpheroPolyShapeDefinition
+from .trajectory import SphereShapeDefinition, PolyShapeDefinition, \
+                        SpheroPolyShapeDefinition
 
 try:
     from gsd.fl import GSDFile
@@ -85,13 +86,16 @@ def _parse_shape_definitions(frame, gsdfile, frame_index):
         return shapedefs
 
     # Convex Spheropolyhedra
-    if get_chunk(frame_index, 'state/hpmc/convex_spheropolyhedron/N') is not None:
+    if get_chunk(frame_index,
+                 'state/hpmc/convex_spheropolyhedron/N') is not None:
         N = get_chunk(frame_index, 'state/hpmc/convex_spheropolyhedron/N')
         N_start = [sum(N[:i]) for i in range(len(N))]
         N_end = [sum(N[:i+1]) for i in range(len(N))]
-        verts = get_chunk(frame_index, 'state/hpmc/convex_spheropolyhedron/vertices')
+        verts = get_chunk(frame_index,
+                          'state/hpmc/convex_spheropolyhedron/vertices')
         verts_split = [verts[start:end] for start, end in zip(N_start, N_end)]
-        sweep_radii = get_chunk(frame_index, 'state/hpmc/convex_spheropolyhedron/sweep_radius')
+        sweep_radii = get_chunk(frame_index,
+                                'state/hpmc/convex_spheropolyhedron/sweep_radius')
         for typename, typeverts, radius in zip(types, verts_split, sweep_radii):
             shapedefs[typename] = SpheroPolyShapeDefinition(
                 shape_class='spoly3d', vertices=typeverts,
@@ -116,11 +120,13 @@ def _parse_shape_definitions(frame, gsdfile, frame_index):
 
 class GSDHoomdFrame(Frame):
 
-    def __init__(self, traj, frame_index, t_frame, gsdfile):
+    def __init__(self, traj, frame_index, t_frame, gsdfile,
+                 read_gsd_shape_data):
         self.traj = traj
         self.frame_index = frame_index
         self.t_frame = t_frame
         self.gsdfile = gsdfile
+        self.read_gsd_shape_data = read_gsd_shape_data
         super(GSDHoomdFrame, self).__init__()
 
     def read(self):
@@ -128,7 +134,8 @@ class GSDHoomdFrame(Frame):
         if self.t_frame is not None:
             raw_frame.data = copy.deepcopy(self.t_frame.data)
             raw_frame.data_keys = copy.deepcopy(self.t_frame.data_keys)
-            raw_frame.shapedef = copy.deepcopy(self.t_frame.shapedef)
+            if not self.read_gsd_shape_data:
+                raw_frame.shapedef = copy.deepcopy(self.t_frame.shapedef)
             raw_frame.box_dimensions = self.t_frame.box.dimensions
         frame = self.traj.read_frame(self.frame_index)
         raw_frame.box = _box_matrix(frame.configuration.box)
@@ -138,8 +145,10 @@ class GSDHoomdFrame(Frame):
         raw_frame.positions = frame.particles.position
         raw_frame.orientations = frame.particles.orientation
         raw_frame.velocities = frame.particles.velocity
-        raw_frame.shapedef.update(
-            _parse_shape_definitions(frame, self.gsdfile, self.frame_index))
+        if self.read_gsd_shape_data:
+            raw_frame.shapedef.update(
+                _parse_shape_definitions(frame, self.gsdfile,
+                                         self.frame_index))
         return raw_frame
 
     def __str__(self):
@@ -170,7 +179,14 @@ class GSDHOOMDFileReader(object):
             with open('dump.gsd', 'rb') as gsdfile:
                 xml_frame = xml_reader.read(xmlfile)[0]
                 traj = gsd_reader.read(gsdfile, xml_frame)
+
+    :param bool read_gsd_shape_data: If True (default), the reader will use
+                                     shape data parsed from the GSD file
+                                     instead of from the provided XML file.
     """
+
+    def __init__(self, read_gsd_shape_data=True):
+        self.read_gsd_shape_data = read_gsd_shape_data
 
     def read(self, stream, frame=None):
         """Read binary stream and return a trajectory instance.
@@ -191,11 +207,12 @@ class GSDHOOMDFileReader(object):
                 gsdfile = PyGSDFile(stream)
                 traj = gsdhoomd.HOOMDTrajectory(gsdfile)
         else:
-            logger.warning("Native GSD library not available. "
-                           "Falling back to pure python reader.")
+            warnings.warn("Native GSD library not available. "
+                          "Falling back to pure python reader.")
             gsdfile = PyGSDFile(stream)
             traj = gsdhoomd.HOOMDTrajectory(gsdfile)
-        frames = [GSDHoomdFrame(traj, i, t_frame=frame, gsdfile=gsdfile)
+        frames = [GSDHoomdFrame(traj, i, t_frame=frame, gsdfile=gsdfile,
+                                read_gsd_shape_data=self.read_gsd_shape_data)
                   for i in range(len(traj))]
         logger.info("Read {} frames.".format(len(frames)))
         return Trajectory(frames)
