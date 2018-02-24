@@ -173,6 +173,11 @@ class TrajectoryTest(unittest.TestCase):
             traj.positions.dtype, glotzformats.trajectory.DEFAULT_DTYPE))
         self.assertEqual(traj.positions.shape, (len(traj), len(traj[0]), 3))
         self.assertTrue((traj.positions[0] == traj[0].positions).all())
+        with self.assertRaises(ValueError):
+            traj[0].positions = 'hello'
+        with self.assertRaises(ValueError):
+            # This should fail since it's using 2d positions
+            traj[0].positions = [[0, 0], [0, 0]]
 
     def test_orientations(self):
         sample_file = self.get_sample_file()
@@ -184,7 +189,22 @@ class TrajectoryTest(unittest.TestCase):
             traj.orientations.dtype, glotzformats.trajectory.DEFAULT_DTYPE))
         self.assertEqual(traj.orientations.shape, (len(traj), len(traj[0]), 4))
         self.assertTrue((traj.orientations[0] == traj[0].orientations).all())
+        with self.assertRaises(ValueError):
+            traj[0].orientations = 'hello'
+        with self.assertRaises(ValueError):
+            # This should fail since it's using 2d positions
+            traj[0].orientations = [[0, 0], [0, 0]]
 
+    def test_velocities(self):
+        sample_file = self.get_sample_file()
+        traj = self.reader().read(sample_file)
+        with self.assertRaises(AttributeError):
+            traj.velocities
+        with self.assertRaises(ValueError):
+            traj[0].velocities = 'hello'
+        with self.assertRaises(ValueError):
+            # This should fail since it's using 2d positions
+            traj[0].velocities = [[0, 0], [0, 0]]
 
 @unittest.skipIf(not HOOMD, 'requires hoomd-blue')
 class FrameSnapshotExport(TrajectoryTest):
