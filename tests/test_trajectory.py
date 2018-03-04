@@ -234,8 +234,6 @@ class TrajectoryTest(unittest.TestCase):
         with self.assertRaises(ValueError):
             # This should fail since the array is not a 1-D list
             traj[0].mass = [[1, 1]]
-        # Make sure the default mass is set to 1
-        self.assertTrue((traj[0].mass == 1).all())
 
     def test_charge(self):
         sample_file = self.get_sample_file()
@@ -256,8 +254,6 @@ class TrajectoryTest(unittest.TestCase):
         with self.assertRaises(ValueError):
             # This should fail since the array is not a 1-D list
             traj[0].charge = [[1, 1]]
-        # Make sure the default charge is set to 0
-        self.assertTrue((traj[0].charge == 0).all())
 
     def test_diameter(self):
         sample_file = self.get_sample_file()
@@ -278,8 +274,6 @@ class TrajectoryTest(unittest.TestCase):
         with self.assertRaises(ValueError):
             # This should fail since the array is not a 1-D list
             traj[0].diameter = [[1, 1]]
-        # Make sure the default diameter is set to 1
-        self.assertTrue((traj[0].diameter == 1).all())
 
     def test_moment_inertia(self):
         sample_file = self.get_sample_file()
@@ -297,8 +291,6 @@ class TrajectoryTest(unittest.TestCase):
         self.assertTrue((traj.diameter[0] == traj[0].diameter).all())
         with self.assertRaises(ValueError):
             traj[0].moment_inertia = 'hello'
-        # Make sure the default moment_inertia is set to [1, 1, 1]
-        self.assertTrue((traj[0].moment_inertia == 1).all())
 
     def test_angmom(self):
         sample_file = self.get_sample_file()
@@ -316,8 +308,6 @@ class TrajectoryTest(unittest.TestCase):
         self.assertTrue((traj.angmom[0] == traj[0].angmom).all())
         with self.assertRaises(ValueError):
             traj[0].angmom = 'hello'
-        # Make sure the default angmom is set to [0, 0, 0, 0]
-        self.assertTrue((traj[0].angmom == 0).all())
 
 @unittest.skipIf(not HOOMD, 'requires hoomd-blue')
 class FrameSnapshotExport(TrajectoryTest):
