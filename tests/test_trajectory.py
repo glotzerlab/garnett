@@ -215,26 +215,6 @@ class TrajectoryTest(unittest.TestCase):
             # This should fail since it's using 2d velocities
             traj[0].velocities = [[0, 0], [0, 0]]
 
-    def test_acceleration(self):
-        sample_file = self.get_sample_file()
-        traj = self.reader().read(sample_file)
-        if 'acceleration' not in traj.supported_properties:
-            with self.assertRaises(NotImplementedError):
-                traj.acceleration
-            return
-        with self.assertRaises(RuntimeError):
-            traj.acceleration
-        traj.load_arrays()
-        self.assertTrue(np.issubdtype(
-            traj.acceleration.dtype, glotzformats.trajectory.DEFAULT_DTYPE))
-        self.assertEqual(traj.acceleration.shape, (len(traj), len(traj[0]), 3))
-        self.assertTrue((traj.acceleration[0] == traj[0].acceleration).all())
-        with self.assertRaises(ValueError):
-            traj[0].acceleration = 'hello'
-        with self.assertRaises(ValueError):
-            # This should fail since it's using 2d accelerations
-            traj[0].acceleration = [[0, 0], [0, 0]]
-
     def test_mass(self):
         sample_file = self.get_sample_file()
         traj = self.reader().read(sample_file)

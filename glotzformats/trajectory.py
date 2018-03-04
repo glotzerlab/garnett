@@ -317,8 +317,6 @@ class FrameData(object):
         "Nx4 matrix of rotational coordinates for N particles represented as quaternions."
         self.velocities = None
         "Nx3 matrix of velocities for N particles in 3 dimensions."
-        self.acceleration = None
-        "Nx3 matrix of accelerations for N particles in 3 dimensions."
         self.mass = None
         "Nx1 list of masses for N particles."
         self.charge = None
@@ -350,7 +348,6 @@ class FrameData(object):
                 and (self.positions == other.positions).all()\
                 and (self.orientations == other.orientations).all()\
                 and (self.velocities == other.velocities).all()\
-                and (self.acceleration == other.acceleration).all()\
                 and (self.mass == other.mass).all()\
                 and (self.charge == other.charge).all()\
                 and (self.diameter == other.diameter).all()\
@@ -390,7 +387,6 @@ class _RawFrameData(object):
         self.positions = list()                     # Nx3
         self.orientations = list()                  # NX4
         self.velocities = list()                    # Nx3
-        self.acceleration = list()                  # Nx3
         self.mass = list()                          # Nx1
         self.charge = list()                        # Nx1
         self.diameter = list()                      # Nx1
@@ -434,10 +430,6 @@ class Frame(object):
         if len(velocities) == 0:
             velocities = np.asarray([[0, 0, 0]] * len(positions))
 
-        acceleration = np.asarray(raw_frame.acceleration, dtype=dtype)
-        if len(acceleration) == 0:
-            acceleration = np.asarray([[0, 0, 0]] * len(positions))
-
         mass = np.asarray(raw_frame.mass, dtype=dtype)
         if len(mass) == 0:
             mass = np.asarray([1] * len(positions))
@@ -463,9 +455,9 @@ class Frame(object):
             raw_frame.box_dimensions = raw_frame.box.dimensions
             raw_frame.box = np.asarray(raw_frame.box.get_box_matrix(), dtype=dtype)
         box_dimensions = getattr(raw_frame, 'box_dimensions', 3)
-        ret.positions, ret.velocities, ret.acceleration, \
+        ret.positions, ret.velocities, \
         ret.orientations, ret.angmom, ret.box = _regularize_box(
-            positions, velocities, acceleration,
+            positions, velocities,
             orientations, angmom,
             raw_frame.box, dtype, box_dimensions)
         ret.mass = mass
@@ -481,7 +473,6 @@ class Frame(object):
         assert N == len(ret.positions)
         assert N == len(ret.orientations)
         assert N == len(ret.velocities)
-        assert N == len(ret.acceleration)
         assert N == len(ret.mass)
         assert N == len(ret.charge)
         assert N == len(ret.diameter)
@@ -629,25 +620,6 @@ class Frame(object):
             raise ValueError("Input array must be of shape (N,{}) where N is the number of particles.".format(self.box.dimensions))
         self.load()
         self.frame_data.velocities = value
-
-    @property
-    def acceleration(self):
-        "Nx3 matrix of accelerations for N particles in 3 dimensions."
-        self.load()
-        return self.frame_data.acceleration
-
-    @acceleration.setter
-    def acceleration(self, value):
-        try:
-            value = np.asarray(value, dtype=self._dtype)
-        except ValueError:
-            raise ValueError("Accelerations can only be set to numeric arrays.")
-        if not np.all(np.isfinite(value)):
-            raise ValueError("Accelerations being set must all be finite numbers.")
-        elif not len(value.shape) == 2 or value.shape[1] != self.box.dimensions:
-            raise ValueError("Input array must be of shape (N,{}) where N is the number of particles.".format(self.box.dimensions))
-        self.load()
-        self.frame_data.acceleration = value
 
     @property
     def mass(self):
@@ -807,7 +779,7 @@ class BaseTrajectory(object):
             traj = type(self)(self.frames[index])
             for x in ('_N', '_types', '_type', '_type_ids',
                       '_positions', '_orientations', '_velocities',
-                      '_acceleration', '_mass', '_charge', '_diameter',
+                      '_mass', '_charge', '_diameter',
                       '_moment_inertia', '_angmom'):
                 if getattr(self, x) is not None:
                     setattr(traj, x, getattr(self, x)[index])
@@ -914,7 +886,6 @@ class Trajectory(BaseTrajectory):
         self._positions = None
         self._orientations = None
         self._velocities = None
-        self._acceleration = None
         self._mass = None
         self._charge = None
         self._diameter = None
@@ -930,7 +901,7 @@ class Trajectory(BaseTrajectory):
         """
         return ['N', 'type', 'types', 'type_ids',
                 'positions', 'orientations', 'velocities',
-                'acceleration', 'mass', 'charge', 'diameter',
+                'mass', 'charge', 'diameter',
                 'moment_inertia', 'angmom']
 
     def load(self):
@@ -967,7 +938,6 @@ class Trajectory(BaseTrajectory):
                     self._positions is None or
                     self._orientations is None or
                     self._velocities is None or
-                    self._acceleration is None or
                     self._mass is None or
                     self._charge is None or
                     self._diameter is None or
@@ -1036,13 +1006,12 @@ class Trajectory(BaseTrajectory):
 
         # Properties
         prop_list = ['positions', 'orientations', 'velocities',
-                     'acceleration', 'mass', 'charge', 'diameter',
+                     'mass', 'charge', 'diameter',
                      'moment_inertia', 'angmom']
         props = dict(
             positions = np.zeros((M, N, 3), dtype=self._dtype),
             orientations = np.zeros((M, N, 4), dtype=self._dtype),
             velocities = np.zeros((M, N, 3), dtype=self._dtype),
-            acceleration = np.zeros((M, N, 3), dtype=self._dtype),
             mass = np.ones((M, N), dtype=self._dtype),
             charge = np.zeros((M, N), dtype=self._dtype),
             diameter = np.ones((M, N), dtype=self._dtype),
@@ -1067,7 +1036,6 @@ class Trajectory(BaseTrajectory):
             self._positions = props['positions']
             self._orientations = props['orientations']
             self._velocities = props['velocities']
-            self._acceleration = props['acceleration']
             self._mass = props['mass']
             self._charge = props['charge']
             self._diameter = props['diameter']
@@ -1077,8 +1045,8 @@ class Trajectory(BaseTrajectory):
             # Ensure consistent error state
             self._N = self._type = self._types = self._type_ids = \
                 self._positions = self._orientations = self._velocities = \
-                self._acceleration = self._mass = self._charge = \
-                self._diameter = self._moment_inertia = self._angmom = None
+                self._mass = self._charge = self._diameter = \
+                self._moment_inertia = self._angmom = None
             raise
 
     def set_dtype(self, value):
@@ -1090,8 +1058,8 @@ class Trajectory(BaseTrajectory):
         :param value: The new data type value."""
         self._dtype = value
         for x in (self._positions, self._orientations, self._velocities,
-                  self._acceleration, self._mass, self._charge,
-                  self._diameter, self._moment_inertia, self._angmom):
+                  self._mass, self._charge, self._diameter,
+                  self._moment_inertia, self._angmom):
             if x is not None:
                 x = x.astype(value)
         for frame in self.frames:
@@ -1203,21 +1171,6 @@ class Trajectory(BaseTrajectory):
         return np.asarray(self._velocities, dtype=self._dtype)
 
     @property
-    def acceleration(self):
-        """Access the particle acceleration as numpy array.
-
-        :returns: particle acceleration as (Nx3) array
-        :rtype: :class:`numpy.ndarray`
-        :raises RuntimeError: When accessed before
-            calling :meth:`~.load_arrays` or
-            :meth:`~.Trajectory.load`."""
-        if 'acceleration' not in self.supported_properties:
-            raise NotImplementedError('Accelerations are not supported for this '
-                                      'trajectory type.')
-        self._assertarrays_loaded()
-        return np.asarray(self._acceleration, dtype=self._dtype)
-
-    @property
     def mass(self):
         """Access the particle mass as numpy array.
 
@@ -1294,7 +1247,7 @@ class Trajectory(BaseTrajectory):
         self._assertarrays_loaded()
         return np.asarray(self._angmom, dtype=self._dtype)
 
-def _regularize_box(positions, velocities, acceleration,
+def _regularize_box(positions, velocities,
                     orientations, angmom,
                     box_matrix, dtype=None, dimensions=3):
     """ Convert box into a right-handed coordinate frame with
@@ -1313,7 +1266,6 @@ def _regularize_box(positions, velocities, acceleration,
         positions = np.copy(positions)
         orientations = np.copy(orientations)
         velocities = np.copy(velocities)
-        acceleration = np.copy(acceleration)
         angmom = np.copy(angmom)
 
         # Since we'll be performing a quaternion operation,
@@ -1322,13 +1274,12 @@ def _regularize_box(positions, velocities, acceleration,
         Q = Q*sign
         R = R*sign
 
-        # First rotate positions, velocities, acceleration.
+        # First rotate positions, velocities.
         # Since they are vectors, we can use the matrix directly.
         # Conveniently, instead of transposing Q we can just reverse
         # the order of multiplication here
         positions = positions.dot(Q)
         velocities = velocities.dot(Q)
-        acceleration = acceleration.dot(Q)
 
         # For orientations and angular momenta, we use the quaternion
         quat = mu.quaternion_from_matrix(Q.T)
@@ -1344,7 +1295,6 @@ def _regularize_box(positions, velocities, acceleration,
         box = R.dot(signs)
         positions = positions.dot(signs)
         velocities = velocities.dot(signs)
-        acceleration = acceleration.dot(signs)
     else:
         box = box_matrix
 
@@ -1354,7 +1304,7 @@ def _regularize_box(positions, velocities, acceleration,
     xz = box[0, 2]/Lz
     yz = box[1, 2]/Lz
     box = Box(Lx = Lx, Ly = Ly, Lz = Lz, xy = xy, xz = xz, yz = yz)
-    return positions, velocities, acceleration, orientations, angmom, box
+    return positions, velocities, orientations, angmom, box
 
 def _generate_type_id_array(types, type_ids):
     "Generate type_id array."
@@ -1385,7 +1335,6 @@ def copyfrom_hoomd_blue_snapshot(frame, snapshot):
     frame.positions = snapshot.particles.position
     frame.orientations = snapshot.particles.orientation
     frame.velocities = snapshot.particles.velocity
-    frame.acceleration = snapshot.particles.acceleration
     frame.mass = snapshot.particles.mass
     frame.charge = snapshot.particles.charge
     frame.diameter = snapshot.particles.diameter
