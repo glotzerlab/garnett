@@ -805,7 +805,10 @@ class BaseTrajectory(object):
     def __getitem__(self, index):
         if isinstance(index, slice):
             traj = type(self)(self.frames[index])
-            for x in ('_types', '_positions', '_orientations', '_type', '_type_ids', '_N'):
+            for x in ('_N', '_types', '_type', '_type_ids',
+                      '_positions', '_orientations', '_velocities',
+                      '_acceleration', '_mass', '_charge', '_diameter',
+                      '_moment_inertia', '_angmom'):
                 if getattr(self, x) is not None:
                     setattr(traj, x, getattr(self, x)[index])
             return traj
@@ -910,9 +913,25 @@ class Trajectory(BaseTrajectory):
         self._type_ids = None
         self._positions = None
         self._orientations = None
+        self._velocities = None
+        self._acceleration = None
+        self._mass = None
+        self._charge = None
+        self._diameter = None
+        self._moment_inertia = None
+        self._angmom = None
 
     def __iter__(self):
         return iter(ImmutableTrajectory(self.frames))
+
+    @property
+    def supported_properties(self):
+        """Returns list of supported properties for this trajectory.
+        """
+        return ['N', 'type', 'types', 'type_ids',
+                'positions', 'orientations', 'velocities',
+                'acceleration', 'mass', 'charge', 'diameter',
+                'moment_inertia', 'angmom']
 
     def load(self):
         """Load all frames into memory.
@@ -946,7 +965,14 @@ class Trajectory(BaseTrajectory):
                     self._types is None or
                     self._type_ids is None or
                     self._positions is None or
-                    self._orientations is None)
+                    self._orientations is None or
+                    self._velocities is None or
+                    self._acceleration is None or
+                    self._mass is None or
+                    self._charge is None or
+                    self._diameter is None or
+                    self._moment_inertia is None or
+                    self._angmom is None)
 
     def _assert_loaded(self):
         "Raises a RuntimeError if trajectory is not loaded."
@@ -1008,14 +1034,29 @@ class Trajectory(BaseTrajectory):
         type_ids = np.zeros((M, N), dtype=np.int_)
         _type = _generate_type_id_array(types, type_ids)
 
-        # Coordinates
-        pos = np.zeros((M, N, 3), dtype=self._dtype)
-        ort = np.zeros((M, N, 4), dtype=self._dtype)
+        # Properties
+        prop_list = ['positions', 'orientations', 'velocities',
+                     'acceleration', 'mass', 'charge', 'diameter',
+                     'moment_inertia', 'angmom']
+        props = dict(
+            positions = np.zeros((M, N, 3), dtype=self._dtype),
+            orientations = np.zeros((M, N, 4), dtype=self._dtype),
+            velocities = np.zeros((M, N, 3), dtype=self._dtype),
+            acceleration = np.zeros((M, N, 3), dtype=self._dtype),
+            mass = np.ones((M, N), dtype=self._dtype),
+            charge = np.zeros((M, N), dtype=self._dtype),
+            diameter = np.ones((M, N), dtype=self._dtype),
+            moment_inertia = np.ones((M, N, 3), dtype=self._dtype),
+            angmom = np.zeros((M, N, 4), dtype=self._dtype))
+
         for i, frame in enumerate(self.frames):
-            sp = frame.positions.shape
-            pos[i][:sp[0], :sp[1]] = frame.positions
-            so = frame.orientations.shape
-            ort[i][:so[0], :so[1]] = frame.orientations
+            for prop in prop_list:
+                frame_prop = getattr(frame, prop)
+                prop_shape = frame_prop.shape
+                if len(prop_shape) == 1:
+                    props[prop][i][:prop_shape[0]] = frame_prop
+                elif len(prop_shape) == 2:
+                    props[prop][i][:prop_shape[0], :prop_shape[1]] = frame_prop
 
         try:
             # Perform swap
@@ -1023,12 +1064,21 @@ class Trajectory(BaseTrajectory):
             self._type = _type
             self._types = types
             self._type_ids = type_ids
-            self._positions = pos
-            self._orientations = ort
+            self._positions = props['positions']
+            self._orientations = props['orientations']
+            self._velocities = props['velocities']
+            self._acceleration = props['acceleration']
+            self._mass = props['mass']
+            self._charge = props['charge']
+            self._diameter = props['diameter']
+            self._moment_inertia = props['moment_inertia']
+            self._angmom = props['angmom']
         except Exception:
             # Ensure consistent error state
             self._N = self._type = self._types = self._type_ids = \
-                self._positions = self._orientations = None
+                self._positions = self._orientations = self._velocities = \
+                self._acceleration = self._mass = self._charge = \
+                self._diameter = self._moment_inertia = self._angmom = None
             raise
 
     def set_dtype(self, value):
@@ -1039,7 +1089,9 @@ class Trajectory(BaseTrajectory):
 
         :param value: The new data type value."""
         self._dtype = value
-        for x in (self._positions, self._orientations):
+        for x in (self._positions, self._orientations, self._velocities,
+                  self._acceleration, self._mass, self._charge,
+                  self._diameter, self._moment_inertia, self._angmom):
             if x is not None:
                 x = x.astype(value)
         for frame in self.frames:
@@ -1134,6 +1186,113 @@ class Trajectory(BaseTrajectory):
             :meth:`~.Trajectory.load`."""
         self._assertarrays_loaded()
         return np.asarray(self._orientations, dtype=self._dtype)
+
+    @property
+    def velocities(self):
+        """Access the particle velocities as numpy array.
+
+        :returns: particle velocities as (Nx3) array
+        :rtype: :class:`numpy.ndarray`
+        :raises RuntimeError: When accessed before
+            calling :meth:`~.load_arrays` or
+            :meth:`~.Trajectory.load`."""
+        if 'velocities' not in self.supported_properties:
+            raise NotImplementedError('Velocities are not supported for this '
+                                      'trajectory type.')
+        self._assertarrays_loaded()
+        return np.asarray(self._velocities, dtype=self._dtype)
+
+    @property
+    def acceleration(self):
+        """Access the particle acceleration as numpy array.
+
+        :returns: particle acceleration as (Nx3) array
+        :rtype: :class:`numpy.ndarray`
+        :raises RuntimeError: When accessed before
+            calling :meth:`~.load_arrays` or
+            :meth:`~.Trajectory.load`."""
+        if 'acceleration' not in self.supported_properties:
+            raise NotImplementedError('Accelerations are not supported for this '
+                                      'trajectory type.')
+        self._assertarrays_loaded()
+        return np.asarray(self._acceleration, dtype=self._dtype)
+
+    @property
+    def mass(self):
+        """Access the particle mass as numpy array.
+
+        :returns: particle mass as (N) element array
+        :rtype: :class:`numpy.ndarray`
+        :raises RuntimeError: When accessed before
+            calling :meth:`~.load_arrays` or
+            :meth:`~.Trajectory.load`."""
+        if 'mass' not in self.supported_properties:
+            raise NotImplementedError('Masses are not supported for this '
+                                      'trajectory type.')
+        self._assertarrays_loaded()
+        return np.asarray(self._mass, dtype=self._dtype)
+
+    @property
+    def charge(self):
+        """Access the particle charge as numpy array.
+
+        :returns: particle charge as (N) element array
+        :rtype: :class:`numpy.ndarray`
+        :raises RuntimeError: When accessed before
+            calling :meth:`~.load_arrays` or
+            :meth:`~.Trajectory.load`."""
+        if 'charge' not in self.supported_properties:
+            raise NotImplementedError('Charges are not supported for this '
+                                      'trajectory type.')
+        self._assertarrays_loaded()
+        return np.asarray(self._charge, dtype=self._dtype)
+
+    @property
+    def diameter(self):
+        """Access the particle diameter as numpy array.
+
+        :returns: particle diameter as (N) element array
+        :rtype: :class:`numpy.ndarray`
+        :raises RuntimeError: When accessed before
+            calling :meth:`~.load_arrays` or
+            :meth:`~.Trajectory.load`."""
+        if 'diameter' not in self.supported_properties:
+            raise NotImplementedError('Diameters are not supported for this '
+                                      'trajectory type.')
+        self._assertarrays_loaded()
+        return np.asarray(self._diameter, dtype=self._dtype)
+
+    @property
+    def moment_inertia(self):
+        """Access the particle principal moment of inertia components as
+        numpy array.
+
+        :returns: particle principal moment of inertia components as (Nx3)
+                  element array
+        :rtype: :class:`numpy.ndarray`
+        :raises RuntimeError: When accessed before
+            calling :meth:`~.load_arrays` or
+            :meth:`~.Trajectory.load`."""
+        if 'moment_inertia' not in self.supported_properties:
+            raise NotImplementedError('Moments of inertia are not supported '
+                                      'for this trajectory type.')
+        self._assertarrays_loaded()
+        return np.asarray(self._moment_inertia, dtype=self._dtype)
+
+    @property
+    def angmom(self):
+        """Access the particle angular momenta as numpy array.
+
+        :returns: particle angular momenta quaternions as (Nx4) element array
+        :rtype: :class:`numpy.ndarray`
+        :raises RuntimeError: When accessed before
+            calling :meth:`~.load_arrays` or
+            :meth:`~.Trajectory.load`."""
+        if 'angmom' not in self.supported_properties:
+            raise NotImplementedError('Angular momenta are not supported '
+                                      'for this trajectory type.')
+        self._assertarrays_loaded()
+        return np.asarray(self._angmom, dtype=self._dtype)
 
 def _regularize_box(positions, velocities, acceleration,
                     orientations, angmom,

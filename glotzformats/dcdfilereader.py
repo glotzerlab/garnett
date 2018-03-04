@@ -204,6 +204,24 @@ class DCDFrame(Frame):
 
 class DCDTrajectory(Trajectory):
 
+    @property
+    def supported_properties(self):
+        """Returns list of supported properties for this trajectory.
+        """
+        return ['N', 'type', 'types', 'type_ids',
+                'positions', 'orientations']
+
+    def arrays_loaded(self):
+        """Returns true if arrays are loaded into memory.
+
+        See also: :meth:`~.load_arrays`"""
+        return not (self._N is None or
+                    self._type is None or
+                    self._types is None or
+                    self._type_ids is None or
+                    self._positions is None or
+                    self._orientations is None)
+
     def load_arrays(self):
         # Determine array shapes
         M = len(self)
