@@ -59,9 +59,15 @@ sub_trajectory = traj[i:j]
 Access properties of trajectories:
 ```
 traj.load_arrays()
-traj.positions      # MxNx3
-traj.orientations   # MxNx4
-traj.types          # MxNx1
+traj.positions       # MxNx3
+traj.orientations    # MxNx4
+traj.velocities      # MxNx3
+traj.mass            # MxN
+traj.charge          # MxN
+traj.diameter        # MxN
+traj.moment_inertia  # MxNx3
+traj.angmom          # MxNx4
+traj.types           # MxN
 
 # where M=len(traj) and N=max((len(f) for f in traj))
 ```
@@ -70,9 +76,15 @@ Access properties of individual frames:
 ```
 frame = traj[i]
 frame.box              # 3x3 matrix (not required to be upper-triangular)
-frame.types            # Nx1
+frame.types            # N
 frame.positions        # Nx3
-frame.orientations     # NX4
+frame.orientations     # Nx4
+frame.velocities       # Nx3
+frame.mass             # N
+frame.charge           # N
+frame.diameter         # N
+frame.moment_inertia   # Nx3
+frame.angmom           # Nx4
 frame.data             # A dictionary of lists for each attribute
 frame.data_key         # A list of strings
 frame.shapedef         # A ordered dictionary of instances of ShapeDefinition
