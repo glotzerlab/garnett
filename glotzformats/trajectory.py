@@ -428,27 +428,27 @@ class Frame(object):
 
         velocities = np.asarray(raw_frame.velocities, dtype=dtype)
         if len(velocities) == 0:
-            velocities = np.asarray([[0, 0, 0]] * len(positions))
+            velocities = np.zeros((len(positions), 3))
 
         mass = np.asarray(raw_frame.mass, dtype=dtype)
         if len(mass) == 0:
-            mass = np.asarray([1] * len(positions))
+            mass = np.ones(len(positions))
 
         charge = np.asarray(raw_frame.charge, dtype=dtype)
         if len(charge) == 0:
-            charge = np.asarray([0] * len(positions))
+            charge = np.zeros(len(positions))
 
         diameter = np.asarray(raw_frame.diameter, dtype=dtype)
         if len(diameter) == 0:
-            diameter = np.asarray([1] * len(positions))
+            diameter = np.ones(len(positions))
 
         moment_inertia = np.asarray(raw_frame.moment_inertia, dtype=dtype)
         if len(moment_inertia) == 0:
-            moment_inertia = np.asarray([[1, 1, 1]] * len(positions))
+            moment_inertia = np.ones((len(positions), 3))
 
         angmom = np.asarray(raw_frame.angmom, dtype=dtype)
         if len(angmom) == 0:
-            angmom = np.asarray([[0, 0, 0, 0]] * len(positions))
+            angmom = np.zeros((len(positions), 4))
 
         assert raw_frame.box is not None
         if isinstance(raw_frame.box, Box):
