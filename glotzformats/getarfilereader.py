@@ -70,7 +70,15 @@ class GetarFrame(Frame):
 
     def read(self):
         raw_frame = _RawFrameData()
-        for name in ['position', 'orientation']:
+        gf_prop_map = {
+            'position': 'positions',
+            'orientation': 'orientations',
+            'velocity': 'velocities',
+            'angular_momentum_quat': 'angmom'}
+        supported_records = ['position', 'orientation', 'velocity',
+                             'mass', 'charge', 'diameter',
+                             'moment_inertia', 'angular_momentum_quat']
+        for name in supported_records:
             try:
                 values = self._trajectory.getRecord(
                     self._records[name], self._frame)
@@ -78,7 +86,8 @@ class GetarFrame(Frame):
                 values = None
 
             if values is not None:
-                setattr(raw_frame, '{}s'.format(name), values)
+                frame_prop = gf_prop_map.get(name, name)
+                setattr(raw_frame, frame_prop, values)
 
         if 'type' in self._records and 'type_names.json' in self._records:
             names = json.loads(self._trajectory.getRecord(
