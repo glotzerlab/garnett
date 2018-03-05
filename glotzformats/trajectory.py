@@ -385,7 +385,7 @@ class _RawFrameData(object):
         self.box_dimensions = 3
         self.types = list()                         # Nx1
         self.positions = list()                     # Nx3
-        self.orientations = list()                  # NX4
+        self.orientations = list()                  # Nx4
         self.velocities = list()                    # Nx3
         self.mass = list()                          # Nx1
         self.charge = list()                        # Nx1
