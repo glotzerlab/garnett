@@ -17,12 +17,12 @@ class GSDHOOMDFileWriter(object):
     .. code::
 
         writer = GSDHOOMDFileWriter()
-        with open('file.gsd', 'wb') as f:
-            writer.write(trajectory, gsdfile, f)
+        with open('file.gsd', 'wb') as gsdfile:
+            writer.write(trajectory, gsdfile)
 
         # For appending to the file
-        with open('file.gsd', 'ab') as f:
-            writer.write(trajectory, gsdfile, f)
+        with open('file.gsd', 'ab') as gsdfile:
+            writer.write(trajectory, gsdfile)
     """
 
     def write(self, trajectory, stream):
@@ -43,8 +43,6 @@ class GSDHOOMDFileWriter(object):
                                       "and not directly from the stream.")
         with gsd.hoomd.open(name = filename, mode = mode) as t:
             for i, frame in enumerate(trajectory):
-                snap = gsd.hoomd.Snapshot()
-
                 types = list(set(frame.types))
                 snap = gsd.hoomd.Snapshot()
                 snap.particles.N = len(frame)
