@@ -56,7 +56,7 @@ class GetarFileWriter(object):
         path = '/'.join(filter(lambda x: x is not None, path_parts))
         return Record(path)
 
-    def writeFrame(self, bulkwriter, frame, index=None):
+    def writeFrame(self, bulkwriter, frame, index=None, skip_props=False):
         """Write the frame data for an index using a bulk writer."""
 
         # Types
@@ -75,11 +75,12 @@ class GetarFileWriter(object):
         bulkwriter.writeRecord(rec=name_rec, contents=name_contents)
 
 
-        # Particle properties
-        for prop, recname in GetarFileWriter.property_record_map.items():
-            rec = self.makeRecord(recname, index=index)
-            contents = getattr(frame, prop)
-            bulkwriter.writeRecord(rec=rec, contents=contents)
+        if not skip_props:
+            # Particle properties
+            for prop, recname in type(self).property_record_map.items():
+                rec = self.makeRecord(recname, index=index)
+                contents = getattr(frame, prop)
+                bulkwriter.writeRecord(rec=rec, contents=contents)
 
         # Box and dimensions
         box_rec = self.makeRecord('box.f32.uni', index=index)
@@ -97,6 +98,10 @@ class GetarFileWriter(object):
                 logger.warn('Shape type {} is unsupported '
                             'for getar writing.'.format(
                     frame.shapedef[typename].__class__))
+            except KeyError:
+                logger.info('Type name \'{}\' has no stored '
+                            'shape information.'.format(
+                                typename))
         shape_contents = json.dumps(shape_contents)
         bulkwriter.writeRecord(rec=shape_rec, contents=shape_contents)
 
@@ -118,8 +123,12 @@ class GetarFileWriter(object):
         with GTAR(path=filename, mode=mode) as t, \
                 t.getBulkWriter() as t_writer:
 
-            if static_frame is not None:
-                self.writeFrame(t_writer, static_frame)
+            if static_frame is None and len(trajectory) > 0:
+                # Write the first frame of the trajectory as static data
+                # so that box, type, and shape information is accessible
+                self.writeFrame(t_writer, trajectory[0], index=None, skip_props=True)
+            else:
+                self.writeFrame(t_writer, static_frame, index=None)
 
             for index, frame in enumerate(trajectory):
                 self.writeFrame(t_writer, frame, index)
