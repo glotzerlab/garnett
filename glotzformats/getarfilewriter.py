@@ -116,22 +116,27 @@ class GetarFileWriter(object):
             filename = stream.name
             mode = stream.mode
         except AttributeError:
-            raise NotImplementedError("The current implementation of the GetarFileWriter requires "
-                                      "file objects with name attribute, such as NamedTemporaryFile "
-                                      "as the underlying library is reading the file by filename "
-                                      "and not directly from the stream.")
+            raise NotImplementedError(
+                "The current implementation of the GetarFileWriter requires "
+                "file objects with name attribute, such as NamedTemporaryFile "
+                "as the underlying library is reading the file by filename "
+                "and not directly from the stream.")
         with GTAR(path=filename, mode=mode) as t, \
                 t.getBulkWriter() as t_writer:
 
-            if static_frame is None and len(trajectory) > 0:
-                # Write the first frame of the trajectory as static data
-                # so that box, type, and shape information is accessible
-                self.writeFrame(t_writer, trajectory[0], index=None, skip_props=True)
-            else:
-                self.writeFrame(t_writer, static_frame, index=None)
-
             for index, frame in enumerate(trajectory):
-                self.writeFrame(t_writer, frame, index)
+
+                if index == 0: # avoid indexing to allow tqdm(trajectory)
+                    if static_frame is None:
+                        # Write the first frame of the trajectory as static data
+                        # so that box, type, and shape information is accessible
+                        self.writeFrame(t_writer, frame,
+                                        index=None, skip_props=True)
+                    else:
+                        self.writeFrame(t_writer, static_frame,
+                                        index=None, skip_props=True)
+
+               self.writeFrame(t_writer, frame, index)
                 logger.debug("Wrote frame {}.".format(index + 1))
 
         logger.info("Wrote {} frames.".format(index + 1))
