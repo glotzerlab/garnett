@@ -65,6 +65,10 @@ class Box(object):
                 [0, self.Ly, self.yz * self.Lz],
                 [0, 0, self.Lz]]
 
+    def get_box_array(self):
+        """Returns the box parameters as a 6-element list."""
+        return [self.Lx, self.Ly, self.Lz, self.xy, self.xz, self.yz]
+
     def __str__(self):
         return "Box(Lx={Lx}, Ly={Ly}, Lz={Lz},"\
             "xy={xy}, xz={xz}, yz={yz}, dimensions={dimensions})".format(
@@ -244,6 +248,12 @@ class PolyShapeDefinition(ShapeDefinition):
             ' '.join((str(v) for xyz in self.vertices for v in xyz)),
             self.color)
 
+    @property
+    def type_shape(self):
+        return {'type': 'ConvexPolyhedron',
+                'rounding_radius': 0,
+                'vertices': self.vertices}
+
 class SpheroPolyShapeDefinition(ShapeDefinition):
     """Initialize a SpheroPolyShapeDefinition instance.
 
@@ -271,6 +281,12 @@ class SpheroPolyShapeDefinition(ShapeDefinition):
             len(self.vertices),
             ' '.join((str(v) for xyz in self.vertices for v in xyz)),
             self.color)
+
+    @property
+    def type_shape(self):
+        return {'type': 'ConvexPolyhedron',
+                'rounding_radius': self.rounding_radius,
+                'vertices': self.vertices}
 
 class GeneralPolyShapeDefinition(ShapeDefinition):
     """Initialize a GeneralPolyShapeDefinition instance.
@@ -1315,19 +1331,24 @@ def _generate_type_id_array(types, type_ids):
     return _type
 
 
-
 def copyto_hoomd_blue_snapshot(frame, snapshot):
     "Copy the frame into a HOOMD-blue snapshot."
     np.copyto(snapshot.particles.position, frame.positions)
     np.copyto(snapshot.particles.orientation, frame.orientations)
+    np.copyto(snapshot.particles.velocity, frame.velocities)
+    np.copyto(snapshot.particles.mass, frame.mass)
+    np.copyto(snapshot.particles.charge, frame.charge)
+    np.copyto(snapshot.particles.diameter, frame.diameter)
+    np.copyto(snapshot.particles.moment_inertia, frame.moment_inertia)
+    np.copyto(snapshot.particles.angmom, frame.angmom)
     return snapshot
 
 
 def copyfrom_hoomd_blue_snapshot(frame, snapshot):
     """"Copy the HOOMD-blue snapshot into the frame.
 
-    Note that only the box, types, positions and
-    orientations will be copied."""
+    Note that only the properties listed below will be copied.
+    """
     frame.box.__dict__ = snapshot.box.__dict__
     particle_types = list(set(snapshot.particles.types))
     snap_types = [particle_types[i] for i in snapshot.particles.typeid]
