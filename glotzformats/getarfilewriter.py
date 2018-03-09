@@ -136,7 +136,8 @@ class GetarFileWriter(object):
                         self.writeFrame(t_writer, static_frame,
                                         index=None, skip_props=True)
 
-               self.writeFrame(t_writer, frame, index)
+                self.writeFrame(t_writer, frame, index)
+
                 logger.debug("Wrote frame {}.".format(index + 1))
 
         logger.info("Wrote {} frames.".format(index + 1))
