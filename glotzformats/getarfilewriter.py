@@ -68,10 +68,7 @@ class GetarFileWriter(object):
 
         # Type names
         name_rec = self.makeRecord('type_names.json', index=index)
-        name_contents = []
-        for typename in types:
-            name_contents.append(typename)
-        name_contents = json.dumps(name_contents)
+        name_contents = json.dumps(types)
         bulkwriter.writeRecord(rec=name_rec, contents=name_contents)
 
 
@@ -98,10 +95,12 @@ class GetarFileWriter(object):
                 logger.warn('Shape type {} is unsupported '
                             'for getar writing.'.format(
                     frame.shapedef[typename].__class__))
+                shape_contents.append(None)
             except KeyError:
                 logger.info('Type name \'{}\' has no stored '
                             'shape information.'.format(
                                 typename))
+                shape_contents.append(None)
         shape_contents = json.dumps(shape_contents)
         bulkwriter.writeRecord(rec=shape_rec, contents=shape_contents)
 
