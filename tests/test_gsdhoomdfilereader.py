@@ -265,6 +265,57 @@ class BaseGSDHOOMDFileReaderTest(TrajectoryTest):
             assert np.array_equal(shape.vertices, shape_vertices)
             assert np.isclose(shape.rounding_radius, shape_sweep_radius)
 
+    @unittest.skipIf(not HOOMD or not HPMC, 'requires HOOMD and HPMC')
+    def test_properties(self):
+        self.system = hoomd.init.create_lattice(
+            unitcell=hoomd.lattice.sc(10), n=(2, 1, 1))
+        self.addCleanup(hoomd.context.initialize, "--mode=cpu")
+        self.addCleanup(self.del_system)
+        self.mc = hoomd.hpmc.integrate.convex_polyhedron(seed=10)
+        self.addCleanup(self.del_mc)
+        shape_vertices = np.array([[-2, -1, -1],
+                                   [-2, -1,  1],
+                                   [-2,  1, -1],
+                                   [-2,  1,  1],
+                                   [ 2, -1, -1],
+                                   [ 2, -1,  1],
+                                   [ 2,  1, -1],
+                                   [ 2,  1,  1]])
+        particle_props = dict(
+            position = (1, 1, 1),
+            orientation = (0, 1, 0, 0),
+            velocity = (1, 2, 3),
+            mass = 2,
+            charge = 1,
+            diameter = 2,
+            moment_inertia = (2, 0.5, 1),
+            angular_momentum = (1, 2, 3, 4))
+        self.mc.shape_param.set("A", vertices=shape_vertices)
+        for i in range(len(self.system.particles)):
+            for prop in particle_props:
+                setattr(self.system.particles[i], prop, particle_props[prop])
+        gsd_writer = hoomd.dump.gsd(filename=self.fn_gsd,
+                                    group=hoomd.group.all(),
+                                    period=None,
+                                    dynamic=['attribute', 'property',
+                                             'momentum'])
+        gsd_writer.dump_state(self.mc)
+        gf_prop_map = dict(
+            position='positions',
+            orientation='orientations',
+            velocity='velocities',
+            angular_momentum='angmom')
+        with open(self.fn_gsd, 'rb') as gsdfile:
+            gsd_reader = glotzformats.gsdhoomdfilereader.GSDHOOMDFileReader()
+            traj = gsd_reader.read(gsdfile)
+            traj.load_arrays()
+            for i in range(traj.N[0]):
+                for prop in particle_props:
+                    gf_prop = gf_prop_map.get(prop, prop)
+                    self.assertTrue(
+                        (getattr(traj, gf_prop)[0][i] == \
+                         particle_props[prop]).all())
+
 
 if __name__ == '__main__':
     unittest.main()

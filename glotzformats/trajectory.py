@@ -65,6 +65,10 @@ class Box(object):
                 [0, self.Ly, self.yz * self.Lz],
                 [0, 0, self.Lz]]
 
+    def get_box_array(self):
+        """Returns the box parameters as a 6-element list."""
+        return [self.Lx, self.Ly, self.Lz, self.xy, self.xz, self.yz]
+
     def __str__(self):
         return "Box(Lx={Lx}, Ly={Ly}, Lz={Lz},"\
             "xy={xy}, xz={xz}, yz={yz}, dimensions={dimensions})".format(
@@ -134,6 +138,10 @@ class SphereShapeDefinition(ShapeDefinition):
 
     def __str__(self):
         return "{} {} {}".format(self.shape_class, self.diameter, self.color)
+
+    @property
+    def json_shape(self):
+        return {'type': 'Sphere'}
 
 
 class ArrowShapeDefinition(ShapeDefinition):
@@ -244,6 +252,12 @@ class PolyShapeDefinition(ShapeDefinition):
             ' '.join((str(v) for xyz in self.vertices for v in xyz)),
             self.color)
 
+    @property
+    def json_shape(self):
+        return {'type': 'ConvexPolyhedron',
+                'rounding_radius': 0,
+                'vertices': self.vertices}
+
 class SpheroPolyShapeDefinition(ShapeDefinition):
     """Initialize a SpheroPolyShapeDefinition instance.
 
@@ -271,6 +285,12 @@ class SpheroPolyShapeDefinition(ShapeDefinition):
             len(self.vertices),
             ' '.join((str(v) for xyz in self.vertices for v in xyz)),
             self.color)
+
+    @property
+    def json_shape(self):
+        return {'type': 'ConvexPolyhedron',
+                'rounding_radius': self.rounding_radius,
+                'vertices': self.vertices}
 
 class GeneralPolyShapeDefinition(ShapeDefinition):
     """Initialize a GeneralPolyShapeDefinition instance.
@@ -313,10 +333,20 @@ class FrameData(object):
         "Nx1 list of types represented as strings."
         self.positions = None
         "Nx3 matrix of coordinates for N particles in 3 dimensions."
+        self.orientations = None
+        "Nx4 matrix of rotational coordinates for N particles represented as quaternions."
         self.velocities = None
         "Nx3 matrix of velocities for N particles in 3 dimensions."
-        self.orientations = None
-        "Nx4 matrix of rotational coordinates represented as quaternions."
+        self.mass = None
+        "Nx1 list of masses for N particles."
+        self.charge = None
+        "Nx1 list of charges for N particles."
+        self.diameter = None
+        "Nx1 list of diameters for N particles."
+        self.moment_inertia = None
+        "Nx3 matrix of principal moments of inertia for N particles in 3 dimensions."
+        self.angmom = None
+        "Nx4 matrix of angular momenta for N particles represented as quaternions."
         self.data = None
         "A dictionary of lists for each attribute."
         self.data_keys = None
@@ -336,8 +366,13 @@ class FrameData(object):
             return self.box == other.box \
                 and self.types == other.types\
                 and (self.positions == other.positions).all()\
-                and (self.velocities == other.velocities).all()\
                 and (self.orientations == other.orientations).all()\
+                and (self.velocities == other.velocities).all()\
+                and (self.mass == other.mass).all()\
+                and (self.charge == other.charge).all()\
+                and (self.diameter == other.diameter).all()\
+                and (self.moment_inertia == other.moment_inertia).all()\
+                and (self.angmom == other.angmom).all()\
                 and self.data == other.data\
                 and self.shapedef == other.shapedef
 
@@ -370,8 +405,13 @@ class _RawFrameData(object):
         self.box_dimensions = 3
         self.types = list()                         # Nx1
         self.positions = list()                     # Nx3
-        self.velocities = list()                     # Nx3
-        self.orientations = list()                  # NX4
+        self.orientations = list()                  # Nx4
+        self.velocities = list()                    # Nx3
+        self.mass = list()                          # Nx1
+        self.charge = list()                        # Nx1
+        self.diameter = list()                      # Nx1
+        self.moment_inertia = list()                # Nx3
+        self.angmom = list()                        # Nx4
         # A dictionary of lists for each attribute
         self.data = None
         self.data_keys = None                       # A list of strings
@@ -401,26 +441,63 @@ class Frame(object):
         ret = FrameData()
         # the box
         positions = np.asarray(raw_frame.positions, dtype=dtype)
-        velocities = np.asarray(raw_frame.velocities, dtype=dtype)
-        if len(velocities) == 0:
-            velocities = np.asarray([[0, 0, 0]] * len(positions))
+
         orientations = np.asarray(raw_frame.orientations, dtype=dtype)
         if len(orientations) == 0:
             orientations = np.asarray([[1, 0, 0, 0]] * len(positions))
+
+        velocities = np.asarray(raw_frame.velocities, dtype=dtype)
+        if len(velocities) == 0:
+            velocities = np.zeros((len(positions), 3))
+
+        mass = np.asarray(raw_frame.mass, dtype=dtype)
+        if len(mass) == 0:
+            mass = np.ones(len(positions))
+
+        charge = np.asarray(raw_frame.charge, dtype=dtype)
+        if len(charge) == 0:
+            charge = np.zeros(len(positions))
+
+        diameter = np.asarray(raw_frame.diameter, dtype=dtype)
+        if len(diameter) == 0:
+            diameter = np.ones(len(positions))
+
+        moment_inertia = np.asarray(raw_frame.moment_inertia, dtype=dtype)
+        if len(moment_inertia) == 0:
+            moment_inertia = np.ones((len(positions), 3))
+
+        angmom = np.asarray(raw_frame.angmom, dtype=dtype)
+        if len(angmom) == 0:
+            angmom = np.zeros((len(positions), 4))
 
         assert raw_frame.box is not None
         if isinstance(raw_frame.box, Box):
             raw_frame.box_dimensions = raw_frame.box.dimensions
             raw_frame.box = np.asarray(raw_frame.box.get_box_matrix(), dtype=dtype)
         box_dimensions = getattr(raw_frame, 'box_dimensions', 3)
-        ret.positions, ret.velocities, ret.orientations, ret.box = _regularize_box(
-            positions, velocities, orientations, raw_frame.box, dtype, box_dimensions)
+        ret.positions, ret.velocities, \
+        ret.orientations, ret.angmom, ret.box = _regularize_box(
+            positions, velocities,
+            orientations, angmom,
+            raw_frame.box, dtype, box_dimensions)
+        ret.mass = mass
+        ret.charge = charge
+        ret.diameter = diameter
+        ret.moment_inertia = moment_inertia
         ret.shapedef = raw_frame.shapedef
         ret.types = raw_frame.types
         ret.data = raw_frame.data
         ret.data_keys = raw_frame.data_keys
         ret.view_rotation = raw_frame.view_rotation
-        assert N == len(ret.types) == len(ret.positions) == len(ret.velocities) == len(ret.orientations)
+        assert N == len(ret.types)
+        assert N == len(ret.positions)
+        assert N == len(ret.orientations)
+        assert N == len(ret.velocities)
+        assert N == len(ret.mass)
+        assert N == len(ret.charge)
+        assert N == len(ret.diameter)
+        assert N == len(ret.moment_inertia)
+        assert N == len(ret.angmom)
         return ret
 
     def loaded(self):
@@ -526,6 +603,26 @@ class Frame(object):
         self.frame_data.positions = value
 
     @property
+    def orientations(self):
+        "Nx4 matrix of rotational coordinates for N particles represented as quaternions."
+        self.load()
+        return self.frame_data.orientations
+
+    @orientations.setter
+    def orientations(self, value):
+        try:
+            value = np.asarray(value, dtype=self._dtype)
+        except ValueError:
+            raise ValueError("Orientations can only be set to numeric arrays.")
+        if not np.all(np.isfinite(value)):
+            raise ValueError("Orientations being set must all be finite numbers.")
+        elif not len(value.shape) == 2 or value.shape[1] != 4:
+            raise ValueError("Input array must be of shape (N,4) where N is the number of particles.")
+
+        self.load()
+        self.frame_data.orientations = value
+
+    @property
     def velocities(self):
         "Nx3 matrix of velocities for N particles in 3 dimensions."
         self.load()
@@ -545,24 +642,101 @@ class Frame(object):
         self.frame_data.velocities = value
 
     @property
-    def orientations(self):
-        "Nx4 matrix of rotational coordinates represented as quaternions."
+    def mass(self):
+        "Nx1 list of masses for N particles."
         self.load()
-        return self.frame_data.orientations
+        return self.frame_data.mass
 
-    @orientations.setter
-    def orientations(self, value):
+    @mass.setter
+    def mass(self, value):
         try:
             value = np.asarray(value, dtype=self._dtype)
         except ValueError:
-            raise ValueError("Orientations can only be set to numeric arrays.")
+            raise ValueError("Masses can only be set to numeric arrays.")
         if not np.all(np.isfinite(value)):
-            raise ValueError("Orientations being set must all be finite numbers.")
+            raise ValueError("Masses being set must all be finite numbers.")
+        elif not len(value.shape) == 1:
+            raise ValueError("Input array must be of shape (N) where N is the number of particles.")
+        self.load()
+        self.frame_data.mass = value
+
+    @property
+    def charge(self):
+        "Nx1 list of charges for N particles."
+        self.load()
+        return self.frame_data.charge
+
+    @charge.setter
+    def charge(self, value):
+        try:
+            value = np.asarray(value, dtype=self._dtype)
+        except ValueError:
+            raise ValueError("Charges can only be set to numeric arrays.")
+        if not np.all(np.isfinite(value)):
+            raise ValueError("Charges being set must all be finite numbers.")
+        elif not len(value.shape) == 1:
+            raise ValueError("Input array must be of shape (N) where N is the number of particles.")
+        self.load()
+        self.frame_data.charge = value
+
+    @property
+    def diameter(self):
+        "Nx1 list of diameters for N particles."
+        self.load()
+        return self.frame_data.diameter
+
+    @diameter.setter
+    def diameter(self, value):
+        try:
+            value = np.asarray(value, dtype=self._dtype)
+        except ValueError:
+            raise ValueError("Diameters can only be set to numeric arrays.")
+        if not np.all(np.isfinite(value)):
+            raise ValueError("Diameters being set must all be finite numbers.")
+        elif not len(value.shape) == 1:
+            raise ValueError("Input array must be of shape (N) where N is the number of particles.")
+        self.load()
+        self.frame_data.diameter = value
+
+    @property
+    def moment_inertia(self):
+        "Nx3 matrix of principal moments of inertia for N particles in 3 dimensions."
+        self.load()
+        return self.frame_data.moment_inertia
+
+    @moment_inertia.setter
+    def moment_inertia(self, value):
+        ndof = self.box.dimensions * (self.box.dimensions - 1) / 2
+        try:
+            value = np.asarray(value, dtype=self._dtype)
+        except ValueError:
+            raise ValueError("Moments of inertia can only be set to numeric arrays.")
+        if not np.all(np.isfinite(value)):
+            raise ValueError("Moments of inertia being set must all be finite numbers.")
+        elif not len(value.shape) == 2 or value.shape[1] != ndof:
+            raise ValueError("Input array must be of shape (N,{}) where N is the number of particles.".format(ndof))
+        self.load()
+        self.frame_data.moment_inertia = value
+
+    @property
+    def angmom(self):
+        "Nx4 matrix of angular momenta for N particles represented as quaternions."
+        self.load()
+        return self.frame_data.angmom
+
+    @angmom.setter
+    def angmom(self, value):
+        try:
+            value = np.asarray(value, dtype=self._dtype)
+        except ValueError:
+            raise ValueError("Angular momenta can only be set to numeric arrays.")
+        if not np.all(np.isfinite(value)):
+            raise ValueError("Angular momenta being set must all be finite numbers.")
         elif not len(value.shape) == 2 or value.shape[1] != 4:
             raise ValueError("Input array must be of shape (N,4) where N is the number of particles.")
 
         self.load()
-        self.frame_data.orientations = value
+        self.frame_data.angmom = value
 
     @property
     def data(self):
@@ -623,7 +797,10 @@ class BaseTrajectory(object):
     def __getitem__(self, index):
         if isinstance(index, slice):
             traj = type(self)(self.frames[index])
-            for x in ('_types', '_positions', '_orientations', '_type', '_type_ids', '_N'):
+            for x in ('_N', '_types', '_type', '_type_ids',
+                      '_positions', '_orientations', '_velocities',
+                      '_mass', '_charge', '_diameter',
+                      '_moment_inertia', '_angmom'):
                 if getattr(self, x) is not None:
                     setattr(traj, x, getattr(self, x)[index])
             return traj
@@ -728,6 +905,12 @@ class Trajectory(BaseTrajectory):
         self._type_ids = None
         self._positions = None
         self._orientations = None
+        self._velocities = None
+        self._mass = None
+        self._charge = None
+        self._diameter = None
+        self._moment_inertia = None
+        self._angmom = None
 
     def __iter__(self):
         return iter(ImmutableTrajectory(self.frames))
@@ -764,7 +947,13 @@ class Trajectory(BaseTrajectory):
                     self._types is None or
                     self._type_ids is None or
                     self._positions is None or
-                    self._orientations is None)
+                    self._orientations is None or
+                    self._velocities is None or
+                    self._mass is None or
+                    self._charge is None or
+                    self._diameter is None or
+                    self._moment_inertia is None or
+                    self._angmom is None)
 
     def _assert_loaded(self):
         "Raises a RuntimeError if trajectory is not loaded."
@@ -826,14 +1015,28 @@ class Trajectory(BaseTrajectory):
         type_ids = np.zeros((M, N), dtype=np.int_)
         _type = _generate_type_id_array(types, type_ids)
 
-        # Coordinates
-        pos = np.zeros((M, N, 3), dtype=self._dtype)
-        ort = np.zeros((M, N, 4), dtype=self._dtype)
+        # Properties
+        prop_list = ['positions', 'orientations', 'velocities',
+                     'mass', 'charge', 'diameter',
+                     'moment_inertia', 'angmom']
+        props = dict(
+            positions = np.zeros((M, N, 3), dtype=self._dtype),
+            orientations = np.zeros((M, N, 4), dtype=self._dtype),
+            velocities = np.zeros((M, N, 3), dtype=self._dtype),
+            mass = np.ones((M, N), dtype=self._dtype),
+            charge = np.zeros((M, N), dtype=self._dtype),
+            diameter = np.ones((M, N), dtype=self._dtype),
+            moment_inertia = np.ones((M, N, 3), dtype=self._dtype),
+            angmom = np.zeros((M, N, 4), dtype=self._dtype))
+
         for i, frame in enumerate(self.frames):
-            sp = frame.positions.shape
-            pos[i][:sp[0], :sp[1]] = frame.positions
-            so = frame.orientations.shape
-            ort[i][:so[0], :so[1]] = frame.orientations
+            for prop in prop_list:
+                frame_prop = getattr(frame, prop)
+                prop_shape = frame_prop.shape
+                if len(prop_shape) == 1:
+                    props[prop][i][:prop_shape[0]] = frame_prop
+                elif len(prop_shape) == 2:
+                    props[prop][i][:prop_shape[0], :prop_shape[1]] = frame_prop
 
         try:
             # Perform swap
@@ -841,12 +1044,20 @@ class Trajectory(BaseTrajectory):
             self._type = _type
             self._types = types
             self._type_ids = type_ids
-            self._positions = pos
-            self._orientations = ort
+            self._positions = props['positions']
+            self._orientations = props['orientations']
+            self._velocities = props['velocities']
+            self._mass = props['mass']
+            self._charge = props['charge']
+            self._diameter = props['diameter']
+            self._moment_inertia = props['moment_inertia']
+            self._angmom = props['angmom']
         except Exception:
             # Ensure consistent error state
             self._N = self._type = self._types = self._type_ids = \
-                self._positions = self._orientations = None
+                self._positions = self._orientations = self._velocities = \
+                self._mass = self._charge = self._diameter = \
+                self._moment_inertia = self._angmom = None
             raise
 
     def set_dtype(self, value):
@@ -857,7 +1068,9 @@ class Trajectory(BaseTrajectory):
 
         :param value: The new data type value."""
         self._dtype = value
-        for x in (self._positions, self._orientations):
+        for x in (self._positions, self._orientations, self._velocities,
+                  self._mass, self._charge, self._diameter,
+                  self._moment_inertia, self._angmom):
             if x is not None:
                 x = x.astype(value)
         for frame in self.frames:
@@ -953,7 +1166,100 @@ class Trajectory(BaseTrajectory):
         self._assertarrays_loaded()
         return np.asarray(self._orientations, dtype=self._dtype)
 
-def _regularize_box(positions, velocities, orientations,
+    @property
+    def velocities(self):
+        """Access the particle velocities as numpy array.
+
+        :returns: particle velocities as (Nx3) array
+        :rtype: :class:`numpy.ndarray`
+        :raises RuntimeError: When accessed before
+            calling :meth:`~.load_arrays` or
+            :meth:`~.Trajectory.load`."""
+        self._assertarrays_loaded()
+        if getattr(self, '_velocities', None) is None:
+            raise AttributeError('Velocities are not available for this '
+                                 'trajectory.')
+        return np.asarray(self._velocities, dtype=self._dtype)
+
+    @property
+    def mass(self):
+        """Access the particle mass as numpy array.
+
+        :returns: particle mass as (N) element array
+        :rtype: :class:`numpy.ndarray`
+        :raises RuntimeError: When accessed before
+            calling :meth:`~.load_arrays` or
+            :meth:`~.Trajectory.load`."""
+        self._assertarrays_loaded()
+        if getattr(self, '_mass', None) is None:
+            raise AttributeError('Masses are not available for this '
+                                 'trajectory.')
+        return np.asarray(self._mass, dtype=self._dtype)
+
+    @property
+    def charge(self):
+        """Access the particle charge as numpy array.
+
+        :returns: particle charge as (N) element array
+        :rtype: :class:`numpy.ndarray`
+        :raises RuntimeError: When accessed before
+            calling :meth:`~.load_arrays` or
+            :meth:`~.Trajectory.load`."""
+        self._assertarrays_loaded()
+        if getattr(self, '_charge', None) is None:
+            raise AttributeError('Charges are not available for this '
+                                 'trajectory.')
+        return np.asarray(self._charge, dtype=self._dtype)
+
+    @property
+    def diameter(self):
+        """Access the particle diameter as numpy array.
+
+        :returns: particle diameter as (N) element array
+        :rtype: :class:`numpy.ndarray`
+        :raises RuntimeError: When accessed before
+            calling :meth:`~.load_arrays` or
+            :meth:`~.Trajectory.load`."""
+        self._assertarrays_loaded()
+        if getattr(self, '_diameter', None) is None:
+            raise AttributeError('Diameters are not available for this '
+                                 'trajectory.')
+        return np.asarray(self._diameter, dtype=self._dtype)
+
+    @property
+    def moment_inertia(self):
+        """Access the particle principal moment of inertia components as
+        numpy array.
+
+        :returns: particle principal moment of inertia components as (Nx3)
+                  element array
+        :rtype: :class:`numpy.ndarray`
+        :raises RuntimeError: When accessed before
+            calling :meth:`~.load_arrays` or
+            :meth:`~.Trajectory.load`."""
+        self._assertarrays_loaded()
+        if getattr(self, '_moment_inertia', None) is None:
+            raise AttributeError('Moments of inertia are not available for '
+                                 'this trajectory.')
+        return np.asarray(self._moment_inertia, dtype=self._dtype)
+
+    @property
+    def angmom(self):
+        """Access the particle angular momenta as numpy array.
+
+        :returns: particle angular momenta quaternions as (Nx4) element array
+        :rtype: :class:`numpy.ndarray`
+        :raises RuntimeError: When accessed before
+            calling :meth:`~.load_arrays` or
+            :meth:`~.Trajectory.load`."""
+        self._assertarrays_loaded()
+        if getattr(self, '_angmom', None) is None:
+            raise AttributeError('Angular momenta are not available for this '
+                                 'trajectory.')
+        return np.asarray(self._angmom, dtype=self._dtype)
+
+def _regularize_box(positions, velocities,
+                    orientations, angmom,
                     box_matrix, dtype=None, dimensions=3):
     """ Convert box into a right-handed coordinate frame with
     only upper triangular entries. Also convert corresponding
@@ -971,6 +1277,7 @@ def _regularize_box(positions, velocities, orientations,
         positions = np.copy(positions)
         orientations = np.copy(orientations)
         velocities = np.copy(velocities)
+        angmom = np.copy(angmom)
 
         # Since we'll be performing a quaternion operation,
         # we have to ensure that Q is a pure rotation
@@ -978,17 +1285,19 @@ def _regularize_box(positions, velocities, orientations,
         Q = Q*sign
         R = R*sign
 
-        # First rotate positions and velocities; since they are
-        # vectors, we can use the matrix directly. Conveniently,
-        # instead of transposing Q we can just reverse the order
-        # of multiplication here
+        # First rotate positions, velocities.
+        # Since they are vectors, we can use the matrix directly.
+        # Conveniently, instead of transposing Q we can just reverse
+        # the order of multiplication here
         positions = positions.dot(Q)
         velocities = velocities.dot(Q)
 
-        # For orientations, we use the quaternion
+        # For orientations and angular momenta, we use the quaternion
         quat = mu.quaternion_from_matrix(Q.T)
         for i in range(orientations.shape[0]):
             orientations[i, :] = mu.quaternionMultiply(quat, orientations[i, :])
+        for i in range(angmom.shape[0]):
+            angmom[i, :] = mu.quaternionMultiply(quat, angmom[i, :])
 
         # Now we have to ensure that the box is right-handed. We
         # do this as a second step to avoid introducing reflections
@@ -1006,7 +1315,7 @@ def _regularize_box(positions, velocities, orientations,
     xz = box[0, 2]/Lz
     yz = box[1, 2]/Lz
     box = Box(Lx = Lx, Ly = Ly, Lz = Lz, xy = xy, xz = xz, yz = yz)
-    return positions, velocities, orientations, box
+    return positions, velocities, orientations, angmom, box
 
 def _generate_type_id_array(types, type_ids):
     "Generate type_id array."
@@ -1017,25 +1326,36 @@ def _generate_type_id_array(types, type_ids):
     return _type
 
 
-
 def copyto_hoomd_blue_snapshot(frame, snapshot):
     "Copy the frame into a HOOMD-blue snapshot."
     np.copyto(snapshot.particles.position, frame.positions)
     np.copyto(snapshot.particles.orientation, frame.orientations)
+    np.copyto(snapshot.particles.velocity, frame.velocities)
+    np.copyto(snapshot.particles.mass, frame.mass)
+    np.copyto(snapshot.particles.charge, frame.charge)
+    np.copyto(snapshot.particles.diameter, frame.diameter)
+    np.copyto(snapshot.particles.moment_inertia, frame.moment_inertia)
+    np.copyto(snapshot.particles.angmom, frame.angmom)
     return snapshot
 
 
 def copyfrom_hoomd_blue_snapshot(frame, snapshot):
     """"Copy the HOOMD-blue snapshot into the frame.
 
-    Note that only the box, types, positions and
-    orientations will be copied."""
+    Note that only the properties listed below will be copied.
+    """
     frame.box.__dict__ = snapshot.box.__dict__
     particle_types = list(set(snapshot.particles.types))
     snap_types = [particle_types[i] for i in snapshot.particles.typeid]
     frame.types = snap_types
     frame.positions = snapshot.particles.position
     frame.orientations = snapshot.particles.orientation
+    frame.velocities = snapshot.particles.velocity
+    frame.mass = snapshot.particles.mass
+    frame.charge = snapshot.particles.charge
+    frame.diameter = snapshot.particles.diameter
+    frame.moment_inertia = snapshot.particles.moment_inertia
+    frame.angmom = snapshot.particles.angmom
     return frame
 
 

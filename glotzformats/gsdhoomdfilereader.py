@@ -145,6 +145,11 @@ class GSDHoomdFrame(Frame):
         raw_frame.positions = frame.particles.position
         raw_frame.orientations = frame.particles.orientation
         raw_frame.velocities = frame.particles.velocity
+        raw_frame.mass = frame.particles.mass
+        raw_frame.charge = frame.particles.charge
+        raw_frame.diameter = frame.particles.diameter
+        raw_frame.moment_inertia = frame.particles.moment_inertia
+        raw_frame.angmom = frame.particles.angmom
         if self.read_gsd_shape_data:
             raw_frame.shapedef.update(
                 _parse_shape_definitions(frame, self.gsdfile,
