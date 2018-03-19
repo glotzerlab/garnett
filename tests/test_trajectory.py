@@ -198,13 +198,13 @@ class TrajectoryTest(unittest.TestCase):
     def test_velocities(self):
         sample_file = self.get_sample_file()
         traj = self.reader().read(sample_file)
-        if 'velocities' not in traj.supported_properties:
-            with self.assertRaises(NotImplementedError):
-                traj.velocities
-            return
         with self.assertRaises(RuntimeError):
             traj.velocities
         traj.load_arrays()
+        try:
+            traj.velocities
+        except AttributeError:
+            return
         self.assertTrue(np.issubdtype(
             traj.velocities.dtype, glotzformats.trajectory.DEFAULT_DTYPE))
         self.assertEqual(traj.velocities.shape, (len(traj), len(traj[0]), 3))
@@ -218,13 +218,13 @@ class TrajectoryTest(unittest.TestCase):
     def test_mass(self):
         sample_file = self.get_sample_file()
         traj = self.reader().read(sample_file)
-        if 'mass' not in traj.supported_properties:
-            with self.assertRaises(NotImplementedError):
-                traj.mass
-            return
         with self.assertRaises(RuntimeError):
             traj.mass
         traj.load_arrays()
+        try:
+            traj.velocities
+        except AttributeError:
+            return
         self.assertTrue(np.issubdtype(
             traj.mass.dtype, glotzformats.trajectory.DEFAULT_DTYPE))
         self.assertEqual(traj.mass.shape, (len(traj), len(traj[0])))
@@ -238,13 +238,13 @@ class TrajectoryTest(unittest.TestCase):
     def test_charge(self):
         sample_file = self.get_sample_file()
         traj = self.reader().read(sample_file)
-        if 'charge' not in traj.supported_properties:
-            with self.assertRaises(NotImplementedError):
-                traj.charge
-            return
         with self.assertRaises(RuntimeError):
             traj.charge
         traj.load_arrays()
+        try:
+            traj.velocities
+        except AttributeError:
+            return
         self.assertTrue(np.issubdtype(
             traj.charge.dtype, glotzformats.trajectory.DEFAULT_DTYPE))
         self.assertEqual(traj.charge.shape, (len(traj), len(traj[0])))
@@ -258,13 +258,13 @@ class TrajectoryTest(unittest.TestCase):
     def test_diameter(self):
         sample_file = self.get_sample_file()
         traj = self.reader().read(sample_file)
-        if 'diameter' not in traj.supported_properties:
-            with self.assertRaises(NotImplementedError):
-                traj.diameter
-            return
         with self.assertRaises(RuntimeError):
             traj.diameter
         traj.load_arrays()
+        try:
+            traj.velocities
+        except AttributeError:
+            return
         self.assertTrue(np.issubdtype(
             traj.diameter.dtype, glotzformats.trajectory.DEFAULT_DTYPE))
         self.assertEqual(traj.diameter.shape, (len(traj), len(traj[0])))
@@ -278,13 +278,13 @@ class TrajectoryTest(unittest.TestCase):
     def test_moment_inertia(self):
         sample_file = self.get_sample_file()
         traj = self.reader().read(sample_file)
-        if 'moment_inertia' not in traj.supported_properties:
-            with self.assertRaises(NotImplementedError):
-                traj.moment_inertia
-            return
         with self.assertRaises(RuntimeError):
             traj.moment_inertia
         traj.load_arrays()
+        try:
+            traj.velocities
+        except AttributeError:
+            return
         self.assertTrue(np.issubdtype(
             traj.moment_inertia.dtype, glotzformats.trajectory.DEFAULT_DTYPE))
         self.assertEqual(traj.moment_inertia.shape, (len(traj), len(traj[0]), 3))
@@ -295,13 +295,13 @@ class TrajectoryTest(unittest.TestCase):
     def test_angmom(self):
         sample_file = self.get_sample_file()
         traj = self.reader().read(sample_file)
-        if 'angmom' not in traj.supported_properties:
-            with self.assertRaises(NotImplementedError):
-                traj.angmom
-            return
         with self.assertRaises(RuntimeError):
             traj.angmom
         traj.load_arrays()
+        try:
+            traj.velocities
+        except AttributeError:
+            return
         self.assertTrue(np.issubdtype(
             traj.angmom.dtype, glotzformats.trajectory.DEFAULT_DTYPE))
         self.assertEqual(traj.angmom.shape, (len(traj), len(traj[0]), 4))
