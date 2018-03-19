@@ -90,7 +90,7 @@ class GetarFileWriter(object):
         shape_contents = []
         for typename in types:
             try:
-                shape_contents.append(frame.shapedef[typename].type_shape)
+                shape_contents.append(frame.shapedef[typename].json_shape)
             except AttributeError:
                 logger.warn('Shape type {} is unsupported '
                             'for getar writing.'.format(

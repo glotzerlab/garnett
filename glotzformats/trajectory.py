@@ -139,6 +139,10 @@ class SphereShapeDefinition(ShapeDefinition):
     def __str__(self):
         return "{} {} {}".format(self.shape_class, self.diameter, self.color)
 
+    @property
+    def json_shape(self):
+        return {'type': 'Sphere'}
+
 
 class ArrowShapeDefinition(ShapeDefinition):
     """Initialize an ArrowShapeDefinition instance.
@@ -249,7 +253,7 @@ class PolyShapeDefinition(ShapeDefinition):
             self.color)
 
     @property
-    def type_shape(self):
+    def json_shape(self):
         return {'type': 'ConvexPolyhedron',
                 'rounding_radius': 0,
                 'vertices': self.vertices}
@@ -283,7 +287,7 @@ class SpheroPolyShapeDefinition(ShapeDefinition):
             self.color)
 
     @property
-    def type_shape(self):
+    def json_shape(self):
         return {'type': 'ConvexPolyhedron',
                 'rounding_radius': self.rounding_radius,
                 'vertices': self.vertices}
