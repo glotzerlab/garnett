@@ -130,6 +130,17 @@ class PosFileFrame(Frame):
                     fv.append(int(next(tokens)))
                 faces.append(fv)
             return GeneralPolyShapeDefinition(shape_class=shape_class, vertices=vertices, faces=faces)
+        elif shape_class.lower() == 'poly3d':
+            num_vertices = int(next(tokens))
+            vertices = []
+            for i in range(num_vertices):
+                xyz = next(tokens), next(tokens), next(tokens)
+                vertices.append([self._num(v) for v in xyz])
+            try:
+                color = next(tokens)
+            except StopIteration:
+                color = None
+            return PolyShapeDefinition(shape_class=shape_class, vertices=vertices, color=color)
         elif shape_class.lower() == 'spoly3d':
             rounding_radius = float(next(tokens))
             num_vertices = int(next(tokens))
