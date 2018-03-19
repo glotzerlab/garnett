@@ -895,15 +895,6 @@ class Trajectory(BaseTrajectory):
     def __iter__(self):
         return iter(ImmutableTrajectory(self.frames))
 
-    @property
-    def supported_properties(self):
-        """Returns list of supported properties for this trajectory.
-        """
-        return ['N', 'type', 'types', 'type_ids',
-                'positions', 'orientations', 'velocities',
-                'mass', 'charge', 'diameter',
-                'moment_inertia', 'angmom']
-
     def load(self):
         """Load all frames into memory.
 
@@ -1164,10 +1155,10 @@ class Trajectory(BaseTrajectory):
         :raises RuntimeError: When accessed before
             calling :meth:`~.load_arrays` or
             :meth:`~.Trajectory.load`."""
-        if 'velocities' not in self.supported_properties:
-            raise NotImplementedError('Velocities are not supported for this '
-                                      'trajectory type.')
         self._assertarrays_loaded()
+        if getattr(self, '_velocities', None) is None:
+            raise AttributeError('Velocities are not available for this '
+                                 'trajectory.')
         return np.asarray(self._velocities, dtype=self._dtype)
 
     @property
@@ -1179,10 +1170,10 @@ class Trajectory(BaseTrajectory):
         :raises RuntimeError: When accessed before
             calling :meth:`~.load_arrays` or
             :meth:`~.Trajectory.load`."""
-        if 'mass' not in self.supported_properties:
-            raise NotImplementedError('Masses are not supported for this '
-                                      'trajectory type.')
         self._assertarrays_loaded()
+        if getattr(self, '_mass', None) is None:
+            raise AttributeError('Masses are not available for this '
+                                 'trajectory.')
         return np.asarray(self._mass, dtype=self._dtype)
 
     @property
@@ -1194,10 +1185,10 @@ class Trajectory(BaseTrajectory):
         :raises RuntimeError: When accessed before
             calling :meth:`~.load_arrays` or
             :meth:`~.Trajectory.load`."""
-        if 'charge' not in self.supported_properties:
-            raise NotImplementedError('Charges are not supported for this '
-                                      'trajectory type.')
         self._assertarrays_loaded()
+        if getattr(self, '_charge', None) is None:
+            raise AttributeError('Charges are not available for this '
+                                 'trajectory.')
         return np.asarray(self._charge, dtype=self._dtype)
 
     @property
@@ -1209,10 +1200,10 @@ class Trajectory(BaseTrajectory):
         :raises RuntimeError: When accessed before
             calling :meth:`~.load_arrays` or
             :meth:`~.Trajectory.load`."""
-        if 'diameter' not in self.supported_properties:
-            raise NotImplementedError('Diameters are not supported for this '
-                                      'trajectory type.')
         self._assertarrays_loaded()
+        if getattr(self, '_diameter', None) is None:
+            raise AttributeError('Diameters are not available for this '
+                                 'trajectory.')
         return np.asarray(self._diameter, dtype=self._dtype)
 
     @property
@@ -1226,10 +1217,10 @@ class Trajectory(BaseTrajectory):
         :raises RuntimeError: When accessed before
             calling :meth:`~.load_arrays` or
             :meth:`~.Trajectory.load`."""
-        if 'moment_inertia' not in self.supported_properties:
-            raise NotImplementedError('Moments of inertia are not supported '
-                                      'for this trajectory type.')
         self._assertarrays_loaded()
+        if getattr(self, '_moment_inertia', None) is None:
+            raise AttributeError('Moments of inertia are not available for '
+                                 'this trajectory.')
         return np.asarray(self._moment_inertia, dtype=self._dtype)
 
     @property
@@ -1241,10 +1232,10 @@ class Trajectory(BaseTrajectory):
         :raises RuntimeError: When accessed before
             calling :meth:`~.load_arrays` or
             :meth:`~.Trajectory.load`."""
-        if 'angmom' not in self.supported_properties:
-            raise NotImplementedError('Angular momenta are not supported '
-                                      'for this trajectory type.')
         self._assertarrays_loaded()
+        if getattr(self, '_angmom', None) is None:
+            raise AttributeError('Angular momenta are not available for this '
+                                 'trajectory.')
         return np.asarray(self._angmom, dtype=self._dtype)
 
 def _regularize_box(positions, velocities,

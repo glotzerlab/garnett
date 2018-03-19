@@ -204,13 +204,6 @@ class DCDFrame(Frame):
 
 class DCDTrajectory(Trajectory):
 
-    @property
-    def supported_properties(self):
-        """Returns list of supported properties for this trajectory.
-        """
-        return ['N', 'type', 'types', 'type_ids',
-                'positions', 'orientations']
-
     def arrays_loaded(self):
         """Returns true if arrays are loaded into memory.
 
