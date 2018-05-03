@@ -19,7 +19,7 @@ from .trajectory import _RawFrameData, Frame, Trajectory, \
     SphereShapeDefinition, PolyShapeDefinition, SpheroPolyShapeDefinition, \
     ArrowShapeDefinition, SphereUnionShapeDefinition, \
     PolyUnionShapeDefinition, GeneralPolyShapeDefinition, FallbackShapeDefinition
-from .math_utils import toQuaternion
+import rowan
 
 from .errors import ParserError, ParserWarning
 
@@ -218,7 +218,8 @@ class PosFileFrame(Frame):
                 elif tokens[0] == 'rotation':
                     euler_angles = np.array([float(t) for t in tokens[1:]])
                     euler_angles *= np.pi / 180
-                    raw_frame.view_rotation = toQuaternion(* euler_angles)
+                    raw_frame.view_rotation = rowan.from_euler(*euler_angles,
+                            axis_type='extrinsic', convention='xyz')
                 else:
                     # assume we are reading positions now
                     if not monotype:

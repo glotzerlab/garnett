@@ -10,7 +10,7 @@ import collections
 
 import numpy as np
 
-from . import math_utils as mu
+import rowan
 
 logger = logging.getLogger(__name__)
 
@@ -1293,11 +1293,11 @@ def _regularize_box(positions, velocities,
         velocities = velocities.dot(Q)
 
         # For orientations and angular momenta, we use the quaternion
-        quat = mu.quaternion_from_matrix(Q.T)
+        quat = rowan.from_matrix(Q.T)
         for i in range(orientations.shape[0]):
-            orientations[i, :] = mu.quaternionMultiply(quat, orientations[i, :])
+            orientations[i, :] = rowan.multiply(quat, orientations[i, :])
         for i in range(angmom.shape[0]):
-            angmom[i, :] = mu.quaternionMultiply(quat, angmom[i, :])
+            angmom[i, :] = rowan.multiply(quat, angmom[i, :])
 
         # Now we have to ensure that the box is right-handed. We
         # do this as a second step to avoid introducing reflections
