@@ -133,7 +133,7 @@ class CifFileFrame(Frame):
 
             replicated_fractions = []
             replicated_types = []
-            for (typ, (fx, fy, fz)) in zip(self.parsed['_atom_site_label'], fractions):
+            for (typ, (fx, fy, fz)) in zip(self.parsed['_atom_site_type_symbol'], fractions):
                 extra_fractions = [eval(sym, dict(x=fx, y=fy, z=fz)) for sym in symmetry_ops]
                 replicated_fractions.extend(extra_fractions)
                 replicated_types.extend(len(extra_fractions)*[typ])
@@ -173,8 +173,8 @@ class CifFileFrame(Frame):
                 unique_types = types
         else:
             unique_points = fractions
-            if '_atom_site_label' in self.parsed:
-                unique_types = self.parsed['_atom_site_label']
+            if '_atom_site_type_symbol' in self.parsed:
+                unique_types = self.parsed['_atom_site_type_symbol']
             else:
                 unique_types = len(unique_points)*[self.default_type]
 
