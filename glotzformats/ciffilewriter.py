@@ -65,7 +65,7 @@ class CifFileWriter(object):
         from . import __version__
 
         if occupancies is None:
-            occupancies = numpy.ones(frame.positions.shape[0])
+            occupancies = np.ones(frame.positions.shape[0])
 
         def _write(msg='', end='\n'):
             if PYTHON_2:
