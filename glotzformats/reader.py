@@ -4,6 +4,7 @@ from .posfilereader import PosFileReader
 from .hoomdxmlfilereader import HOOMDXMLFileReader
 from .dcdfilereader import _DCDFileReader
 from .gsdhoomdfilereader import GSDHOOMDFileReader
+from .reader_function import autoread
 
 try:
     from .getarfilereader import GetarFileReader
@@ -112,3 +113,11 @@ __all__ = [
     'GetarFileReader',
     'GSDHOOMDFileReader', 'GSDHoomdFileReader',
     'CifFileReader']
+
+
+
+
+
+
+
+

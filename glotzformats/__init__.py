@@ -8,7 +8,8 @@ from . import reader
 from . import writer
 from . import samples
 from . import trajectory
+from . import reader_function
 
 __version__ = '0.4.1'
 
-__all__ = ['formats', 'reader', 'writer', 'samples', 'trajectory']
+__all__ = ['formats', 'reader', 'writer', 'samples', 'trajectory','reader_function']
