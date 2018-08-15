@@ -36,6 +36,14 @@ def detect_format(filename):
     file_format = FORMATS[extension]
     return file_format
 
+
+
+    """ The function 'autoread' which is declared right after this comment, is imported in the __init__.py under glotzformats.
+    So, when you want to read the files with particle data (pos, gsd, gtar, dcd, xml, cif), 
+    you can just give syntax line like following manner: glotzformat.autoread('filename.ext')
+
+    """
+
 def autoread(filename, template=None, frames=None):
     file_format = detect_format(filename)
     mode = READ_MODES[file_format]

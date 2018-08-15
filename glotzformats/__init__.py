@@ -8,7 +8,7 @@ from . import reader
 from . import writer
 from . import samples
 from . import trajectory
-from .reader_function import autoread
+from .reader_function import autoread ## to make a shortcut syntax when reading files having particle data. (glotzformats.autoread('filename.ext'))
 
 __version__ = '0.4.1'
 
