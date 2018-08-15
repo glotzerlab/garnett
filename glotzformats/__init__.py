@@ -8,7 +8,6 @@ from . import reader
 from . import writer
 from . import samples
 from . import trajectory
-#from . import reader_function
 from .reader_function import autoread
 
 __version__ = '0.4.1'
