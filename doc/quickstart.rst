@@ -14,7 +14,8 @@ This can be used to quickly load a file and return a :py:class:`~.trajectory.Tra
 .. code-block:: python
 
     import glotzformats as gf
-    traj = gf.read('dump.gsd')
+    with gf.read('dump.gsd') as traj:
+        print(len(traj))  # do things with the trajectory
 
 Using reader and writer classes
 -------------------------------

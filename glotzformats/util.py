@@ -5,6 +5,7 @@
 """Utility functions for format detection and conversion."""
 import os
 import logging
+from contextlib import contextmanager
 from . import reader, trajectory
 
 
@@ -55,6 +56,7 @@ def _detect_format(filename):
     return file_format
 
 
+@contextmanager
 def read(filename, template=None, frames=None):
     """This function automatically detects the file format, read the file, and
     returns a trajectory object.
@@ -92,4 +94,4 @@ def read(filename, template=None, frames=None):
         if not isinstance(traj, trajectory.Trajectory):
             traj = trajectory.Trajectory([traj])
 
-    return traj
+        yield traj
