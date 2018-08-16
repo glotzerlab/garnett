@@ -22,7 +22,7 @@ FORMATS = {
     '.xml': 'xml',
     '.cif': 'cif'}
 
-# Mapping of format to readers and input modes
+# Mapping of format to reader classes and input modes
 READ_CLASS_MODES = {
     'pos': {
         'reader': reader.PosFileReader,
@@ -44,7 +44,7 @@ READ_CLASS_MODES = {
         'mode': 'r'}}
 
 
-def detect_format(filename):
+def _detect_format(filename):
     extension = os.path.splitext(filename)[1]
     try:
         file_format = FORMATS[extension]
@@ -73,7 +73,7 @@ def read(filename, template=None, frames=None):
         raise FileNotFoundError('Filename {} cannot be found.'.format(
             filename))
 
-    file_format = detect_format(filename)
+    file_format = _detect_format(filename)
     reader = READ_CLASS_MODES[file_format]['reader']()
     mode = READ_CLASS_MODES[file_format]['mode']
 
@@ -91,6 +91,5 @@ def read(filename, template=None, frames=None):
 
         if not isinstance(traj, trajectory.Trajectory):
             traj = trajectory.Trajectory([traj])
-        traj.load_arrays()
 
     return traj
