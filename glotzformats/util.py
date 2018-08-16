@@ -49,8 +49,9 @@ def detect_format(filename):
     try:
         file_format = FORMATS[extension]
     except KeyError:
-        raise ValueError(
-            'The extension "{}" is not recognized.'.format(extension))
+        raise NotImplementedError(
+            'The extension "{}" is not supported as a trajectory file.'.format(
+                extension))
     return file_format
 
 
