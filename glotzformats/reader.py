@@ -112,11 +112,3 @@ __all__ = [
     'GetarFileReader',
     'GSDHOOMDFileReader', 'GSDHoomdFileReader',
     'CifFileReader']
-
-
-
-
-
-
-
-
