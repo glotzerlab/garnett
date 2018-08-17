@@ -5,6 +5,7 @@
 """Utility functions for format detection and conversion."""
 import os
 import logging
+from .common import six
 from contextlib import contextmanager
 from . import reader, trajectory
 
@@ -57,7 +58,7 @@ def _detect_format(filename):
 
 
 @contextmanager
-def read(filename, template=None, frames=None):
+def read(filename_or_file_obj, template=None, frames=None):
     """This function automatically detects the file format, read the file, and
     returns a trajectory object.
 
@@ -70,10 +71,15 @@ def read(filename, template=None, frames=None):
     :returns: Trajectory read from the file.
     :rtype: :class:`glotzformats.trajectory.Trajectory`
     """
-
-    if not os.path.isfile(filename):
-        raise FileNotFoundError('Filename {} cannot be found.'.format(
-            filename))
+    if isinstance(filename_or_file_obj, six.string_types):
+        filename = filename_or_file_obj
+    else:
+        try:
+            filename = filename_or_file_obj.name
+        except AttributeError:
+            raise RuntimeError(
+                "Unable to determine filename from file object, "
+                "which is required for format detection.")
 
     file_format = _detect_format(filename)
     reader = READ_CLASS_MODES[file_format]['reader']()
