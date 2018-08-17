@@ -40,4 +40,5 @@ nosetests.xml
 .*.swp
 
 # custom
+_*
 *.log
