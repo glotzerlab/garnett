@@ -58,7 +58,7 @@ def _detect_format(filename):
 
 
 @contextmanager
-def read(filename_or_file_obj, template=None, frames=None):
+def read(filename_or_fileobj, template=None):
     """This function automatically detects the file format, read the file, and
     returns a trajectory object.
 
@@ -71,11 +71,11 @@ def read(filename_or_file_obj, template=None, frames=None):
     :returns: Trajectory read from the file.
     :rtype: :class:`glotzformats.trajectory.Trajectory`
     """
-    if isinstance(filename_or_file_obj, six.string_types):
-        filename = filename_or_file_obj
+    if isinstance(filename_or_fileobj, six.string_types):
+        filename = filename_or_fileobj
     else:
         try:
-            filename = filename_or_file_obj.name
+            filename = filename_or_fileobj.name
         except AttributeError:
             raise RuntimeError(
                 "Unable to determine filename from file object, "
@@ -90,14 +90,5 @@ def read(filename_or_file_obj, template=None, frames=None):
             traj = reader.read(read_file, template)
         else:
             traj = reader.read(read_file)
-
-        if frames is not None:
-            if type(frames) is int or type(frames) is slice:
-                traj = traj[frames]
-            else:
-                raise ValueError('Argument frames must be an int or slice.')
-
-        if not isinstance(traj, trajectory.Trajectory):
-            traj = trajectory.Trajectory([traj])
 
         yield traj
