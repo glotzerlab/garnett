@@ -25,10 +25,10 @@ class BaseGSDHOOMDFileWriterTest(unittest.TestCase):
         self.writer = type(self).writer_class()
 
     def test_write(self):
-        # Note that this test assumes that the reader is working, and therefore 
+        # Note that this test assumes that the reader is working, and therefore
         # could fail if the reader is broken even if the writer is fine.
         gsdfile = io.BytesIO(base64.b64decode(glotzformats.samples.GSD_BASE64))
-        
+
         traj = self.reader.read(gsdfile)
         traj.load_arrays()
         len_orig = len(traj)
