@@ -32,12 +32,14 @@ class BaseGSDHOOMDFileWriterTest(unittest.TestCase):
         traj = self.reader.read(gsdfile)
         traj.load_arrays()
         len_orig = len(traj)
-        N_orig = traj.N
-        types_orig = traj.types
-        typeids_orig = traj.type_ids
+        readwrite_props = ['N', 'types', 'type_ids',
+                           'positions', 'orientations', 'velocities',
+                           'mass', 'charge', 'diameter',
+                           'moment_inertia', 'angmom']
+        original_data = {}
+        for prop in readwrite_props:
+            original_data[prop] = getattr(traj, prop)
         box_orig = traj[0].box.get_box_matrix() # Just checking one frame
-        pos_orig = traj.positions
-        or_orig = traj.orientations
 
         # Write to a temp file
         tmpfile = tempfile.NamedTemporaryFile(mode = 'wb')
@@ -48,12 +50,10 @@ class BaseGSDHOOMDFileWriterTest(unittest.TestCase):
             traj = self.reader.read(f)
             traj.load_arrays()
             self.assertEqual(len(traj), len_orig)
-            self.assertTrue(np.array_equal(traj.N, N_orig))
-            self.assertTrue(np.array_equal(traj.type_ids, typeids_orig))
-            self.assertTrue(np.array_equal(traj.types, types_orig))
+            for prop in readwrite_props:
+                self.assertTrue(np.array_equal(
+                    getattr(traj, prop), original_data[prop]))
             self.assertTrue(np.allclose(traj[0].box.get_box_matrix(), box_orig))
-            self.assertTrue(np.allclose(traj.positions, pos_orig))
-            self.assertTrue(np.allclose(traj.orientations, or_orig))
 
 if __name__ == '__main__':
     unittest.main()

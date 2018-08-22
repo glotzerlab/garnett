@@ -63,7 +63,8 @@ class BasePosFileWriterTest(BasePosFileReaderTest):
         return writer.write(trajectory, file)
 
     def assert_approximately_equal_frames(self, a, b,
-                                          decimals=6, atol=1e-5, ignore_orientations=False):
+                                          decimals=6, atol=1e-5,
+                                          ignore_orientations=False):
         self.assertEqual(a.box.round(decimals), b.box.round(decimals))
         self.assertEqual(a.types, b.types)
         self.assertTrue(np.allclose(a.positions, b.positions, atol=atol))

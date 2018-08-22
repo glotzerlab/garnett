@@ -31,6 +31,12 @@ class BaseGetarFileReaderTest(unittest.TestCase):
     def setup_sample(self, N):
         self.positions = np.random.rand(N, 3)
         self.orientations = np.random.rand(N, 4)
+        self.velocities = np.random.rand(N, 3)
+        self.mass = np.random.rand(N)
+        self.charge = np.random.rand(N)
+        self.diameter = np.random.rand(N)
+        self.moment_inertia = np.random.rand(N, 3)
+        self.angmom = np.random.rand(N, 4)
         types = N // 2 * [0] + (N - N // 2) * [1]
         type_names = ['A', 'B']
         self.box = np.array([1.0, 1.0, 1.0, 0.0, 0.0, 0.0])
@@ -38,6 +44,12 @@ class BaseGetarFileReaderTest(unittest.TestCase):
         with gtar.GTAR(self.getar_file_fn, 'w') as traj:
             traj.writePath('frames/0/position.f32.ind', self.positions)
             traj.writePath('frames/0/orientation.f32.ind', self.orientations)
+            traj.writePath('frames/0/velocity.f32.ind', self.velocities)
+            traj.writePath('frames/0/mass.f32.ind', self.mass)
+            traj.writePath('frames/0/charge.f32.ind', self.charge)
+            traj.writePath('frames/0/diameter.f32.ind', self.diameter)
+            traj.writePath('frames/0/moment_inertia.f32.ind', self.moment_inertia)
+            traj.writePath('frames/0/angular_momentum_quat.f32.ind', self.angmom)
             traj.writePath('frames/0/box.f32.ind', self.box)
             traj.writePath('type.u32.ind', types)
             traj.writePath('type_names.json', json.dumps(type_names))
@@ -58,6 +70,12 @@ class BaseGetarFileReaderTest(unittest.TestCase):
         self.assertEqual(frame.box, glotzformats.trajectory.Box(1.0, 1.0, 1.0))
         np.testing.assert_allclose(frame.positions, self.positions)
         np.testing.assert_allclose(frame.orientations, self.orientations)
+        np.testing.assert_allclose(frame.velocities, self.velocities)
+        np.testing.assert_allclose(frame.mass, self.mass)
+        np.testing.assert_allclose(frame.charge, self.charge)
+        np.testing.assert_allclose(frame.diameter, self.diameter)
+        np.testing.assert_allclose(frame.moment_inertia, self.moment_inertia)
+        np.testing.assert_allclose(frame.angmom, self.angmom)
         self.assertEqual(frame.types, self.types)
 
 
@@ -70,12 +88,24 @@ class NoTypesGetarFileReaderTest(BaseGetarFileReaderTest):
     def setup_sample(self, N):
         self.positions = np.random.rand(N, 3)
         self.orientations = np.random.rand(N, 4)
+        self.velocities = np.random.rand(N, 3)
+        self.mass = np.random.rand(N)
+        self.charge = np.random.rand(N)
+        self.diameter = np.random.rand(N)
+        self.moment_inertia = np.random.rand(N, 3)
+        self.angmom = np.random.rand(N, 4)
         self.box = np.array([1.0, 1.0, 1.0, 0.0, 0.0, 0.0])
         self.types = N*['A']
 
         with gtar.GTAR(self.getar_file_fn, 'w') as traj:
             traj.writePath('frames/0/position.f32.ind', self.positions)
             traj.writePath('frames/0/orientation.f32.ind', self.orientations)
+            traj.writePath('frames/0/velocity.f32.ind', self.velocities)
+            traj.writePath('frames/0/mass.f32.ind', self.mass)
+            traj.writePath('frames/0/charge.f32.ind', self.charge)
+            traj.writePath('frames/0/diameter.f32.ind', self.diameter)
+            traj.writePath('frames/0/moment_inertia.f32.ind', self.moment_inertia)
+            traj.writePath('frames/0/angular_momentum_quat.f32.ind', self.angmom)
             traj.writePath('frames/0/box.f32.ind', self.box)
             traj.writePath('angle/type.u32.ind', [0])
             traj.writePath('angle/type_names.json', '["Angle_A"]')

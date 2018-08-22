@@ -21,28 +21,31 @@ logger = logging.getLogger(__name__)
 
 
 def _parse_shape_definition(shape):
-    rounding_radius = shape.get('rounding_radius', 0)
-
     shapedef = None
-    if rounding_radius == 0:
-        if shape['type'].lower() == 'sphere':
-            shapedef = SphereShapeDefinition(
-                shape_class='sphere', diameter=shape['diameter'], color=None)
-        elif shape['type'].lower() == 'polyhedron':
-            shapedef = GeneralPolyShapeDefinition(shape_class='polyV', vertices=shape[
-                                                  'vertices'], faces=shape['faces'], facet_colors=shape['colors'], color=None)
-        elif shape['type'].lower() == 'convexpolyhedron':
-            shapedef = PolyShapeDefinition(shape_class='poly3d', vertices=shape[
-                                           'vertices'], color=None)
-    else:
-        # Rounded shapes
-        if shape['type'].lower() == 'convexpolyhedron':
-            shapedef = SpheroPolyShapeDefinition(shape_class='spoly3d', vertices=shape[
-                                                 'vertices'], rounding_radius=rounding_radius, color=None)
+
+    try:
+        rounding_radius = shape.get('rounding_radius', 0)
+
+        if rounding_radius == 0:
+            if shape['type'].lower() == 'sphere':
+                shapedef = SphereShapeDefinition(
+                    diameter=shape['diameter'], color=None)
+            elif shape['type'].lower() == 'polyhedron':
+                shapedef = GeneralPolyShapeDefinition(shape_class='polyV', vertices=shape[
+                                                      'vertices'], faces=shape['faces'], facet_colors=shape['colors'], color=None)
+            elif shape['type'].lower() == 'convexpolyhedron':
+                shapedef = PolyShapeDefinition(shape_class='poly3d', vertices=shape[
+                                               'vertices'], color=None)
+        else:
+            # Rounded shapes
+            if shape['type'].lower() == 'convexpolyhedron':
+                shapedef = SpheroPolyShapeDefinition(shape_class='spoly3d', vertices=shape[
+                                                     'vertices'], rounding_radius=rounding_radius, color=None)
+    except AttributeError:
+        pass
 
     if shapedef is None:
-        logger.error("Failed to parse shape definition: shape not supported.")
-        raise RuntimeError("Failed to parse shape definition.")
+        logger.warning("Failed to parse shape definition: shape not supported.")
 
     return shapedef
 
@@ -70,7 +73,15 @@ class GetarFrame(Frame):
 
     def read(self):
         raw_frame = _RawFrameData()
-        for name in ['position', 'orientation']:
+        gf_prop_map = {
+            'position': 'positions',
+            'orientation': 'orientations',
+            'velocity': 'velocities',
+            'angular_momentum_quat': 'angmom'}
+        supported_records = ['position', 'orientation', 'velocity',
+                             'mass', 'charge', 'diameter',
+                             'moment_inertia', 'angular_momentum_quat']
+        for name in supported_records:
             try:
                 values = self._trajectory.getRecord(
                     self._records[name], self._frame)
@@ -78,7 +89,8 @@ class GetarFrame(Frame):
                 values = None
 
             if values is not None:
-                setattr(raw_frame, '{}s'.format(name), values)
+                frame_prop = gf_prop_map.get(name, name)
+                setattr(raw_frame, frame_prop, values)
 
         if 'type' in self._records and 'type_names.json' in self._records:
             names = json.loads(self._trajectory.getRecord(
