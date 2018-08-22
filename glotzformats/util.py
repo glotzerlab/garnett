@@ -62,12 +62,10 @@ def read(filename_or_fileobj, template=None):
     """This function automatically detects the file format, read the file, and
     returns a trajectory object.
 
-    :param filename: Filename to read.
+    :param filename_or_fileobj: Filename to read.
     :param template: Optional template for the GSDHOOMDFileReader.
-    :param frames: Optional integer or slice object to subset the trajectory.
-    :type filename: string
+    :type filename_or_fileobj: string or file object
     :type template: string
-    :type frames: int or slice
     :returns: Trajectory read from the file.
     :rtype: :class:`glotzformats.trajectory.Trajectory`
     """
