@@ -1,8 +1,10 @@
 import os
+import sys
 import unittest
 
 import glotzformats
 
+PYTHON_2 = sys.version_info[0] == 2
 TESTDATA_PATH = os.path.join(os.path.dirname(__file__), 'files/')
 
 def get_filename(filename):
@@ -30,6 +32,7 @@ class UtilReaderTest(unittest.TestCase):
         with glotzformats.read(get_filename('hoomd.xml')) as traj:
             assert len(traj) > 0, "Trajectory should have more than zero frames."
 
+    @unittest.skipIf(PYTHON_2, 'requires python 3')
     def test_read_nonexistent(self):
         with self.assertRaises(FileNotFoundError):
             with glotzformats.read(get_filename('does_not_exist.pos')) as traj:
