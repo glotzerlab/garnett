@@ -5,6 +5,21 @@ Quickstart
 Reading and writing of trajectories
 ===================================
 
+Reading with automatic filetype detection
+-----------------------------------------
+
+The :py:meth:`glotzformats.read` function will automatically determine the type of a trajectory from its file extension.
+This can be used to quickly load a file and return a :py:class:`~.trajectory.Trajectory` object.
+
+.. code-block:: python
+
+    import glotzformats as gf
+    with gf.read('dump.gsd') as traj:
+        print(len(traj))  # do things with the trajectory
+
+Using reader and writer classes
+-------------------------------
+
 Readers and writers are defined in the ``reader`` and ``writer`` modules.
 The following code uses the :py:class:`~.reader.PosFileReader` and :py:class:`~.writer.PosFileWriter` as example.
 
