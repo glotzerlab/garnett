@@ -9,7 +9,6 @@ Authors: Matthew Spellings
         traj = reader.read(ciffile)
 """
 
-import collections
 import logging
 import re
 import warnings
@@ -33,6 +32,7 @@ REMOVE_NONNUM_REGEXP = re.compile(r'[^+\-*/0-9\.,\(\)xyz]+')
 # (an integer or floating point number)/(an integer or floating point number)
 PARSE_DIVISION_REGEXP = re.compile(r'(?P<num>\d+(\.(\d+)?)?)\s*/\s*(?P<denom>\d+(\.(\d+)?)?)')
 
+
 def _parse_division(match):
     """Helper function to substitute ratios in cif files, like '1/4', into
     fractions, like '0.25'."""
@@ -46,6 +46,7 @@ class _RawCifFrameData(_RawFrameData):
         # Append the cif_coordinates to the dataset
         super(_RawCifFrameData, self).__init__()
         self.cif_coordinates = list()               # Nx3
+
 
 class CifFileFrame(Frame):
 
@@ -88,8 +89,8 @@ class CifFileFrame(Frame):
         lz = np.sqrt(c**2 - xz**2 - yz**2)
 
         return np.array([[lx, xy, xz],
-                         [ 0, ly, yz],
-                         [ 0,  0, lz]])
+                         [0, ly, yz],
+                         [0, 0, lz]])
 
     @property
     def cif_coordinates(self):
@@ -106,7 +107,8 @@ class CifFileFrame(Frame):
         if not np.all(np.isfinite(value)):
             raise ValueError("CIF coordinates being set must all be finite numbers.")
         elif not len(value.shape) == 2 or value.shape[1] != self.box.dimensions:
-            raise ValueError("Input array must be of shape (N,{}) where N is the number of particles.".format(self.box.dimensions))
+            raise ValueError("Input array must be of shape (N,{}) where N is the "
+                             "number of particles.".format(self.box.dimensions))
 
         self.load()
         self.frame_data.cif_coordinates = value

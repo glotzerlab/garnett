@@ -15,7 +15,8 @@ import numpy as np
 import gtar
 
 from .trajectory import _RawFrameData, Box, Frame, Trajectory
-from .trajectory import SphereShapeDefinition, GeneralPolyShapeDefinition, PolyShapeDefinition, SpheroPolyShapeDefinition
+from .trajectory import SphereShapeDefinition, GeneralPolyShapeDefinition, \
+    PolyShapeDefinition, SpheroPolyShapeDefinition
 
 logger = logging.getLogger(__name__)
 
@@ -31,16 +32,22 @@ def _parse_shape_definition(shape):
                 shapedef = SphereShapeDefinition(
                     diameter=shape['diameter'], color=None)
             elif shape['type'].lower() == 'polyhedron':
-                shapedef = GeneralPolyShapeDefinition(shape_class='polyV', vertices=shape[
-                                                      'vertices'], faces=shape['faces'], facet_colors=shape['colors'], color=None)
+                shapedef = GeneralPolyShapeDefinition(shape_class='polyV',
+                                                      vertices=shape['vertices'],
+                                                      faces=shape['faces'],
+                                                      facet_colors=shape['colors'],
+                                                      color=None)
             elif shape['type'].lower() == 'convexpolyhedron':
-                shapedef = PolyShapeDefinition(shape_class='poly3d', vertices=shape[
-                                               'vertices'], color=None)
+                shapedef = PolyShapeDefinition(shape_class='poly3d',
+                                               vertices=shape['vertices'],
+                                               color=None)
         else:
             # Rounded shapes
             if shape['type'].lower() == 'convexpolyhedron':
-                shapedef = SpheroPolyShapeDefinition(shape_class='spoly3d', vertices=shape[
-                                                     'vertices'], rounding_radius=rounding_radius, color=None)
+                shapedef = SpheroPolyShapeDefinition(shape_class='spoly3d',
+                                                     vertices=shape['vertices'],
+                                                     rounding_radius=rounding_radius,
+                                                     color=None)
     except AttributeError:
         pass
 

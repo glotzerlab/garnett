@@ -5,7 +5,6 @@ The trajectory module provides classes to store discretized
 trajectories."""
 
 import logging
-import math
 import collections
 
 import numpy as np
@@ -162,6 +161,7 @@ class ArrowShapeDefinition(ShapeDefinition):
     def __str__(self):
         return "{} {} {}".format(self.shape_class, self.thickness, self.color)
 
+
 class SphereUnionShapeDefinition(ShapeDefinition):
     """Initialize a SphereUnionShapeDefinition instance.
 
@@ -184,13 +184,14 @@ class SphereUnionShapeDefinition(ShapeDefinition):
         self.colors = colors
 
     def __str__(self):
-        shape_def = '{} {} '.format(self.shape_class,len(self.centers))
-        for d,p,c in zip(self.diameters, self.centers, self.colors):
+        shape_def = '{} {} '.format(self.shape_class, len(self.centers))
+        for d, p, c in zip(self.diameters, self.centers, self.colors):
             shape_def += '{0} '.format(d)
             shape_def += '{0} {1} {2} '.format(*p)
             shape_def += '{0} '.format(c)
 
         return shape_def
+
 
 class PolyUnionShapeDefinition(ShapeDefinition):
     """Initialize a ShapeDefinition instance.
@@ -217,8 +218,8 @@ class PolyUnionShapeDefinition(ShapeDefinition):
         self.colors = colors
 
     def __str__(self):
-        shape_def = '{} {} '.format(self.shape_class,len(self.centers))
-        for verts,p,q,c in zip(self.vertices, self.centers, self.orientations, self.colors):
+        shape_def = '{} {} '.format(self.shape_class, len(self.centers))
+        for verts, p, q, c in zip(self.vertices, self.centers, self.orientations, self.colors):
             shape_def += '{0} '.format(len(verts))
             for v in verts:
                 shape_def += '{0} {1} {2} '.format(*v)
@@ -227,6 +228,7 @@ class PolyUnionShapeDefinition(ShapeDefinition):
             shape_def += '{0} '.format(c)
 
         return shape_def
+
 
 class PolyShapeDefinition(ShapeDefinition):
     """Initialize a PolyShapeDefinition instance.
@@ -257,6 +259,7 @@ class PolyShapeDefinition(ShapeDefinition):
         return {'type': 'ConvexPolyhedron',
                 'rounding_radius': 0,
                 'vertices': self.vertices}
+
 
 class SpheroPolyShapeDefinition(ShapeDefinition):
     """Initialize a SpheroPolyShapeDefinition instance.
@@ -292,18 +295,18 @@ class SpheroPolyShapeDefinition(ShapeDefinition):
                 'rounding_radius': self.rounding_radius,
                 'vertices': self.vertices}
 
+
 class GeneralPolyShapeDefinition(ShapeDefinition):
     """Initialize a GeneralPolyShapeDefinition instance.
 
-    :param shape_class: The shape class definition,
-                        e.g. 'polyv'.
+    :param shape_class: The shape class definition, e.g. 'polyv'.
     :type shape_class: str
     :param vertices: A list of vertex vectors.
     :type vertices: A sequence of 3-tuple of numbers (Nx3).
     :param faces: A list of lists of vertex indices per face.
     :type faces: A list of lists of integer numbers.
     :param color: Definition of a color for the particular shape.
-    :type color: A hexadecimal color string in format RRGGBBAA.
+    :type color: A hexadecimal color string in format 'RRGGBBAA'.
     """
 
     def __init__(self, shape_class, vertices=None, faces=None, color=None, facet_colors=None):
@@ -475,11 +478,8 @@ class Frame(object):
             raw_frame.box_dimensions = raw_frame.box.dimensions
             raw_frame.box = np.asarray(raw_frame.box.get_box_matrix(), dtype=dtype)
         box_dimensions = getattr(raw_frame, 'box_dimensions', 3)
-        ret.positions, ret.velocities, \
-        ret.orientations, ret.angmom, ret.box = _regularize_box(
-            positions, velocities,
-            orientations, angmom,
-            raw_frame.box, dtype, box_dimensions)
+        ret.positions, ret.velocities, ret.orientations, ret.angmom, ret.box = _regularize_box(
+            positions, velocities, orientations, angmom, raw_frame.box, dtype, box_dimensions)
         ret.mass = mass
         ret.charge = charge
         ret.diameter = diameter
@@ -597,7 +597,8 @@ class Frame(object):
         if not np.all(np.isfinite(value)):
             raise ValueError("Positions being set must all be finite numbers.")
         elif not len(value.shape) == 2 or value.shape[1] != self.box.dimensions:
-            raise ValueError("Input array must be of shape (N,{}) where N is the number of particles.".format(self.box.dimensions))
+            raise ValueError("Input array must be of shape (N,{}) where N is the "
+                             "number of particles.".format(self.box.dimensions))
 
         self.load()
         self.frame_data.positions = value
@@ -637,7 +638,8 @@ class Frame(object):
         if not np.all(np.isfinite(value)):
             raise ValueError("Velocities being set must all be finite numbers.")
         elif not len(value.shape) == 2 or value.shape[1] != self.box.dimensions:
-            raise ValueError("Input array must be of shape (N,{}) where N is the number of particles.".format(self.box.dimensions))
+            raise ValueError("Input array must be of shape (N,{}) where N is the "
+                             "number of particles.".format(self.box.dimensions))
         self.load()
         self.frame_data.velocities = value
 
@@ -1020,14 +1022,14 @@ class Trajectory(BaseTrajectory):
                      'mass', 'charge', 'diameter',
                      'moment_inertia', 'angmom']
         props = dict(
-            positions = np.zeros((M, N, 3), dtype=self._dtype),
-            orientations = np.zeros((M, N, 4), dtype=self._dtype),
-            velocities = np.zeros((M, N, 3), dtype=self._dtype),
-            mass = np.ones((M, N), dtype=self._dtype),
-            charge = np.zeros((M, N), dtype=self._dtype),
-            diameter = np.ones((M, N), dtype=self._dtype),
-            moment_inertia = np.ones((M, N, 3), dtype=self._dtype),
-            angmom = np.zeros((M, N, 4), dtype=self._dtype))
+            positions=np.zeros((M, N, 3), dtype=self._dtype),
+            orientations=np.zeros((M, N, 4), dtype=self._dtype),
+            velocities=np.zeros((M, N, 3), dtype=self._dtype),
+            mass=np.ones((M, N), dtype=self._dtype),
+            charge=np.zeros((M, N), dtype=self._dtype),
+            diameter=np.ones((M, N), dtype=self._dtype),
+            moment_inertia=np.ones((M, N, 3), dtype=self._dtype),
+            angmom=np.zeros((M, N, 4), dtype=self._dtype))
 
         for i, frame in enumerate(self.frames):
             for prop in prop_list:
@@ -1258,6 +1260,7 @@ class Trajectory(BaseTrajectory):
                                  'trajectory.')
         return np.asarray(self._angmom, dtype=self._dtype)
 
+
 def _regularize_box(positions, velocities,
                     orientations, angmom,
                     box_matrix, dtype=None, dimensions=3):
@@ -1314,8 +1317,9 @@ def _regularize_box(positions, velocities,
     xy = box[0, 1]/Ly
     xz = box[0, 2]/Lz
     yz = box[1, 2]/Lz
-    box = Box(Lx = Lx, Ly = Ly, Lz = Lz, xy = xy, xz = xz, yz = yz)
+    box = Box(Lx=Lx, Ly=Ly, Lz=Lz, xy=xy, xz=xz, yz=yz)
     return positions, velocities, orientations, angmom, box
+
 
 def _generate_type_id_array(types, type_ids):
     "Generate type_id array."

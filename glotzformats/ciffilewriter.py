@@ -28,7 +28,7 @@ PYTHON_2 = sys.version_info[0] == 2
 
 
 def _determine_unitcell(box):
-    lengths = np.sqrt(np.sum(np.array(box.get_box_matrix())**2, axis=0)) # a, b, c
+    lengths = np.sqrt(np.sum(np.array(box.get_box_matrix())**2, axis=0))  # a, b, c
     gamma = math.degrees(
         np.arccos(
             box.xy / math.sqrt(1 + box.xy ** 2)))
@@ -114,10 +114,9 @@ class CifFileWriter(object):
 
         type_counter = defaultdict(int)
         n_digits = len(str(len(frame.positions)))
-        l = "{ptype}{pnum:0" + str(n_digits) + \
-            "d} {ptype} {occ:3.2f} {position}"
+        particle_str = "{ptype}{pnum:0" + str(n_digits) + "d} {ptype} {occ:3.2f} {position}"
         for i, (position, particle_type) in enumerate(zip(fractions, frame.types)):
-            _write(l.format(
+            _write(particle_str.format(
                 pnum=type_counter[particle_type],
                 ptype=particle_type,
                 occ=occupancy,
@@ -154,7 +153,7 @@ class CifFileWriter(object):
         logger.info("Wrote {} frames.".format(i + 1))
 
     def dump(self, trajectory, data='simulation', occupancy=1.0,
-            fractional=False, raw=False):
+             fractional=False, raw=False):
         """Serialize trajectory into cif-format.
 
         :param trajectory: The trajectory to serialize.
