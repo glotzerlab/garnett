@@ -14,8 +14,8 @@ from tqdm import tqdm
 
 
 COLORS = [
-    '#ffcb05',  # maize
     '#00274c',  # blue
+    '#ffcb05',  # maize
     '#e41a1c',
     '#377eb8',
     '#4daf4a',
@@ -116,7 +116,7 @@ def gf2pos(fn, outfile, args, template=None):
         elif informat == 'pos':
             traj = pos_reader.read(infile)
 
-        traj = traj[-args.num_frames:]
+        traj = traj[-args.num_frames::args.stride]
 
         if args.center_by_density:
             traj = (center_ld(f) for f in traj)
@@ -188,7 +188,7 @@ if __name__ == '__main__':
         '-n', '--num-frames',
         type=int,
         default=0,
-        help="The number of frames to dump.")
+        help="The number of frames to dump, counting from the last frame.")
     parser.add_argument(
         '--color-by-type',
         action='store_true',
@@ -213,6 +213,11 @@ if __name__ == '__main__':
         '-v', '--verbose',
         action='store_true',
         help="Increase output verbosity.")
+    parser.add_argument(
+        '--stride',
+        default=1,
+        type=int,
+        help='Dump every stride-th frame.')
 
     args = parser.parse_args()
     logging.basicConfig(level=logging.WARNING - 10 * int(args.verbose))
