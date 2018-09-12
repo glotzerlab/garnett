@@ -47,12 +47,11 @@ pos_writer = gf.writer.PosFileWriter()
 def _build_slice(slice_string):
     if slice_string.count(':') == 0: # dump the last n frames
         start, end, step = -int(slice_string), None, 1
-
     elif slice_string.count(':') == 1:
         start, end = [(None if e == '' else int(e))
                 for e in slice_string.split(':')]
         step = None
-    elif str.count(':') == 2:
+    elif slice_string.count(':') == 2:
         start, end, step = [(None if e == '' else int(e))
                 for e in slice_string.split(':')]
     return slice(start, end, step)
@@ -226,8 +225,8 @@ if __name__ == '__main__':
     parser.add_argument(
         '--frames',
         default=':',
-        help='Select which frames to dump. A single number n dumps the final n frames;
-              otherwise, python slice-like behavior is assumed.')
+        help='Select which frames to dump. A single number n dumps the final \
+        n frames; otherwise, python slice-like behavior is assumed.')
 
     args = parser.parse_args()
     logging.basicConfig(level=logging.WARNING - 10 * int(args.verbose))
