@@ -1,4 +1,3 @@
-import sys
 import io
 import unittest
 import base64
@@ -9,11 +8,13 @@ import numpy as np
 import glotzformats
 
 try:
-    import gsd, gsd.hoomd
+    import gsd  # noqa: F401
+    import gsd.hoomd  # noqa: F401
 except ImportError:
     GSD = False
 else:
     GSD = True
+
 
 @unittest.skipIf(not GSD, 'GSDHOOMDFileWriter requires the gsd module.')
 class BaseGSDHOOMDFileWriterTest(unittest.TestCase):
@@ -39,10 +40,10 @@ class BaseGSDHOOMDFileWriterTest(unittest.TestCase):
         original_data = {}
         for prop in readwrite_props:
             original_data[prop] = getattr(traj, prop)
-        box_orig = traj[0].box.get_box_matrix() # Just checking one frame
+        box_orig = traj[0].box.get_box_matrix()  # Just checking one frame
 
         # Write to a temp file
-        tmpfile = tempfile.NamedTemporaryFile(mode = 'wb')
+        tmpfile = tempfile.NamedTemporaryFile(mode='wb')
         with tmpfile as f:
             self.writer.write(traj, f)
 
@@ -54,6 +55,7 @@ class BaseGSDHOOMDFileWriterTest(unittest.TestCase):
                 self.assertTrue(np.array_equal(
                     getattr(traj, prop), original_data[prop]))
             self.assertTrue(np.allclose(traj[0].box.get_box_matrix(), box_orig))
+
 
 if __name__ == '__main__':
     unittest.main()
