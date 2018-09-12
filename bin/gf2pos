@@ -195,9 +195,14 @@ if __name__ == '__main__':
         help="Specify an output directory instead "
               "of dumping files to STDOUT.")
     parser.add_argument(
-        '-f', '--force',
+        '--force',
         action='store_true',
         help="Overwrite existing files. Use with caution.")
+    parser.add_argument(
+        '-f', '--frames',
+        default=':',
+        help='Select which frames to dump. A single number n dumps the final \
+        n frames; otherwise, python slice-like behavior is assumed.')
     parser.add_argument(
         '--color-by-type',
         action='store_true',
@@ -222,11 +227,6 @@ if __name__ == '__main__':
         '-v', '--verbose',
         action='store_true',
         help="Increase output verbosity.")
-    parser.add_argument(
-        '--frames',
-        default=':',
-        help='Select which frames to dump. A single number n dumps the final \
-        n frames; otherwise, python slice-like behavior is assumed.')
 
     args = parser.parse_args()
     logging.basicConfig(level=logging.WARNING - 10 * int(args.verbose))
