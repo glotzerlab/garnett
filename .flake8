@@ -1,0 +1,13 @@
+[flake8]
+exclude =
+    .git,
+    __pycache__,
+    build,
+    dist,
+    doc/conf.py,
+    examples,
+    glotzformats/common/six.py,
+    glotzformats/gsdhoomd.py,
+    glotzformats/pygsd.py,
+    samples
+max_line_length=120
