@@ -21,6 +21,9 @@ logger = logging.getLogger(__name__)
 
 
 def _parse_shape_definition(shape):
+    if not shape:
+        return FallbackShapeDefinition('')
+
     rounding_radius = shape.get('rounding_radius', 0)
     shape_type = shape['type'].lower()
 
