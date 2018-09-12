@@ -25,8 +25,7 @@ setup(
 
     author='Carl Simon Adorf',
     author_email='csadorf@umich.edu',
-    description="Samples, parsers, and writers for formats used "
-                "in the Glotzer Group",
+    description="Samples, parsers, and writers for formats used in the Glotzer Group",
     keywords=['glotzer formats'],
 
     classifiers=[
@@ -35,9 +34,9 @@ setup(
         "Topic :: Scientific/Engineering :: Physics",
     ],
 
-      install_requires=[
-          'rowan>=0.5'
-      ],
+    install_requires=[
+        'rowan>=0.5'
+    ],
 
     tests_require=['nose', 'ddt'],
 )
