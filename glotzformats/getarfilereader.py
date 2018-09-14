@@ -43,7 +43,7 @@ def _parse_shape_definition(shape):
                 rounding_radius=rounding_radius, color=None)
     elif shape_type == 'polyhedron':
         shapedef = GeneralPolyShapeDefinition(
-            shape_class='polyv', vertices=shape['vertices'], faces=shape['faces'],
+            shape_class='polyV', vertices=shape['vertices'], faces=shape['faces'],
             facet_colors=shape['colors'], color=None)
 
     if shapedef is None:

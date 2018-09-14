@@ -299,7 +299,7 @@ class SpheroPolyShapeDefinition(ShapeDefinition):
 class GeneralPolyShapeDefinition(ShapeDefinition):
     """Initialize a GeneralPolyShapeDefinition instance.
 
-    :param shape_class: The shape class definition, e.g. 'polyv'.
+    :param shape_class: The shape class definition, e.g. 'polyV'.
     :type shape_class: str
     :param vertices: A list of vertex vectors.
     :type vertices: A sequence of 3-tuple of numbers (Nx3).

@@ -123,7 +123,7 @@ class PosFileFrame(Frame):
                                             centers=centers,
                                             orientations=orientations,
                                             colors=colors)
-        elif shape_class.lower() == 'polyv':
+        elif shape_class.lower() == 'polyv':  # Officially polyV
             num_vertices = int(next(tokens))
             vertices = []
             for i in range(num_vertices):
