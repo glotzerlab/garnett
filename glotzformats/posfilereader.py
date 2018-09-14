@@ -18,7 +18,8 @@ import numpy as np
 from .trajectory import _RawFrameData, Frame, Trajectory, \
     SphereShapeDefinition, PolyShapeDefinition, SpheroPolyShapeDefinition, \
     ArrowShapeDefinition, SphereUnionShapeDefinition, \
-    PolyUnionShapeDefinition, GeneralPolyShapeDefinition, FallbackShapeDefinition
+    PolyUnionShapeDefinition, GeneralPolyShapeDefinition, \
+    FallbackShapeDefinition
 import rowan
 
 from .errors import ParserError, ParserWarning

@@ -17,6 +17,7 @@ import numpy as np
 
 from .trajectory import _RawFrameData, Frame, Trajectory
 
+# CifFile is from the pycifrw package
 from CifFile import CifFile
 
 from .errors import ParserError, ParserWarning

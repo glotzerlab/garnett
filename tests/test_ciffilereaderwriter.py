@@ -2,23 +2,23 @@ import io
 import logging
 import sys
 import unittest
-
 import numpy as np
-
 import glotzformats
+
 try:
     import CifFile  # noqa: F401
 except ImportError:
-    NO_PyCifRW = True
+    PYCIFRW = False
 else:
-    NO_PyCifRW = False
+    PYCIFRW = True
 
 logger = logging.getLogger(__name__)
 
 PYTHON_2 = sys.version_info[0] == 2
 
 
-@unittest.skipIf(NO_PyCifRW, 'CifFileReader tests require the PyCifRW package.')
+@unittest.skipIf(not PYCIFRW,
+                 'CifFileReader tests require the PyCifRW package.')
 class BaseCifFileReaderTest(unittest.TestCase):
 
     def read_pos_trajectory(self, stream, precision=None):

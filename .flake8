@@ -9,5 +9,5 @@ exclude =
     glotzformats/common/six.py,
     glotzformats/gsdhoomd.py,
     glotzformats/pygsd.py,
-    samples
+    samples,
 max_line_length=120
