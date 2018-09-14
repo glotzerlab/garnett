@@ -20,9 +20,7 @@ import numpy as np
 
 from .posfilereader import POSFILE_FLOAT_DIGITS
 from .trajectory import SphereShapeDefinition, ArrowShapeDefinition
-from .math_utils import toEulerAngles
-from .math_utils import rotateVector
-from .math_utils import quaternionMultiply
+import rowan
 
 
 logger = logging.getLogger(__name__)
@@ -87,10 +85,11 @@ class PosFileWriter(object):
             box_matrix = np.array(frame.box.get_box_matrix())
             if self._rotate and frame.view_rotation is not None:
                 for i in range(3):
-                    box_matrix[:, i] = rotateVector(box_matrix[:, i], frame.view_rotation)
+                    box_matrix[:, i] = rowan.rotate(frame.view_rotation, box_matrix[:, i])
 
             if frame.view_rotation is not None and not self._rotate:
-                angles = toEulerAngles(frame.view_rotation) * 180 / math.pi
+                angles = rowan.to_euler(frame.view_rotation,
+                        axis_type='extrinsic', convention='xyz') * 180 / math.pi
                 _write('rotation ' + ' '.join((str(_num(_)) for _ in angles)))
 
             _write('boxMatrix ', end='')
@@ -115,8 +114,8 @@ class PosFileWriter(object):
                 shapedef = frame.shapedef.get(name, DEFAULT_SHAPE_DEFINITION)
 
                 if self._rotate and frame.view_rotation is not None:
-                    pos = rotateVector(pos, frame.view_rotation)
-                    rot = quaternionMultiply(frame.view_rotation, rot)
+                    pos = rowan.rotate(frame.view_rotation, pos)
+                    rot = rowan.multiply(frame.view_rotation, rot)
 
                 if isinstance(shapedef, SphereShapeDefinition):
                     _write(' '.join((str(_num(v)) for v in pos)))

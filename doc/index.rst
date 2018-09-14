@@ -7,9 +7,6 @@
 glotzformats - documentation
 ============================
 
-.. automodule:: glotzformats
-   :members:
-
 .. toctree::
    :maxdepth: 2
 

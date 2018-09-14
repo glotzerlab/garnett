@@ -35,5 +35,9 @@ setup(
         "Topic :: Scientific/Engineering :: Physics",
     ],
 
+      install_requires=[
+          'rowan>=0.5'
+      ],
+
     tests_require=['nose', 'ddt'],
 )

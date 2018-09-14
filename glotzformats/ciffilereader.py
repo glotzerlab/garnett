@@ -18,6 +18,7 @@ import numpy as np
 
 from .trajectory import _RawFrameData, Frame, Trajectory
 
+# CifFile is from the pycifrw package
 from CifFile import CifFile
 
 from .errors import ParserError, ParserWarning
@@ -38,6 +39,14 @@ def _parse_division(match):
     fractions, like '0.25'."""
     return str(float(match.group('num'))/float(match.group('denom')))
 
+
+class _RawCifFrameData(_RawFrameData):
+    """Extend base class to support raw CIF coordinates"""
+
+    def __init__(self):
+        # Append the cif_coordinates to the dataset
+        super(_RawCifFrameData, self).__init__()
+        self.cif_coordinates = list()               # Nx3
 
 class CifFileFrame(Frame):
 
@@ -82,6 +91,33 @@ class CifFileFrame(Frame):
         return np.array([[lx, xy, xz],
                          [ 0, ly, yz],
                          [ 0,  0, lz]])
+
+    @property
+    def cif_coordinates(self):
+        "Nx3 matrix of exact coordinates provided in the CIF file."
+        self.load()
+        return self.frame_data.cif_coordinates
+
+    @cif_coordinates.setter
+    def cif_coordinates(self, value):
+        try:
+            value = np.asarray(value, dtype=self._dtype)
+        except ValueError:
+            raise ValueError("CIF coordinates can only be set to numeric arrays.")
+        if not np.all(np.isfinite(value)):
+            raise ValueError("CIF coordinates being set must all be finite numbers.")
+        elif not len(value.shape) == 2 or value.shape[1] != self.box.dimensions:
+            raise ValueError("Input array must be of shape (N,{}) where N is the number of particles.".format(self.box.dimensions))
+
+        self.load()
+        self.frame_data.cif_coordinates = value
+
+    def _raw_frame_to_frame(self, raw_frame, dtype=None):
+        """Extend parent function to also incorporate cif_coordinates"""
+        ret = super(CifFileFrame, self)._raw_frame_to_frame(raw_frame, dtype)
+        ret.cif_coordinates = np.asarray(raw_frame.cif_coordinates, dtype=dtype)
+        assert len(ret.positions) == len(ret.cif_coordinates)
+        return ret
 
     def read(self):
         "Read the frame data from the stream."
@@ -149,6 +185,9 @@ class CifFileFrame(Frame):
             unique_points = fractions
             unique_types = site_types
 
+        # Safe the exact points
+        cif_coordinates = unique_points.copy()
+
         # shift so that (0, 0, 0) in fractional coordinates goes to a
         # corner of the box, not the center of the box
         unique_points -= 0.5
@@ -160,6 +199,7 @@ class CifFileFrame(Frame):
         raw_frame.box = box_matrix
         raw_frame.types = unique_types
         raw_frame.positions = coordinates
+        raw_frame.cif_coordinates = cif_coordinates
         raw_frame.velocities = np.zeros_like(coordinates)
         raw_frame.orientations = np.zeros((coordinates.shape[0], 4), dtype=np.float32)
         return raw_frame
