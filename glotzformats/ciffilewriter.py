@@ -61,7 +61,7 @@ class CifFileWriter(object):
             writer.write(trajectory, ciffile)
     """
 
-    def _write_frame(self, frame, file, data, occupancy):
+    def _write_frame(self, frame, file, data, occupancy, fractional, raw):
         from . import __version__
 
         def _write(msg='', end='\n'):
@@ -102,10 +102,15 @@ class CifFileWriter(object):
         _write("_atom_site_fract_z")
 
         # write header particle positions
-        invbox = np.linalg.inv(frame.box.get_box_matrix())
-        fractions = np.dot(invbox, frame.positions.T).T
-        # fraction (0, 0, 0) should be a corner of the box
-        fractions += 0.5
+        if raw:
+            fractions = frame.cif_coordinates.copy()
+        else:
+            if fractional:
+                fractions = frame.positions.copy()
+            else:
+                invbox = np.linalg.inv(frame.box.get_box_matrix())
+                fractions = np.dot(invbox, frame.positions.T).T
+            fractions += 0.5
 
         type_counter = defaultdict(int)
         n_digits = len(str(len(frame.positions)))
@@ -120,7 +125,7 @@ class CifFileWriter(object):
             type_counter[particle_type] += 1
 
     def write(self, trajectory, file=sys.stdout,
-              data='simulation', occupancy=1.0):
+              data='simulation', occupancy=1.0, fractional=False, raw=False):
         """Serialize a trajectory into cif-format and write it to file.
 
         :param trajectory: The trajectory to serialize
@@ -132,17 +137,24 @@ class CifFileWriter(object):
         :type data: str
         :param occupancy: The default occupancy of individual particles.
         :type occupancy: int
+        :param fractional: Whether or not the input coordinates are fractional
+        :type fractional: bool
+        :param raw: Whether or not to write the raw CIF coordinates (with no transformations)
+        :type raw: bool
         """
         for i, frame in enumerate(trajectory):
             self._write_frame(
                 frame=frame,
                 file=file,
                 data='{}_frame_{}'.format(data, i),
-                occupancy=occupancy)
+                occupancy=occupancy,
+                fractional=fractional,
+                raw=raw)
             logger.debug("Wrote frame {}.".format(i + 1))
         logger.info("Wrote {} frames.".format(i + 1))
 
-    def dump(self, trajectory, data='simulation', occupancy=1.0):
+    def dump(self, trajectory, data='simulation', occupancy=1.0,
+            fractional=False, raw=False):
         """Serialize trajectory into cif-format.
 
         :param trajectory: The trajectory to serialize.
@@ -155,5 +167,5 @@ class CifFileWriter(object):
         :rtype: str
         """
         f = io.StringIO()
-        self.write(trajectory, f)
+        self.write(trajectory, f, occupancy=occupancy, fractional=fractional, raw=raw)
         return f.getvalue()

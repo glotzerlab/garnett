@@ -1,0 +1,14 @@
+# .coveragerc to control coverage.py
+[run]
+branch = True
+source = glotzformats
+omit =
+    glotzformats/common/six.py
+    glotzformats/gsdhoomd.py
+    glotzformats/pygsd.py
+
+[report]
+ignore_errors = True
+
+[html]
+directory = coverage_html_report
