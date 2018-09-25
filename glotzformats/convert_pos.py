@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 # Copyright (c) 2017 The Regents of the University of Michigan
 # All rights reserved.
 # This software is licensed under the BSD 3-Clause License.
@@ -9,8 +8,10 @@ import sys
 import argparse
 import logging
 
-import glotzformats as gf
 from tqdm import tqdm
+from . import reader
+from . import writer
+from . import util
 
 
 COLORS = [
@@ -23,25 +24,13 @@ COLORS = [
     '#ff7f00',
 ]
 
-# Mapping of file extension to format
-FORMATS = {
-    '.pos': 'pos',
-    '.gsd': 'gsd',
-    '.zip': 'gtar',
-    '.tar': 'gtar',
-    '.sqlite': 'gtar'
-}
 
-# Mapping of format to read input mode
-MODES = {
-    'pos': 'r',
-    'gsd': 'rb',
-    'gtar': 'rb'
-}
+pos_reader = reader.PosFileReader()
+pos_writer = writer.PosFileWriter()
 
 
-pos_reader = gf.reader.PosFileReader()
-pos_writer = gf.writer.PosFileWriter()
+def _print_err(msg=None, *args):
+    print(msg, *args, file=sys.stderr)
 
 
 def _build_slice(slice_string):
@@ -109,27 +98,10 @@ def color_by_type(frame):
     return frame
 
 
-def gf2pos(fn, outfile, args, template=None):
-    extension = os.path.splitext(fn)[1]
-    informat = FORMATS[
-        extension] if args.informat is None else args.informat.lower()
-    inmode = MODES[informat]
+def convert_pos(fn, outfile, args, template=None):
     frame_slice = _build_slice(args.frames)
 
-    if informat not in MODES:
-        print("The input format {} is not supported.".format(informat))
-        return
-
-    with open(fn, inmode) as infile:
-        if informat == 'gsd':
-            gsd_reader = gf.reader.GSDHoomdFileReader()
-            traj = gsd_reader.read(infile, template)
-        elif informat == 'gtar':
-            getar_reader = gf.reader.GetarFileReader()
-            traj = getar_reader.read(infile)
-        elif informat == 'pos':
-            traj = pos_reader.read(infile)
-
+    with util.read(fn) as traj:
         traj = traj[frame_slice]
 
         if args.center_by_density:
@@ -145,46 +117,14 @@ def gf2pos(fn, outfile, args, template=None):
         pos_writer.write(tqdm(traj), outfile)
 
 
-def main(args):
-    if args.template:
-        with open(args.template) as pos:
-            template = pos_reader.read(pos)[0]
-            template.load()
-    else:
-        template = None
-    if not isinstance(args.infile, list):
-        args.infile = [args.infile]
-    if args.out:
-        if not os.path.isdir(args.out):
-            raise ValueError("'{}' must be a directory.".format(args.out))
-        for fn in args.infile:
-            fn_out = os.path.join(args.out, os.path.splitext(fn)[0] + '.pos')
-            print("Writing to '{}'...".format(fn_out), file=sys.stderr)
-            if not args.force and os.path.isfile(fn_out):
-                print("File '{}' already exists, skipping.".format(fn_out))
-            with open(fn_out, 'w') as outfile:
-                gf2pos(fn, outfile, args, template)
-    else:
-        for fn in args.infile:
-            gf2pos(fn, sys.stdout, args, template)
-
-
-if __name__ == '__main__':
-    fmts = list(MODES.keys())
-    fmt_list = ", ".join(fmts[:-1]) + ", or {}".format(fmts[-1])
-
+def main():
     parser = argparse.ArgumentParser(
         description="Convert glotzformats compatible trajectories to POS.")
     parser.add_argument(
         'infile',
         type=str,
         nargs='+',
-        help="One or more paths to %s file(s)." % fmt_list)
-    parser.add_argument(
-        '-i', '--informat',
-        type=str,
-        choices=(fmt for fmt in MODES),
-        help="Specify the input format, one of %s." % fmt_list)
+        help="One or more paths to glotzformats-compatible file(s).")
     parser.add_argument(
         '-t', '--template',
         type=str,
@@ -230,4 +170,37 @@ if __name__ == '__main__':
 
     args = parser.parse_args()
     logging.basicConfig(level=logging.WARNING - 10 * int(args.verbose))
-    main(args)
+
+    try:
+        if args.template:
+            with open(args.template) as pos:
+                template = pos_reader.read(pos)[0]
+                template.load()
+        else:
+            template = None
+        if not isinstance(args.infile, list):
+            args.infile = [args.infile]
+        if args.out:
+            if not os.path.isdir(args.out):
+                raise ValueError("'{}' must be a directory.".format(args.out))
+            for fn in args.infile:
+                fn_out = os.path.join(args.out, os.path.splitext(fn)[0] + '.pos')
+                _print_err("Writing to '{}'...".format(fn_out))
+                if not args.force and os.path.isfile(fn_out):
+                    _print_err("File '{}' already exists, skipping.".format(fn_out))
+                with open(fn_out, 'w') as outfile:
+                    convert_pos(fn, outfile, args, template)
+        else:
+            for fn in args.infile:
+                convert_pos(fn, sys.stdout, args, template)
+    except Exception as error:
+        _print_err('Error: {}'.format(error))
+        sys.exit(1)
+    else:
+        sys.exit(0)
+    finally:
+        try:
+            sys.stdout.close()
+            sys.stderr.close()
+        except Exception as error:
+            pass

@@ -35,5 +35,16 @@ setup(
         "Topic :: Scientific/Engineering :: Physics",
     ],
 
+    install_requires=[
+        'rowan>=0.5',
+        'tqdm>=4.0',
+    ],
+
     tests_require=['nose', 'ddt'],
+
+    entry_points={
+        'console_scripts': [
+            'gf2pos = glotzformats.convert_pos:main',
+        ],
+    },
 )
