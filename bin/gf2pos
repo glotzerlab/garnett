@@ -199,7 +199,7 @@ if __name__ == '__main__':
         action='store_true',
         help="Overwrite existing files. Use with caution.")
     parser.add_argument(
-        '-f', '--frames',
+        '-n', '--frames',
         default=':',
         help='Select which frames to dump. A single number n dumps the final \
         n frames; otherwise, python slice-like behavior is assumed.')
