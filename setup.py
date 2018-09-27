@@ -37,7 +37,7 @@ setup(
 
     install_requires=[
         'rowan>=0.5',
-        'tqdm>=4.0',
+        'tqdm',
     ],
 
     tests_require=['nose', 'ddt'],
