@@ -99,10 +99,8 @@ def color_by_type(frame):
 
 
 def convert_pos(fn, outfile, args, template=None):
-    frame_slice = _build_slice(args.frames)
-
     with util.read(fn) as traj:
-        traj = traj[frame_slice]
+        traj = traj[_build_slice(args.frames)]
 
         if args.center_by_density:
             traj = (center_ld(f) for f in traj)
@@ -201,6 +199,9 @@ def main():
     finally:
         try:
             sys.stdout.close()
+        except Exception as error:
+            pass
+        try:
             sys.stderr.close()
         except Exception as error:
             pass
