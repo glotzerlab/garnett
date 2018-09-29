@@ -81,29 +81,32 @@ def _color_by_type(frame, colors=DEFAULT_COLORS):
     return frame
 
 
-def convert_file(infile, outfile=sys.stdout, template=None, frames=':', center_by_density=False, select_center=False,
+def convert_file(infile, outfile=None, outformat=None, template=None, frames=':', center_by_density=False, select_center=False,
                  center=False, color_by_type=True, colors=DEFAULT_COLORS, no_progress=False):
     """Convert trajectory files from one format to another.
 
     :param infile: Path to input trajectory.
     :type infile: path
-    :param outfile: Path to output trajectory (default: sys.stdout)
+    :param outfile: Path to output trajectory (default: `None`, prints to `sys.stdout`)
     :type outfile: path
-    :param template: Template frame for reading input file (default: None).
+    :param outfmt: File format, one of 'gsd', 'gtar', 'pos', 'cif'
+        (default: `None`, autodetected from outfile with fallback to 'pos')
+    :type outfmt: string
+    :param template: Template frame for reading input file (default: `None`).
     :type template: Frame
-    :param frames: Slice for selecting frames (default: ':', all frames are kept).
+    :param frames: Slice for selecting frames (default: `':'`, all frames are kept).
     :type frames: Slice-like string or slice.
-    :param center_by_density: Whether to center by local density (requires freud, default: False).
+    :param center_by_density: Whether to center by local density (requires freud, default: `False`).
     :type center_by_density: bool
-    :param select_center: Crops box to keep only this fraction from the center (default: False, no cropping).
+    :param select_center: Crops box to keep only this fraction from the center (default: `False`, no cropping).
     :type select_center: float
-    :param center: Whether to center the box on the center of particle positions (default: False).
+    :param center: Whether to center the box on the center of particle positions (default: `False`).
     :type center: bool
-    :param color_by_type: Whether to assign particles colors by their types (default: True).
+    :param color_by_type: Whether to assign particles colors by their types (default: `True`).
     :type color_by_type: bool
     :param colors: An optional color map for coloring particle types (default: Michigan-inspired color map).
-    :type colors: List of hexadecimal strings like ['#00274c', ...].
-    :param no_progress: Whether to disable the progress bar from tqdm (default: False).
+    :type colors: List of hexadecimal strings like `['#00274c', ...]`.
+    :param no_progress: Whether to disable the progress bar from tqdm (default: `False`).
     :type no_progress: bool
     """
 
@@ -119,7 +122,14 @@ def convert_file(infile, outfile=sys.stdout, template=None, frames=':', center_b
         if color_by_type:
             traj = (_color_by_type(f, colors) for f in traj)
 
-        util.write(tqdm(traj, disable=no_progress, unit=' frames'), outfile)
+        if outfile is None:
+            outfile = sys.stdout
+        if outformat is None:
+            try:
+                outformat = util.detect_format(outfile)
+            except Exception as e:
+                outformat = 'pos'
+        util.write(tqdm(traj, disable=no_progress, unit=' frames'), outfile, fmt=outformat)
 
 
 def main():
@@ -134,7 +144,8 @@ def main():
         type=str,
         help="Use a template frame.")
     parser.add_argument(
-        '-o', '--out',
+        '-o', '--outfile',
+        default=None,
         type=str,
         help="Specify an output file instead of dumping files to STDOUT.")
     parser.add_argument(
@@ -164,10 +175,6 @@ def main():
         action='store_true',
         help="Center particles by local density.")
     parser.add_argument(
-        '-w', '--wrap-into-box',
-        action='store_true',
-        help="Wrap all particles to fit into the box.")
-    parser.add_argument(
         '-s', '--select-center',
         type=float,
         help="Select a central fraction of the box.")
@@ -176,25 +183,22 @@ def main():
         action='store_true',
         help="Increase output verbosity.")
 
-    args = parser.parse_args()
-    logging.basicConfig(level=logging.WARNING - 10 * int(args.verbose))
+    argdict = vars(parser.parse_args())
+    logging.basicConfig(level=logging.WARNING - 10 * int(argdict['verbose']))
 
     try:
-        if args.template:
-            with util.read(args.template) as template_traj:
-                args.template = template_traj[0]
-                args.template.load()
-        else:
-            template = None
-        if not isinstance(args.infile, list):
-            args.infile = [args.infile]
-        if args.out:
-            _print_err("Writing to '{}'...".format(args.out))
-            if not args.force and os.path.isfile(args.out):
-                _print_err("File '{}' already exists, skipping.".format(args.out))
-            convert_file(args.infile, args.out, **args)
-        else:
-            convert_file(args.infile, **args)
+        if argdict['template']:
+            with util.read(argdict['template']) as template_traj:
+                argdict['template'] = template_traj[0]
+                argdict['template'].load()
+        if argdict['outfile']:
+            _print_err("Writing to '{}'...".format(argdict['outfile']))
+            if not argdict['force'] and os.path.isfile(argdict['outfile']):
+                _print_err("File '{}' already exists. To overwrite, use --force.".format(argdict['outfile']))
+                sys.exit(0)
+        for unused_key in ['force', 'verbose']:
+            del argdict[unused_key]
+        convert_file(**argdict)
     except Exception as error:
         _print_err('Error: {}'.format(error))
         sys.exit(1)

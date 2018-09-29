@@ -61,7 +61,7 @@ WRITE_CLASS_MODES = {
         'mode': 'w'}}
 
 
-def _detect_format(filename):
+def detect_format(filename):
     extension = os.path.splitext(filename)[1]
     try:
         file_format = FORMATS[extension]
@@ -98,7 +98,7 @@ def read(filename_or_fileobj, template=None, fmt=None):
                 "Unable to determine filename from file object, "
                 "which is required for format detection.")
 
-    file_format = fmt or _detect_format(filename)
+    file_format = fmt or detect_format(filename)
     file_reader = READ_CLASS_MODES[file_format]['reader']()
     mode = READ_CLASS_MODES[file_format]['mode']
 
@@ -134,7 +134,7 @@ def write(trajectory, filename_or_fileobj, fmt=None):
                 "Unable to determine filename from file object, "
                 "which is required for format detection.")
 
-    file_format = fmt or _detect_format(filename)
+    file_format = fmt or detect_format(filename)
     file_writer = WRITE_CLASS_MODES[file_format]['writer']()
     mode = WRITE_CLASS_MODES[file_format]['mode']
 
