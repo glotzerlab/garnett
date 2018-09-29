@@ -127,10 +127,10 @@ class UtilWriterTest(unittest.TestCase):
     def test_write_format(self):
         # No suffix is given to the temp file, so no format will be detected
         tmp_name = os.path.join(self.tmp_dir.name, 'test')
-        glotzformats.write(self.trajectory, tmp_name, format='pos')
+        glotzformats.write(self.trajectory, tmp_name, fmt='pos')
 
         # Read back the file and check if it is the same as the original read
-        with glotzformats.read(tmp_name, format='pos') as traj:
+        with glotzformats.read(tmp_name, fmt='pos') as traj:
             self.assertEqual(len(traj), len(self.trajectory))
 
     def test_write_unsupported(self):
