@@ -3,6 +3,7 @@
 # This software is licensed under the BSD 3-Clause License.
 
 "Converts between compatible trajectory formats."
+from __future__ import print_function
 import os
 import sys
 import argparse
