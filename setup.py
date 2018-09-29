@@ -44,7 +44,7 @@ setup(
 
     entry_points={
         'console_scripts': [
-            'gf2pos = glotzformats.convert_pos:main',
+            'gf-convert = glotzformats.convert:main',
         ],
     },
 )

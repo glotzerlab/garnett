@@ -9,7 +9,8 @@ from . import writer
 from . import samples
 from . import trajectory
 from .util import read, write
+from .convert import convert_file as convert
 
 __version__ = '0.4.1'
 
-__all__ = ['formats', 'reader', 'writer', 'samples', 'trajectory', 'read', 'write']
+__all__ = ['formats', 'reader', 'writer', 'samples', 'trajectory', 'read', 'write', 'convert']
