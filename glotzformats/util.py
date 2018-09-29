@@ -73,16 +73,16 @@ def _detect_format(filename):
 
 
 @contextmanager
-def read(filename_or_fileobj, template=None, format=None):
+def read(filename_or_fileobj, template=None, fmt=None):
     """This function automatically detects the file format, reads the file, and returns a trajectory object.
 
     :param filename_or_fileobj: Filename to read.
     :type filename_or_fileobj: string or file object
     :param template: Optional template for the GSDHOOMDFileReader.
     :type template: string
-    :param format: File format, one of 'gsd', 'gtar', 'pos', 'cif', 'dcd', 'xml'
+    :param fmt: File format, one of 'gsd', 'gtar', 'pos', 'cif', 'dcd', 'xml'
         (default: None, autodetected from filename_or_fileobj)
-    :type format: string
+    :type fmt: string
     :returns: Trajectory read from the file.
     :rtype: :class:`glotzformats.trajectory.Trajectory`
     """
@@ -98,7 +98,7 @@ def read(filename_or_fileobj, template=None, format=None):
                 "Unable to determine filename from file object, "
                 "which is required for format detection.")
 
-    file_format = format or _detect_format(filename)
+    file_format = fmt or _detect_format(filename)
     file_reader = READ_CLASS_MODES[file_format]['reader']()
     mode = READ_CLASS_MODES[file_format]['mode']
 
@@ -111,16 +111,16 @@ def read(filename_or_fileobj, template=None, format=None):
         yield traj
 
 
-def write(trajectory, filename_or_fileobj, format=None):
+def write(trajectory, filename_or_fileobj, fmt=None):
     """This function automatically detects the file format and writes a trajectory to the file.
 
     :param trajectory: Trajectory to write.
     :type trajectory: :class:`~glotzformats.trajectory.Trajectory`
     :param filename_or_fileobj: Filename to write.
     :type filename_or_fileobj: string or file object
-    :param format: File format, one of 'gsd', 'gtar', 'pos', 'cif'
+    :param fmt: File format, one of 'gsd', 'gtar', 'pos', 'cif'
         (default: None, autodetected from filename_or_fileobj)
-    :type format: string
+    :type fmt: string
     """
     if isinstance(filename_or_fileobj, six.string_types):
         is_fileobj = False
@@ -134,7 +134,7 @@ def write(trajectory, filename_or_fileobj, format=None):
                 "Unable to determine filename from file object, "
                 "which is required for format detection.")
 
-    file_format = format or _detect_format(filename)
+    file_format = fmt or _detect_format(filename)
     file_writer = WRITE_CLASS_MODES[file_format]['writer']()
     mode = WRITE_CLASS_MODES[file_format]['mode']
 
