@@ -11,10 +11,10 @@ pipelines:
           - python3.6 --version
           - pip3.6 --version
           - tox --version
-          - pip2.7 install -U numpy cython pycifrw ddt rowan
-          - pip3.4 install -U numpy cython pycifrw ddt rowan
-          - pip3.5 install -U numpy cython pycifrw ddt rowan
-          - pip3.6 install -U numpy cython pycifrw ddt rowan
+          - pip2.7 install -U numpy cython pycifrw ddt rowan tqdm
+          - pip3.4 install -U numpy cython pycifrw ddt rowan tqdm
+          - pip3.5 install -U numpy cython pycifrw ddt rowan tqdm
+          - pip3.6 install -U numpy cython pycifrw ddt rowan tqdm
           - wget https://bitbucket.org/glotzer/gsd/get/master.tar.gz -O gsd.tar.gz
           - tar -xvzf gsd.tar.gz
           - cd glotzer-gsd-*
