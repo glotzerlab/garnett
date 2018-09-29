@@ -30,7 +30,7 @@ class GSDHOOMDFileWriter(object):
 
         :param trajectory: The trajectory to serialize
         :type trajectory: :class:`~glotzformats.trajectory.Trajectory`
-        :param filename: The file to write to.
+        :param stream: The file to write to.
         """
 
         try:
@@ -38,8 +38,8 @@ class GSDHOOMDFileWriter(object):
             mode = stream.mode
         except AttributeError:
             raise NotImplementedError(
-                "The current implementation of the GSDFileWriter requires "
-                "file objects with name attribute, such as NamedTemporaryFile "
+                "The current implementation of the GSDHOOMDFileWriter requires "
+                "file objects with name attribute, such as NamedTemporaryFile, "
                 "as the underlying library is reading the file by filename "
                 "and not directly from the stream.")
 
