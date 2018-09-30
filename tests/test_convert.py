@@ -61,13 +61,13 @@ class ConvertTest(unittest.TestCase):
         for informat, outformat in itertools.product(self.infiles, self.outfiles):
             infile = self.infiles[informat]
             outfile = self.outfiles[outformat]
-            print('Converting', informat, 'to', outformat)
             glotzformats.convert(infile, outfile, no_progress=True)
 
             # Verify that the output frames match the input frames
             with glotzformats.read(infile) as intraj:
                 with glotzformats.read(outfile) as outtraj:
-                    print(all([inframe == outframe for inframe, outframe in zip(intraj, outtraj)]))
+                    for inframe, outframe in zip(intraj, outtraj):
+                        self.assertEqual(inframe, outframe)
 
 
 if __name__ == '__main__':

@@ -107,9 +107,14 @@ class PosFileWriter(object):
                     "No shape defined for '{}'. "
                     "Using fallback definition.".format(name))
                 _write('def {} "{}"'.format(name, DEFAULT_SHAPE_DEFINITION))
-            for name, pos, rot in zip(frame.types, frame.positions,
-                                      frame.orientations):
 
+            # Use identity quaternions when orientations are needed if none were provided
+            if frame.orientations is None:
+                orientations = np.asarray([[1, 0, 0, 0]] * len(frame.types))
+            else:
+                orientations = frame.orientations
+
+            for name, pos, rot in zip(frame.types, frame.positions, orientations):
                 _write(name, end=' ')
                 shapedef = frame.shapedef.get(name, DEFAULT_SHAPE_DEFINITION)
 

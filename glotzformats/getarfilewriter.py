@@ -75,9 +75,10 @@ class GetarFileWriter(object):
         if not skip_props:
             # Particle properties
             for prop, recname in type(self).property_record_map.items():
-                rec = self.makeRecord(recname, index=index)
                 contents = getattr(frame, prop)
-                bulkwriter.writeRecord(rec=rec, contents=contents)
+                if contents is not None:
+                    rec = self.makeRecord(recname, index=index)
+                    bulkwriter.writeRecord(rec=rec, contents=contents)
 
         # Box and dimensions
         box_rec = self.makeRecord('box.f32.uni', index=index)

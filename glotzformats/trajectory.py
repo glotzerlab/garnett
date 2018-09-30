@@ -17,9 +17,36 @@ logger = logging.getLogger(__name__)
 SHAPE_DEFAULT_COLOR = '005984FF'
 DEFAULT_DTYPE = np.float32
 
+ARRAY_PROPERTIES = ['positions', 'orientations', 'velocities', 'mass',
+                    'charge', 'diameter', 'moment_inertia', 'angmom']
+
+HOOMD_SNAPSHOT_PROPERTY_MAP = {
+    'positions': 'position',
+    'orientations': 'orientation',
+    'velocities': 'velocity',
+}
+
+def _make_default_array(attr, shape, dtype=DEFAULT_DTYPE):
+    if attr == 'types':
+        return np.zeros(shape, dtype=np.int_)
+    elif attr in ['positions', 'velocities']:
+        return np.zeros(shape + (3,), dtype=dtype)
+    elif attr == 'orientations':
+        orientations = np.zeros(shape + (4,), dtype=dtype)
+        orientations[..., 0] = 1
+        return orientations
+    elif attr == 'angmom':
+        return np.zeros(shape + (4,), dtype=dtype)
+    elif attr in ['mass', 'diameter']:
+        return np.ones(shape, dtype=dtype)
+    elif attr == 'charge':
+        return np.zeros(shape, dtype=dtype)
+    elif attr == 'moment_inertia':
+        return np.ones(shape + (3,), dtype=dtype)
+
 
 class Box(object):
-    """A triclinical box class.
+    """A triclinic box class.
 
     You can access the box size and tilt factors via attributes:
 
@@ -31,8 +58,8 @@ class Box(object):
         # etc.
 
         # Setting
-        box.lx = 10.0
-        box.ly = box.lz = 5.0
+        box.Lx = 10.0
+        box.Ly = box.Lz = 5.0
         box.xy = box.xz = box.yz = 0.01
         # etc.
 
@@ -366,18 +393,29 @@ class FrameData(object):
         if len(self) != len(other):
             return False
         else:  # rigorous comparison required
-            return self.box == other.box \
-                and self.types == other.types\
-                and (self.positions == other.positions).all()\
-                and (self.orientations == other.orientations).all()\
-                and (self.velocities == other.velocities).all()\
-                and (self.mass == other.mass).all()\
-                and (self.charge == other.charge).all()\
-                and (self.diameter == other.diameter).all()\
-                and (self.moment_inertia == other.moment_inertia).all()\
-                and (self.angmom == other.angmom).all()\
-                and self.data == other.data\
-                and self.shapedef == other.shapedef
+            comparison = {}
+
+            def compare_attr(attr, array=False):
+                selfattr = getattr(self, attr, None)
+                otherattr = getattr(other, attr, None)
+                if attr == 'box':
+                    # Compare boxes
+                    comparison[attr] = np.allclose(selfattr.get_box_array(), otherattr.get_box_array())
+                elif attr == 'shapedef' and selfattr and otherattr:
+                    # Compare shape definitions, irrespective of type order in the OrderedDict
+                    comparison[attr] = dict(selfattr) == dict(otherattr)
+                elif array and selfattr is not None and otherattr is not None:
+                    # Compare array properties like positions, when both frame properties are not None
+                    comparison[attr] = np.allclose(selfattr, otherattr)
+                elif not array and selfattr and otherattr:
+                    # Compare non-array properties, when both frame properties are non-empty
+                    comparison[attr] = selfattr == otherattr
+
+            for attr in ['box', 'types', 'data', 'shapedef']:
+                compare_attr(attr)
+            for attr in ARRAY_PROPERTIES:
+                compare_attr(attr, array=True)
+            return all(comparison.values())
 
     def __ne__(self, other):
         return not self.__eq__(other)
@@ -447,31 +485,31 @@ class Frame(object):
 
         orientations = np.asarray(raw_frame.orientations, dtype=dtype)
         if len(orientations) == 0:
-            orientations = np.asarray([[1, 0, 0, 0]] * len(positions))
+            orientations = None
 
         velocities = np.asarray(raw_frame.velocities, dtype=dtype)
         if len(velocities) == 0:
-            velocities = np.zeros((len(positions), 3))
+            velocities = None
 
         mass = np.asarray(raw_frame.mass, dtype=dtype)
         if len(mass) == 0:
-            mass = np.ones(len(positions))
+            mass = None
 
         charge = np.asarray(raw_frame.charge, dtype=dtype)
         if len(charge) == 0:
-            charge = np.zeros(len(positions))
+            charge = None
 
         diameter = np.asarray(raw_frame.diameter, dtype=dtype)
         if len(diameter) == 0:
-            diameter = np.ones(len(positions))
+            diameter = None
 
         moment_inertia = np.asarray(raw_frame.moment_inertia, dtype=dtype)
         if len(moment_inertia) == 0:
-            moment_inertia = np.ones((len(positions), 3))
+            moment_inertia = None
 
         angmom = np.asarray(raw_frame.angmom, dtype=dtype)
         if len(angmom) == 0:
-            angmom = np.zeros((len(positions), 4))
+            angmom = None
 
         assert raw_frame.box is not None
         if isinstance(raw_frame.box, Box):
@@ -480,8 +518,7 @@ class Frame(object):
         box_dimensions = getattr(raw_frame, 'box_dimensions', 3)
         ret.positions, ret.velocities, \
         ret.orientations, ret.angmom, ret.box = _regularize_box(
-            positions, velocities,
-            orientations, angmom,
+            positions, velocities, orientations, angmom,
             raw_frame.box, dtype, box_dimensions)
         ret.mass = mass
         ret.charge = charge
@@ -492,15 +529,14 @@ class Frame(object):
         ret.data = raw_frame.data
         ret.data_keys = raw_frame.data_keys
         ret.view_rotation = raw_frame.view_rotation
-        assert N == len(ret.types)
-        assert N == len(ret.positions)
-        assert N == len(ret.orientations)
-        assert N == len(ret.velocities)
-        assert N == len(ret.mass)
-        assert N == len(ret.charge)
-        assert N == len(ret.diameter)
-        assert N == len(ret.moment_inertia)
-        assert N == len(ret.angmom)
+
+        def assert_lengths(attr):
+            assert getattr(ret, attr, None) is None or len(getattr(ret, attr)) == N, \
+                "Frame property '{}' is not valid. Must be None or have length {}.".format(attr, N)
+
+        assert_lengths('types')
+        for attr in ARRAY_PROPERTIES:
+            assert_lengths(attr)
         return ret
 
     def loaded(self):
@@ -1015,31 +1051,20 @@ class Trajectory(BaseTrajectory):
 
         # Types
         types = [f.types for f in self.frames]
-        type_ids = np.zeros((M, N), dtype=np.int_)
+        type_ids = _make_default_array('types', (M, N))
         _type = _generate_type_id_array(types, type_ids)
 
-        # Properties
-        prop_list = ['positions', 'orientations', 'velocities',
-                     'mass', 'charge', 'diameter',
-                     'moment_inertia', 'angmom']
-        props = dict(
-            positions = np.zeros((M, N, 3), dtype=self._dtype),
-            orientations = np.zeros((M, N, 4), dtype=self._dtype),
-            velocities = np.zeros((M, N, 3), dtype=self._dtype),
-            mass = np.ones((M, N), dtype=self._dtype),
-            charge = np.zeros((M, N), dtype=self._dtype),
-            diameter = np.ones((M, N), dtype=self._dtype),
-            moment_inertia = np.ones((M, N, 3), dtype=self._dtype),
-            angmom = np.zeros((M, N, 4), dtype=self._dtype))
+        props = {attr: _make_default_array(attr, (M, N), self._dtype) for attr in ARRAY_PROPERTIES}
 
         for i, frame in enumerate(self.frames):
-            for prop in prop_list:
+            for prop in ARRAY_PROPERTIES:
                 frame_prop = getattr(frame, prop)
-                prop_shape = frame_prop.shape
-                if len(prop_shape) == 1:
-                    props[prop][i][:prop_shape[0]] = frame_prop
-                elif len(prop_shape) == 2:
-                    props[prop][i][:prop_shape[0], :prop_shape[1]] = frame_prop
+                if frame_prop is not None:
+                    prop_shape = frame_prop.shape
+                    if len(prop_shape) == 1:
+                        props[prop][i][:prop_shape[0]] = frame_prop
+                    elif len(prop_shape) == 2:
+                        props[prop][i][:prop_shape[0], :prop_shape[1]] = frame_prop
 
         try:
             # Perform swap
@@ -1273,42 +1298,43 @@ def _regularize_box(positions, velocities,
     R = R.astype(dtype)
 
     if not np.allclose(Q[:dimensions, :dimensions], np.eye(dimensions)):
-        # If Q is not the identity matrix, then we will be
-        # changing data, so we have to copy. This only causes
-        # actual failures for non-writeable GSD frames, but could
-        # cause unexpected data corruption for other cases
-        positions = np.copy(positions)
-        orientations = np.copy(orientations)
-        velocities = np.copy(velocities)
-        angmom = np.copy(angmom)
-
         # Since we'll be performing a quaternion operation,
         # we have to ensure that Q is a pure rotation
         sign = np.linalg.det(Q)
         Q = Q*sign
         R = R*sign
 
-        # First rotate positions, velocities.
-        # Since they are vectors, we can use the matrix directly.
-        # Conveniently, instead of transposing Q we can just reverse
-        # the order of multiplication here
-        positions = positions.dot(Q)
-        velocities = velocities.dot(Q)
-
-        # For orientations and angular momenta, we use the quaternion
-        quat = rowan.from_matrix(Q.T)
-        for i in range(orientations.shape[0]):
-            orientations[i, :] = rowan.multiply(quat, orientations[i, :])
-        for i in range(angmom.shape[0]):
-            angmom[i, :] = rowan.multiply(quat, angmom[i, :])
-
         # Now we have to ensure that the box is right-handed. We
         # do this as a second step to avoid introducing reflections
         # into the rotation matrix before making the quaternion
         signs = np.diag(np.diag(np.where(R < 0, -np.ones(R.shape), np.ones(R.shape))))
         box = R.dot(signs)
-        positions = positions.dot(signs)
-        velocities = velocities.dot(signs)
+
+        # If Q is not the identity matrix, then we will be
+        # changing data, so we have to copy. This only causes
+        # actual failures for non-writeable GSD frames, but could
+        # cause unexpected data corruption for other cases.
+
+        # We rotate positions and velocities.
+        # Since they are vectors, we can use the matrix directly.
+        # Conveniently, instead of transposing Q we can just reverse
+        # the order of multiplication here
+        if positions is not None:
+            positions = np.copy(positions).dot(Q).dot(signs)
+        if velocities is not None:
+            velocities = np.copy(velocities).dot(Q).dot(signs)
+
+        # For orientations and angular momenta, we use the quaternion
+        quat = rowan.from_matrix(Q.T)
+
+        if orientations is not None:
+            orientations = np.copy(orientations)
+            for i in range(orientations.shape[0]):
+                orientations[i, :] = rowan.multiply(quat, orientations[i, :])
+        if angmom is not None:
+            angmom = np.copy(angmom)
+            for i in range(angmom.shape[0]):
+                angmom[i, :] = rowan.multiply(quat, angmom[i, :])
     else:
         box = box_matrix
 
@@ -1331,14 +1357,13 @@ def _generate_type_id_array(types, type_ids):
 
 def copyto_hoomd_blue_snapshot(frame, snapshot):
     "Copy the frame into a HOOMD-blue snapshot."
-    np.copyto(snapshot.particles.position, frame.positions)
-    np.copyto(snapshot.particles.orientation, frame.orientations)
-    np.copyto(snapshot.particles.velocity, frame.velocities)
-    np.copyto(snapshot.particles.mass, frame.mass)
-    np.copyto(snapshot.particles.charge, frame.charge)
-    np.copyto(snapshot.particles.diameter, frame.diameter)
-    np.copyto(snapshot.particles.moment_inertia, frame.moment_inertia)
-    np.copyto(snapshot.particles.angmom, frame.angmom)
+    N = len(frame.types)
+    for attr in ARRAY_PROPERTIES:
+        frameattr = getattr(frame, attr, None)
+        if frameattr is not None:
+            np.copyto(getattr(snapshot.particles, HOOMD_SNAPSHOT_PROPERTY_MAP.get(attr, attr)), frameattr)
+        else:
+            _make_default_array(attr, (N,))
     return snapshot
 
 
@@ -1351,14 +1376,8 @@ def copyfrom_hoomd_blue_snapshot(frame, snapshot):
     particle_types = list(set(snapshot.particles.types))
     snap_types = [particle_types[i] for i in snapshot.particles.typeid]
     frame.types = snap_types
-    frame.positions = snapshot.particles.position
-    frame.orientations = snapshot.particles.orientation
-    frame.velocities = snapshot.particles.velocity
-    frame.mass = snapshot.particles.mass
-    frame.charge = snapshot.particles.charge
-    frame.diameter = snapshot.particles.diameter
-    frame.moment_inertia = snapshot.particles.moment_inertia
-    frame.angmom = snapshot.particles.angmom
+    for attr in ARRAY_PROPERTIES:
+        setattr(frame, attr, getattr(snapshot.particles, HOOMD_SNAPSHOT_PROPERTY_MAP.get(attr, attr)))
     return frame
 
 
