@@ -170,6 +170,7 @@ class SphereShapeDefinition(ShapeDefinition):
     @property
     def json_shape(self):
         return {'type': 'Sphere',
+                'diameter': float(self.diameter),
                 'color': self.color}
 
 
