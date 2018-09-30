@@ -15,7 +15,8 @@ import numpy as np
 import gtar
 
 from .trajectory import _RawFrameData, Box, Frame, Trajectory
-from .trajectory import FallbackShapeDefinition, SphereShapeDefinition, GeneralPolyShapeDefinition, PolyShapeDefinition, SpheroPolyShapeDefinition
+from .trajectory import FallbackShapeDefinition, SphereShapeDefinition, \
+    GeneralPolyShapeDefinition, PolyShapeDefinition, SpheroPolyShapeDefinition
 
 logger = logging.getLogger(__name__)
 

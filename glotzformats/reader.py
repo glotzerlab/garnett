@@ -33,6 +33,7 @@ class PyDCDFileReader(_DCDFileReader):
     .. seealso:: The API is identical to: :py:class:`~.DCDFileReader`"""
     pass
 
+
 try:
     try:
         from . import dcdreader
@@ -86,6 +87,7 @@ else:
                 alpha = 2 * np.arccos(traj[0].orientations.T[0])
         """
         _dcdreader = dcdreader
+
 
 class GSDHoomdFileReader(GSDHOOMDFileReader):
 

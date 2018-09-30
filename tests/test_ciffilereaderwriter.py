@@ -6,7 +6,7 @@ import numpy as np
 import glotzformats
 
 try:
-    import CifFile
+    import CifFile  # noqa: F401
 except ImportError:
     PYCIFRW = False
 else:
@@ -173,7 +173,6 @@ class CifFileReaderTest(CifFileWriterTest):
         with self.assertRaises(ValueError):
             # This should fail since it's using 2d positions
             traj[-1].cif_coordinates = [[0, 0], [0, 0]]
-
 
 
 if __name__ == '__main__':

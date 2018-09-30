@@ -88,8 +88,7 @@ class PosFileWriter(object):
                     box_matrix[:, i] = rowan.rotate(frame.view_rotation, box_matrix[:, i])
 
             if frame.view_rotation is not None and not self._rotate:
-                angles = rowan.to_euler(frame.view_rotation,
-                        axis_type='extrinsic', convention='xyz') * 180 / math.pi
+                angles = rowan.to_euler(frame.view_rotation, axis_type='extrinsic', convention='xyz') * 180 / math.pi
                 _write('rotation ' + ' '.join((str(_num(_)) for _ in angles)))
 
             _write('boxMatrix ', end='')

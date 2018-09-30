@@ -5,14 +5,14 @@ import unittest
 import glotzformats
 
 try:
-    import CifFile
+    import CifFile  # noqa: F401
 except ImportError:
     PYCIFRW = False
 else:
     PYCIFRW = True
 
 try:
-    import gtar
+    import gtar  # noqa: F401
 except ImportError:
     GTAR = False
 else:

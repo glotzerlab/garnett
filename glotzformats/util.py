@@ -7,7 +7,7 @@ import os
 import logging
 from .common import six
 from contextlib import contextmanager
-from . import reader, trajectory
+from . import reader
 
 
 logger = logging.getLogger(__name__)

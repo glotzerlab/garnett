@@ -98,7 +98,10 @@ class PosFileFrame(Frame):
                 xyz = next(tokens), next(tokens), next(tokens)
                 colors.append(next(tokens))
                 centers.append([self._num(v) for v in xyz])
-            return SphereUnionShapeDefinition(shape_class=shape_class, diameters=diameters, centers=centers, colors=colors)
+            return SphereUnionShapeDefinition(shape_class=shape_class,
+                                              diameters=diameters,
+                                              centers=centers,
+                                              colors=colors)
         elif shape_class.lower() == 'poly3d_union':
             num_centers = int(next(tokens))
             vertices = [[] for p in range(num_centers)]
@@ -115,8 +118,12 @@ class PosFileFrame(Frame):
                 quat = next(tokens), next(tokens), next(tokens), next(tokens)
                 orientations.append([self._num(q) for q in quat])
                 colors.append(next(tokens))
-            return PolyUnionShapeDefinition(shape_class=shape_class, vertices=vertices, centers=centers, orientations=orientations, colors=colors)
-        elif shape_class.lower() == 'polyv':
+            return PolyUnionShapeDefinition(shape_class=shape_class,
+                                            vertices=vertices,
+                                            centers=centers,
+                                            orientations=orientations,
+                                            colors=colors)
+        elif shape_class.lower() == 'polyv':  # Officially polyV
             num_vertices = int(next(tokens))
             vertices = []
             for i in range(num_vertices):
@@ -130,7 +137,9 @@ class PosFileFrame(Frame):
                 for j in range(nvert):
                     fv.append(int(next(tokens)))
                 faces.append(fv)
-            return GeneralPolyShapeDefinition(shape_class=shape_class, vertices=vertices, faces=faces)
+            return GeneralPolyShapeDefinition(shape_class=shape_class,
+                                              vertices=vertices,
+                                              faces=faces)
         elif shape_class.lower() == 'poly3d':
             num_vertices = int(next(tokens))
             vertices = []
@@ -141,7 +150,9 @@ class PosFileFrame(Frame):
                 color = next(tokens)
             except StopIteration:
                 color = None
-            return PolyShapeDefinition(shape_class=shape_class, vertices=vertices, color=color)
+            return PolyShapeDefinition(shape_class=shape_class,
+                                       vertices=vertices,
+                                       color=color)
         elif shape_class.lower() == 'spoly3d':
             rounding_radius = float(next(tokens))
             num_vertices = int(next(tokens))
@@ -153,7 +164,10 @@ class PosFileFrame(Frame):
                 color = next(tokens)
             except StopIteration:
                 color = None
-            return SpheroPolyShapeDefinition(shape_class=shape_class, vertices=vertices, rounding_radius=rounding_radius, color=color)
+            return SpheroPolyShapeDefinition(shape_class=shape_class,
+                                             vertices=vertices,
+                                             rounding_radius=rounding_radius,
+                                             color=color)
         else:
             warnings.warn("Failed to parse shape definition, "
                           "using fallback mode. ({})".format(line))
@@ -219,8 +233,7 @@ class PosFileFrame(Frame):
                 elif tokens[0] == 'rotation':
                     euler_angles = np.array([float(t) for t in tokens[1:]])
                     euler_angles *= np.pi / 180
-                    raw_frame.view_rotation = rowan.from_euler(*euler_angles,
-                            axis_type='extrinsic', convention='xyz')
+                    raw_frame.view_rotation = rowan.from_euler(*euler_angles, axis_type='extrinsic', convention='xyz')
                 else:
                     # assume we are reading positions now
                     if not monotype:

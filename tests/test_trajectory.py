@@ -62,7 +62,6 @@ class TrajectoryTest(unittest.TestCase):
             return io.StringIO(self.sample)
 
     def test_str(self):
-        from glotzformats.trajectory import Frame
         sample_file = self.get_sample_file()
         traj = self.reader().read(sample_file)
         str(traj)
@@ -309,6 +308,7 @@ class TrajectoryTest(unittest.TestCase):
         with self.assertRaises(ValueError):
             traj[0].angmom = 'hello'
 
+
 @unittest.skipIf(not HOOMD, 'requires hoomd-blue')
 class FrameSnapshotExport(TrajectoryTest):
 
@@ -386,6 +386,7 @@ class FrameSnapshotExport(TrajectoryTest):
 
     def test_injavis_dialect(self):
         self.make_snapshot(glotzformats.samples.POS_INJAVIS)
+
 
 if __name__ == '__main__':
     unittest.main()
