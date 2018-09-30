@@ -52,6 +52,7 @@ def _box_matrix(box):
         [xy * ly, ly, 0.0],
         [xz * lz, yz * lz, lz]]).T
 
+
 def _parse_shape_definitions(frame, gsdfile, frame_index):
 
     def get_chunk(i, chunk):

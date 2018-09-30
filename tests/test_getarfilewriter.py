@@ -7,11 +7,12 @@ import numpy as np
 import glotzformats
 
 try:
-    import gtar
+    import gtar  # noqa: F401
 except ImportError:
     GTAR = False
 else:
     GTAR = True
+
 
 @unittest.skipIf(not GTAR, 'GetarFileWriter requires the gtar module.')
 class BaseGetarFileWriterTest(unittest.TestCase):
@@ -37,7 +38,7 @@ class BaseGetarFileWriterTest(unittest.TestCase):
         original_data = {}
         for prop in readwrite_props:
             original_data[prop] = getattr(traj, prop)
-        box_orig = traj[0].box.get_box_matrix() # Just checking one frame
+        box_orig = traj[0].box.get_box_matrix()  # Just checking one frame
 
         # Write to a temp file that tests each supported GTAR backend
         for suffix in ['.zip', '.tar', '.sqlite']:
@@ -53,6 +54,7 @@ class BaseGetarFileWriterTest(unittest.TestCase):
                     self.assertTrue(np.array_equal(
                         getattr(traj, prop), original_data[prop]))
                 self.assertTrue(np.allclose(traj[0].box.get_box_matrix(), box_orig))
+
 
 if __name__ == '__main__':
     unittest.main()

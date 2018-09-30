@@ -59,15 +59,14 @@ def _euler_to_quaternion(alpha, q):
 
 
 def _box_matrix_from_frame_header(frame_header, tol=1e-12):
-    from math import cos, sqrt, pi
     fh = frame_header
 
     lx = fh.box_a
     xy = fh.box_b * fh.box_gamma
     xz = fh.box_c * fh.box_beta
-    ly = sqrt(fh.box_b*fh.box_b - xy*xy)
+    ly = np.sqrt(fh.box_b*fh.box_b - xy*xy)
     yz = (fh.box_b*fh.box_c*fh.box_alpha - xy*xz) / lx
-    lz = sqrt(fh.box_c*fh.box_c - xz*xz - yz*yz)
+    lz = np.sqrt(fh.box_c*fh.box_c - xz*xz - yz*yz)
 
     xy /= ly
     xz /= lz

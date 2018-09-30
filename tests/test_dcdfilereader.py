@@ -44,7 +44,7 @@ class BaseDCDFileReaderTest(TrajectoryTest):
         return self.reader().read(self.get_sample_file(), top_traj[0])
 
     def test_read(self):
-        top_traj = self.read_top_trajectory()
+        assert self.read_top_trajectory()
         traj = self.get_traj()
         self.assertEqual(len(traj), 10)
         self.assertEqual(len(traj[0]), 10)

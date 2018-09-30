@@ -4,7 +4,8 @@ Author: Vyas Ramasubramani
 
 """
 
-import gsd, gsd.hoomd
+import gsd
+import gsd.hoomd
 import logging
 import numpy as np
 logger = logging.getLogger(__name__)
@@ -76,7 +77,7 @@ class GSDHOOMDFileWriter(object):
                 "as the underlying library is reading the file by filename "
                 "and not directly from the stream.")
 
-        with gsd.hoomd.open(name = filename, mode = mode) as traj_outfile:
+        with gsd.hoomd.open(name=filename, mode=mode) as traj_outfile:
             for i, frame in enumerate(trajectory):
                 types = list(set(frame.types))
                 snap = gsd.hoomd.Snapshot()

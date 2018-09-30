@@ -15,6 +15,7 @@ import json
 import logging
 logger = logging.getLogger(__name__)
 
+
 class GetarFileWriter(object):
     """getar-file writer for the Glotzer Group, University of Michigan.
 
@@ -71,7 +72,6 @@ class GetarFileWriter(object):
         name_contents = json.dumps(types)
         bulkwriter.writeRecord(rec=name_rec, contents=name_contents)
 
-
         if not skip_props:
             # Particle properties
             for prop, recname in type(self).property_record_map.items():
@@ -93,14 +93,12 @@ class GetarFileWriter(object):
             try:
                 shape_contents.append(frame.shapedef[typename].json_shape)
             except AttributeError:
-                logger.warn('Shape type {} is unsupported '
-                            'for getar writing.'.format(
+                logger.warn('Shape type {} is unsupported for getar writing.'.format(
                     frame.shapedef[typename].__class__))
                 shape_contents.append(None)
             except KeyError:
-                logger.info('Type name \'{}\' has no stored '
-                            'shape information.'.format(
-                                typename))
+                logger.info('Type name \'{}\' has no stored shape information.'.format(
+                    typename))
                 shape_contents.append(None)
         shape_contents = json.dumps(shape_contents)
         bulkwriter.writeRecord(rec=shape_rec, contents=shape_contents)
@@ -126,7 +124,7 @@ class GetarFileWriter(object):
 
             for index, frame in enumerate(trajectory):
 
-                if index == 0: # avoid indexing to allow tqdm(trajectory)
+                if index == 0:  # avoid indexing to allow tqdm(trajectory)
                     if static_frame is None:
                         # Write the first frame of the trajectory as static data
                         # so that box, type, and shape information is accessible

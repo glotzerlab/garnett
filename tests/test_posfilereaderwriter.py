@@ -310,9 +310,9 @@ class PosFileWriterTest(BasePosFileWriterTest):
         'Henzie_lithium_triclinic',
         'cubic_onep',
         'cubic_twop',
-        #'hex_onep',    # These tests are deactivated, because we currently
-        #'hex_twop',    # do not have a solution to keep the reference orientation
-        #'rand_test',   # the same. The systems are otherwise identical.
+        # 'hex_onep',    # These tests are deactivated, because we currently
+        # 'hex_twop',    # do not have a solution to keep the reference orientation
+        # 'rand_test',   # the same. The systems are otherwise identical.
         'scc',
         'switch_FeSiUC',
         'switch_scc')
@@ -335,8 +335,8 @@ class PosFileWriterTest(BasePosFileWriterTest):
         'xtalslice3_small',
         'FeSiUC',
         # For the following two, the box has a different sign...
-        #'xtalslice3_small_rotated',
-        #'switch_FeSiUC',
+        # 'xtalslice3_small_rotated',
+        # 'switch_FeSiUC',
         )
     def test_read_write_read_rotated(self, name):
         fn = os.path.join(PATH, 'samples', name + '.pos')
@@ -352,7 +352,7 @@ class PosFileWriterTest(BasePosFileWriterTest):
                     for f0, f1 in zip(traj0, traj1):
                         self.assert_approximately_equal_frames(
                             f0, f1, decimals=4, atol=1e-6,
-                            ignore_orientations=True # The shapes themselves are differently oriented
+                            ignore_orientations=True  # The shapes themselves are differently oriented
                             )
 
 
