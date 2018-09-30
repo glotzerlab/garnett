@@ -43,7 +43,7 @@ setup(
 
     entry_points={
         'console_scripts': [
-            'gf-convert = glotzformats.convert:main',
+            'gf-convert = glotzformats.convert.__main__:main',
         ],
     },
 )
