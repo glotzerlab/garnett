@@ -31,19 +31,19 @@ def _parse_shape_definition(shape):
 
     if shape_type in ('sphere', 'disk'):
         diameter = shape.get('diameter', 2*shape.get('rounding_radius', 0.5))
-        shapedef = SphereShapeDefinition(diameter=diameter, color=None)
+        shapedef = SphereShapeDefinition(diameter=diameter, color=shape.get('color', None))
     elif shape_type == 'convexpolyhedron':
         if rounding_radius == 0:
             shapedef = PolyShapeDefinition(
-                shape_class='poly3d', vertices=shape['vertices'], color=None)
+                shape_class='poly3d', vertices=shape['vertices'], color=shape.get('color', None))
         else:
             shapedef = SpheroPolyShapeDefinition(
                 shape_class='spoly3d', vertices=shape['vertices'],
-                rounding_radius=rounding_radius, color=None)
+                rounding_radius=rounding_radius, color=shape.get('color', None))
     elif shape_type == 'polyhedron':
         shapedef = GeneralPolyShapeDefinition(
             shape_class='polyV', vertices=shape['vertices'], faces=shape['faces'],
-            facet_colors=shape['colors'], color=None)
+            facet_colors=shape['colors'], color=shape.get('color', None))
 
     if shapedef is None:
         logger.warning("Failed to parse shape definition: shape {} not supported. "
