@@ -31,15 +31,13 @@ def _print_err(msg=None, *args):
 def _build_slice(slice_string):
     if isinstance(slice_string, slice):
         return slice_string
-    if slice_string.count(':') == 0: # dump the last n frames
+    if slice_string.count(':') == 0:  # dump the last n frames
         start, end, step = -int(slice_string), None, 1
     elif slice_string.count(':') == 1:
-        start, end = [(None if e == '' else int(e))
-                for e in slice_string.split(':')]
+        start, end = [(None if e == '' else int(e)) for e in slice_string.split(':')]
         step = None
     elif slice_string.count(':') == 2:
-        start, end, step = [(None if e == '' else int(e))
-                for e in slice_string.split(':')]
+        start, end, step = [(None if e == '' else int(e)) for e in slice_string.split(':')]
     return slice(start, end, step)
 
 
@@ -81,8 +79,9 @@ def _color_by_type(frame, colors=DEFAULT_COLORS):
     return frame
 
 
-def convert_file(infile, outfile=None, outformat=None, template=None, frames=':', center_by_density=False, select_center=False,
-                 center=False, color_by_type=False, colors=DEFAULT_COLORS, no_progress=False):
+def convert_file(infile, outfile=None, outformat=None, template=None, frames=':',
+                 center_by_density=False, select_center=False, center=False,
+                 color_by_type=False, colors=DEFAULT_COLORS, no_progress=False):
     """Convert trajectory files from one format to another.
 
     :param infile: Path to input trajectory.

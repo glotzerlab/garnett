@@ -7,7 +7,7 @@ import os
 import logging
 from .common import six
 from contextlib import contextmanager
-from . import reader, writer, trajectory
+from . import reader, writer
 
 
 logger = logging.getLogger(__name__)
@@ -111,11 +111,11 @@ def read(filename_or_fileobj, template=None, fmt=None):
         yield traj
 
 
-def write(trajectory, filename_or_fileobj, fmt=None):
+def write(traj, filename_or_fileobj, fmt=None):
     """This function automatically detects the file format and writes a trajectory to the file.
 
-    :param trajectory: Trajectory to write.
-    :type trajectory: :class:`~glotzformats.trajectory.Trajectory`
+    :param traj: Trajectory to write.
+    :type traj: :class:`~glotzformats.trajectory.Trajectory`
     :param filename_or_fileobj: Filename to write.
     :type filename_or_fileobj: string or file object
     :param fmt: File format, one of 'gsd', 'gtar', 'pos', 'cif'
@@ -139,4 +139,4 @@ def write(trajectory, filename_or_fileobj, fmt=None):
     mode = WRITE_CLASS_MODES[file_format]['mode']
 
     with filename_or_fileobj if is_fileobj else open(filename_or_fileobj, mode) as write_file:
-        file_writer.write(trajectory, write_file)
+        file_writer.write(traj, write_file)

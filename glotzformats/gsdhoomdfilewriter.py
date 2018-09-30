@@ -8,10 +8,11 @@ import gsd
 import gsd.hoomd
 import logging
 import numpy as np
-logger = logging.getLogger(__name__)
 
 from .trajectory import SphereShapeDefinition, PolyShapeDefinition, SpheroPolyShapeDefinition
 from .trajectory import ARRAY_PROPERTIES, HOOMD_SNAPSHOT_PROPERTY_MAP, make_default_array
+
+logger = logging.getLogger(__name__)
 
 
 def _write_shape_definitions(snap, shapedefs):
@@ -37,7 +38,8 @@ def _write_shape_definitions(snap, shapedefs):
                 vertices = compute_property(lambda shape: shape.vertices)
                 vertices = np.concatenate(vertices, axis=0)
                 state['hpmc/convex_spheropolyhedron/vertices'] = vertices
-                state['hpmc/convex_spheropolyhedron/sweep_radius'] = compute_property(lambda shape: shape.rounding_radius)
+                state['hpmc/convex_spheropolyhedron/sweep_radius'] = \
+                    compute_property(lambda shape: shape.rounding_radius)
 
     snap.state = state
 

@@ -292,7 +292,6 @@ class PolyShapeDefinition(ShapeDefinition):
                 'vertices': np.asarray(self.vertices).tolist()}
 
 
-
 class SpheroPolyShapeDefinition(ShapeDefinition):
     """Initialize a SpheroPolyShapeDefinition instance.
 
