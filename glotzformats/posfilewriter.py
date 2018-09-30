@@ -19,7 +19,7 @@ from itertools import chain
 import numpy as np
 
 from .posfilereader import POSFILE_FLOAT_DIGITS
-from .trajectory import SphereShapeDefinition, ArrowShapeDefinition
+from .trajectory import SphereShapeDefinition, ArrowShapeDefinition, make_default_array
 import rowan
 
 
@@ -110,7 +110,7 @@ class PosFileWriter(object):
 
             # Use identity quaternions when orientations are needed if none were provided
             if frame.orientations is None:
-                orientations = np.asarray([[1, 0, 0, 0]] * len(frame.types))
+                orientations = make_default_array('orientations', (len(frame),))
             else:
                 orientations = frame.orientations
 

@@ -6,7 +6,40 @@ Author: Vyas Ramasubramani
 
 import gsd, gsd.hoomd
 import logging
+import numpy as np
 logger = logging.getLogger(__name__)
+
+from .trajectory import SphereShapeDefinition, PolyShapeDefinition, SpheroPolyShapeDefinition
+from .trajectory import ARRAY_PROPERTIES, HOOMD_SNAPSHOT_PROPERTY_MAP, make_default_array
+
+
+def _write_shape_definitions(snap, shapedefs):
+    state = {}
+
+    def compute_property(compute=lambda x: x):
+        return np.array([compute(shape) for shape in shapedefs.values()])
+
+    n_types = len(shapedefs)
+    if n_types > 0:
+        # Ensure all shape types are the same
+        shape_type = type(next(iter(shapedefs.values())))
+        if all([isinstance(shapedef, shape_type) for shapedef in shapedefs.values()]):
+            if shape_type is SphereShapeDefinition:
+                state['hpmc/sphere/radius'] = compute_property(lambda shape: 0.5*shape.diameter)
+            elif shape_type is PolyShapeDefinition:
+                state['hpmc/convex_polyhedron/N'] = compute_property(lambda shape: len(shape.vertices))
+                vertices = compute_property(lambda shape: shape.vertices)
+                vertices = np.concatenate(vertices, axis=0)
+                state['hpmc/convex_polyhedron/vertices'] = vertices
+            elif shape_type is SpheroPolyShapeDefinition:
+                state['hpmc/convex_spheropolyhedron/N'] = compute_property(lambda shape: len(shape.vertices))
+                vertices = compute_property(lambda shape: shape.vertices)
+                vertices = np.concatenate(vertices, axis=0)
+                state['hpmc/convex_spheropolyhedron/vertices'] = vertices
+                state['hpmc/convex_spheropolyhedron/sweep_radius'] = compute_property(lambda shape: shape.rounding_radius)
+
+    snap.state = state
+
 
 class GSDHOOMDFileWriter(object):
     """GSD file writer for the Glotzer Group, University of Michigan.
@@ -47,21 +80,18 @@ class GSDHOOMDFileWriter(object):
             for i, frame in enumerate(trajectory):
                 types = list(set(frame.types))
                 snap = gsd.hoomd.Snapshot()
-                snap.particles.N = len(frame)
+                N = len(frame)
+                snap.particles.N = N
                 snap.particles.types = types
-                snap.particles.typeid = [types.index(typeid)
-                                         for typeid in frame.types]
-                snap.particles.position = frame.positions
-                snap.particles.orientation = frame.orientations
-                snap.particles.velocity = frame.velocities
-                snap.particles.mass = frame.mass
-                snap.particles.charge = frame.charge
-                snap.particles.diameter = frame.diameter
-                snap.particles.moment_inertia = frame.moment_inertia
-                snap.particles.angmom = frame.angmom
-                box = frame.box
-                snap.configuration.box = [box.Lx, box.Ly, box.Lz,
-                                          box.xy, box.xz, box.yz]
+                snap.particles.typeid = [types.index(typeid) for typeid in frame.types]
+                snap.configuration.box = frame.box.get_box_array()
+
+                # Set positions, orientations, etc.
+                for attr in ARRAY_PROPERTIES:
+                    setattr(snap.particles, HOOMD_SNAPSHOT_PROPERTY_MAP.get(attr, attr),
+                            getattr(frame, attr, make_default_array(attr, (N,))))
+
+                _write_shape_definitions(snap, frame.shapedef)
                 traj_outfile.append(snap)
                 logger.debug("Wrote frame {}.".format(i + 1))
         logger.info("Wrote {} frames.".format(i + 1))

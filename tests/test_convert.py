@@ -41,33 +41,33 @@ class ConvertTest(unittest.TestCase):
         self.addCleanup(self.tmp_dir.cleanup)
         self.infiles = {}
         self.outfiles = {}
-        self.infiles['gsd'] = 'dump.gsd'
+        self.infiles['gsd'] = ['dump.gsd', 'hpmc-spherocubes.gsd']
         self.outfiles['gsd'] = 'test.gsd'
-        self.infiles['pos'] = 'FeSiUC.pos'
+        self.infiles['pos'] = ['FeSiUC.pos']
         self.outfiles['pos'] = 'test.pos'
-        self.infiles['xml'] = 'hoomd.xml'
+        self.infiles['xml'] = ['hoomd.xml']
         if PYCIFRW:
-            self.infiles['cif'] = 'cI16.cif'
+            self.infiles['cif'] = ['cI16.cif']
             self.outfiles['cif'] = 'test.cif'
         if GTAR:
-            self.infiles['gtar'] = 'libgetar_sample.tar'
+            self.infiles['gtar'] = ['libgetar_sample.tar', 'hpmc-cubes.zip']
             self.outfiles['gtar'] = 'test.tar'
         for fmt in self.infiles:
-            self.infiles[fmt] = get_filename(self.infiles[fmt])
+            self.infiles[fmt] = [get_filename(infile) for infile in self.infiles[fmt]]
         for fmt in self.outfiles:
             self.outfiles[fmt] = os.path.join(self.tmp_dir.name, self.outfiles[fmt])
 
     def test_convert(self):
-        for informat, outformat in itertools.product(self.infiles, self.outfiles):
-            infile = self.infiles[informat]
-            outfile = self.outfiles[outformat]
-            glotzformats.convert(infile, outfile, no_progress=True)
+        for informat in self.infiles:
+            for infile, outformat in itertools.product(self.infiles[informat], self.outfiles):
+                outfile = self.outfiles[outformat]
+                glotzformats.convert(infile, outfile, no_progress=True)
 
-            # Verify that the output frames match the input frames
-            with glotzformats.read(infile) as intraj:
-                with glotzformats.read(outfile) as outtraj:
-                    for inframe, outframe in zip(intraj, outtraj):
-                        self.assertEqual(inframe, outframe)
+                # Verify that the output frames match the input frames
+                with glotzformats.read(infile) as intraj:
+                    with glotzformats.read(outfile) as outtraj:
+                        for inframe, outframe in zip(intraj, outtraj):
+                            self.assertEqual(inframe, outframe)
 
 
 if __name__ == '__main__':

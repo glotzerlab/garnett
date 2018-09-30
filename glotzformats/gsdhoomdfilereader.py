@@ -30,8 +30,8 @@ import copy
 import numpy as np
 
 from .trajectory import _RawFrameData, Frame, Trajectory
-from .trajectory import SphereShapeDefinition, PolyShapeDefinition, \
-                        SpheroPolyShapeDefinition
+from .trajectory import SphereShapeDefinition, PolyShapeDefinition, SpheroPolyShapeDefinition
+from .trajectory import ARRAY_PROPERTIES, HOOMD_SNAPSHOT_PROPERTY_MAP
 
 try:
     from gsd.fl import GSDFile
@@ -140,20 +140,16 @@ class GSDHoomdFrame(Frame):
         frame = self.traj.read_frame(self.frame_index)
         raw_frame.box = _box_matrix(frame.configuration.box)
         raw_frame.box_dimensions = int(frame.configuration.dimensions)
-        raw_frame.types = [frame.particles.types[t]
-                           for t in frame.particles.typeid]
-        raw_frame.positions = frame.particles.position
-        raw_frame.orientations = frame.particles.orientation
-        raw_frame.velocities = frame.particles.velocity
-        raw_frame.mass = frame.particles.mass
-        raw_frame.charge = frame.particles.charge
-        raw_frame.diameter = frame.particles.diameter
-        raw_frame.moment_inertia = frame.particles.moment_inertia
-        raw_frame.angmom = frame.particles.angmom
+        raw_frame.types = [frame.particles.types[t] for t in frame.particles.typeid]
+
+        # Set positions, orientations, etc.
+        for attr in ARRAY_PROPERTIES:
+            setattr(raw_frame, attr,
+                    getattr(frame.particles, HOOMD_SNAPSHOT_PROPERTY_MAP.get(attr, attr)))
+
         if self.read_gsd_shape_data:
             raw_frame.shapedef.update(
-                _parse_shape_definitions(frame, self.gsdfile,
-                                         self.frame_index))
+                _parse_shape_definitions(frame, self.gsdfile, self.frame_index))
         return raw_frame
 
     def __str__(self):

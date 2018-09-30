@@ -7,29 +7,28 @@ trajectories."""
 import logging
 import math
 import collections
+import copy
 
 import numpy as np
-
 import rowan
 
 logger = logging.getLogger(__name__)
 
 SHAPE_DEFAULT_COLOR = '005984FF'
 DEFAULT_DTYPE = np.float32
-
 ARRAY_PROPERTIES = ['positions', 'orientations', 'velocities', 'mass',
                     'charge', 'diameter', 'moment_inertia', 'angmom']
-
 HOOMD_SNAPSHOT_PROPERTY_MAP = {
     'positions': 'position',
     'orientations': 'orientation',
     'velocities': 'velocity',
 }
 
-def _make_default_array(attr, shape, dtype=DEFAULT_DTYPE):
+
+def make_default_array(attr, shape, dtype=DEFAULT_DTYPE):
     if attr == 'types':
         return np.zeros(shape, dtype=np.int_)
-    elif attr in ['positions', 'velocities']:
+    elif attr in ['positions', 'velocities', 'moment_inertia']:
         return np.zeros(shape + (3,), dtype=dtype)
     elif attr == 'orientations':
         orientations = np.zeros(shape + (4,), dtype=dtype)
@@ -41,8 +40,6 @@ def _make_default_array(attr, shape, dtype=DEFAULT_DTYPE):
         return np.ones(shape, dtype=dtype)
     elif attr == 'charge':
         return np.zeros(shape, dtype=dtype)
-    elif attr == 'moment_inertia':
-        return np.ones(shape + (3,), dtype=dtype)
 
 
 class Box(object):
@@ -145,7 +142,12 @@ class ShapeDefinition(object):
         return str(self)
 
     def __eq__(self, other):
-        return str(self) == str(other)
+        # Ignore shape colors when determining equality, since not all formats support colors
+        selfcopy = copy.deepcopy(self)
+        selfcopy.color = SHAPE_DEFAULT_COLOR
+        othercopy = copy.deepcopy(other)
+        othercopy.color = SHAPE_DEFAULT_COLOR
+        return str(selfcopy) == str(othercopy)
 
 
 class SphereShapeDefinition(ShapeDefinition):
@@ -285,7 +287,8 @@ class PolyShapeDefinition(ShapeDefinition):
         return {'type': 'ConvexPolyhedron',
                 'color': self.color,
                 'rounding_radius': 0,
-                'vertices': self.vertices}
+                'vertices': np.asarray(self.vertices).tolist()}
+
 
 class SpheroPolyShapeDefinition(ShapeDefinition):
     """Initialize a SpheroPolyShapeDefinition instance.
@@ -319,8 +322,8 @@ class SpheroPolyShapeDefinition(ShapeDefinition):
     def json_shape(self):
         return {'type': 'ConvexPolyhedron',
                 'color': self.color,
-                'rounding_radius': self.rounding_radius,
-                'vertices': self.vertices}
+                'rounding_radius': float(self.rounding_radius),
+                'vertices': np.asarray(self.vertices).tolist()}
 
 class GeneralPolyShapeDefinition(ShapeDefinition):
     """Initialize a GeneralPolyShapeDefinition instance.
@@ -398,7 +401,9 @@ class FrameData(object):
             def compare_attr(attr, array=False):
                 selfattr = getattr(self, attr, None)
                 otherattr = getattr(other, attr, None)
-                if attr == 'box':
+
+                # This does not set a value for the key 'attr' if one or both frame properties are None
+                if attr == 'box' and selfattr and otherattr:
                     # Compare boxes
                     comparison[attr] = np.allclose(selfattr.get_box_array(), otherattr.get_box_array())
                 elif attr == 'shapedef' and selfattr and otherattr:
@@ -1051,10 +1056,10 @@ class Trajectory(BaseTrajectory):
 
         # Types
         types = [f.types for f in self.frames]
-        type_ids = _make_default_array('types', (M, N))
+        type_ids = make_default_array('types', (M, N))
         _type = _generate_type_id_array(types, type_ids)
 
-        props = {attr: _make_default_array(attr, (M, N), self._dtype) for attr in ARRAY_PROPERTIES}
+        props = {attr: make_default_array(attr, (M, N), self._dtype) for attr in ARRAY_PROPERTIES}
 
         for i, frame in enumerate(self.frames):
             for prop in ARRAY_PROPERTIES:
@@ -1363,7 +1368,7 @@ def copyto_hoomd_blue_snapshot(frame, snapshot):
         if frameattr is not None:
             np.copyto(getattr(snapshot.particles, HOOMD_SNAPSHOT_PROPERTY_MAP.get(attr, attr)), frameattr)
         else:
-            _make_default_array(attr, (N,))
+            make_default_array(attr, (N,))
     return snapshot
 
 

@@ -194,8 +194,6 @@ class CifFileFrame(Frame):
         raw_frame.types = unique_types
         raw_frame.positions = coordinates
         raw_frame.cif_coordinates = cif_coordinates
-        raw_frame.velocities = np.zeros_like(coordinates)
-        raw_frame.orientations = np.zeros((coordinates.shape[0], 4), dtype=np.float32)
         return raw_frame
 
     def __str__(self):
