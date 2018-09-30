@@ -127,6 +127,15 @@ class CifFileFrame(Frame):
                               for (x, y, z) in zip(
             self.parsed['_atom_site_fract_x'], self.parsed['_atom_site_fract_y'], self.parsed['_atom_site_fract_z'])])
 
+
+        if '_atom_site_type_symbol' in self.parsed:
+            site_types = list(self.parsed['_atom_site_type_symbol'])
+        elif '_atom_site_label' in self.parsed:
+            site_types = [re.search('([a-zA-Z]+)', label)
+                          for label in self.parsed['_atom_site_label']]
+        else:
+            site_types = len(fractions)*[self.default_type]
+
         if '_symmetry_equiv_pos_as_xyz' in self.parsed:
             symmetry_ops = [PARSE_DIVISION_REGEXP.sub(
                             _parse_division, REMOVE_NONNUM_REGEXP.sub('', sym))
@@ -134,7 +143,7 @@ class CifFileFrame(Frame):
 
             replicated_fractions = []
             replicated_types = []
-            for (typ, (fx, fy, fz)) in zip(self.parsed['_atom_site_type_symbol'], fractions):
+            for (typ, (fx, fy, fz)) in zip(site_types, fractions):
                 extra_fractions = [eval(sym, dict(x=fx, y=fy, z=fz)) for sym in symmetry_ops]
                 replicated_fractions.extend(extra_fractions)
                 replicated_types.extend(len(extra_fractions)*[typ])
@@ -174,10 +183,7 @@ class CifFileFrame(Frame):
                 unique_types = types
         else:
             unique_points = fractions
-            if '_atom_site_type_symbol' in self.parsed:
-                unique_types = self.parsed['_atom_site_type_symbol']
-            else:
-                unique_types = len(unique_points)*[self.default_type]
+            unique_types = site_types
 
         # Safe the exact points
         cif_coordinates = unique_points.copy()
