@@ -82,7 +82,7 @@ def _color_by_type(frame, colors=DEFAULT_COLORS):
 
 
 def convert_file(infile, outfile=None, outformat=None, template=None, frames=':', center_by_density=False, select_center=False,
-                 center=False, color_by_type=True, colors=DEFAULT_COLORS, no_progress=False):
+                 center=False, color_by_type=False, colors=DEFAULT_COLORS, no_progress=False):
     """Convert trajectory files from one format to another.
 
     :param infile: Path to input trajectory.
@@ -102,7 +102,7 @@ def convert_file(infile, outfile=None, outformat=None, template=None, frames=':'
     :type select_center: float
     :param center: Whether to center the box on the center of particle positions (default: `False`).
     :type center: bool
-    :param color_by_type: Whether to assign particles colors by their types (default: `True`).
+    :param color_by_type: Whether to assign particles colors by their types (default: `False`).
     :type color_by_type: bool
     :param colors: An optional color map for coloring particle types (default: Michigan-inspired color map).
     :type colors: List of hexadecimal strings like `['#00274c', ...]`.
