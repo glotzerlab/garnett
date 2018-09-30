@@ -42,7 +42,7 @@ class ConvertTest(unittest.TestCase):
         self.outfiles = {}
         self.infiles['gsd'] = ['dump.gsd', 'hpmc-spherocubes.gsd']
         self.outfiles['gsd'] = 'test.gsd'
-        self.infiles['pos'] = ['FeSiUC.pos']
+        self.infiles['pos'] = ['FeSiUC.pos', 'multicolored-spheres.pos']
         self.outfiles['pos'] = 'test.pos'
         self.infiles['xml'] = ['hoomd.xml']
         if PYCIFRW:
