@@ -61,6 +61,20 @@ class UtilReaderTest(unittest.TestCase):
         with glotzformats.read(get_filename('hoomd.xml')) as traj:
             self.assertGreater(len(traj), 0)
 
+    def test_read_gsd_template(self):
+        with glotzformats.read(get_filename('template-missing-shape.gsd'),
+                               template=get_filename('template-missing-shape.pos')) as traj:
+            self.assertGreater(len(traj), 0)
+
+            # Make sure a shape definition was parsed from the POS file
+            self.assertGreater(len(traj[0].shapedef), 0)
+
+    def test_read_unsupported_template(self):
+        with self.assertRaises(ValueError):
+            with glotzformats.read(get_filename('FeSiUC.pos'),
+                                   template=get_filename('template-missing-shape.pos')):
+                pass
+
     @unittest.skipIf(PYTHON_2, 'requires python 3')
     def test_read_nonexistent(self):
         with self.assertRaises(FileNotFoundError):

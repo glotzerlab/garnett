@@ -103,12 +103,17 @@ def read(filename_or_fileobj, template=None, fmt=None):
     mode = READ_CLASS_MODES[file_format]['mode']
 
     with filename_or_fileobj if is_fileobj else open(filename_or_fileobj, mode) as read_file:
-        if file_format == 'gsd':
-            traj = file_reader.read(read_file, template)
-        else:
+        if template is None:
             traj = file_reader.read(read_file)
-
-        yield traj
+            yield traj
+        elif file_format == 'gsd':
+            file_reader = READ_CLASS_MODES[file_format]['reader'](
+                read_gsd_shape_data=False)
+            with read(template) as templatetraj:
+                traj = file_reader.read(read_file, templatetraj[0])
+                yield traj
+        else:
+            raise ValueError('The reader class {} does not support templates.'.format(file_reader.__class__.__name__))
 
 
 def write(traj, filename_or_fileobj, fmt=None):
