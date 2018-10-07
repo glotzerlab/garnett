@@ -1,3 +1,4 @@
+import os
 import io
 import unittest
 import base64
@@ -14,6 +15,35 @@ except ImportError:
     GSD = False
 else:
     GSD = True
+
+
+TESTDATA_PATH = os.path.join(os.path.dirname(__file__), 'files/')
+
+
+def get_filename(filename):
+    return os.path.join(TESTDATA_PATH, filename)
+
+
+class ColorlessShape(glotzformats.trajectory.ShapeDefinition):
+    """ShapeDefinition without colors, for comparing formats.
+
+    :param other: Another ShapeDefinition object.
+    :type other: :py:class:`glotzformats.trajectory.ShapeDefinition`
+    """
+
+    def __init__(self, other):
+        for key in vars(other):
+            if key != 'color':
+                setattr(self, key, getattr(other, key))
+
+    def __str__(self):
+        return str(self.shape_class)
+
+
+def assertEqualShapedefs(first, second):
+    assert first.keys() == second.keys()
+    for key in first:
+        assert ColorlessShape(first[key]) == ColorlessShape(second[key])
 
 
 @unittest.skipIf(not GSD, 'GSDHOOMDFileWriter requires the gsd module.')
@@ -55,6 +85,16 @@ class BaseGSDHOOMDFileWriterTest(unittest.TestCase):
                 self.assertTrue(np.array_equal(
                     getattr(traj, prop), original_data[prop]))
             self.assertTrue(np.allclose(traj[0].box.get_box_matrix(), box_orig))
+
+    def test_write_sphere_shapedef(self):
+        # Write to / read from a temp file
+        tmpfile = tempfile.NamedTemporaryFile(mode='wb')
+
+        with tmpfile:
+            with glotzformats.read(get_filename('FeSiUC.pos')) as traj:
+                self.writer.write(traj, tmpfile)
+                written_traj = self.reader.read(tmpfile)
+                assertEqualShapedefs(written_traj[0].shapedef, traj[0].shapedef)
 
 
 if __name__ == '__main__':
