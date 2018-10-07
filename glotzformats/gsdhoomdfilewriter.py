@@ -18,27 +18,34 @@ def _write_shape_definitions(snap, shapedefs):
     state = {}
 
     def compute_property(compute=lambda x: x):
+        """This helper function iterates over the dictionary of shapedefs
+        to produce a numpy array of shape data to save to the frame state."""
         return np.array([compute(shape) for shape in shapedefs.values()])
 
-    n_types = len(shapedefs)
-    if n_types > 0:
-        # Ensure all shape types are the same
+    try:
+        # If the shape types don't all match, there is no valid conversion to the GSD state.
+        # To ensure all shape types are the same: Get the first shape's type,
+        # and then compare it to all other shape types.
+        assert len(shapedefs) > 0, 'shapedefs length is not greater than 0.'
         shape_type = type(next(iter(shapedefs.values())))
-        if all([isinstance(shapedef, shape_type) for shapedef in shapedefs.values()]):
-            if shape_type is SphereShapeDefinition:
-                state['hpmc/sphere/radius'] = compute_property(lambda shape: 0.5*shape.diameter)
-            elif shape_type is PolyShapeDefinition:
-                state['hpmc/convex_polyhedron/N'] = compute_property(lambda shape: len(shape.vertices))
-                vertices = compute_property(lambda shape: shape.vertices)
-                vertices = np.concatenate(vertices, axis=0)
-                state['hpmc/convex_polyhedron/vertices'] = vertices
-            elif shape_type is SpheroPolyShapeDefinition:
-                state['hpmc/convex_spheropolyhedron/N'] = compute_property(lambda shape: len(shape.vertices))
-                vertices = compute_property(lambda shape: shape.vertices)
-                vertices = np.concatenate(vertices, axis=0)
-                state['hpmc/convex_spheropolyhedron/vertices'] = vertices
-                state['hpmc/convex_spheropolyhedron/sweep_radius'] = \
-                    compute_property(lambda shape: shape.rounding_radius)
+        assert all([isinstance(shapedef, shape_type) for shapedef in shapedefs.values()]), 'Not all shape types match.'
+    except AssertionError as e:
+        logger.warning('Shape definitions could not be written to the GSD snapshot: {}'.format(e))
+    else:
+        if shape_type is SphereShapeDefinition:
+            state['hpmc/sphere/radius'] = compute_property(lambda shape: 0.5*shape.diameter)
+        elif shape_type is PolyShapeDefinition:
+            state['hpmc/convex_polyhedron/N'] = compute_property(lambda shape: len(shape.vertices))
+            vertices = compute_property(lambda shape: shape.vertices)
+            vertices = np.concatenate(vertices, axis=0)
+            state['hpmc/convex_polyhedron/vertices'] = vertices
+        elif shape_type is SpheroPolyShapeDefinition:
+            state['hpmc/convex_spheropolyhedron/N'] = compute_property(lambda shape: len(shape.vertices))
+            vertices = compute_property(lambda shape: shape.vertices)
+            vertices = np.concatenate(vertices, axis=0)
+            state['hpmc/convex_spheropolyhedron/vertices'] = vertices
+            state['hpmc/convex_spheropolyhedron/sweep_radius'] = \
+                compute_property(lambda shape: shape.rounding_radius)
 
     snap.state = state
 
@@ -47,6 +54,7 @@ class GSDHOOMDFileWriter(object):
     """GSD file writer for the Glotzer Group, University of Michigan.
 
     Author: Vyas Ramasubramani
+    Author: Bradley Dice
 
 
     .. code::
