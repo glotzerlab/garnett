@@ -30,8 +30,7 @@ import copy
 import numpy as np
 
 from .trajectory import _RawFrameData, Frame, Trajectory
-from .trajectory import SphereShapeDefinition, PolyShapeDefinition, \
-                        SpheroPolyShapeDefinition
+from .trajectory import SphereShapeDefinition, PolyShapeDefinition, SpheroPolyShapeDefinition
 
 try:
     from gsd.fl import GSDFile
@@ -141,8 +140,7 @@ class GSDHoomdFrame(Frame):
         frame = self.traj.read_frame(self.frame_index)
         raw_frame.box = _box_matrix(frame.configuration.box)
         raw_frame.box_dimensions = int(frame.configuration.dimensions)
-        raw_frame.types = [frame.particles.types[t]
-                           for t in frame.particles.typeid]
+        raw_frame.types = [frame.particles.types[t] for t in frame.particles.typeid]
         raw_frame.positions = frame.particles.position
         raw_frame.orientations = frame.particles.orientation
         raw_frame.velocities = frame.particles.velocity
@@ -153,8 +151,7 @@ class GSDHoomdFrame(Frame):
         raw_frame.angmom = frame.particles.angmom
         if self.read_gsd_shape_data:
             raw_frame.shapedef.update(
-                _parse_shape_definitions(frame, self.gsdfile,
-                                         self.frame_index))
+                _parse_shape_definitions(frame, self.gsdfile, self.frame_index))
         return raw_frame
 
     def __str__(self):
