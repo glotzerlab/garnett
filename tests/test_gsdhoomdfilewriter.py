@@ -41,7 +41,7 @@ class ColorlessShape(glotzformats.trajectory.ShapeDefinition):
 
 
 def assertEqualShapedefs(first, second):
-    assert first.keys() == second.keys()
+    assert set(first.keys()) == set(second.keys())
     for key in first:
         assert ColorlessShape(first[key]) == ColorlessShape(second[key])
 
