@@ -225,7 +225,7 @@ class HPMCPosFileReaderTest(BasePosFileReaderTest):
         pos_writer = dump.pos(filename=self.fn_pos, period=1)
         self.mc.setup_pos_writer(pos_writer)
         run(10, quiet=True)
-        with open(self.fn_pos, 'r') as posfile:
+        with io.open(self.fn_pos, 'r', encoding='utf-8') as posfile:
             self.read_trajectory(posfile)
 
 
