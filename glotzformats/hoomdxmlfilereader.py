@@ -35,17 +35,13 @@ class HOOMDXMLFrame(Frame):
         raw_frame.box = np.asarray(_get_box_matrix(config.find('box')))
         raw_frame.box_dimensions = int(config.get('dimensions', 3))
         raw_frame.positions = list(_parse_positions(config.find('position')))
-        velocities = config.find('velocity')
-        if velocities is None:
-            raw_frame.velocities = [[0, 0, 0]] * len(raw_frame.positions)
-        else:
-            raw_frame.velocities = list(
-                _parse_velocities(config.find('velocity')))
         orientations = config.find('orientation')
-        if orientations is None:
-            raw_frame.orientations = [[1, 0, 0, 0]] * len(raw_frame.positions)
-        else:
+        if orientations is not None:
             raw_frame.orientations = list(_parse_orientations(orientations))
+        velocities = config.find('velocity')
+        if velocities is not None:
+            raw_frame.velocities = list(_parse_velocities(velocities))
+
         raw_frame.types = list(_parse_types(config.find('type')))
         return raw_frame
 
