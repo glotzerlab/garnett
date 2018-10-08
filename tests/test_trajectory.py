@@ -21,7 +21,6 @@ except ImportError:
     HOOMD = False
 else:
     HOOMD = True
-    HOOMD_v1 = True
 
 
 if HOOMD:
@@ -168,6 +167,10 @@ class TrajectoryTest(unittest.TestCase):
         with self.assertRaises(RuntimeError):
             traj.positions
         traj.load_arrays()
+        try:
+            traj.positions
+        except AttributeError:
+            return
         self.assertTrue(np.issubdtype(
             traj.positions.dtype, glotzformats.trajectory.DEFAULT_DTYPE))
         self.assertEqual(traj.positions.shape, (len(traj), len(traj[0]), 3))
@@ -184,6 +187,10 @@ class TrajectoryTest(unittest.TestCase):
         with self.assertRaises(RuntimeError):
             traj.orientations
         traj.load_arrays()
+        try:
+            traj.orientations
+        except AttributeError:
+            return
         self.assertTrue(np.issubdtype(
             traj.orientations.dtype, glotzformats.trajectory.DEFAULT_DTYPE))
         self.assertEqual(traj.orientations.shape, (len(traj), len(traj[0]), 4))
@@ -221,7 +228,7 @@ class TrajectoryTest(unittest.TestCase):
             traj.mass
         traj.load_arrays()
         try:
-            traj.velocities
+            traj.mass
         except AttributeError:
             return
         self.assertTrue(np.issubdtype(
@@ -241,7 +248,7 @@ class TrajectoryTest(unittest.TestCase):
             traj.charge
         traj.load_arrays()
         try:
-            traj.velocities
+            traj.charge
         except AttributeError:
             return
         self.assertTrue(np.issubdtype(
@@ -261,7 +268,7 @@ class TrajectoryTest(unittest.TestCase):
             traj.diameter
         traj.load_arrays()
         try:
-            traj.velocities
+            traj.diameter
         except AttributeError:
             return
         self.assertTrue(np.issubdtype(
@@ -281,13 +288,13 @@ class TrajectoryTest(unittest.TestCase):
             traj.moment_inertia
         traj.load_arrays()
         try:
-            traj.velocities
+            traj.moment_inertia
         except AttributeError:
             return
         self.assertTrue(np.issubdtype(
             traj.moment_inertia.dtype, glotzformats.trajectory.DEFAULT_DTYPE))
         self.assertEqual(traj.moment_inertia.shape, (len(traj), len(traj[0]), 3))
-        self.assertTrue((traj.diameter[0] == traj[0].diameter).all())
+        self.assertTrue((traj.moment_inertia[0] == traj[0].moment_inertia).all())
         with self.assertRaises(ValueError):
             traj[0].moment_inertia = 'hello'
 
@@ -298,7 +305,7 @@ class TrajectoryTest(unittest.TestCase):
             traj.angmom
         traj.load_arrays()
         try:
-            traj.velocities
+            traj.angmom
         except AttributeError:
             return
         self.assertTrue(np.issubdtype(
