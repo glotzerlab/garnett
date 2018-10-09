@@ -186,7 +186,7 @@ class HPMCPosFileReaderTest(BasePosFileReaderTest):
             context.current.sorter.set_params(grid=8)
         dump.pos(filename=self.fn_pos, period=1)
         run(10, quiet=True)
-        with open(self.fn_pos, 'r') as posfile:
+        with io.open(self.fn_pos, 'r', encoding='utf-8') as posfile:
             self.read_trajectory(posfile)
 
     def test_convex_polyhedron(self):

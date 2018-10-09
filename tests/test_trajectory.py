@@ -170,7 +170,7 @@ class TrajectoryTest(unittest.TestCase):
         try:
             traj.positions
         except AttributeError:
-            return
+            pass
         else:
             self.assertTrue(np.issubdtype(
                 traj.positions.dtype, glotzformats.trajectory.DEFAULT_DTYPE))
@@ -191,7 +191,7 @@ class TrajectoryTest(unittest.TestCase):
         try:
             traj.orientations
         except AttributeError:
-            return
+            pass
         else:
             self.assertTrue(np.issubdtype(
                 traj.orientations.dtype, glotzformats.trajectory.DEFAULT_DTYPE))
@@ -212,7 +212,7 @@ class TrajectoryTest(unittest.TestCase):
         try:
             traj.velocities
         except AttributeError:
-            return
+            pass
         else:
             self.assertTrue(np.issubdtype(
                 traj.velocities.dtype, glotzformats.trajectory.DEFAULT_DTYPE))
@@ -233,7 +233,7 @@ class TrajectoryTest(unittest.TestCase):
         try:
             traj.mass
         except AttributeError:
-            return
+            pass
         else:
             self.assertTrue(np.issubdtype(
                 traj.mass.dtype, glotzformats.trajectory.DEFAULT_DTYPE))
@@ -254,7 +254,7 @@ class TrajectoryTest(unittest.TestCase):
         try:
             traj.charge
         except AttributeError:
-            return
+            pass
         else:
             self.assertTrue(np.issubdtype(
                 traj.charge.dtype, glotzformats.trajectory.DEFAULT_DTYPE))
@@ -275,7 +275,7 @@ class TrajectoryTest(unittest.TestCase):
         try:
             traj.diameter
         except AttributeError:
-            return
+            pass
         else:
             self.assertTrue(np.issubdtype(
                 traj.diameter.dtype, glotzformats.trajectory.DEFAULT_DTYPE))
@@ -296,7 +296,7 @@ class TrajectoryTest(unittest.TestCase):
         try:
             traj.moment_inertia
         except AttributeError:
-            return
+            pass
         else:
             self.assertTrue(np.issubdtype(
                 traj.moment_inertia.dtype, glotzformats.trajectory.DEFAULT_DTYPE))
@@ -314,7 +314,7 @@ class TrajectoryTest(unittest.TestCase):
         try:
             traj.angmom
         except AttributeError:
-            return
+            pass
         else:
             self.assertTrue(np.issubdtype(
                 traj.angmom.dtype, glotzformats.trajectory.DEFAULT_DTYPE))
