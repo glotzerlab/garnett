@@ -10,11 +10,12 @@ import logging
 import numpy as np
 
 from .trajectory import SphereShapeDefinition, PolyShapeDefinition, SpheroPolyShapeDefinition
+from .errors import GSDShapeError
 
 logger = logging.getLogger(__name__)
 
 
-def _write_shape_definitions(snap, shapedefs):
+def _write_shape_definitions(snap, shapedefs, ignore_shape_errors=False):
     state = {}
 
     def compute_property(compute=lambda x: x):
@@ -30,7 +31,8 @@ def _write_shape_definitions(snap, shapedefs):
         shape_type = type(next(iter(shapedefs.values())))
         assert all([isinstance(shapedef, shape_type) for shapedef in shapedefs.values()]), 'Not all shape types match.'
     except AssertionError as e:
-        logger.warning('Shape definitions could not be written to the GSD snapshot: {}'.format(e))
+        if not ignore_shape_errors:
+            raise GSDShapeError('Shape definitions could not be written to the GSD snapshot: {}'.format(e))
     else:
         if shape_type is SphereShapeDefinition:
             state['hpmc/sphere/radius'] = compute_property(lambda shape: 0.5*shape.diameter)
@@ -68,12 +70,16 @@ class GSDHOOMDFileWriter(object):
             writer.write(trajectory, gsdfile)
     """
 
-    def write(self, trajectory, stream):
+    def write(self, trajectory, stream, ignore_shape_errors=False):
         """Serialize a trajectory into gsd-format and write it to a file.
 
         :param trajectory: The trajectory to serialize
         :type trajectory: :class:`~glotzformats.trajectory.Trajectory`
         :param stream: The file to write to.
+        :type stream: File stream
+        :param ignore_shape_errors: Whether to ignore errors occuring during
+            writing shape information to the GSD state (Default: False).
+        :type ignore_shape_errors: bool
         """
 
         try:
@@ -102,7 +108,7 @@ class GSDHOOMDFileWriter(object):
                 snap.particles.moment_inertia = frame.moment_inertia
                 snap.particles.angmom = frame.angmom
                 snap.configuration.box = frame.box.get_box_array()
-                _write_shape_definitions(snap, frame.shapedef)
+                _write_shape_definitions(snap, frame.shapedef, ignore_shape_errors)
                 traj_outfile.append(snap)
                 logger.debug("Wrote frame {}.".format(i + 1))
         logger.info("Wrote {} frames.".format(i + 1))

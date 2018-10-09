@@ -75,7 +75,7 @@ class BaseGSDHOOMDFileWriterTest(unittest.TestCase):
         # Write to a temp file
         tmpfile = tempfile.NamedTemporaryFile(mode='wb')
         with tmpfile as f:
-            self.writer.write(traj, f)
+            self.writer.write(traj, f, ignore_shape_errors=True)
 
             # Read back the file and check if it is the same as the original read
             traj = self.reader.read(f)
