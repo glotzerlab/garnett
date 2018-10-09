@@ -257,10 +257,10 @@ class PosFileFrame(Frame):
                         raise ParserError(line)
                     raw_frame.types.append(name)
                     raw_frame.positions.append([self._num(v) for v in xyz])
-                    if quat is not None:
-                        raw_frame.orientations.append([self._num(v) for v in quat])
-                    else:
+                    if quat is None:
                         raw_frame.orientations.append(quat)
+                    else:
+                        raw_frame.orientations.append([self._num(v) for v in quat])
 
         # If no valid orientations have been added, the array should be empty
         if all([quat is None for quat in raw_frame.orientations]):
