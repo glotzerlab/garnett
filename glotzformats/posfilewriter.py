@@ -19,14 +19,14 @@ from itertools import chain
 import numpy as np
 
 from .posfilereader import POSFILE_FLOAT_DIGITS
-from .trajectory import SphereShapeDefinition, ArrowShapeDefinition
+from .shapes import SphereShape, ArrowShape
 import rowan
 
 
 logger = logging.getLogger(__name__)
 PYTHON_2 = sys.version_info[0] == 2
 
-DEFAULT_SHAPE_DEFINITION = SphereShapeDefinition(1.0, color='005984FF')
+DEFAULT_SHAPE_DEFINITION = SphereShape(1.0, color='005984FF')
 
 
 def _num(x):
@@ -116,9 +116,9 @@ class PosFileWriter(object):
                     pos = rowan.rotate(frame.view_rotation, pos)
                     rot = rowan.multiply(frame.view_rotation, rot)
 
-                if isinstance(shapedef, SphereShapeDefinition):
+                if isinstance(shapedef, SphereShape):
                     _write(' '.join((str(_num(v)) for v in pos)))
-                elif isinstance(shapedef, ArrowShapeDefinition):
+                elif isinstance(shapedef, ArrowShape):
                     # The arrow shape actually has two position vectors of
                     # three elements since it has start.{x,y,z} and end.{x,y,z}.
                     # That is, "rot" is not an accurate variable name, since it

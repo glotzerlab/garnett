@@ -7,9 +7,10 @@ from . import formats
 from . import reader
 from . import writer
 from . import samples
+from . import shapes
 from . import trajectory
 from .util import read
 
 __version__ = '0.4.1'
 
-__all__ = ['formats', 'reader', 'writer', 'samples', 'trajectory', 'read']
+__all__ = ['formats', 'reader', 'writer', 'samples', 'shapes', 'trajectory', 'read']

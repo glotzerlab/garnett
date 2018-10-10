@@ -15,11 +15,10 @@ import warnings
 
 import numpy as np
 
-from .trajectory import _RawFrameData, Frame, Trajectory, \
-    SphereShapeDefinition, PolyShapeDefinition, SpheroPolyShapeDefinition, \
-    ArrowShapeDefinition, SphereUnionShapeDefinition, \
-    PolyUnionShapeDefinition, GeneralPolyShapeDefinition, \
-    FallbackShapeDefinition
+from .trajectory import _RawFrameData, Frame, Trajectory
+from .shapes import FallbackShape, SphereShape, ArrowShape, SphereUnionShape, \
+    ConvexPolyhedronShape, ConvexSpheropolyhedronShape, \
+    ConvexPolyhedronUnionShape, GeneralPolyhedronShape
 import rowan
 
 from .errors import ParserError, ParserWarning
@@ -80,14 +79,16 @@ class PosFileFrame(Frame):
                 color = next(tokens)
             except StopIteration:
                 color = None
-            return SphereShapeDefinition(diameter=diameter, color=color)
+            return SphereShape(diameter=diameter,
+                               color=color)
         elif shape_class.lower() == 'arrow':
             thickness = float(next(tokens))
             try:
                 color = next(tokens)
             except StopIteration:
                 color = None
-            return ArrowShapeDefinition(thickness=thickness, color=color)
+            return ArrowShape(thickness=thickness,
+                              color=color)
         elif shape_class.lower() == 'sphere_union':
             num_centers = int(next(tokens))
             centers = []
@@ -98,10 +99,9 @@ class PosFileFrame(Frame):
                 xyz = next(tokens), next(tokens), next(tokens)
                 colors.append(next(tokens))
                 centers.append([self._num(v) for v in xyz])
-            return SphereUnionShapeDefinition(shape_class=shape_class,
-                                              diameters=diameters,
-                                              centers=centers,
-                                              colors=colors)
+            return SphereUnionShape(diameters=diameters,
+                                    centers=centers,
+                                    colors=colors)
         elif shape_class.lower() == 'poly3d_union':
             num_centers = int(next(tokens))
             vertices = [[] for p in range(num_centers)]
@@ -118,11 +118,10 @@ class PosFileFrame(Frame):
                 quat = next(tokens), next(tokens), next(tokens), next(tokens)
                 orientations.append([self._num(q) for q in quat])
                 colors.append(next(tokens))
-            return PolyUnionShapeDefinition(shape_class=shape_class,
-                                            vertices=vertices,
-                                            centers=centers,
-                                            orientations=orientations,
-                                            colors=colors)
+            return ConvexPolyhedronUnionShape(vertices=vertices,
+                                              centers=centers,
+                                              orientations=orientations,
+                                              colors=colors)
         elif shape_class.lower() == 'polyv':  # Officially polyV
             num_vertices = int(next(tokens))
             vertices = []
@@ -137,9 +136,8 @@ class PosFileFrame(Frame):
                 for j in range(nvert):
                     fv.append(int(next(tokens)))
                 faces.append(fv)
-            return GeneralPolyShapeDefinition(shape_class=shape_class,
-                                              vertices=vertices,
-                                              faces=faces)
+            return GeneralPolyhedronShape(vertices=vertices,
+                                          faces=faces)
         elif shape_class.lower() == 'poly3d':
             num_vertices = int(next(tokens))
             vertices = []
@@ -150,9 +148,8 @@ class PosFileFrame(Frame):
                 color = next(tokens)
             except StopIteration:
                 color = None
-            return PolyShapeDefinition(shape_class=shape_class,
-                                       vertices=vertices,
-                                       color=color)
+            return ConvexPolyhedronShape(vertices=vertices,
+                                         color=color)
         elif shape_class.lower() == 'spoly3d':
             rounding_radius = float(next(tokens))
             num_vertices = int(next(tokens))
@@ -164,14 +161,13 @@ class PosFileFrame(Frame):
                 color = next(tokens)
             except StopIteration:
                 color = None
-            return SpheroPolyShapeDefinition(shape_class=shape_class,
-                                             vertices=vertices,
-                                             rounding_radius=rounding_radius,
-                                             color=color)
+            return ConvexSpheropolyhedronShape(vertices=vertices,
+                                               rounding_radius=rounding_radius,
+                                               color=color)
         else:
             warnings.warn("Failed to parse shape definition, "
                           "using fallback mode. ({})".format(line))
-            return FallbackShapeDefinition(line)
+            return FallbackShape(line)
 
     def read(self):
         "Read the frame data from the stream."
@@ -244,7 +240,7 @@ class PosFileFrame(Frame):
                     else:
                         name = self.default_type
                     if len(tokens) == 7 and isinstance(
-                            raw_frame.shapedef[name], ArrowShapeDefinition):
+                            raw_frame.shapedef[name], ArrowShape):
                         xyz = tokens[-6:-3]
                         quat = tokens[-3:] + [0]
                     elif len(tokens) >= 7:

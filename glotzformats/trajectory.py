@@ -13,7 +13,6 @@ import rowan
 
 logger = logging.getLogger(__name__)
 
-SHAPE_DEFAULT_COLOR = '005984FF'
 DEFAULT_DTYPE = np.float32
 
 
@@ -88,244 +87,6 @@ class Box(object):
             dimensions=self.dimensions)
 
 
-class FallbackShapeDefinition(str):
-    """This shape definition class is used when no specialized
-    ShapeDefinition class can be applied.
-
-    The fallback shape definition is a str containing the definition."""
-    pass
-
-
-class ShapeDefinition(object):
-    """Initialize a ShapeDefinition instance.
-
-    :param shape_class: The shape class definition, e.g. 'sphere' or 'poly3d'.
-    :type shape_class: str
-    :param color: Definition of a color for the
-                  particular shape (optional).
-    :type color: A hexadecimal color string in format RRGGBBAA.
-    """
-
-    def __init__(self, shape_class, color=None):
-        self.shape_class = shape_class
-        self.color = color or SHAPE_DEFAULT_COLOR
-
-    def __str__(self):
-        return "{} {}".format(self.shape_class, self.color)
-
-    def __repr__(self):
-        return str(self)
-
-    def __eq__(self, other):
-        return str(self) == str(other)
-
-
-class SphereShapeDefinition(ShapeDefinition):
-    """Initialize a SphereShapeDefinition instance.
-
-    :param diameter: The diameter of the sphere.
-    :type diameter: A floating point number.
-    :param color: Definition of a color for the
-                  particular shape (optional).
-    :type color: A hexadecimal color string in format RRGGBBAA.
-    """
-
-    def __init__(self, diameter, color=None):
-        super(SphereShapeDefinition, self).__init__(
-            shape_class='sphere', color=color)
-        self.diameter = diameter
-
-    def __str__(self):
-        return "{} {} {}".format(self.shape_class, self.diameter, self.color)
-
-    @property
-    def json_shape(self):
-        return {'type': 'Sphere'}
-
-
-class ArrowShapeDefinition(ShapeDefinition):
-    """Initialize an ArrowShapeDefinition instance.
-
-    :param thickness: The thickness of the arrow.
-    :type thickness: A floating point number.
-    :param color: Definition of a color for the
-                  particular shape (optional).
-    :type color: A hexadecimal color string in format RRGGBBAA.
-    """
-
-    def __init__(self, thickness=0.1, color=None):
-        super(ArrowShapeDefinition, self).__init__(
-            shape_class='arrow', color=color)
-        self.thickness = thickness
-
-    def __str__(self):
-        return "{} {} {}".format(self.shape_class, self.thickness, self.color)
-
-
-class SphereUnionShapeDefinition(ShapeDefinition):
-    """Initialize a SphereUnionShapeDefinition instance.
-
-    :param shape_class: The shape class definition,
-                        e.g. 'sphere_union'.
-    :type shape_class: str
-    :param diameters: A list of sphere diameters
-    :type diameters: A sequence of floats
-    :param centers: A list of vertex vectors, if applicable.
-    :type centers: A sequence of 3-tuples of numbers (Nx3).
-    :param colors: Definition of a color for every sphere
-    :type colors: A sequence of hexadecimal color strings in format RRGGBBAA.
-    """
-
-    def __init__(self, shape_class, diameters=None, centers=None, colors=None):
-        super(SphereUnionShapeDefinition, self).__init__(
-            shape_class=shape_class, color='')
-        self.diameters = diameters
-        self.centers = centers
-        self.colors = colors
-
-    def __str__(self):
-        shape_def = '{} {} '.format(self.shape_class, len(self.centers))
-        for d, p, c in zip(self.diameters, self.centers, self.colors):
-            shape_def += '{0} '.format(d)
-            shape_def += '{0} {1} {2} '.format(*p)
-            shape_def += '{0} '.format(c)
-
-        return shape_def
-
-
-class PolyUnionShapeDefinition(ShapeDefinition):
-    """Initialize a ShapeDefinition instance.
-
-    :param shape_class: The shape class definition,
-                        e.g. 'sphere' or 'poly3d'.
-    :type shape_class: str
-    :param vertices: A list of lists of the vertices of the polyhedra in particle coordinates
-    :type vertices: A list of lists of 3-tuples
-    :param centers: A list of the centers of the polyhedra in particle coordinates
-    :type centers: A list of 3-tuples
-    :param orientations: A list of the orientations of the polyhedra
-    :type orientations: A list of 4-tuples
-    :param colors: Definition of a color for every polyhedron
-    :type colors: A sequence of str for RGB color definiton.
-        """
-
-    def __init__(self, shape_class, vertices=None, centers=None, orientations=None, colors=None):
-        super(PolyUnionShapeDefinition, self).__init__(
-            shape_class=shape_class, color='')
-        self.vertices = vertices
-        self.centers = centers
-        self.orientations = orientations
-        self.colors = colors
-
-    def __str__(self):
-        shape_def = '{} {} '.format(self.shape_class, len(self.centers))
-        for verts, p, q, c in zip(self.vertices, self.centers, self.orientations, self.colors):
-            shape_def += '{0} '.format(len(verts))
-            for v in verts:
-                shape_def += '{0} {1} {2} '.format(*v)
-            shape_def += '{0} {1} {2} '.format(*p)
-            shape_def += '{0} {1} {2} {3} '.format(*q)
-            shape_def += '{0} '.format(c)
-
-        return shape_def
-
-
-class PolyShapeDefinition(ShapeDefinition):
-    """Initialize a PolyShapeDefinition instance.
-
-    :param shape_class: The shape class definition,
-                        e.g. 'poly3d'.
-    :type shape_class: str
-    :param vertices: A list of vertice vectors, if applicable.
-    :type vertices: A sequence of 3-tuple of numbers (Nx3).
-    :param color: Definition of a color for the particular shape.
-    :type color: A hexadecimal color string in format RRGGBBAA.
-    """
-
-    def __init__(self, shape_class, vertices=None, color=None):
-        super(PolyShapeDefinition, self).__init__(
-            shape_class=shape_class, color=color)
-        self.vertices = vertices
-
-    def __str__(self):
-        return "{} {} {} {}".format(
-            self.shape_class,
-            len(self.vertices),
-            ' '.join((str(v) for xyz in self.vertices for v in xyz)),
-            self.color)
-
-    @property
-    def json_shape(self):
-        return {'type': 'ConvexPolyhedron',
-                'rounding_radius': 0,
-                'vertices': self.vertices}
-
-
-class SpheroPolyShapeDefinition(ShapeDefinition):
-    """Initialize a SpheroPolyShapeDefinition instance.
-
-    :param shape_class: The shape class definition,
-                        e.g. 'spoly3d'.
-    :type shape_class: str
-    :param vertices: A list of vertex vectors, if applicable.
-    :type vertices: A sequence of 3-tuple of numbers (Nx3).
-    :param rounding_radius: Rounding radius applied to the spheropolyhedron.
-    :type rounding_radius: A floating-point number.
-    :param color: Definition of a color for the particular shape.
-    :type color: A hexadecimal color string in format RRGGBBAA.
-    """
-
-    def __init__(self, shape_class, vertices=None, rounding_radius=None, color=None):
-        super(SpheroPolyShapeDefinition, self).__init__(
-            shape_class=shape_class, color=color)
-        self.vertices = vertices
-        self.rounding_radius = rounding_radius
-
-    def __str__(self):
-        return "{} {} {} {} {}".format(
-            self.shape_class,
-            self.rounding_radius,
-            len(self.vertices),
-            ' '.join((str(v) for xyz in self.vertices for v in xyz)),
-            self.color)
-
-    @property
-    def json_shape(self):
-        return {'type': 'ConvexPolyhedron',
-                'rounding_radius': self.rounding_radius,
-                'vertices': self.vertices}
-
-
-class GeneralPolyShapeDefinition(ShapeDefinition):
-    """Initialize a GeneralPolyShapeDefinition instance.
-
-    :param shape_class: The shape class definition, e.g. 'polyV'.
-    :type shape_class: str
-    :param vertices: A list of vertex vectors.
-    :type vertices: A sequence of 3-tuple of numbers (Nx3).
-    :param faces: A list of lists of vertex indices per face.
-    :type faces: A list of lists of integer numbers.
-    :param color: Definition of a color for the particular shape.
-    :type color: A hexadecimal color string in format 'RRGGBBAA'.
-    """
-
-    def __init__(self, shape_class, vertices=None, faces=None, color=None, facet_colors=None):
-        super(GeneralPolyShapeDefinition, self).__init__(
-            shape_class=shape_class, color=color)
-        self.vertices = vertices
-        self.faces = faces
-        self.facet_colors = facet_colors
-
-    def __str__(self):
-        return "{} {} {} {} {} {}".format(
-            self.shape_class,
-            len(self.vertices),
-            ' '.join((str(v) for xyz in self.vertices for v in xyz)),
-            len(self.faces),
-            ' '.join((str(fv) for f in self.faces for fv in [len(f)]+f)),
-            self.color)
-
-
 class FrameData(object):
     """One FrameData instance manages the data of one frame in a trajectory."""
 
@@ -355,7 +116,7 @@ class FrameData(object):
         self.data_keys = None
         "A list of strings, where each string represents one attribute."
         self.shapedef = collections.OrderedDict()
-        "A ordered dictionary of instances of :class:`~.ShapeDefinition`."
+        "A ordered dictionary of instances of :class:`~.shapes.ShapeDefinition`."
         self.view_rotation = None
         "A quaternion specifying a rotation that should be applied for visualization."
 
@@ -764,7 +525,7 @@ class Frame(object):
 
     @property
     def shapedef(self):
-        "A ordered dictionary of instances of :class:`~.ShapeDefinition`."
+        "A ordered dictionary of instances of :class:`~.shapes.ShapeDefinition`."
         self.load()
         return self.frame_data.shapedef
 

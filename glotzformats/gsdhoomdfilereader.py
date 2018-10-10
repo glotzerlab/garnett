@@ -30,8 +30,7 @@ import copy
 import numpy as np
 
 from .trajectory import _RawFrameData, Frame, Trajectory
-from .trajectory import SphereShapeDefinition, PolyShapeDefinition, \
-                        SpheroPolyShapeDefinition
+from .shapes import SphereShape, ConvexPolyhedronShape, ConvexSpheropolyhedronShape
 
 try:
     from gsd.fl import GSDFile
@@ -70,7 +69,7 @@ def _parse_shape_definitions(frame, gsdfile, frame_index):
     if get_chunk(frame_index, 'state/hpmc/sphere/radius') is not None:
         radii = get_chunk(frame_index, 'state/hpmc/sphere/radius')
         for typename, radius in zip(types, radii):
-            shapedefs[typename] = SphereShapeDefinition(
+            shapedefs[typename] = SphereShape(
                 diameter=radius*2, color=None)
         return shapedefs
 
@@ -82,8 +81,8 @@ def _parse_shape_definitions(frame, gsdfile, frame_index):
         verts = get_chunk(frame_index, 'state/hpmc/convex_polyhedron/vertices')
         verts_split = [verts[start:end] for start, end in zip(N_start, N_end)]
         for typename, typeverts in zip(types, verts_split):
-            shapedefs[typename] = PolyShapeDefinition(
-                shape_class='poly3d', vertices=typeverts, color=None)
+            shapedefs[typename] = ConvexPolyhedronShape(
+                vertices=typeverts, color=None)
         return shapedefs
 
     # Convex Spheropolyhedra
@@ -98,12 +97,11 @@ def _parse_shape_definitions(frame, gsdfile, frame_index):
         sweep_radii = get_chunk(frame_index,
                                 'state/hpmc/convex_spheropolyhedron/sweep_radius')
         for typename, typeverts, radius in zip(types, verts_split, sweep_radii):
-            shapedefs[typename] = SpheroPolyShapeDefinition(
-                shape_class='spoly3d', vertices=typeverts,
-                rounding_radius=radius, color=None)
+            shapedefs[typename] = ConvexSpheropolyhedronShape(
+                vertices=typeverts, rounding_radius=radius, color=None)
         return shapedefs
 
-    # Shapes supported by state/hpmc but not glotzformats ShapeDefinitions:
+    # Shapes supported by state/hpmc but not glotzformats.shapes:
     if get_chunk(frame_index, 'state/hpmc/ellipsoid/a') is not None:
         warnings.warn('ellipsoid is not supported by glotzformats.')
 

@@ -277,7 +277,7 @@ class PosFileWriterTest(BasePosFileWriterTest):
         self.assertEqual(traj, traj_cmp)
 
     def test_arrows(self):
-        from glotzformats.trajectory import ArrowShapeDefinition
+        from glotzformats.shapes import ArrowShape
         if PYTHON_2:
             sample = io.StringIO(unicode(glotzformats.samples.POS_INJAVIS))  # noqa
         else:
@@ -285,7 +285,7 @@ class PosFileWriterTest(BasePosFileWriterTest):
         traj = self.read_trajectory(sample)
         traj.load()
         for frame in traj:
-            frame.shapedef['A'] = ArrowShapeDefinition()
+            frame.shapedef['A'] = ArrowShape()
             frame.orientations.T[3] = 0
         dump = io.StringIO()
         self.write_trajectory(traj, dump)
@@ -294,7 +294,7 @@ class PosFileWriterTest(BasePosFileWriterTest):
         self.assertEqual(traj, traj_cmp)
         for frame in traj_cmp:
             self.assertTrue(isinstance(
-                frame.shapedef['A'], ArrowShapeDefinition))
+                frame.shapedef['A'], ArrowShape))
 
     @unittest.skipIf(not IN_PATH, 'tests not executed from repository root')
     @data(
