@@ -15,7 +15,7 @@ from .errors import GSDShapeError
 logger = logging.getLogger(__name__)
 
 
-def _write_shape_definitions(snap, shapedefs, ignore_shape_errors=False):
+def _write_shape_definitions(snap, shapedefs):
     state = {}
 
     def compute_property(compute=lambda x: x):
@@ -27,12 +27,13 @@ def _write_shape_definitions(snap, shapedefs, ignore_shape_errors=False):
         # If the shape types don't all match, there is no valid conversion to the GSD state.
         # To ensure all shape types are the same: Get the first shape's type,
         # and then compare it to all other shape types.
-        assert len(shapedefs) > 0, 'shapedefs length is not greater than 0.'
         shape_type = type(next(iter(shapedefs.values())))
         assert all([isinstance(shapedef, shape_type) for shapedef in shapedefs.values()]), 'Not all shape types match.'
+    except StopIteration as e:
+        # The shapedefs are empty, so there is nothing to write.
+        pass
     except AssertionError as e:
-        if not ignore_shape_errors:
-            raise GSDShapeError('Shape definitions could not be written to the GSD snapshot: {}'.format(e))
+        raise GSDShapeError('Shape definitions could not be written to the GSD snapshot: {}'.format(e))
     else:
         if shape_type is SphereShapeDefinition:
             state['hpmc/sphere/radius'] = compute_property(lambda shape: 0.5*shape.diameter)
@@ -48,6 +49,8 @@ def _write_shape_definitions(snap, shapedefs, ignore_shape_errors=False):
             state['hpmc/convex_spheropolyhedron/vertices'] = vertices
             state['hpmc/convex_spheropolyhedron/sweep_radius'] = \
                 compute_property(lambda shape: shape.rounding_radius)
+        else:
+            raise GSDShapeError('Unsupported shape: {}'.format(shape_type))
 
     snap.state = state
 
@@ -70,16 +73,13 @@ class GSDHOOMDFileWriter(object):
             writer.write(trajectory, gsdfile)
     """
 
-    def write(self, trajectory, stream, ignore_shape_errors=False):
+    def write(self, trajectory, stream):
         """Serialize a trajectory into gsd-format and write it to a file.
 
         :param trajectory: The trajectory to serialize
         :type trajectory: :class:`~glotzformats.trajectory.Trajectory`
         :param stream: The file to write to.
         :type stream: File stream
-        :param ignore_shape_errors: Whether to ignore errors occuring during
-            writing shape information to the GSD state (Default: False).
-        :type ignore_shape_errors: bool
         """
 
         try:
@@ -108,7 +108,7 @@ class GSDHOOMDFileWriter(object):
                 snap.particles.moment_inertia = frame.moment_inertia
                 snap.particles.angmom = frame.angmom
                 snap.configuration.box = frame.box.get_box_array()
-                _write_shape_definitions(snap, frame.shapedef, ignore_shape_errors)
+                _write_shape_definitions(snap, frame.shapedef)
                 traj_outfile.append(snap)
                 logger.debug("Wrote frame {}.".format(i + 1))
         logger.info("Wrote {} frames.".format(i + 1))
