@@ -4,10 +4,12 @@ Readers & Writers
 
 This is the API documentation for all readers and writers provided by **glotzformats**.
 
-Automatic reader
-================
+Automatic reader/writer
+=======================
 
 .. autofunction:: glotzformats.read
+
+.. autofunction:: glotzformats.write
 
 
 General API

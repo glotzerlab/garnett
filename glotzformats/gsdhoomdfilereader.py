@@ -174,7 +174,7 @@ class GSDHOOMDFileReader(object):
     to pass a frame object, whose properties
     are copied into each frame of the gsd trajectory.
 
-    The example is given for a hoomd-blue xml frame:
+    The example is given for a HOOMD-blue XML frame:
 
     .. code::
 
@@ -188,7 +188,7 @@ class GSDHOOMDFileReader(object):
 
     :param bool read_gsd_shape_data: If True (default), the reader will use
                                      shape data parsed from the GSD file
-                                     instead of from the provided XML file.
+                                     instead of from the provided frame.
     """
 
     def __init__(self, read_gsd_shape_data=True):
