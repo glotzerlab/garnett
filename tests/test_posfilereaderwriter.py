@@ -13,6 +13,10 @@ import glotzformats
 import numpy as np
 
 PYTHON_2 = sys.version_info[0] == 2
+if PYTHON_2:
+    from tempdir import TemporaryDirectory
+else:
+    from tempfile import TemporaryDirectory
 
 PATH = os.path.join(glotzformats.__path__[0], '..')
 IN_PATH = os.path.abspath(PATH) == os.path.abspath(os.getcwd())
@@ -145,7 +149,7 @@ class PosFileReaderTest(BasePosFileReaderTest):
 class HPMCPosFileReaderTest(BasePosFileReaderTest):
 
     def setUp(self):
-        self.tmp_dir = tempfile.TemporaryDirectory()
+        self.tmp_dir = TemporaryDirectory()
         self.addCleanup(self.tmp_dir.cleanup)
         self.fn_pos = os.path.join(self.tmp_dir.name, 'test.pos')
 
@@ -182,7 +186,7 @@ class HPMCPosFileReaderTest(BasePosFileReaderTest):
             context.current.sorter.set_params(grid=8)
         dump.pos(filename=self.fn_pos, period=1)
         run(10, quiet=True)
-        with open(self.fn_pos, 'r', encoding='utf-8') as posfile:
+        with io.open(self.fn_pos, 'r', encoding='utf-8') as posfile:
             self.read_trajectory(posfile)
 
     def test_convex_polyhedron(self):
@@ -221,7 +225,7 @@ class HPMCPosFileReaderTest(BasePosFileReaderTest):
         pos_writer = dump.pos(filename=self.fn_pos, period=1)
         self.mc.setup_pos_writer(pos_writer)
         run(10, quiet=True)
-        with open(self.fn_pos, 'r', encoding='utf-8') as posfile:
+        with io.open(self.fn_pos, 'r', encoding='utf-8') as posfile:
             self.read_trajectory(posfile)
 
 

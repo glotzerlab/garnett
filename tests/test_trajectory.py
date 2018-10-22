@@ -21,7 +21,6 @@ except ImportError:
     HOOMD = False
 else:
     HOOMD = True
-    HOOMD_v1 = True
 
 
 if HOOMD:
@@ -168,15 +167,20 @@ class TrajectoryTest(unittest.TestCase):
         with self.assertRaises(RuntimeError):
             traj.positions
         traj.load_arrays()
-        self.assertTrue(np.issubdtype(
-            traj.positions.dtype, glotzformats.trajectory.DEFAULT_DTYPE))
-        self.assertEqual(traj.positions.shape, (len(traj), len(traj[0]), 3))
-        self.assertTrue((traj.positions[0] == traj[0].positions).all())
-        with self.assertRaises(ValueError):
-            traj[0].positions = 'hello'
-        with self.assertRaises(ValueError):
-            # This should fail since it's using 2d positions
-            traj[0].positions = [[0, 0], [0, 0]]
+        try:
+            traj.positions
+        except AttributeError:
+            pass
+        else:
+            self.assertTrue(np.issubdtype(
+                traj.positions.dtype, glotzformats.trajectory.DEFAULT_DTYPE))
+            self.assertEqual(traj.positions.shape, (len(traj), len(traj[0]), 3))
+            self.assertTrue((traj.positions[0] == traj[0].positions).all())
+            with self.assertRaises(ValueError):
+                traj[0].positions = 'hello'
+            with self.assertRaises(ValueError):
+                # This should fail since it's using 2d positions
+                traj[0].positions = [[0, 0], [0, 0]]
 
     def test_orientations(self):
         sample_file = self.get_sample_file()
@@ -184,15 +188,20 @@ class TrajectoryTest(unittest.TestCase):
         with self.assertRaises(RuntimeError):
             traj.orientations
         traj.load_arrays()
-        self.assertTrue(np.issubdtype(
-            traj.orientations.dtype, glotzformats.trajectory.DEFAULT_DTYPE))
-        self.assertEqual(traj.orientations.shape, (len(traj), len(traj[0]), 4))
-        self.assertTrue((traj.orientations[0] == traj[0].orientations).all())
-        with self.assertRaises(ValueError):
-            traj[0].orientations = 'hello'
-        with self.assertRaises(ValueError):
-            # This should fail since it's using 2d positions
-            traj[0].orientations = [[0, 0], [0, 0]]
+        try:
+            traj.orientations
+        except AttributeError:
+            pass
+        else:
+            self.assertTrue(np.issubdtype(
+                traj.orientations.dtype, glotzformats.trajectory.DEFAULT_DTYPE))
+            self.assertEqual(traj.orientations.shape, (len(traj), len(traj[0]), 4))
+            self.assertTrue((traj.orientations[0] == traj[0].orientations).all())
+            with self.assertRaises(ValueError):
+                traj[0].orientations = 'hello'
+            with self.assertRaises(ValueError):
+                # This should fail since it's using 2d positions
+                traj[0].orientations = [[0, 0], [0, 0]]
 
     def test_velocities(self):
         sample_file = self.get_sample_file()
@@ -203,16 +212,17 @@ class TrajectoryTest(unittest.TestCase):
         try:
             traj.velocities
         except AttributeError:
-            return
-        self.assertTrue(np.issubdtype(
-            traj.velocities.dtype, glotzformats.trajectory.DEFAULT_DTYPE))
-        self.assertEqual(traj.velocities.shape, (len(traj), len(traj[0]), 3))
-        self.assertTrue((traj.velocities[0] == traj[0].velocities).all())
-        with self.assertRaises(ValueError):
-            traj[0].velocities = 'hello'
-        with self.assertRaises(ValueError):
-            # This should fail since it's using 2d velocities
-            traj[0].velocities = [[0, 0], [0, 0]]
+            pass
+        else:
+            self.assertTrue(np.issubdtype(
+                traj.velocities.dtype, glotzformats.trajectory.DEFAULT_DTYPE))
+            self.assertEqual(traj.velocities.shape, (len(traj), len(traj[0]), 3))
+            self.assertTrue((traj.velocities[0] == traj[0].velocities).all())
+            with self.assertRaises(ValueError):
+                traj[0].velocities = 'hello'
+            with self.assertRaises(ValueError):
+                # This should fail since it's using 2d velocities
+                traj[0].velocities = [[0, 0], [0, 0]]
 
     def test_mass(self):
         sample_file = self.get_sample_file()
@@ -221,18 +231,19 @@ class TrajectoryTest(unittest.TestCase):
             traj.mass
         traj.load_arrays()
         try:
-            traj.velocities
+            traj.mass
         except AttributeError:
-            return
-        self.assertTrue(np.issubdtype(
-            traj.mass.dtype, glotzformats.trajectory.DEFAULT_DTYPE))
-        self.assertEqual(traj.mass.shape, (len(traj), len(traj[0])))
-        self.assertTrue((traj.mass[0] == traj[0].mass).all())
-        with self.assertRaises(ValueError):
-            traj[0].mass = 'hello'
-        with self.assertRaises(ValueError):
-            # This should fail since the array is not a 1-D list
-            traj[0].mass = [[1, 1]]
+            pass
+        else:
+            self.assertTrue(np.issubdtype(
+                traj.mass.dtype, glotzformats.trajectory.DEFAULT_DTYPE))
+            self.assertEqual(traj.mass.shape, (len(traj), len(traj[0])))
+            self.assertTrue((traj.mass[0] == traj[0].mass).all())
+            with self.assertRaises(ValueError):
+                traj[0].mass = 'hello'
+            with self.assertRaises(ValueError):
+                # This should fail since the array is not a 1-D list
+                traj[0].mass = [[1, 1]]
 
     def test_charge(self):
         sample_file = self.get_sample_file()
@@ -241,18 +252,19 @@ class TrajectoryTest(unittest.TestCase):
             traj.charge
         traj.load_arrays()
         try:
-            traj.velocities
+            traj.charge
         except AttributeError:
-            return
-        self.assertTrue(np.issubdtype(
-            traj.charge.dtype, glotzformats.trajectory.DEFAULT_DTYPE))
-        self.assertEqual(traj.charge.shape, (len(traj), len(traj[0])))
-        self.assertTrue((traj.charge[0] == traj[0].charge).all())
-        with self.assertRaises(ValueError):
-            traj[0].charge = 'hello'
-        with self.assertRaises(ValueError):
-            # This should fail since the array is not a 1-D list
-            traj[0].charge = [[1, 1]]
+            pass
+        else:
+            self.assertTrue(np.issubdtype(
+                traj.charge.dtype, glotzformats.trajectory.DEFAULT_DTYPE))
+            self.assertEqual(traj.charge.shape, (len(traj), len(traj[0])))
+            self.assertTrue((traj.charge[0] == traj[0].charge).all())
+            with self.assertRaises(ValueError):
+                traj[0].charge = 'hello'
+            with self.assertRaises(ValueError):
+                # This should fail since the array is not a 1-D list
+                traj[0].charge = [[1, 1]]
 
     def test_diameter(self):
         sample_file = self.get_sample_file()
@@ -261,18 +273,19 @@ class TrajectoryTest(unittest.TestCase):
             traj.diameter
         traj.load_arrays()
         try:
-            traj.velocities
+            traj.diameter
         except AttributeError:
-            return
-        self.assertTrue(np.issubdtype(
-            traj.diameter.dtype, glotzformats.trajectory.DEFAULT_DTYPE))
-        self.assertEqual(traj.diameter.shape, (len(traj), len(traj[0])))
-        self.assertTrue((traj.diameter[0] == traj[0].diameter).all())
-        with self.assertRaises(ValueError):
-            traj[0].diameter = 'hello'
-        with self.assertRaises(ValueError):
-            # This should fail since the array is not a 1-D list
-            traj[0].diameter = [[1, 1]]
+            pass
+        else:
+            self.assertTrue(np.issubdtype(
+                traj.diameter.dtype, glotzformats.trajectory.DEFAULT_DTYPE))
+            self.assertEqual(traj.diameter.shape, (len(traj), len(traj[0])))
+            self.assertTrue((traj.diameter[0] == traj[0].diameter).all())
+            with self.assertRaises(ValueError):
+                traj[0].diameter = 'hello'
+            with self.assertRaises(ValueError):
+                # This should fail since the array is not a 1-D list
+                traj[0].diameter = [[1, 1]]
 
     def test_moment_inertia(self):
         sample_file = self.get_sample_file()
@@ -281,15 +294,16 @@ class TrajectoryTest(unittest.TestCase):
             traj.moment_inertia
         traj.load_arrays()
         try:
-            traj.velocities
+            traj.moment_inertia
         except AttributeError:
-            return
-        self.assertTrue(np.issubdtype(
-            traj.moment_inertia.dtype, glotzformats.trajectory.DEFAULT_DTYPE))
-        self.assertEqual(traj.moment_inertia.shape, (len(traj), len(traj[0]), 3))
-        self.assertTrue((traj.diameter[0] == traj[0].diameter).all())
-        with self.assertRaises(ValueError):
-            traj[0].moment_inertia = 'hello'
+            pass
+        else:
+            self.assertTrue(np.issubdtype(
+                traj.moment_inertia.dtype, glotzformats.trajectory.DEFAULT_DTYPE))
+            self.assertEqual(traj.moment_inertia.shape, (len(traj), len(traj[0]), 3))
+            self.assertTrue((traj.moment_inertia[0] == traj[0].moment_inertia).all())
+            with self.assertRaises(ValueError):
+                traj[0].moment_inertia = 'hello'
 
     def test_angmom(self):
         sample_file = self.get_sample_file()
@@ -298,15 +312,16 @@ class TrajectoryTest(unittest.TestCase):
             traj.angmom
         traj.load_arrays()
         try:
-            traj.velocities
+            traj.angmom
         except AttributeError:
-            return
-        self.assertTrue(np.issubdtype(
-            traj.angmom.dtype, glotzformats.trajectory.DEFAULT_DTYPE))
-        self.assertEqual(traj.angmom.shape, (len(traj), len(traj[0]), 4))
-        self.assertTrue((traj.angmom[0] == traj[0].angmom).all())
-        with self.assertRaises(ValueError):
-            traj[0].angmom = 'hello'
+            pass
+        else:
+            self.assertTrue(np.issubdtype(
+                traj.angmom.dtype, glotzformats.trajectory.DEFAULT_DTYPE))
+            self.assertEqual(traj.angmom.shape, (len(traj), len(traj[0]), 4))
+            self.assertTrue((traj.angmom[0] == traj[0].angmom).all())
+            with self.assertRaises(ValueError):
+                traj[0].angmom = 'hello'
 
 
 @unittest.skipIf(not HOOMD, 'requires hoomd-blue')
