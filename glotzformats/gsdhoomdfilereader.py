@@ -30,7 +30,8 @@ import copy
 import numpy as np
 
 from .trajectory import _RawFrameData, Frame, Trajectory
-from .shapes import SphereShape, ConvexPolyhedronShape, ConvexSpheropolyhedronShape
+from .shapes import SphereShape, ConvexPolyhedronShape, ConvexSpheropolyhedronShape, \
+    PolygonShape
 
 try:
     from gsd.fl import GSDFile
@@ -106,7 +107,15 @@ def _parse_shape_definitions(frame, gsdfile, frame_index):
         warnings.warn('ellipsoid is not supported by glotzformats.')
 
     if get_chunk(frame_index, 'state/hpmc/convex_polygon/N') is not None:
-        warnings.warn('convex_polygon is not supported by glotzformats.')
+        N = get_chunk(frame_index, 'state/hpmc/convex_polygon/N')
+        N_start = [sum(N[:i]) for i in range(len(N))]
+        N_end = [sum(N[:i+1]) for i in range(len(N))]
+        verts = get_chunk(frame_index, 'state/hpmc/convex_polygon/vertices')
+        verts_split = [verts[start:end] for start, end in zip(N_start, N_end)]
+        for typename, typeverts in zip(types, verts_split):
+            shapedefs[typename] = PolygonShape(
+                vertices=typeverts, color=None)
+        return shapedefs
 
     if get_chunk(frame_index, 'state/hpmc/convex_spheropolygon/N') is not None:
         warnings.warn('convex_spheropolygon is not supported by glotzformats.')
