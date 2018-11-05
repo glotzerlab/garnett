@@ -126,7 +126,3 @@ Execute the tests with
 
     python -m unittest discover tests
 
-otherwise, run tests with:
-
-    nosetest
-
