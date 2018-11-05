@@ -50,6 +50,32 @@ All readers and writers work with **file-like objects** and use the following AP
 File Formats
 ============
 
+This table outlines the supported properties of each format reader and writer.
+
++--------+-----------+-----+--------------+------------+-------+-----------------------------------+
+| Format | Positions | Box | Orientations | Velocities | Shape | Additional Properties (See below) |
++--------+-----------+-----+--------------+------------+-------+-----------------------------------+
+|    POS |     RW    |  RW |      RW      |    N/A+    |  RW++ |                N/A                |
++--------+-----------+-----+--------------+------------+-------+-----------------------------------+
+|    GSD |     RW    |  RW |      RW      |     RW     |  RW++ |                RW                 |
++--------+-----------+-----+--------------+------------+-------+-----------------------------------+
+|   GTAR |     RW    |  RW |      RW      |     RW     |  RW++ |                RW                 |
++--------+-----------+-----+--------------+------------+-------+-----------------------------------+
+|    CIF |     RW    |  RW |      N/A     |     N/A    |  N/A  |                N/A                |
++--------+-----------+-----+--------------+------------+-------+-----------------------------------+
+|    DCD |     R     |  R  |       R      |     R++    |  N/A  |                N/A                |
++--------+-----------+-----+--------------+------------+-------+-----------------------------------+
+|    XML |     R     |  R  |       R      |      R     |  N/A  |                N/A                |
++--------+-----------+-----+--------------+------------+-------+-----------------------------------+
+
+RW indicates glotzformats can read and write on this format.
+R indicates glotzformats can only read.
+N/A indicates the format does not support storing this property.
+Additional Properties: Mass, Charge, Diameter, Angular momentum, Moment of inertia
++ None
+++ Incomplete
+
+
 The following collection of readers and writers is ordered by different file formats.
 
 POS-Files
