@@ -50,6 +50,30 @@ All readers and writers work with **file-like objects** and use the following AP
 File Formats
 ============
 
+This table outlines the supported properties of each format reader and writer.
+
++--------+-----------+-----+--------------+------------+-------+---------------------------+
+| Format | Positions | Box | Orientations | Velocities | Shape | Mass,Charge,Diameter etc. |
++--------+-----------+-----+--------------+------------+-------+---------------------------+
+|    POS |     RW    |  RW |      RW      |    N/A+    |  RW++ |            N/A            |
++--------+-----------+-----+--------------+------------+-------+---------------------------+
+|    GSD |     RW    |  RW |      RW      |     RW     |  RW++ |             RW            |
++--------+-----------+-----+--------------+------------+-------+---------------------------+
+|   GTAR |     RW    |  RW |      RW      |     RW     |  RW++ |             RW            |
++--------+-----------+-----+--------------+------------+-------+---------------------------+
+|    CIF |     RW    |  RW |      N/A     |     N/A    |  N/A  |            N/A            |
++--------+-----------+-----+--------------+------------+-------+---------------------------+
+|    DCD |     R     |  R  |       R      |     R++    |  N/A  |            N/A            |
++--------+-----------+-----+--------------+------------+-------+---------------------------+
+|    XML |     R     |  R  |       R      |      R     |  N/A  |             R             |
++--------+-----------+-----+--------------+------------+-------+---------------------------+
+
+RW indicates glotzformats can read and write on this format.
+R indeicates glotzformats can only read.
++ None
+++ Incomplete
+
+
 The following collection of readers and writers is ordered by different file formats.
 
 POS-Files

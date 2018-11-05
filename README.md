@@ -4,9 +4,11 @@
 
 This is a collection of samples, parsers and writers for formats used in the Glotzer Group at the University of Michigan, Ann Arbor.
 
-## Authors
+## Maintainers
 
-* Carl Simon Adorf, csadorf@umich.edu (Maintainer)
+* Carl Simon Adorf, csadorf@umich.edu (Author)
+* Bradley Dice, bdice@umich.edu
+* Sophie Youjung Lee, syjlee@umich.edu
 * Richmond Newmann, newmanrs@umich.edu
 
 ## Setup
@@ -117,12 +119,9 @@ Ideally, you test with HOOMD-blue installed in your testing environment.
 
 In this case, execute tests with
 
-    hoomd -m unittest discover tests
+    python -m unittest discover tests
 
 otherwise, run tests with:
 
-    python -m unittest discover tests
-
-or:
-
     nosetest
+
