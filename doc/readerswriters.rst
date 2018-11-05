@@ -69,7 +69,7 @@ This table outlines the supported properties of each format reader and writer.
 +--------+-----------+-----+--------------+------------+-------+---------------------------+
 
 RW indicates glotzformats can read and write on this format.
-R indeicates glotzformats can only read.
+R indicates glotzformats can only read.
 + None
 ++ Incomplete
 
