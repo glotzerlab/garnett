@@ -11,9 +11,9 @@ This is a collection of samples, parsers and writers for formats used in the Glo
 
 ## Maintainers
 
+* Sophie Youjung Lee, syjlee@umich.edu
 * Carl Simon Adorf, csadorf@umich.edu
 * Bradley Dice, bdice@umich.edu
-* Sophie Youjung Lee, syjlee@umich.edu
 
 
 ## Setup
