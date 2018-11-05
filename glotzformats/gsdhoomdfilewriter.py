@@ -29,7 +29,7 @@ def _write_shape_definitions(snap, shapedefs):
         # and then compare it to all other shape types.
         shape_type = type(next(iter(shapedefs.values())))
         assert all([isinstance(shapedef, shape_type) for shapedef in shapedefs.values()]), 'Not all shape types match.'
-    except StopIteration as e:
+    except StopIteration:
         # The shapedefs are empty, so there is nothing to write.
         pass
     except AssertionError as e:
