@@ -70,6 +70,7 @@ This table outlines the supported properties of each format reader and writer.
 
 RW indicates glotzformats can read and write on this format.
 R indicates glotzformats can only read.
+N/A indicates the format does not support storing this property.
 Additional Properties: Mass, Charge, Diameter, Angular momentum, Moment of inertia
 + None
 ++ Incomplete

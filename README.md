@@ -120,9 +120,9 @@ traj[-1].copyto_snapshot(snapshot)
 
 ## Testing
 
-Ideally, you test with HOOMD-blue installed in your testing environment.
+To run all glotzformats tests, `ddt`, HOOMD-blue (`hoomd`), and `pycifrw` must be installed in the testing environments.
 
-In this case, execute tests with
+Execute the tests with
 
     python -m unittest discover tests
 
