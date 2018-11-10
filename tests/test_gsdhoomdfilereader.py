@@ -20,6 +20,7 @@ except ImportError:
     HOOMD = False
 else:
     HOOMD = True
+    hoomd.util.quiet_status()
 
 try:
     import hoomd.hpmc
@@ -175,6 +176,7 @@ class BaseGSDHOOMDFileReaderTest(TrajectoryTest):
         self.system = hoomd.init.create_lattice(
             unitcell=hoomd.lattice.sc(10), n=(2, 1, 1))
         self.addCleanup(hoomd.context.initialize, "--mode=cpu")
+        hoomd.option.set_notice_level(0)
         self.addCleanup(self.del_system)
         self.mc = hoomd.hpmc.integrate.sphere(seed=10)
         self.addCleanup(self.del_mc)
@@ -200,6 +202,7 @@ class BaseGSDHOOMDFileReaderTest(TrajectoryTest):
         self.system = hoomd.init.create_lattice(
             unitcell=hoomd.lattice.sc(10), n=(2, 1, 1))
         self.addCleanup(hoomd.context.initialize, "--mode=cpu")
+        hoomd.option.set_notice_level(0)
         self.addCleanup(self.del_system)
         self.mc = hoomd.hpmc.integrate.convex_polyhedron(seed=10)
         self.addCleanup(self.del_mc)
@@ -234,6 +237,7 @@ class BaseGSDHOOMDFileReaderTest(TrajectoryTest):
         self.system = hoomd.init.create_lattice(
             unitcell=hoomd.lattice.sc(10), n=(2, 1, 1))
         self.addCleanup(hoomd.context.initialize, "--mode=cpu")
+        hoomd.option.set_notice_level(0)
         self.addCleanup(self.del_system)
         self.mc = hoomd.hpmc.integrate.convex_spheropolyhedron(seed=10)
         self.addCleanup(self.del_mc)
@@ -271,6 +275,7 @@ class BaseGSDHOOMDFileReaderTest(TrajectoryTest):
         self.system = hoomd.init.create_lattice(
             unitcell=hoomd.lattice.sc(10), n=(2, 1, 1))
         self.addCleanup(hoomd.context.initialize, "--mode=cpu")
+        hoomd.option.set_notice_level(0)
         self.addCleanup(self.del_system)
         self.mc = hoomd.hpmc.integrate.convex_polyhedron(seed=10)
         self.addCleanup(self.del_mc)

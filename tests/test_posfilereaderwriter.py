@@ -25,11 +25,13 @@ IN_PATH = os.path.abspath(PATH) == os.path.abspath(os.getcwd())
 try:
     try:
         from hoomd import context
+        import hoomd
     except ImportError:
         from hoomd_script import context
         HOOMD_v1 = True
     else:
         HOOMD_v1 = False
+        hoomd.util.quiet_status()
 except ImportError:
     HOOMD = False
 else:
@@ -172,6 +174,7 @@ class HPMCPosFileReaderTest(BasePosFileReaderTest):
             self.system = init.create_lattice(
                 unitcell=lattice.sq(10), n=(2, 1))
             self.addCleanup(context.initialize, "--mode=cpu")
+            hoomd.option.set_notice_level(0)
         self.addCleanup(self.del_system)
         self.mc = hpmc.integrate.sphere(seed=10)
         self.mc.shape_param.set("A", diameter=1.0)
@@ -203,6 +206,7 @@ class HPMCPosFileReaderTest(BasePosFileReaderTest):
             self.system = init.create_lattice(
                 unitcell=lattice.sq(10), n=(2, 1))
             self.addCleanup(context.initialize, "--mode=cpu")
+            hoomd.option.set_notice_level(0)
         self.addCleanup(self.del_system)
         self.mc = hpmc.integrate.convex_polygon(seed=10)
         self.addCleanup(self.del_mc)
@@ -396,4 +400,5 @@ class InjavisReadWriteTest(BasePosFileWriterTest):
 
 if __name__ == '__main__':
     context.initialize("--mode=cpu")
+    hoomd.option.set_notice_level(0)
     unittest.main()

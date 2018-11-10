@@ -12,11 +12,13 @@ PYTHON_2 = sys.version_info[0] == 2
 try:
     try:
         from hoomd import context
+        import hoomd
     except ImportError:
         from hoomd_script import context
         HOOMD_v1 = True
     else:
         HOOMD_v1 = False
+        hoomd.util.quiet_status()
 except ImportError:
     HOOMD = False
 else:
@@ -25,6 +27,8 @@ else:
 
 if HOOMD:
     context.initialize('--mode=cpu')
+    if not HOOMD_v1:
+        hoomd.option.set_notice_level(0)
     try:
         if HOOMD_v1:
             from hoomd_plugins import hpmc
