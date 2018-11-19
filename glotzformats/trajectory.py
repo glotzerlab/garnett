@@ -756,19 +756,18 @@ class Frame(object):
         self.load()
         return self.frame_data.image
 
-    @moment_inertia.setter
-    def moment_inertia(self, value):
-        ndof = self.box.dimensions * (self.box.dimensions - 1) / 2
+    @image.setter
+    def image(self, value):
         try:
-            value = np.asarray(value, dtype=self._dtype)
+            value = np.asarray(value, dtype=np.int32)
         except ValueError:
-            raise ValueError("Moments of inertia can only be set to numeric arrays.")
+            raise ValueError("Images can only be set to numeric arrays.")
         if not np.all(np.isfinite(value)):
-            raise ValueError("Moments of inertia being set must all be finite numbers.")
-        elif not len(value.shape) == 2 or value.shape[1] != ndof:
-            raise ValueError("Input array must be of shape (N,{}) where N is the number of particles.".format(ndof))
+            raise ValueError("Images being set must all be finite numbers.")
+        elif not len(value.shape) == 2 or value.shape[1] != 3:
+            raise ValueError("Input array must be of shape (N,3) where N is the number of particles.")
         self.load()
-        self.frame_data.moment_inertia = value
+        self.frame_data.image = value
 
     @property
     def data(self):
