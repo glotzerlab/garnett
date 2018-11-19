@@ -370,15 +370,15 @@ class FrameData(object):
         else:  # rigorous comparison required
             return self.box == other.box \
                 and self.types == other.types\
-                and (self.positions == other.positions).all()\
-                and (self.orientations == other.orientations).all()\
-                and (self.velocities == other.velocities).all()\
-                and (self.mass == other.mass).all()\
-                and (self.charge == other.charge).all()\
-                and (self.diameter == other.diameter).all()\
-                and (self.moment_inertia == other.moment_inertia).all()\
-                and (self.angmom == other.angmom).all()\
-                and (self.image == other.image).all()\
+                and np.array_equal(self.positions, other.positions)\
+                and np.array_equal(self.orientations, other.orientations)\
+                and np.array_equal(self.velocities, other.velocities)\
+                and np.array_equal(self.mass, other.mass)\
+                and np.array_equal(self.charge, other.charge)\
+                and np.array_equal(self.diameter, other.diameter)\
+                and np.array_equal(self.moment_inertia, other.moment_inertia)\
+                and np.array_equal(self.angmom, other.angmom)\
+                and np.array_equal(self.image, other.image)\
                 and self.data == other.data\
                 and self.shapedef == other.shapedef
 
