@@ -342,7 +342,7 @@ class TrajectoryTest(unittest.TestCase):
                 traj.image.dtype, np.int32))
             self.assertEqual(traj.image.shape, (len(traj), len(traj[0]), 3))
             self.assertTrue((traj.image[0] == traj[0].image).all())
-            with self.assertRaises(AttributeError):
+            with self.assertRaises(ValueError):
                 traj[0].image = 'hello'
 
 
