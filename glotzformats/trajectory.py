@@ -477,7 +477,7 @@ class Frame(object):
         if len(angmom) == 0:
             angmom = np.zeros((len(positions), 4), dtype=dtype)
 
-        image = np.asarray(raw_frame.image, dtype=dtype)
+        image = np.asarray(raw_frame.image, dtype=np.int32)
         if len(image) == 0:
             image = np.zeros((len(positions), 3), dtype=np.int32)
 
