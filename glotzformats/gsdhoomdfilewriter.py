@@ -9,7 +9,7 @@ import gsd.hoomd
 import logging
 import numpy as np
 
-from .trajectory import SphereShapeDefinition, PolyShapeDefinition, SpheroPolyShapeDefinition
+from .shapes import SphereShape, ConvexPolyhedronShape, ConvexSpheropolyhedronShape
 from .errors import GSDShapeError
 
 logger = logging.getLogger(__name__)
@@ -35,14 +35,14 @@ def _write_shape_definitions(snap, shapedefs):
     except AssertionError as e:
         raise GSDShapeError('Shape definitions could not be written to the GSD snapshot: {}'.format(e))
     else:
-        if shape_type is SphereShapeDefinition:
+        if shape_type is SphereShape:
             state['hpmc/sphere/radius'] = compute_property(lambda shape: 0.5*shape.diameter)
-        elif shape_type is PolyShapeDefinition:
+        elif shape_type is ConvexPolyhedronShape:
             state['hpmc/convex_polyhedron/N'] = compute_property(lambda shape: len(shape.vertices))
             vertices = compute_property(lambda shape: shape.vertices)
             vertices = np.concatenate(vertices, axis=0)
             state['hpmc/convex_polyhedron/vertices'] = vertices
-        elif shape_type is SpheroPolyShapeDefinition:
+        elif shape_type is ConvexSpheropolyhedronShape:
             state['hpmc/convex_spheropolyhedron/N'] = compute_property(lambda shape: len(shape.vertices))
             vertices = compute_property(lambda shape: shape.vertices)
             vertices = np.concatenate(vertices, axis=0)
