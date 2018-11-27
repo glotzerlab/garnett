@@ -6,8 +6,15 @@ This is a collection of samples, parsers and writers for formats used in the Glo
 
 ## Authors
 
-* Carl Simon Adorf, csadorf@umich.edu (Maintainer)
+* Carl Simon Adorf, csadorf@umich.edu
 * Richmond Newmann, newmanrs@umich.edu
+
+## Maintainers
+
+* Sophie Youjung Lee, syjlee@umich.edu
+* Carl Simon Adorf, csadorf@umich.edu
+* Bradley Dice, bdice@umich.edu
+
 
 ## Setup
 
@@ -113,16 +120,9 @@ traj[-1].copyto_snapshot(snapshot)
 
 ## Testing
 
-Ideally, you test with HOOMD-blue installed in your testing environment.
+To run all glotzformats tests, `ddt`, HOOMD-blue (`hoomd`), and `pycifrw` must be installed in the testing environments.
 
-In this case, execute tests with
-
-    hoomd -m unittest discover tests
-
-otherwise, run tests with:
+Execute the tests with
 
     python -m unittest discover tests
 
-or:
-
-    nosetest

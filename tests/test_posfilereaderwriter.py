@@ -13,6 +13,10 @@ import glotzformats
 import numpy as np
 
 PYTHON_2 = sys.version_info[0] == 2
+if PYTHON_2:
+    from tempdir import TemporaryDirectory
+else:
+    from tempfile import TemporaryDirectory
 
 PATH = os.path.join(glotzformats.__path__[0], '..')
 IN_PATH = os.path.abspath(PATH) == os.path.abspath(os.getcwd())
@@ -21,11 +25,13 @@ IN_PATH = os.path.abspath(PATH) == os.path.abspath(os.getcwd())
 try:
     try:
         from hoomd import context
+        import hoomd
     except ImportError:
         from hoomd_script import context
         HOOMD_v1 = True
     else:
         HOOMD_v1 = False
+        hoomd.util.quiet_status()
 except ImportError:
     HOOMD = False
 else:
@@ -145,7 +151,7 @@ class PosFileReaderTest(BasePosFileReaderTest):
 class HPMCPosFileReaderTest(BasePosFileReaderTest):
 
     def setUp(self):
-        self.tmp_dir = tempfile.TemporaryDirectory()
+        self.tmp_dir = TemporaryDirectory()
         self.addCleanup(self.tmp_dir.cleanup)
         self.fn_pos = os.path.join(self.tmp_dir.name, 'test.pos')
 
@@ -168,6 +174,7 @@ class HPMCPosFileReaderTest(BasePosFileReaderTest):
             self.system = init.create_lattice(
                 unitcell=lattice.sq(10), n=(2, 1))
             self.addCleanup(context.initialize, "--mode=cpu")
+            hoomd.option.set_notice_level(0)
         self.addCleanup(self.del_system)
         self.mc = hpmc.integrate.sphere(seed=10)
         self.mc.shape_param.set("A", diameter=1.0)
@@ -182,7 +189,7 @@ class HPMCPosFileReaderTest(BasePosFileReaderTest):
             context.current.sorter.set_params(grid=8)
         dump.pos(filename=self.fn_pos, period=1)
         run(10, quiet=True)
-        with open(self.fn_pos, 'r', encoding='utf-8') as posfile:
+        with io.open(self.fn_pos, 'r', encoding='utf-8') as posfile:
             self.read_trajectory(posfile)
 
     def test_convex_polyhedron(self):
@@ -199,6 +206,7 @@ class HPMCPosFileReaderTest(BasePosFileReaderTest):
             self.system = init.create_lattice(
                 unitcell=lattice.sq(10), n=(2, 1))
             self.addCleanup(context.initialize, "--mode=cpu")
+            hoomd.option.set_notice_level(0)
         self.addCleanup(self.del_system)
         self.mc = hpmc.integrate.convex_polygon(seed=10)
         self.addCleanup(self.del_mc)
@@ -221,7 +229,7 @@ class HPMCPosFileReaderTest(BasePosFileReaderTest):
         pos_writer = dump.pos(filename=self.fn_pos, period=1)
         self.mc.setup_pos_writer(pos_writer)
         run(10, quiet=True)
-        with open(self.fn_pos, 'r', encoding='utf-8') as posfile:
+        with io.open(self.fn_pos, 'r', encoding='utf-8') as posfile:
             self.read_trajectory(posfile)
 
 
@@ -392,4 +400,5 @@ class InjavisReadWriteTest(BasePosFileWriterTest):
 
 if __name__ == '__main__':
     context.initialize("--mode=cpu")
+    hoomd.option.set_notice_level(0)
     unittest.main()

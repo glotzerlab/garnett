@@ -248,12 +248,24 @@ class PosFileFrame(Frame):
                         quat = tokens[-4:]
                     elif len(tokens) >= 3:
                         xyz = tokens[-3:]
-                        quat = (1, 0, 0, 0)
+                        quat = None
                     else:
                         raise ParserError(line)
                     raw_frame.types.append(name)
                     raw_frame.positions.append([self._num(v) for v in xyz])
-                    raw_frame.orientations.append([self._num(v) for v in quat])
+                    if quat is None:
+                        raw_frame.orientations.append(quat)
+                    else:
+                        raw_frame.orientations.append([self._num(v) for v in quat])
+
+        # If no valid orientations have been added, the array should be empty
+        if all([quat is None for quat in raw_frame.orientations]):
+            raw_frame.orientations = []
+        else:
+            # Replace values of None with an identity quaternion
+            for i in range(len(raw_frame.orientations)):
+                if raw_frame.orientations[i] is None:
+                    raw_frame.orientations[i] = [1, 0, 0, 0]
         return raw_frame
 
     def __str__(self):

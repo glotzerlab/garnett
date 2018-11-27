@@ -31,7 +31,7 @@ import numpy as np
 
 from .trajectory import _RawFrameData, Frame, Trajectory
 from .shapes import SphereShape, ConvexPolyhedronShape, ConvexSpheropolyhedronShape, \
-    PolygonShape
+    PolygonShape, SpheropolygonShape
 
 try:
     from gsd.fl import GSDFile
@@ -102,10 +102,11 @@ def _parse_shape_definitions(frame, gsdfile, frame_index):
                 vertices=typeverts, rounding_radius=radius, color=None)
         return shapedefs
 
-    # Shapes supported by state/hpmc but not glotzformats.shapes:
+    # Ellipsoid is supported by state/hpmc but not glotzformats.shapes:
     if get_chunk(frame_index, 'state/hpmc/ellipsoid/a') is not None:
         warnings.warn('ellipsoid is not supported by glotzformats.')
 
+    # Convex Polygons
     if get_chunk(frame_index, 'state/hpmc/convex_polygon/N') is not None:
         N = get_chunk(frame_index, 'state/hpmc/convex_polygon/N')
         N_start = [sum(N[:i]) for i in range(len(N))]
@@ -117,12 +118,33 @@ def _parse_shape_definitions(frame, gsdfile, frame_index):
                 vertices=typeverts, color=None)
         return shapedefs
 
+    # Convex Spheropolygons
     if get_chunk(frame_index, 'state/hpmc/convex_spheropolygon/N') is not None:
-        warnings.warn('convex_spheropolygon is not supported by glotzformats.')
+        N = get_chunk(frame_index, 'state/hpmc/convex_spheropolygon/N')
+        N_start = [sum(N[:i]) for i in range(len(N))]
+        N_end = [sum(N[:i+1]) for i in range(len(N))]
+        verts = get_chunk(frame_index, 'state/hpmc/convex_spheropolygon/vertices')
+        verts_split = [verts[start:end] for start, end in zip(N_start, N_end)]
+        sweep_radii = get_chunk(frame_index,
+                                'state/hpmc/convex_spheropolygon/sweep_radius')
+        for typename, typeverts, radius in zip(types, verts_split, sweep_radii):
+            shapedefs[typename] = SpheropolygonShape(
+                vertices=typeverts, rounding_radius=radius, color=None)
+        return shapedefs
 
+    # Simple Polygons
     if get_chunk(frame_index, 'state/hpmc/simple_polygon/N') is not None:
-        warnings.warn('simple_polygon is not supported by glotzformats.')
+        N = get_chunk(frame_index, 'state/hpmc/simple_polygon/N')
+        N_start = [sum(N[:i]) for i in range(len(N))]
+        N_end = [sum(N[:i+1]) for i in range(len(N))]
+        verts = get_chunk(frame_index, 'state/hpmc/simple_polygon/vertices')
+        verts_split = [verts[start:end] for start, end in zip(N_start, N_end)]
+        for typename, typeverts in zip(types, verts_split):
+            shapedefs[typename] = PolygonShape(
+                vertices=typeverts, color=None)
+        return shapedefs
 
+    # If no shapes were detected, return the empty shapedefs dict.
     return shapedefs
 
 
@@ -148,8 +170,7 @@ class GSDHoomdFrame(Frame):
         frame = self.traj.read_frame(self.frame_index)
         raw_frame.box = _box_matrix(frame.configuration.box)
         raw_frame.box_dimensions = int(frame.configuration.dimensions)
-        raw_frame.types = [frame.particles.types[t]
-                           for t in frame.particles.typeid]
+        raw_frame.types = [frame.particles.types[t] for t in frame.particles.typeid]
         raw_frame.positions = frame.particles.position
         raw_frame.orientations = frame.particles.orientation
         raw_frame.velocities = frame.particles.velocity
@@ -160,8 +181,7 @@ class GSDHoomdFrame(Frame):
         raw_frame.angmom = frame.particles.angmom
         if self.read_gsd_shape_data:
             raw_frame.shapedef.update(
-                _parse_shape_definitions(frame, self.gsdfile,
-                                         self.frame_index))
+                _parse_shape_definitions(frame, self.gsdfile, self.frame_index))
         return raw_frame
 
     def __str__(self):
@@ -181,7 +201,7 @@ class GSDHOOMDFileReader(object):
     to pass a frame object, whose properties
     are copied into each frame of the gsd trajectory.
 
-    The example is given for a hoomd-blue xml frame:
+    The example is given for a HOOMD-blue XML frame:
 
     .. code::
 
@@ -195,7 +215,7 @@ class GSDHOOMDFileReader(object):
 
     :param bool read_gsd_shape_data: If True (default), the reader will use
                                      shape data parsed from the GSD file
-                                     instead of from the provided XML file.
+                                     instead of from the provided frame.
     """
 
     def __init__(self, read_gsd_shape_data=True):

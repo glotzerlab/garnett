@@ -94,23 +94,25 @@ class FrameData(object):
         self.box = None
         "Instance of :class:`~.Box`"
         self.types = None
-        "Nx1 list of types represented as strings."
+        "Nx1 array of types represented as strings."
         self.positions = None
-        "Nx3 matrix of coordinates for N particles in 3 dimensions."
+        "Nx3 array of coordinates for N particles in 3 dimensions."
         self.orientations = None
-        "Nx4 matrix of rotational coordinates for N particles represented as quaternions."
+        "Nx4 array of rotational coordinates for N particles represented as quaternions."
         self.velocities = None
-        "Nx3 matrix of velocities for N particles in 3 dimensions."
+        "Nx3 array of velocities for N particles in 3 dimensions."
         self.mass = None
-        "Nx1 list of masses for N particles."
+        "Nx1 array of masses for N particles."
         self.charge = None
-        "Nx1 list of charges for N particles."
+        "Nx1 array of charges for N particles."
         self.diameter = None
-        "Nx1 list of diameters for N particles."
+        "Nx1 array of diameters for N particles."
         self.moment_inertia = None
-        "Nx3 matrix of principal moments of inertia for N particles in 3 dimensions."
+        "Nx3 array of principal moments of inertia for N particles in 3 dimensions."
         self.angmom = None
-        "Nx4 matrix of angular momenta for N particles represented as quaternions."
+        "Nx4 array of angular momenta for N particles represented as quaternions."
+        self.image = None
+        "Nx3 array of periodic images for N particles in 3 dimensions."
         self.data = None
         "A dictionary of lists for each attribute."
         self.data_keys = None
@@ -129,14 +131,15 @@ class FrameData(object):
         else:  # rigorous comparison required
             return self.box == other.box \
                 and self.types == other.types\
-                and (self.positions == other.positions).all()\
-                and (self.orientations == other.orientations).all()\
-                and (self.velocities == other.velocities).all()\
-                and (self.mass == other.mass).all()\
-                and (self.charge == other.charge).all()\
-                and (self.diameter == other.diameter).all()\
-                and (self.moment_inertia == other.moment_inertia).all()\
-                and (self.angmom == other.angmom).all()\
+                and np.array_equal(self.positions, other.positions)\
+                and np.array_equal(self.orientations, other.orientations)\
+                and np.array_equal(self.velocities, other.velocities)\
+                and np.array_equal(self.mass, other.mass)\
+                and np.array_equal(self.charge, other.charge)\
+                and np.array_equal(self.diameter, other.diameter)\
+                and np.array_equal(self.moment_inertia, other.moment_inertia)\
+                and np.array_equal(self.angmom, other.angmom)\
+                and np.array_equal(self.image, other.image)\
                 and self.data == other.data\
                 and self.shapedef == other.shapedef
 
@@ -176,6 +179,7 @@ class _RawFrameData(object):
         self.diameter = list()                      # Nx1
         self.moment_inertia = list()                # Nx3
         self.angmom = list()                        # Nx4
+        self.image = list()                         # Nx3
         # A dictionary of lists for each attribute
         self.data = None
         self.data_keys = None                       # A list of strings
@@ -203,36 +207,40 @@ class Frame(object):
         """Generate a frame object from a raw frame object."""
         N = len(raw_frame.types)
         ret = FrameData()
-        # the box
+
         positions = np.asarray(raw_frame.positions, dtype=dtype)
 
         orientations = np.asarray(raw_frame.orientations, dtype=dtype)
         if len(orientations) == 0:
-            orientations = np.asarray([[1, 0, 0, 0]] * len(positions))
+            orientations = np.asarray([[1, 0, 0, 0]] * len(positions), dtype=dtype)
 
         velocities = np.asarray(raw_frame.velocities, dtype=dtype)
         if len(velocities) == 0:
-            velocities = np.zeros((len(positions), 3))
+            velocities = np.zeros((len(positions), 3), dtype=dtype)
 
         mass = np.asarray(raw_frame.mass, dtype=dtype)
         if len(mass) == 0:
-            mass = np.ones(len(positions))
+            mass = np.ones(len(positions), dtype=dtype)
 
         charge = np.asarray(raw_frame.charge, dtype=dtype)
         if len(charge) == 0:
-            charge = np.zeros(len(positions))
+            charge = np.zeros(len(positions), dtype=dtype)
 
         diameter = np.asarray(raw_frame.diameter, dtype=dtype)
         if len(diameter) == 0:
-            diameter = np.ones(len(positions))
+            diameter = np.ones(len(positions), dtype=dtype)
 
         moment_inertia = np.asarray(raw_frame.moment_inertia, dtype=dtype)
         if len(moment_inertia) == 0:
-            moment_inertia = np.ones((len(positions), 3))
+            moment_inertia = np.ones((len(positions), 3), dtype=dtype)
 
         angmom = np.asarray(raw_frame.angmom, dtype=dtype)
         if len(angmom) == 0:
-            angmom = np.zeros((len(positions), 4))
+            angmom = np.zeros((len(positions), 4), dtype=dtype)
+
+        image = np.asarray(raw_frame.image, dtype=np.int32)
+        if len(image) == 0:
+            image = np.zeros((len(positions), 3), dtype=np.int32)
 
         assert raw_frame.box is not None
         if isinstance(raw_frame.box, Box):
@@ -245,6 +253,7 @@ class Frame(object):
         ret.charge = charge
         ret.diameter = diameter
         ret.moment_inertia = moment_inertia
+        ret.image = image
         ret.shapedef = raw_frame.shapedef
         ret.types = raw_frame.types
         ret.data = raw_frame.data
@@ -259,6 +268,7 @@ class Frame(object):
         assert N == len(ret.diameter)
         assert N == len(ret.moment_inertia)
         assert N == len(ret.angmom)
+        assert N == len(ret.image)
         return ret
 
     def loaded(self):
@@ -333,7 +343,7 @@ class Frame(object):
 
     @property
     def types(self):
-        "Nx1 list of types represented as strings."
+        "Nx1 array of types represented as strings."
         self.load()
         return self.frame_data.types
 
@@ -344,7 +354,7 @@ class Frame(object):
 
     @property
     def positions(self):
-        "Nx3 matrix of coordinates for N particles in 3 dimensions."
+        "Nx3 array of coordinates for N particles in 3 dimensions."
         self.load()
         return self.frame_data.positions
 
@@ -366,7 +376,7 @@ class Frame(object):
 
     @property
     def orientations(self):
-        "Nx4 matrix of rotational coordinates for N particles represented as quaternions."
+        "Nx4 array of rotational coordinates for N particles represented as quaternions."
         self.load()
         return self.frame_data.orientations
 
@@ -386,7 +396,7 @@ class Frame(object):
 
     @property
     def velocities(self):
-        "Nx3 matrix of velocities for N particles in 3 dimensions."
+        "Nx3 array of velocities for N particles in 3 dimensions."
         self.load()
         return self.frame_data.velocities
 
@@ -406,7 +416,7 @@ class Frame(object):
 
     @property
     def mass(self):
-        "Nx1 list of masses for N particles."
+        "Nx1 array of masses for N particles."
         self.load()
         return self.frame_data.mass
 
@@ -425,7 +435,7 @@ class Frame(object):
 
     @property
     def charge(self):
-        "Nx1 list of charges for N particles."
+        "Nx1 array of charges for N particles."
         self.load()
         return self.frame_data.charge
 
@@ -444,7 +454,7 @@ class Frame(object):
 
     @property
     def diameter(self):
-        "Nx1 list of diameters for N particles."
+        "Nx1 array of diameters for N particles."
         self.load()
         return self.frame_data.diameter
 
@@ -463,7 +473,7 @@ class Frame(object):
 
     @property
     def moment_inertia(self):
-        "Nx3 matrix of principal moments of inertia for N particles in 3 dimensions."
+        "Nx3 array of principal moments of inertia for N particles in 3 dimensions."
         self.load()
         return self.frame_data.moment_inertia
 
@@ -483,7 +493,7 @@ class Frame(object):
 
     @property
     def angmom(self):
-        "Nx4 matrix of angular momenta for N particles represented as quaternions."
+        "Nx4 array of angular momenta for N particles represented as quaternions."
         self.load()
         return self.frame_data.angmom
 
@@ -500,6 +510,25 @@ class Frame(object):
 
         self.load()
         self.frame_data.angmom = value
+
+    @property
+    def image(self):
+        "Nx3 array of periodic images for N particles in 3 dimensions."
+        self.load()
+        return self.frame_data.image
+
+    @image.setter
+    def image(self, value):
+        try:
+            value = np.asarray(value, dtype=np.int32)
+        except ValueError:
+            raise ValueError("Images can only be set to numeric arrays.")
+        if not np.all(np.isfinite(value)):
+            raise ValueError("Images being set must all be finite numbers.")
+        elif not len(value.shape) == 2 or value.shape[1] != 3:
+            raise ValueError("Input array must be of shape (N,3) where N is the number of particles.")
+        self.load()
+        self.frame_data.image = value
 
     @property
     def data(self):
@@ -563,7 +592,7 @@ class BaseTrajectory(object):
             for x in ('_N', '_types', '_type', '_type_ids',
                       '_positions', '_orientations', '_velocities',
                       '_mass', '_charge', '_diameter',
-                      '_moment_inertia', '_angmom'):
+                      '_moment_inertia', '_angmom', '_image'):
                 if getattr(self, x) is not None:
                     setattr(traj, x, getattr(self, x)[index])
             return traj
@@ -674,6 +703,7 @@ class Trajectory(BaseTrajectory):
         self._diameter = None
         self._moment_inertia = None
         self._angmom = None
+        self._image = None
 
     def __iter__(self):
         return iter(ImmutableTrajectory(self.frames))
@@ -716,7 +746,8 @@ class Trajectory(BaseTrajectory):
                     self._charge is None or
                     self._diameter is None or
                     self._moment_inertia is None or
-                    self._angmom is None)
+                    self._angmom is None or
+                    self._image is None)
 
     def _assert_loaded(self):
         "Raises a RuntimeError if trajectory is not loaded."
@@ -775,7 +806,7 @@ class Trajectory(BaseTrajectory):
 
         # Types
         types = [f.types for f in self.frames]
-        type_ids = np.zeros((M, N), dtype=np.int_)
+        type_ids = np.zeros((M, N), dtype=np.uint32)
         _type = _generate_type_id_array(types, type_ids)
 
         # Properties
@@ -790,7 +821,9 @@ class Trajectory(BaseTrajectory):
             charge=np.zeros((M, N), dtype=self._dtype),
             diameter=np.ones((M, N), dtype=self._dtype),
             moment_inertia=np.ones((M, N, 3), dtype=self._dtype),
-            angmom=np.zeros((M, N, 4), dtype=self._dtype))
+            angmom=np.zeros((M, N, 4), dtype=self._dtype),
+            image=np.zeros((M, N, 3), dtype=np.int32),
+        )
 
         for i, frame in enumerate(self.frames):
             for prop in prop_list:
@@ -815,12 +848,13 @@ class Trajectory(BaseTrajectory):
             self._diameter = props['diameter']
             self._moment_inertia = props['moment_inertia']
             self._angmom = props['angmom']
+            self._image = props['image']
         except Exception:
             # Ensure consistent error state
             self._N = self._type = self._types = self._type_ids = \
                 self._positions = self._orientations = self._velocities = \
                 self._mass = self._charge = self._diameter = \
-                self._moment_inertia = self._angmom = None
+                self._moment_inertia = self._angmom = self._image = None
             raise
 
     def set_dtype(self, value):
@@ -841,7 +875,7 @@ class Trajectory(BaseTrajectory):
 
     @property
     def N(self):
-        """Access the frame sizes as numpy array.
+        """Access the frame sizes as a numpy array.
 
         Mostly important when the trajectory has varying size.
 
@@ -859,7 +893,7 @@ class Trajectory(BaseTrajectory):
 
     @property
     def types(self):
-        """Access the particle types as numpy array.
+        """Access the particle types as a numpy array.
 
         :returns: particles types as (MxN) array
         :rtype: :class:`numpy.ndarray` (dtype= :class:`numpy.str_` )
@@ -891,7 +925,7 @@ class Trajectory(BaseTrajectory):
 
     @property
     def type_ids(self):
-        """Access the particle type ids as numpy array.
+        """Access the particle type ids as a numpy array.
 
         See also: :attr:`~.Trajectory.type`
 
@@ -905,7 +939,7 @@ class Trajectory(BaseTrajectory):
 
     @property
     def positions(self):
-        """Access the particle positions as numpy array.
+        """Access the particle positions as a numpy array.
 
         :returns: particle positions as (Nx3) array
         :rtype: :class:`numpy.ndarray`
@@ -917,7 +951,7 @@ class Trajectory(BaseTrajectory):
 
     @property
     def orientations(self):
-        """Access the particle orientations as numpy array.
+        """Access the particle orientations as a numpy array.
 
         Orientations are stored as quaternions.
 
@@ -931,7 +965,7 @@ class Trajectory(BaseTrajectory):
 
     @property
     def velocities(self):
-        """Access the particle velocities as numpy array.
+        """Access the particle velocities as a numpy array.
 
         :returns: particle velocities as (Nx3) array
         :rtype: :class:`numpy.ndarray`
@@ -946,7 +980,7 @@ class Trajectory(BaseTrajectory):
 
     @property
     def mass(self):
-        """Access the particle mass as numpy array.
+        """Access the particle mass as a numpy array.
 
         :returns: particle mass as (N) element array
         :rtype: :class:`numpy.ndarray`
@@ -961,7 +995,7 @@ class Trajectory(BaseTrajectory):
 
     @property
     def charge(self):
-        """Access the particle charge as numpy array.
+        """Access the particle charge as a numpy array.
 
         :returns: particle charge as (N) element array
         :rtype: :class:`numpy.ndarray`
@@ -976,7 +1010,7 @@ class Trajectory(BaseTrajectory):
 
     @property
     def diameter(self):
-        """Access the particle diameter as numpy array.
+        """Access the particle diameter as a numpy array.
 
         :returns: particle diameter as (N) element array
         :rtype: :class:`numpy.ndarray`
@@ -991,7 +1025,7 @@ class Trajectory(BaseTrajectory):
 
     @property
     def moment_inertia(self):
-        """Access the particle principal moment of inertia components as
+        """Access the particle principal moment of inertia components as a
         numpy array.
 
         :returns: particle principal moment of inertia components as (Nx3)
@@ -1008,7 +1042,7 @@ class Trajectory(BaseTrajectory):
 
     @property
     def angmom(self):
-        """Access the particle angular momenta as numpy array.
+        """Access the particle angular momenta as a numpy array.
 
         :returns: particle angular momenta quaternions as (Nx4) element array
         :rtype: :class:`numpy.ndarray`
@@ -1020,6 +1054,21 @@ class Trajectory(BaseTrajectory):
             raise AttributeError('Angular momenta are not available for this '
                                  'trajectory.')
         return np.asarray(self._angmom, dtype=self._dtype)
+
+    @property
+    def image(self):
+        """Access the particle periodic images as a numpy array.
+
+        :returns: particle periodic images as (Nx3) element array
+        :rtype: :class:`numpy.ndarray`
+        :raises RuntimeError: When accessed before
+            calling :meth:`~.load_arrays` or
+            :meth:`~.Trajectory.load`."""
+        self._assertarrays_loaded()
+        if getattr(self, '_image', None) is None:
+            raise AttributeError('Images are not available for '
+                                 'this trajectory.')
+        return np.asarray(self._image, dtype=np.int32)
 
 
 def _regularize_box(positions, velocities,
@@ -1101,6 +1150,7 @@ def copyto_hoomd_blue_snapshot(frame, snapshot):
     np.copyto(snapshot.particles.diameter, frame.diameter)
     np.copyto(snapshot.particles.moment_inertia, frame.moment_inertia)
     np.copyto(snapshot.particles.angmom, frame.angmom)
+    np.copyto(snapshot.particles.image, frame.image)
     return snapshot
 
 
@@ -1121,6 +1171,7 @@ def copyfrom_hoomd_blue_snapshot(frame, snapshot):
     frame.diameter = snapshot.particles.diameter
     frame.moment_inertia = snapshot.particles.moment_inertia
     frame.angmom = snapshot.particles.angmom
+    frame.image = snapshot.particles.image
     return frame
 
 

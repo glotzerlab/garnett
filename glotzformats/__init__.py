@@ -9,8 +9,17 @@ from . import writer
 from . import samples
 from . import shapes
 from . import trajectory
-from .util import read
+from .util import read, write
 
 __version__ = '0.4.1'
 
-__all__ = ['formats', 'reader', 'writer', 'samples', 'shapes', 'trajectory', 'read']
+__all__ = [
+    'formats',
+    'reader',
+    'writer',
+    'samples',
+    'shapes',
+    'trajectory',
+    'read',
+    'write',
+]

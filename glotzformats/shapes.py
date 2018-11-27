@@ -152,6 +152,38 @@ class PolygonShape(Shape):
                 'vertices': [v[:2] for v in self.vertices]}
 
 
+class SpheropolygonShape(Shape):
+    """Initialize a SpheropolygonShape instance.
+
+    :param vertices: A list of vertex vectors, if applicable.
+    :type vertices: A sequence of 3-tuples of numbers (Nx3), where the third component is z=0.
+    :param rounding_radius: Rounding radius applied to the spheropolygon.
+    :type rounding_radius: A floating-point number.
+    :param color: Definition of a color for the particular shape.
+    :type color: A hexadecimal color string in format RRGGBBAA.
+    """
+
+    def __init__(self, vertices=None, rounding_radius=None, color=None):
+        super(SpheropolygonShape, self).__init__(
+            shape_class='spoly', color=color)
+        self.vertices = vertices
+        self.rounding_radius = rounding_radius
+
+    def __str__(self):
+        return "{} {} {} {} {}".format(
+            self.shape_class,
+            self.rounding_radius,
+            len(self.vertices),
+            ' '.join((str(v) for xyz in self.vertices for v in xyz)),
+            self.color)
+
+    @property
+    def json_shape(self):
+        return {'type': 'Polygon',
+                'rounding_radius': self.rounding_radius,
+                'vertices': [v[:2] for v in self.vertices]}
+
+
 class ConvexPolyhedronShape(Shape):
     """Initialize a ConvexPolyhedronShape instance.
 
