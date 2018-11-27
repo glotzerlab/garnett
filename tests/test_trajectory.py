@@ -327,6 +327,24 @@ class TrajectoryTest(unittest.TestCase):
             with self.assertRaises(ValueError):
                 traj[0].angmom = 'hello'
 
+    def test_image(self):
+        sample_file = self.get_sample_file()
+        traj = self.reader().read(sample_file)
+        with self.assertRaises(RuntimeError):
+            traj.image
+        traj.load_arrays()
+        try:
+            traj.image
+        except AttributeError:
+            pass
+        else:
+            self.assertTrue(np.issubdtype(
+                traj.image.dtype, np.int32))
+            self.assertEqual(traj.image.shape, (len(traj), len(traj[0]), 3))
+            self.assertTrue((traj.image[0] == traj[0].image).all())
+            with self.assertRaises(ValueError):
+                traj[0].image = 'hello'
+
 
 @unittest.skipIf(not HOOMD, 'requires hoomd-blue')
 class FrameSnapshotExport(TrajectoryTest):
