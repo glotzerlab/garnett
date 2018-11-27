@@ -9,7 +9,8 @@ import gsd.hoomd
 import logging
 import numpy as np
 
-from .shapes import SphereShape, ConvexPolyhedronShape, ConvexSpheropolyhedronShape
+from .shapes import SphereShape, ConvexPolyhedronShape, ConvexSpheropolyhedronShape, \
+    PolygonShape, SpheropolygonShape
 from .errors import GSDShapeError
 
 logger = logging.getLogger(__name__)
@@ -48,6 +49,18 @@ def _write_shape_definitions(snap, shapedefs):
             vertices = np.concatenate(vertices, axis=0)
             state['hpmc/convex_spheropolyhedron/vertices'] = vertices
             state['hpmc/convex_spheropolyhedron/sweep_radius'] = \
+                compute_property(lambda shape: shape.rounding_radius)
+        elif shape_type is PolygonShape:
+            state['hpmc/simple_polygon/N'] = compute_property(lambda shape: len(shape.vertices))
+            vertices = compute_property(lambda shape: shape.vertices[:2])
+            vertices = np.concatenate(vertices, axis=0)
+            state['hpmc/simple_polygon/vertices'] = vertices
+        elif shape_type is SpheropolygonShape:
+            state['hpmc/convex_spheropolygon/N'] = compute_property(lambda shape: len(shape.vertices))
+            vertices = compute_property(lambda shape: shape.vertices[:2])
+            vertices = np.concatenate(vertices, axis=0)
+            state['hpmc/convex_spheropolygon/vertices'] = vertices
+            state['hpmc/convex_spheropolygon/sweep_radius'] = \
                 compute_property(lambda shape: shape.rounding_radius)
         else:
             raise GSDShapeError('Unsupported shape: {}'.format(shape_type))

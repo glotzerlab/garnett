@@ -12,6 +12,7 @@ __all__ = [
     'ArrowShape',
     'SphereUnionShape',
     'PolygonShape',
+    'SpheropolygonShape',
     'ConvexPolyhedronShape',
     'ConvexPolyhedronUnionShape',
     'ConvexSpheropolyhedronShape',

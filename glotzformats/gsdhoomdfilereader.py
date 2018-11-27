@@ -115,7 +115,7 @@ def _parse_shape_definitions(frame, gsdfile, frame_index):
         verts_split = [verts[start:end] for start, end in zip(N_start, N_end)]
         for typename, typeverts in zip(types, verts_split):
             shapedefs[typename] = PolygonShape(
-                vertices=typeverts, color=None)
+                vertices=[typeverts[0], typeverts[1], 0], color=None)
         return shapedefs
 
     # Convex Spheropolygons
@@ -129,7 +129,8 @@ def _parse_shape_definitions(frame, gsdfile, frame_index):
                                 'state/hpmc/convex_spheropolygon/sweep_radius')
         for typename, typeverts, radius in zip(types, verts_split, sweep_radii):
             shapedefs[typename] = SpheropolygonShape(
-                vertices=typeverts, rounding_radius=radius, color=None)
+                vertices=[typeverts[0], typeverts[1], 0],
+                rounding_radius=radius, color=None)
         return shapedefs
 
     # Simple Polygons
@@ -141,7 +142,7 @@ def _parse_shape_definitions(frame, gsdfile, frame_index):
         verts_split = [verts[start:end] for start, end in zip(N_start, N_end)]
         for typename, typeverts in zip(types, verts_split):
             shapedefs[typename] = PolygonShape(
-                vertices=typeverts, color=None)
+                vertices=[typeverts[0], typeverts[1], 0], color=None)
         return shapedefs
 
     # If no shapes were detected, return the empty shapedefs dict.
