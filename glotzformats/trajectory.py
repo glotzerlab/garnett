@@ -448,38 +448,40 @@ class Frame(object):
         ret = FrameData()
 
         positions = np.asarray(raw_frame.positions, dtype=dtype)
+        if len(positions) == 0:
+            positions = None
 
         orientations = np.asarray(raw_frame.orientations, dtype=dtype)
         if len(orientations) == 0:
-            orientations = np.asarray([[1, 0, 0, 0]] * len(positions), dtype=dtype)
+            orientations = None
 
         velocities = np.asarray(raw_frame.velocities, dtype=dtype)
         if len(velocities) == 0:
-            velocities = np.zeros((len(positions), 3), dtype=dtype)
+            velocities = None
 
         mass = np.asarray(raw_frame.mass, dtype=dtype)
         if len(mass) == 0:
-            mass = np.ones(len(positions), dtype=dtype)
+            mass = None
 
         charge = np.asarray(raw_frame.charge, dtype=dtype)
         if len(charge) == 0:
-            charge = np.zeros(len(positions), dtype=dtype)
+            charge = None
 
         diameter = np.asarray(raw_frame.diameter, dtype=dtype)
         if len(diameter) == 0:
-            diameter = np.ones(len(positions), dtype=dtype)
+            diameter = None
 
         moment_inertia = np.asarray(raw_frame.moment_inertia, dtype=dtype)
         if len(moment_inertia) == 0:
-            moment_inertia = np.ones((len(positions), 3), dtype=dtype)
+            moment_inertia = None
 
         angmom = np.asarray(raw_frame.angmom, dtype=dtype)
         if len(angmom) == 0:
-            angmom = np.zeros((len(positions), 4), dtype=dtype)
+            angmom = None
 
         image = np.asarray(raw_frame.image, dtype=np.int32)
         if len(image) == 0:
-            image = np.zeros((len(positions), 3), dtype=np.int32)
+            image = None
 
         assert raw_frame.box is not None
         if isinstance(raw_frame.box, Box):
@@ -500,14 +502,22 @@ class Frame(object):
         ret.view_rotation = raw_frame.view_rotation
         assert N == len(ret.types)
         assert N == len(ret.positions)
-        assert N == len(ret.orientations)
-        assert N == len(ret.velocities)
-        assert N == len(ret.mass)
-        assert N == len(ret.charge)
-        assert N == len(ret.diameter)
-        assert N == len(ret.moment_inertia)
-        assert N == len(ret.angmom)
-        assert N == len(ret.image)
+        if ret.orientations is not None:
+            assert N == len(ret.orientations)
+        if ret.velocities is not None:
+            assert N == len(ret.velocities)
+        if ret.mass is not None:
+            assert N == len(ret.mass)
+        if ret.charge is not None:
+            assert N == len(ret.charge)
+        if ret.diameter is not None:
+            assert N == len(ret.diameter)
+        if ret.moment_inertia is not None:
+            assert N == len(ret.moment_inertia)
+        if ret.angmom is not None:
+            assert N == len(ret.angmom)
+        if ret.image is not None:
+            assert N == len(ret.image)
         return ret
 
     def loaded(self):
@@ -1051,27 +1061,34 @@ class Trajectory(BaseTrajectory):
         # Properties
         prop_list = ['positions', 'orientations', 'velocities',
                      'mass', 'charge', 'diameter',
-                     'moment_inertia', 'angmom']
+                     'moment_inertia', 'angmom', 'image']
         props = dict(
-            positions=np.zeros((M, N, 3), dtype=self._dtype),
-            orientations=np.zeros((M, N, 4), dtype=self._dtype),
-            velocities=np.zeros((M, N, 3), dtype=self._dtype),
-            mass=np.ones((M, N), dtype=self._dtype),
-            charge=np.zeros((M, N), dtype=self._dtype),
-            diameter=np.ones((M, N), dtype=self._dtype),
-            moment_inertia=np.ones((M, N, 3), dtype=self._dtype),
-            angmom=np.zeros((M, N, 4), dtype=self._dtype),
-            image=np.zeros((M, N, 3), dtype=np.int32),
+            positions=[None] * M,
+            orientations=[None] * M,
+            velocities=[None] * M,
+            mass=[None] * M,
+            charge=[None] * M,
+            diameter=[None] * M,
+            moment_inertia=[None] * M,
+            angmom=[None] * M,
+            image=[None] * M,
         )
 
         for i, frame in enumerate(self.frames):
             for prop in prop_list:
                 frame_prop = getattr(frame, prop)
-                prop_shape = frame_prop.shape
-                if len(prop_shape) == 1:
-                    props[prop][i][:prop_shape[0]] = frame_prop
-                elif len(prop_shape) == 2:
-                    props[prop][i][:prop_shape[0], :prop_shape[1]] = frame_prop
+                if frame_prop is not None:
+                    props[prop][i] = frame_prop
+
+        for prop in prop_list:
+            if prop == 'image':
+                dtype_ = np.int_
+            else:
+                dtype_ = DEFAULT_DTYPE
+            try:
+                props[prop] = np.asarray(props[prop], dtype=dtype_)
+            except TypeError:
+                props[prop] = np.asarray(props[prop])
 
         try:
             # Perform swap
@@ -1186,7 +1203,7 @@ class Trajectory(BaseTrajectory):
             calling :meth:`~.load_arrays` or
             :meth:`~.Trajectory.load`."""
         self._assertarrays_loaded()
-        return np.asarray(self._positions, dtype=self._dtype)
+        return self._positions
 
     @property
     def orientations(self):
@@ -1200,7 +1217,7 @@ class Trajectory(BaseTrajectory):
             calling :meth:`~.load_arrays` or
             :meth:`~.Trajectory.load`."""
         self._assertarrays_loaded()
-        return np.asarray(self._orientations, dtype=self._dtype)
+        return self._orientations
 
     @property
     def velocities(self):
@@ -1215,7 +1232,7 @@ class Trajectory(BaseTrajectory):
         if getattr(self, '_velocities', None) is None:
             raise AttributeError('Velocities are not available for this '
                                  'trajectory.')
-        return np.asarray(self._velocities, dtype=self._dtype)
+        return self._velocities
 
     @property
     def mass(self):
@@ -1230,7 +1247,7 @@ class Trajectory(BaseTrajectory):
         if getattr(self, '_mass', None) is None:
             raise AttributeError('Masses are not available for this '
                                  'trajectory.')
-        return np.asarray(self._mass, dtype=self._dtype)
+        return self._mass
 
     @property
     def charge(self):
@@ -1245,7 +1262,7 @@ class Trajectory(BaseTrajectory):
         if getattr(self, '_charge', None) is None:
             raise AttributeError('Charges are not available for this '
                                  'trajectory.')
-        return np.asarray(self._charge, dtype=self._dtype)
+        return self._charge
 
     @property
     def diameter(self):
@@ -1260,7 +1277,7 @@ class Trajectory(BaseTrajectory):
         if getattr(self, '_diameter', None) is None:
             raise AttributeError('Diameters are not available for this '
                                  'trajectory.')
-        return np.asarray(self._diameter, dtype=self._dtype)
+        return self._diameter
 
     @property
     def moment_inertia(self):
@@ -1277,7 +1294,7 @@ class Trajectory(BaseTrajectory):
         if getattr(self, '_moment_inertia', None) is None:
             raise AttributeError('Moments of inertia are not available for '
                                  'this trajectory.')
-        return np.asarray(self._moment_inertia, dtype=self._dtype)
+        return self._moment_inertia
 
     @property
     def angmom(self):
@@ -1292,7 +1309,7 @@ class Trajectory(BaseTrajectory):
         if getattr(self, '_angmom', None) is None:
             raise AttributeError('Angular momenta are not available for this '
                                  'trajectory.')
-        return np.asarray(self._angmom, dtype=self._dtype)
+        return self._angmom
 
     @property
     def image(self):
@@ -1307,7 +1324,7 @@ class Trajectory(BaseTrajectory):
         if getattr(self, '_image', None) is None:
             raise AttributeError('Images are not available for '
                                  'this trajectory.')
-        return np.asarray(self._image, dtype=np.int32)
+        return self._image
 
 
 def _regularize_box(positions, velocities,
@@ -1327,9 +1344,12 @@ def _regularize_box(positions, velocities,
         # actual failures for non-writeable GSD frames, but could
         # cause unexpected data corruption for other cases
         positions = np.copy(positions)
-        orientations = np.copy(orientations)
-        velocities = np.copy(velocities)
-        angmom = np.copy(angmom)
+        if orientations is not None:
+            orientations = np.copy(orientations)
+        if velocities is not None:
+            velocities = np.copy(velocities)
+        if angmom is not None:
+            angmom = np.copy(angmom)
 
         # Since we'll be performing a quaternion operation,
         # we have to ensure that Q is a pure rotation
@@ -1342,14 +1362,17 @@ def _regularize_box(positions, velocities,
         # Conveniently, instead of transposing Q we can just reverse
         # the order of multiplication here
         positions = positions.dot(Q)
-        velocities = velocities.dot(Q)
+        if velocities is not None:
+            velocities = velocities.dot(Q)
 
         # For orientations and angular momenta, we use the quaternion
         quat = rowan.from_matrix(Q.T)
-        for i in range(orientations.shape[0]):
-            orientations[i, :] = rowan.multiply(quat, orientations[i, :])
-        for i in range(angmom.shape[0]):
-            angmom[i, :] = rowan.multiply(quat, angmom[i, :])
+        if orientations is not None:
+            for i in range(orientations.shape[0]):
+                orientations[i, :] = rowan.multiply(quat, orientations[i, :])
+        if angmom is not None:
+            for i in range(angmom.shape[0]):
+                angmom[i, :] = rowan.multiply(quat, angmom[i, :])
 
         # Now we have to ensure that the box is right-handed. We
         # do this as a second step to avoid introducing reflections
@@ -1357,7 +1380,8 @@ def _regularize_box(positions, velocities,
         signs = np.diag(np.diag(np.where(R < 0, -np.ones(R.shape), np.ones(R.shape))))
         box = R.dot(signs)
         positions = positions.dot(signs)
-        velocities = velocities.dot(signs)
+        if velocities is not None:
+            velocities = velocities.dot(signs)
     else:
         box = box_matrix
 
@@ -1381,15 +1405,24 @@ def _generate_type_id_array(types, type_ids):
 
 def copyto_hoomd_blue_snapshot(frame, snapshot):
     "Copy the frame into a HOOMD-blue snapshot."
-    np.copyto(snapshot.particles.position, frame.positions)
-    np.copyto(snapshot.particles.orientation, frame.orientations)
-    np.copyto(snapshot.particles.velocity, frame.velocities)
-    np.copyto(snapshot.particles.mass, frame.mass)
-    np.copyto(snapshot.particles.charge, frame.charge)
-    np.copyto(snapshot.particles.diameter, frame.diameter)
-    np.copyto(snapshot.particles.moment_inertia, frame.moment_inertia)
-    np.copyto(snapshot.particles.angmom, frame.angmom)
-    np.copyto(snapshot.particles.image, frame.image)
+    if frame.positions is not None:
+        np.copyto(snapshot.particles.position, frame.positions)
+    if frame.orientations is not None:
+        np.copyto(snapshot.particles.orientation, frame.orientations)
+    if frame.velocities is not None:
+        np.copyto(snapshot.particles.velocity, frame.velocities)
+    if frame.mass is not None:
+        np.copyto(snapshot.particles.mass, frame.mass)
+    if frame.charge is not None:
+        np.copyto(snapshot.particles.charge, frame.charge)
+    if frame.diameter is not None:
+        np.copyto(snapshot.particles.diameter, frame.diameter)
+    if frame.moment_inertia is not None:
+        np.copyto(snapshot.particles.moment_inertia, frame.moment_inertia)
+    if frame.angmom is not None:
+        np.copyto(snapshot.particles.angmom, frame.angmom)
+    if frame.image is not None:
+        np.copyto(snapshot.particles.image, frame.image)
     return snapshot
 
 
