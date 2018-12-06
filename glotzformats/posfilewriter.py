@@ -107,6 +107,8 @@ class PosFileWriter(object):
                     "Using fallback definition.".format(name))
                 _write('def {} "{}"'.format(name, DEFAULT_SHAPE_DEFINITION))
 
+            # Orientations must be provided for all particles
+            # If the frame does not have orientations, identity quaternions are used
             orientations = frame.orientations
             if orientations is None:
                 orientations = np.array([[1, 0, 0, 0]] * len(frame.types))
