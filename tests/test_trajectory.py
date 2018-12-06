@@ -171,11 +171,7 @@ class TrajectoryTest(unittest.TestCase):
         with self.assertRaises(RuntimeError):
             traj.positions
         traj.load_arrays()
-        try:
-            traj.positions
-        except AttributeError:
-            pass
-        else:
+        if traj.positions is not None and None not in traj.positions:
             self.assertTrue(np.issubdtype(
                 traj.positions.dtype, glotzformats.trajectory.DEFAULT_DTYPE))
             self.assertEqual(traj.positions.shape, (len(traj), len(traj[0]), 3))
@@ -192,11 +188,7 @@ class TrajectoryTest(unittest.TestCase):
         with self.assertRaises(RuntimeError):
             traj.orientations
         traj.load_arrays()
-        try:
-            traj.orientations
-        except AttributeError:
-            pass
-        else:
+        if traj.orientations is not None and None not in traj.orientations:
             if len(traj.orientations.shape) > 1:
                 self.assertTrue(np.issubdtype(
                     traj.orientations.dtype, glotzformats.trajectory.DEFAULT_DTYPE))
@@ -215,11 +207,7 @@ class TrajectoryTest(unittest.TestCase):
         with self.assertRaises(RuntimeError):
             traj.velocities
         traj.load_arrays()
-        try:
-            traj.velocities
-        except AttributeError:
-            pass
-        else:
+        if traj.velocities is not None and None not in traj.velocities:
             if len(traj.velocities.shape) > 1:
                 self.assertTrue(np.issubdtype(
                     traj.velocities.dtype, glotzformats.trajectory.DEFAULT_DTYPE))
@@ -238,11 +226,7 @@ class TrajectoryTest(unittest.TestCase):
         with self.assertRaises(RuntimeError):
             traj.mass
         traj.load_arrays()
-        try:
-            traj.mass
-        except AttributeError:
-            pass
-        else:
+        if traj.mass is not None and None not in traj.mass:
             if len(traj.mass.shape) > 1:
                 self.assertTrue(np.issubdtype(
                     traj.mass.dtype, glotzformats.trajectory.DEFAULT_DTYPE))
@@ -261,11 +245,7 @@ class TrajectoryTest(unittest.TestCase):
         with self.assertRaises(RuntimeError):
             traj.charge
         traj.load_arrays()
-        try:
-            traj.charge
-        except AttributeError:
-            pass
-        else:
+        if traj.charge is not None and None not in traj.charge:
             if len(traj.charge.shape) > 1:
                 self.assertTrue(np.issubdtype(
                     traj.charge.dtype, glotzformats.trajectory.DEFAULT_DTYPE))
@@ -284,11 +264,7 @@ class TrajectoryTest(unittest.TestCase):
         with self.assertRaises(RuntimeError):
             traj.diameter
         traj.load_arrays()
-        try:
-            traj.diameter
-        except AttributeError:
-            pass
-        else:
+        if traj.diameter is not None and None not in traj.diameter:
             if len(traj.diameter.shape) > 1:
                 self.assertTrue(np.issubdtype(
                     traj.diameter.dtype, glotzformats.trajectory.DEFAULT_DTYPE))
@@ -307,11 +283,7 @@ class TrajectoryTest(unittest.TestCase):
         with self.assertRaises(RuntimeError):
             traj.moment_inertia
         traj.load_arrays()
-        try:
-            traj.moment_inertia
-        except AttributeError:
-            pass
-        else:
+        if traj.moment_inertia is not None and None not in traj.moment_inertia:
             if len(traj.moment_inertia.shape) > 1:
                 self.assertTrue(np.issubdtype(
                     traj.moment_inertia.dtype, glotzformats.trajectory.DEFAULT_DTYPE))
@@ -327,11 +299,7 @@ class TrajectoryTest(unittest.TestCase):
         with self.assertRaises(RuntimeError):
             traj.angmom
         traj.load_arrays()
-        try:
-            traj.angmom
-        except AttributeError:
-            pass
-        else:
+        if traj.angmom is not None and None not in traj.angmom:
             if len(traj.angmom.shape) > 1:
                 self.assertTrue(np.issubdtype(
                     traj.angmom.dtype, glotzformats.trajectory.DEFAULT_DTYPE))
@@ -347,11 +315,7 @@ class TrajectoryTest(unittest.TestCase):
         with self.assertRaises(RuntimeError):
             traj.image
         traj.load_arrays()
-        try:
-            traj.image
-        except AttributeError:
-            pass
-        else:
+        if traj.image is not None and None not in traj.image:
             if len(traj.image.shape) > 1:
                 self.assertTrue(np.issubdtype(
                     traj.image.dtype, np.int32))

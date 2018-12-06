@@ -1229,9 +1229,6 @@ class Trajectory(BaseTrajectory):
             calling :meth:`~.load_arrays` or
             :meth:`~.Trajectory.load`."""
         self._assertarrays_loaded()
-        if getattr(self, '_velocities', None) is None:
-            raise AttributeError('Velocities are not available for this '
-                                 'trajectory.')
         return self._velocities
 
     @property
@@ -1244,9 +1241,6 @@ class Trajectory(BaseTrajectory):
             calling :meth:`~.load_arrays` or
             :meth:`~.Trajectory.load`."""
         self._assertarrays_loaded()
-        if getattr(self, '_mass', None) is None:
-            raise AttributeError('Masses are not available for this '
-                                 'trajectory.')
         return self._mass
 
     @property
@@ -1259,9 +1253,6 @@ class Trajectory(BaseTrajectory):
             calling :meth:`~.load_arrays` or
             :meth:`~.Trajectory.load`."""
         self._assertarrays_loaded()
-        if getattr(self, '_charge', None) is None:
-            raise AttributeError('Charges are not available for this '
-                                 'trajectory.')
         return self._charge
 
     @property
@@ -1274,9 +1265,6 @@ class Trajectory(BaseTrajectory):
             calling :meth:`~.load_arrays` or
             :meth:`~.Trajectory.load`."""
         self._assertarrays_loaded()
-        if getattr(self, '_diameter', None) is None:
-            raise AttributeError('Diameters are not available for this '
-                                 'trajectory.')
         return self._diameter
 
     @property
@@ -1291,9 +1279,6 @@ class Trajectory(BaseTrajectory):
             calling :meth:`~.load_arrays` or
             :meth:`~.Trajectory.load`."""
         self._assertarrays_loaded()
-        if getattr(self, '_moment_inertia', None) is None:
-            raise AttributeError('Moments of inertia are not available for '
-                                 'this trajectory.')
         return self._moment_inertia
 
     @property
@@ -1306,9 +1291,6 @@ class Trajectory(BaseTrajectory):
             calling :meth:`~.load_arrays` or
             :meth:`~.Trajectory.load`."""
         self._assertarrays_loaded()
-        if getattr(self, '_angmom', None) is None:
-            raise AttributeError('Angular momenta are not available for this '
-                                 'trajectory.')
         return self._angmom
 
     @property
@@ -1321,9 +1303,6 @@ class Trajectory(BaseTrajectory):
             calling :meth:`~.load_arrays` or
             :meth:`~.Trajectory.load`."""
         self._assertarrays_loaded()
-        if getattr(self, '_image', None) is None:
-            raise AttributeError('Images are not available for '
-                                 'this trajectory.')
         return self._image
 
 
