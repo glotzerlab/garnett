@@ -1082,12 +1082,12 @@ class Trajectory(BaseTrajectory):
 
         for prop in prop_list:
             if prop == 'image':
-                dtype_ = np.int_
+                dtype_ = np.int32
             else:
                 dtype_ = DEFAULT_DTYPE
             try:
                 props[prop] = np.asarray(props[prop], dtype=dtype_)
-            except TypeError:
+            except (TypeError, ValueError):
                 props[prop] = np.asarray(props[prop])
 
         try:
