@@ -171,11 +171,7 @@ class TrajectoryTest(unittest.TestCase):
         with self.assertRaises(RuntimeError):
             traj.positions
         traj.load_arrays()
-        try:
-            traj.positions
-        except AttributeError:
-            pass
-        else:
+        if traj.positions is not None and None not in traj.positions:
             self.assertTrue(np.issubdtype(
                 traj.positions.dtype, glotzformats.trajectory.DEFAULT_DTYPE))
             self.assertEqual(traj.positions.shape, (len(traj), len(traj[0]), 3))
@@ -192,15 +188,13 @@ class TrajectoryTest(unittest.TestCase):
         with self.assertRaises(RuntimeError):
             traj.orientations
         traj.load_arrays()
-        try:
-            traj.orientations
-        except AttributeError:
-            pass
-        else:
-            self.assertTrue(np.issubdtype(
-                traj.orientations.dtype, glotzformats.trajectory.DEFAULT_DTYPE))
-            self.assertEqual(traj.orientations.shape, (len(traj), len(traj[0]), 4))
-            self.assertTrue((traj.orientations[0] == traj[0].orientations).all())
+        if traj.orientations is not None and None not in traj.orientations:
+            if len(traj.orientations.shape) > 1:
+                self.assertTrue(np.issubdtype(
+                    traj.orientations.dtype, glotzformats.trajectory.DEFAULT_DTYPE))
+                self.assertEqual(traj.orientations.shape,
+                                 (len(traj), len(traj[0]), 4))
+                self.assertTrue((traj.orientations[0] == traj[0].orientations).all())
             with self.assertRaises(ValueError):
                 traj[0].orientations = 'hello'
             with self.assertRaises(ValueError):
@@ -213,15 +207,13 @@ class TrajectoryTest(unittest.TestCase):
         with self.assertRaises(RuntimeError):
             traj.velocities
         traj.load_arrays()
-        try:
-            traj.velocities
-        except AttributeError:
-            pass
-        else:
-            self.assertTrue(np.issubdtype(
-                traj.velocities.dtype, glotzformats.trajectory.DEFAULT_DTYPE))
-            self.assertEqual(traj.velocities.shape, (len(traj), len(traj[0]), 3))
-            self.assertTrue((traj.velocities[0] == traj[0].velocities).all())
+        if traj.velocities is not None and None not in traj.velocities:
+            if len(traj.velocities.shape) > 1:
+                self.assertTrue(np.issubdtype(
+                    traj.velocities.dtype, glotzformats.trajectory.DEFAULT_DTYPE))
+                self.assertEqual(traj.velocities.shape,
+                                 (len(traj), len(traj[0]), 3))
+                self.assertTrue((traj.velocities[0] == traj[0].velocities).all())
             with self.assertRaises(ValueError):
                 traj[0].velocities = 'hello'
             with self.assertRaises(ValueError):
@@ -234,15 +226,13 @@ class TrajectoryTest(unittest.TestCase):
         with self.assertRaises(RuntimeError):
             traj.mass
         traj.load_arrays()
-        try:
-            traj.mass
-        except AttributeError:
-            pass
-        else:
-            self.assertTrue(np.issubdtype(
-                traj.mass.dtype, glotzformats.trajectory.DEFAULT_DTYPE))
-            self.assertEqual(traj.mass.shape, (len(traj), len(traj[0])))
-            self.assertTrue((traj.mass[0] == traj[0].mass).all())
+        if traj.mass is not None and None not in traj.mass:
+            if len(traj.mass.shape) > 1:
+                self.assertTrue(np.issubdtype(
+                    traj.mass.dtype, glotzformats.trajectory.DEFAULT_DTYPE))
+                self.assertEqual(traj.mass.shape,
+                                 (len(traj), len(traj[0])))
+                self.assertTrue((traj.mass[0] == traj[0].mass).all())
             with self.assertRaises(ValueError):
                 traj[0].mass = 'hello'
             with self.assertRaises(ValueError):
@@ -255,15 +245,13 @@ class TrajectoryTest(unittest.TestCase):
         with self.assertRaises(RuntimeError):
             traj.charge
         traj.load_arrays()
-        try:
-            traj.charge
-        except AttributeError:
-            pass
-        else:
-            self.assertTrue(np.issubdtype(
-                traj.charge.dtype, glotzformats.trajectory.DEFAULT_DTYPE))
-            self.assertEqual(traj.charge.shape, (len(traj), len(traj[0])))
-            self.assertTrue((traj.charge[0] == traj[0].charge).all())
+        if traj.charge is not None and None not in traj.charge:
+            if len(traj.charge.shape) > 1:
+                self.assertTrue(np.issubdtype(
+                    traj.charge.dtype, glotzformats.trajectory.DEFAULT_DTYPE))
+                self.assertEqual(traj.charge.shape,
+                                 (len(traj), len(traj[0])))
+                self.assertTrue((traj.charge[0] == traj[0].charge).all())
             with self.assertRaises(ValueError):
                 traj[0].charge = 'hello'
             with self.assertRaises(ValueError):
@@ -276,15 +264,13 @@ class TrajectoryTest(unittest.TestCase):
         with self.assertRaises(RuntimeError):
             traj.diameter
         traj.load_arrays()
-        try:
-            traj.diameter
-        except AttributeError:
-            pass
-        else:
-            self.assertTrue(np.issubdtype(
-                traj.diameter.dtype, glotzformats.trajectory.DEFAULT_DTYPE))
-            self.assertEqual(traj.diameter.shape, (len(traj), len(traj[0])))
-            self.assertTrue((traj.diameter[0] == traj[0].diameter).all())
+        if traj.diameter is not None and None not in traj.diameter:
+            if len(traj.diameter.shape) > 1:
+                self.assertTrue(np.issubdtype(
+                    traj.diameter.dtype, glotzformats.trajectory.DEFAULT_DTYPE))
+                self.assertEqual(traj.diameter.shape,
+                                 (len(traj), len(traj[0])))
+                self.assertTrue((traj.diameter[0] == traj[0].diameter).all())
             with self.assertRaises(ValueError):
                 traj[0].diameter = 'hello'
             with self.assertRaises(ValueError):
@@ -297,15 +283,13 @@ class TrajectoryTest(unittest.TestCase):
         with self.assertRaises(RuntimeError):
             traj.moment_inertia
         traj.load_arrays()
-        try:
-            traj.moment_inertia
-        except AttributeError:
-            pass
-        else:
-            self.assertTrue(np.issubdtype(
-                traj.moment_inertia.dtype, glotzformats.trajectory.DEFAULT_DTYPE))
-            self.assertEqual(traj.moment_inertia.shape, (len(traj), len(traj[0]), 3))
-            self.assertTrue((traj.moment_inertia[0] == traj[0].moment_inertia).all())
+        if traj.moment_inertia is not None and None not in traj.moment_inertia:
+            if len(traj.moment_inertia.shape) > 1:
+                self.assertTrue(np.issubdtype(
+                    traj.moment_inertia.dtype, glotzformats.trajectory.DEFAULT_DTYPE))
+                self.assertEqual(traj.moment_inertia.shape,
+                                 (len(traj), len(traj[0]), 3))
+                self.assertTrue((traj.moment_inertia[0] == traj[0].moment_inertia).all())
             with self.assertRaises(ValueError):
                 traj[0].moment_inertia = 'hello'
 
@@ -315,15 +299,13 @@ class TrajectoryTest(unittest.TestCase):
         with self.assertRaises(RuntimeError):
             traj.angmom
         traj.load_arrays()
-        try:
-            traj.angmom
-        except AttributeError:
-            pass
-        else:
-            self.assertTrue(np.issubdtype(
-                traj.angmom.dtype, glotzformats.trajectory.DEFAULT_DTYPE))
-            self.assertEqual(traj.angmom.shape, (len(traj), len(traj[0]), 4))
-            self.assertTrue((traj.angmom[0] == traj[0].angmom).all())
+        if traj.angmom is not None and None not in traj.angmom:
+            if len(traj.angmom.shape) > 1:
+                self.assertTrue(np.issubdtype(
+                    traj.angmom.dtype, glotzformats.trajectory.DEFAULT_DTYPE))
+                self.assertEqual(traj.angmom.shape,
+                                 (len(traj), len(traj[0]), 4))
+                self.assertTrue((traj.angmom[0] == traj[0].angmom).all())
             with self.assertRaises(ValueError):
                 traj[0].angmom = 'hello'
 
@@ -333,15 +315,13 @@ class TrajectoryTest(unittest.TestCase):
         with self.assertRaises(RuntimeError):
             traj.image
         traj.load_arrays()
-        try:
-            traj.image
-        except AttributeError:
-            pass
-        else:
-            self.assertTrue(np.issubdtype(
-                traj.image.dtype, np.int32))
-            self.assertEqual(traj.image.shape, (len(traj), len(traj[0]), 3))
-            self.assertTrue((traj.image[0] == traj[0].image).all())
+        if traj.image is not None and None not in traj.image:
+            if len(traj.image.shape) > 1:
+                self.assertTrue(np.issubdtype(
+                    traj.image.dtype, np.int32))
+                self.assertEqual(traj.image.shape,
+                                 (len(traj), len(traj[0]), 3))
+                self.assertTrue((traj.image[0] == traj[0].image).all())
             with self.assertRaises(ValueError):
                 traj[0].image = 'hello'
 
