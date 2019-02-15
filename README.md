@@ -20,7 +20,7 @@ This is a collection of samples, parsers and writers for formats used in the Glo
 
 To install this package with pip, execute:
 
-    pip install git+https://$USER@bitbucket.org/glotzer/glotz-formats.git#egg=glotzformats --user
+    pip install git+https://$USER@github.com/glotzerlab/glotzformats.git#egg=glotzformats --user
 
 ## Documentation
 
@@ -100,7 +100,7 @@ All matrices are `numpy` arrays.
 
 ## Example use with HOOMD-blue
 
-Click [here](https://bitbucket.org/glotzer/glotz-formats/src/master/examples/) for more examples.
+Click [here](https://github.com/glotzerlab/glotzformats/src/master/examples/) for more examples.
 
 ```
 #!python

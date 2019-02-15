@@ -40,7 +40,7 @@ To install the package with the package manager pip_, execute
 
 .. code:: bash
 
-    $ pip install git+https://$USER@bitbucket.org/glotzer/glotz-formats.git#egg=glotzformats --user
+    $ pip install git+https://$USER@github.com/glotzerlab/glotzformats.git#egg=glotzformats --user
 
 .. note::
     It is highly recommended to install the package into the user space and not as superuser!
@@ -49,7 +49,7 @@ To upgrade the package, simply execute the same command with the `--upgrade` opt
 
 .. code:: bash
 
-    $ pip install git+https://$USER@bitbucket.org/glotzer/glotz-formats.git#egg=glotzformats --user --upgrade
+    $ pip install git+https://$USER@github.com/glotzerlab/glotzformats.git#egg=glotzformats --user --upgrade
 
 With git
 --------
@@ -58,6 +58,6 @@ Alternatively you can clone the git repository and use the ``setup.py`` to insta
 
 .. code:: bash
 
-  git clone https://$USER@bitbucket.org/glotzer/glotz-formats.git
-  cd glotz-formats
+  git clone https://$USER@github.com/glotzerlab/glotzformats.git
+  cd glotzformats
   python setup.py install --user
