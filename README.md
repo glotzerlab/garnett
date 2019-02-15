@@ -100,7 +100,7 @@ All matrices are `numpy` arrays.
 
 ## Example use with HOOMD-blue
 
-Click [here](https://github.com/glotzerlab/glotzformats/src/master/examples/) for more examples.
+See the [examples directory](https://github.com/glotzerlab/glotzformats/tree/master/examples) for additional examples.
 
 ```
 #!python
