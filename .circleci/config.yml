@@ -34,7 +34,7 @@ jobs:
           command: |
             python --version
             pip --version
-            pip install -U numpy cython pycifrw ddt rowan
+            pip install --user -U numpy cython pycifrw ddt rowan
             wget https://github.com/glotzerlab/gsd/archive/master.tar.gz -O gsd.tar.gz
             tar -xvzf gsd.tar.gz
             cd gsd-master
@@ -47,7 +47,7 @@ jobs:
             python setup.py install
             cd ..
             rm -r libgetar-master
-            pip install -U coverage
+            pip install --user -U coverage
             python -c "import numpy; print('numpy', numpy.__version__)"
             python -c "import cython; print('cython', cython.__version__)"
             python -c "import gsd; print('gsd', gsd.__version__)"
