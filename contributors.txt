@@ -1,5 +1,5 @@
-Contributors to the glotz-formats code base (roughly) in
-chronologocial order of contribution:
+Contributors to the glotzformats code base (roughly) in
+chronological order of contribution:
 
 Carl Simon Adorf
 Richmond Newmann
