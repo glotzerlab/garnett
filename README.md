@@ -20,7 +20,7 @@ This is a collection of samples, parsers and writers for formats used in the Glo
 
 To install this package with pip, execute:
 
-    pip install git+https://$USER@github.com/glotzerlab/glotzformats.git#egg=glotzformats --user
+    pip install git+https://github.com/glotzerlab/glotzformats.git#egg=glotzformats --user
 
 ## Documentation
 
