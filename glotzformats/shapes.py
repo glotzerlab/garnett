@@ -1,4 +1,4 @@
-# Copyright (c) 2018 The Regents of the University of Michigan
+# Copyright (c) 2019 The Regents of the University of Michigan
 # All rights reserved.
 # This software is licensed under the BSD 3-Clause License.
 
@@ -31,16 +31,17 @@ class FallbackShape(str):
 
 
 class Shape(object):
-    """Initialize a Shape instance.
+    """Parent class of all shape objects.
 
-    :param color: Definition of a color for the
-                  particular shape (optional).
-    :type color: A hexadecimal color string in format RRGGBBAA.
+    :param color:
+        Definition of a color for the particular shape (optional).
+    :type color:
+        A hexadecimal color string in format RRGGBBAA.
     """
 
     def __init__(self, shape_class=None, color=None):
         self.shape_class = shape_class
-        self.color = SHAPE_DEFAULT_COLOR if color is None else color
+        self.color = color if color else SHAPE_DEFAULT_COLOR
 
     def __str__(self):
         return "{} {}".format(self.shape_class, self.color)
@@ -53,13 +54,16 @@ class Shape(object):
 
 
 class SphereShape(Shape):
-    """Initialize a SphereShape instance.
+    """Shape class for spheres of a specified diameter.
 
-    :param diameter: The diameter of the sphere.
-    :type diameter: A floating point number.
-    :param color: Definition of a color for the
-                  particular shape (optional).
-    :type color: A hexadecimal color string in format RRGGBBAA.
+    :param diameter:
+        The diameter of the sphere.
+    :type diameter:
+        A floating point number.
+    :param color:
+        Definition of a color for the particular shape (optional).
+    :type color:
+        A hexadecimal color string in format RRGGBBAA.
     """
 
     def __init__(self, diameter, color=None):
@@ -76,13 +80,16 @@ class SphereShape(Shape):
 
 
 class ArrowShape(Shape):
-    """Initialize an ArrowShape instance.
+    """Shape class for arrows of a specified thickness.
 
-    :param thickness: The thickness of the arrow.
-    :type thickness: A floating point number.
-    :param color: Definition of a color for the
-                  particular shape (optional).
-    :type color: A hexadecimal color string in format RRGGBBAA.
+    :param thickness:
+        The thickness of the arrow.
+    :type thickness:
+        A floating point number.
+    :param color:
+        Definition of a color for the particular shape (optional).
+    :type color:
+        A hexadecimal color string in format RRGGBBAA.
     """
 
     def __init__(self, thickness=0.1, color=None):
@@ -95,17 +102,24 @@ class ArrowShape(Shape):
 
 
 class SphereUnionShape(Shape):
-    """Initialize a SphereUnionShape instance.
+    """Shape class for sphere unions, such as rigid bodies of many spheres.
 
-    :param shape_class: The shape class definition,
-                        e.g. 'sphere_union'.
-    :type shape_class: str
-    :param diameters: A list of sphere diameters
-    :type diameters: A sequence of floats
-    :param centers: A list of vertex vectors, if applicable.
-    :type centers: A sequence of 3-tuples of numbers (Nx3).
-    :param colors: Definition of a color for every sphere
-    :type colors: A sequence of hexadecimal color strings in format RRGGBBAA.
+    :param shape_class:
+        The shape class definition, e.g. 'sphere_union'.
+    :type shape_class:
+        str
+    :param diameters:
+        A list of sphere diameters.
+    :type diameters:
+        A sequence of numbers.
+    :param centers:
+        A list of vertex vectors, if applicable.
+    :type centers:
+        A sequence of 3-tuples of numbers (Nx3).
+    :param colors:
+        Definition of a color for every sphere.
+    :type colors:
+        A sequence of hexadecimal color strings in format RRGGBBAA.
     """
 
     def __init__(self, diameters=None, centers=None, colors=None):
@@ -126,12 +140,17 @@ class SphereUnionShape(Shape):
 
 
 class PolygonShape(Shape):
-    """Initialize a PolygonShape instance.
+    """Shape class for polygons in a 2D plane.
 
-    :param vertices: A list of vertex vectors, if applicable.
-    :type vertices: A sequence of 3-tuples of numbers (Nx3), where the third component is z=0.
-    :param color: Definition of a color for the particular shape.
-    :type color: A hexadecimal color string in format RRGGBBAA.
+    :param vertices:
+        A list of vertex vectors, if applicable.
+    :type vertices:
+        A sequence of 3-tuples of numbers (Nx3), where the third component is
+        z=0.
+    :param color:
+        Definition of a color for the particular shape.
+    :type color:
+        A hexadecimal color string in format RRGGBBAA.
     """
 
     def __init__(self, vertices=None, color=None):
@@ -154,14 +173,21 @@ class PolygonShape(Shape):
 
 
 class SpheropolygonShape(Shape):
-    """Initialize a SpheropolygonShape instance.
+    """Shape class for rounded polygons in a 2D plane.
 
-    :param vertices: A list of vertex vectors, if applicable.
-    :type vertices: A sequence of 3-tuples of numbers (Nx3), where the third component is z=0.
-    :param rounding_radius: Rounding radius applied to the spheropolygon.
-    :type rounding_radius: A floating-point number.
-    :param color: Definition of a color for the particular shape.
-    :type color: A hexadecimal color string in format RRGGBBAA.
+    :param vertices:
+        A list of vertex vectors, if applicable.
+    :type vertices:
+        A sequence of 3-tuples of numbers (Nx3), where the third component is
+        z=0.
+    :param rounding_radius:
+        Rounding radius applied to the spheropolygon.
+    :type rounding_radius:
+        A floating-point number.
+    :param color:
+        Definition of a color for the particular shape.
+    :type color:
+        A hexadecimal color string in format RRGGBBAA.
     """
 
     def __init__(self, vertices=None, rounding_radius=None, color=None):
@@ -186,12 +212,16 @@ class SpheropolygonShape(Shape):
 
 
 class ConvexPolyhedronShape(Shape):
-    """Initialize a ConvexPolyhedronShape instance.
+    """Shape class for convex polyhedra.
 
-    :param vertices: A list of vertex vectors, if applicable.
-    :type vertices: A sequence of 3-tuples of numbers (Nx3).
-    :param color: Definition of a color for the particular shape.
-    :type color: A hexadecimal color string in format RRGGBBAA.
+    :param vertices:
+        A list of vertex vectors, if applicable.
+    :type vertices:
+        A sequence of 3-tuples of numbers (Nx3).
+    :param color:
+        Definition of a color for the particular shape.
+    :type color:
+        A hexadecimal color string in format RRGGBBAA.
     """
 
     def __init__(self, vertices=None, color=None):
@@ -214,17 +244,25 @@ class ConvexPolyhedronShape(Shape):
 
 
 class ConvexPolyhedronUnionShape(Shape):
-    """Initialize a Shape instance.
+    """Shape class for unions of convex polyhedra.
 
-    :param vertices: A list of lists of the vertices of the polyhedra in particle coordinates
-    :type vertices: A list of lists of 3-tuples
-    :param centers: A list of the centers of the polyhedra in particle coordinates
-    :type centers: A list of 3-tuples
-    :param orientations: A list of the orientations of the polyhedra
-    :type orientations: A list of 4-tuples
-    :param colors: Definition of a color for every polyhedron
-    :type colors: A sequence of str for RGB color definiton.
-        """
+    :param vertices:
+        A sequence of the vertices of the polyhedra in particle coordinates.
+    :type vertices:
+        A sequence of sequences of vertex 3-tuples (each shape, each vertex).
+    :param centers:
+        A sequence of the centers of the polyhedra in particle coordinates.
+    :type centers:
+        A sequence of coordinate 3-tuples.
+    :param orientations:
+        A sequence of the orientations of the polyhedra.
+    :type orientations:
+        A sequence of quaternion 4-tuples.
+    :param colors:
+        Definition of a color for every polyhedron.
+    :type colors:
+        A sequence of hexadecimal color strings in format RRGGBBAA.
+    """
 
     def __init__(self, vertices=None, centers=None, orientations=None, colors=None):
         super(ConvexPolyhedronUnionShape, self).__init__(
@@ -248,14 +286,20 @@ class ConvexPolyhedronUnionShape(Shape):
 
 
 class ConvexSpheropolyhedronShape(Shape):
-    """Initialize a ConvexSpheropolyhedronShape instance.
+    """Shape class for a convex polyhedron extended by a rounding radius.
 
-    :param vertices: A list of vertex vectors, if applicable.
-    :type vertices: A sequence of 3-tuples of numbers (Nx3).
-    :param rounding_radius: Rounding radius applied to the spheropolyhedron.
-    :type rounding_radius: A floating-point number.
-    :param color: Definition of a color for the particular shape.
-    :type color: A hexadecimal color string in format RRGGBBAA.
+    :param vertices:
+        A list of vertex vectors, if applicable.
+    :type vertices:
+        A sequence of 3-tuples of numbers (Nx3).
+    :param rounding_radius:
+        Rounding radius applied to the spheropolyhedron.
+    :type rounding_radius:
+        A floating-point number.
+    :param color:
+        Definition of a color for the particular shape.
+    :type color:
+        A hexadecimal color string in format RRGGBBAA.
     """
 
     def __init__(self, vertices=None, rounding_radius=None, color=None):
@@ -280,14 +324,20 @@ class ConvexSpheropolyhedronShape(Shape):
 
 
 class GeneralPolyhedronShape(Shape):
-    """Initialize a GeneralPolyhedronShape instance.
+    """Shape class for general polyhedra, such as arbitrary meshes.
 
-    :param vertices: A list of vertex vectors.
-    :type vertices: A sequence of 3-tuples of numbers (Nx3).
-    :param faces: A list of lists of vertex indices per face.
-    :type faces: A list of lists of integer numbers.
-    :param color: Definition of a color for the particular shape.
-    :type color: A hexadecimal color string in format 'RRGGBBAA'.
+    :param vertices:
+        A sequence of vertex vectors.
+    :type vertices:
+        A sequence of 3-tuples of numbers (Nx3).
+    :param faces:
+        A sequences of sequences representings vertex indices per face.
+    :type faces:
+        A sequence of sequences of integers.
+    :param color:
+        Definition of a color for the particular shape.
+    :type color:
+        A hexadecimal color string in format RRGGBBAA.
     """
 
     def __init__(self, vertices=None, faces=None, color=None, facet_colors=None):
