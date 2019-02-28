@@ -76,7 +76,8 @@ class SphereShape(Shape):
 
     @property
     def json_shape(self):
-        return {'type': 'Sphere'}
+        return {'type': 'Sphere',
+                'diameter': self.diameter}
 
 
 class ArrowShape(Shape):
