@@ -16,7 +16,8 @@ import gtar
 
 from .trajectory import _RawFrameData, Box, Frame, Trajectory
 from .shapes import FallbackShape, SphereShape, ConvexPolyhedronShape, \
-    ConvexSpheropolyhedronShape, GeneralPolyhedronShape
+    ConvexSpheropolyhedronShape, GeneralPolyhedronShape, PolygonShape, \
+    SpheropolygonShape
 
 logger = logging.getLogger(__name__)
 
@@ -44,6 +45,13 @@ def _parse_shape_definition(shape):
         shapedef = GeneralPolyhedronShape(vertices=shape['vertices'],
                                           faces=shape['faces'],
                                           facet_colors=shape['colors'],
+                                          color=None)
+    elif shape_type == 'polygon':
+        if rounding_radius == 0:
+            shapedef = PolygonShape(vertices=shape['vertices'], color=None)
+        else:
+            shapedef = SpheropolygonShape(vertices=shape['vertices'],
+                                          rounding_radius=rounding_radius,
                                           color=None)
 
     if shapedef is None:
