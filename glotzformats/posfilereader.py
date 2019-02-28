@@ -164,6 +164,20 @@ class PosFileFrame(Frame):
             return ConvexSpheropolyhedronShape(vertices=vertices,
                                                rounding_radius=rounding_radius,
                                                color=color)
+        elif shape_class.lower() == 'cyl':
+            rounding_radius = float(next(tokens))/2
+            height = float(next(tokens))
+            if height > 0:
+                vertices = [[-height/2, 0, 0], [height/2, 0, 0]]
+            else:
+                vertices = [[0, 0, 0]]
+            try:
+                color = next(tokens)
+            except StopIteration:
+                color = None
+            return ConvexSpheropolyhedronShape(vertices=vertices,
+                                               rounding_radius=rounding_radius,
+                                               color=color)
         else:
             warnings.warn("Failed to parse shape definition, "
                           "using fallback mode. ({})".format(line))
