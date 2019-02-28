@@ -170,7 +170,7 @@ class PolygonShape(Shape):
     def json_shape(self):
         return {'type': 'Polygon',
                 'rounding_radius': 0,
-                'vertices': [v[:2] for v in self.vertices]}
+                'vertices': self.vertices}
 
 
 class SpheropolygonShape(Shape):
