@@ -209,7 +209,7 @@ class SpheropolygonShape(Shape):
     def json_shape(self):
         return {'type': 'Polygon',
                 'rounding_radius': self.rounding_radius,
-                'vertices': [v[:2] for v in self.vertices]}
+                'vertices': self.vertices}
 
 
 class ConvexPolyhedronShape(Shape):
