@@ -356,3 +356,9 @@ class GeneralPolyhedronShape(Shape):
             len(self.faces),
             ' '.join((str(fv) for f in self.faces for fv in [len(f)]+f)),
             self.color)
+
+    @property
+    def json_shape(self):
+        return {'type': 'Mesh',
+                'vertices': self.vertices,
+                'indices': self.faces}
