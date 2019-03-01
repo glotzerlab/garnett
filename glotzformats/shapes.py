@@ -146,8 +146,7 @@ class PolygonShape(Shape):
     :param vertices:
         A list of vertex vectors, if applicable.
     :type vertices:
-        A sequence of 3-tuples of numbers (Nx3), where the third component is
-        z=0.
+        A sequence of 2-tuples of numbers (Nx2).
     :param color:
         Definition of a color for the particular shape.
     :type color:
@@ -163,7 +162,7 @@ class PolygonShape(Shape):
         return "{} {} {} {}".format(
             self.shape_class,
             len(self.vertices),
-            ' '.join((str(v) for xyz in self.vertices for v in xyz)),
+            ' '.join('{} {} 0'.format(v[0], v[1]) for v in self.vertices),
             self.color)
 
     @property
@@ -179,8 +178,7 @@ class SpheropolygonShape(Shape):
     :param vertices:
         A list of vertex vectors, if applicable.
     :type vertices:
-        A sequence of 3-tuples of numbers (Nx3), where the third component is
-        z=0.
+        A sequence of 2-tuples of numbers (Nx2).
     :param rounding_radius:
         Rounding radius applied to the spheropolygon.
     :type rounding_radius:
@@ -202,7 +200,7 @@ class SpheropolygonShape(Shape):
             self.shape_class,
             self.rounding_radius,
             len(self.vertices),
-            ' '.join((str(v) for xyz in self.vertices for v in xyz)),
+            ' '.join('{} {} 0'.format(v[0], v[1]) for v in self.vertices),
             self.color)
 
     @property
