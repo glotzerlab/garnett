@@ -156,7 +156,7 @@ class PolygonShape(Shape):
 
     def __init__(self, vertices=None, color=None):
         super(PolygonShape, self).__init__(
-            shape_class='poly', color=color)
+            shape_class='poly3d', color=color)
         self.vertices = vertices
 
     def __str__(self):
@@ -193,7 +193,7 @@ class SpheropolygonShape(Shape):
 
     def __init__(self, vertices=None, rounding_radius=None, color=None):
         super(SpheropolygonShape, self).__init__(
-            shape_class='spoly', color=color)
+            shape_class='spoly3d', color=color)
         self.vertices = vertices
         self.rounding_radius = rounding_radius
 
