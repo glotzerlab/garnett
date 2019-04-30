@@ -2,16 +2,23 @@ import io
 import logging
 import sys
 import unittest
-
 import numpy as np
-
 import glotzformats
+
+try:
+    import CifFile  # noqa: F401
+except ImportError:
+    PYCIFRW = False
+else:
+    PYCIFRW = True
 
 logger = logging.getLogger(__name__)
 
 PYTHON_2 = sys.version_info[0] == 2
 
 
+@unittest.skipIf(not PYCIFRW,
+                 'CifFileReader tests require the PyCifRW package.')
 class BaseCifFileReaderTest(unittest.TestCase):
 
     def read_pos_trajectory(self, stream, precision=None):
@@ -154,7 +161,18 @@ class CifFileReaderTest(CifFileWriterTest):
         logger.debug(traj[-1].positions)
         logger.debug('original positions:')
         logger.debug(ref_positions)
+        cif_coordinates = np.array(
+                [[0.333333333, 0.6666666667, 0.25],
+                 [0.6666666667, 0.333333333, 0.75]])
+
         self.assertTrue(np.allclose(traj[-1].positions, ref_positions))
+        self.assertTrue(np.allclose(traj[-1].cif_coordinates, cif_coordinates))
+
+        with self.assertRaises(ValueError):
+            traj[-1].cif_coordinates = 'hello'
+        with self.assertRaises(ValueError):
+            # This should fail since it's using 2d positions
+            traj[-1].cif_coordinates = [[0, 0], [0, 0]]
 
 
 if __name__ == '__main__':

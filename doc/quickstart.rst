@@ -5,8 +5,26 @@ Quickstart
 Reading and writing of trajectories
 ===================================
 
+Reading and writing with automatic filetype detection
+-----------------------------------------------------
+
+The :py:meth:`glotzformats.read` and :py:meth:`glotzformats.write` functions will automatically determine the type of a trajectory from its file extension.
+This can be used to quickly load and save :py:class:`~.trajectory.Trajectory` objects.
+
+.. code-block:: python
+
+    import glotzformats as gf
+    # Load a GSD file...
+    with gf.read('dump.gsd') as traj:
+        print(len(traj))
+        # ...do things with the trajectory, then output a GTAR file
+        gf.write(traj, 'output.tar')
+
+Using reader and writer classes
+-------------------------------
+
 Readers and writers are defined in the ``reader`` and ``writer`` modules.
-The following code uses the :py:class:`~.reader.PosFileReader` and :py:class:`~.writer.PosFileWriter` as example.
+The following code uses the :py:class:`~.reader.PosFileReader` and :py:class:`~.writer.PosFileWriter` as an example.
 
 .. code-block:: python
 
@@ -91,7 +109,7 @@ Inidividual frame objects can be accessed via indexing of a (sub-)trajectory obj
 Iterating over trajectories
 ---------------------------
 
-Iterating over trajectories it the most **memory-efficient** form of data access.
+Iterating over trajectories is the most **memory-efficient** form of data access.
 Each frame will be loaded *prior* to access and unloaded *post* access, such that there is only one frame loaded into memory at the same time.
 
 .. code-block:: python

@@ -16,10 +16,11 @@ import warnings
 import numpy as np
 
 from .trajectory import _RawFrameData, Frame, Trajectory, \
-    SphereShapeDefinition, PolyShapeDefinition,\
+    SphereShapeDefinition, PolyShapeDefinition, SpheroPolyShapeDefinition, \
     ArrowShapeDefinition, SphereUnionShapeDefinition, \
-    PolyUnionShapeDefinition, GeneralPolyShapeDefinition, FallbackShapeDefinition
-from .math_utils import toQuaternion
+    PolyUnionShapeDefinition, GeneralPolyShapeDefinition, \
+    FallbackShapeDefinition
+import rowan
 
 from .errors import ParserError, ParserWarning
 
@@ -71,77 +72,103 @@ class PosFileFrame(Frame):
             return keys, data, i
 
     def _parse_shape_definition(self, line):
-        try:
-            tokens = (t for t in line.split())
-            shape_class = next(tokens)
-            if shape_class.lower() == 'sphere':
-                diameter = float(next(tokens))
-            elif shape_class.lower() == 'arrow':
-                thickness = float(next(tokens))
-            elif shape_class.lower() == 'sphere_union':
-                num_centers = int(next(tokens))
-                centers = []
-                diameters = []
-                colors = []
-                for i in range(num_centers):
-                    diameters.append(float(next(tokens)))
-                    xyz = next(tokens), next(tokens), next(tokens)
-                    colors.append(next(tokens))
-                    centers.append([self._num(v) for v in xyz])
-            elif shape_class.lower() == 'poly3d_union':
-                num_centers = int(next(tokens))
-                vertices = [[] for p in range(num_centers)]
-                centers = []
-                orientations = []
-                colors = []
-                for i in range(num_centers):
-                    num_vertices = int(next(tokens))
-                    for j in range(num_vertices):
-                        xyz = next(tokens), next(tokens), next(tokens)
-                        vertices[i].append([self._num(v) for v in xyz])
-                    xyz = next(tokens), next(tokens), next(tokens)
-                    centers.append([self._num(v) for v in xyz])
-                    quat = next(tokens), next(tokens), next(tokens), next(tokens)
-                    orientations.append([self._num(q) for q in quat])
-                    colors.append(next(tokens))
-            elif shape_class.lower() == 'polyv':
-                num_vertices = int(next(tokens))
-                vertices = []
-                for i in range(num_vertices):
-                    xyz = next(tokens), next(tokens), next(tokens)
-                    vertices.append([self._num(v) for v in xyz])
-                num_faces = int(next(tokens))
-                faces = []
-                for i in range(num_faces):
-                    fv = []
-                    nvert = int(next(tokens))
-                    for j in range(nvert):
-                        fv.append(int(next(tokens)))
-                    faces.append(fv)
-            else:
-                num_vertices = int(next(tokens))
-                vertices = []
-                for i in range(num_vertices):
-                    xyz = next(tokens), next(tokens), next(tokens)
-                    vertices.append([self._num(v) for v in xyz])
+        tokens = (t for t in line.split())
+        shape_class = next(tokens)
+        if shape_class.lower() == 'sphere':
+            diameter = float(next(tokens))
             try:
                 color = next(tokens)
             except StopIteration:
                 color = None
-            if shape_class.lower() == 'sphere':
-                return SphereShapeDefinition(diameter=diameter, color=color)
-            elif shape_class.lower() == 'arrow':
-                return ArrowShapeDefinition(thickness=thickness, color=color)
-            elif shape_class.lower() == 'sphere_union':
-                return SphereUnionShapeDefinition(shape_class=shape_class, diameters=diameters, centers=centers, colors=colors)
-            elif shape_class.lower() == 'poly3d_union':
-                return PolyUnionShapeDefinition(shape_class=shape_class, vertices=vertices, centers=centers, orientations=orientations, colors=colors)
-            elif shape_class.lower() == 'polyv':
-                return GeneralPolyShapeDefinition(shape_class=shape_class, vertices=vertices, faces=faces)
-            else:
-                return PolyShapeDefinition(shape_class=shape_class,
-                                           vertices=vertices, color=color)
-        except Exception:
+            return SphereShapeDefinition(diameter=diameter, color=color)
+        elif shape_class.lower() == 'arrow':
+            thickness = float(next(tokens))
+            try:
+                color = next(tokens)
+            except StopIteration:
+                color = None
+            return ArrowShapeDefinition(thickness=thickness, color=color)
+        elif shape_class.lower() == 'sphere_union':
+            num_centers = int(next(tokens))
+            centers = []
+            diameters = []
+            colors = []
+            for i in range(num_centers):
+                diameters.append(float(next(tokens)))
+                xyz = next(tokens), next(tokens), next(tokens)
+                colors.append(next(tokens))
+                centers.append([self._num(v) for v in xyz])
+            return SphereUnionShapeDefinition(shape_class=shape_class,
+                                              diameters=diameters,
+                                              centers=centers,
+                                              colors=colors)
+        elif shape_class.lower() == 'poly3d_union':
+            num_centers = int(next(tokens))
+            vertices = [[] for p in range(num_centers)]
+            centers = []
+            orientations = []
+            colors = []
+            for i in range(num_centers):
+                num_vertices = int(next(tokens))
+                for j in range(num_vertices):
+                    xyz = next(tokens), next(tokens), next(tokens)
+                    vertices[i].append([self._num(v) for v in xyz])
+                xyz = next(tokens), next(tokens), next(tokens)
+                centers.append([self._num(v) for v in xyz])
+                quat = next(tokens), next(tokens), next(tokens), next(tokens)
+                orientations.append([self._num(q) for q in quat])
+                colors.append(next(tokens))
+            return PolyUnionShapeDefinition(shape_class=shape_class,
+                                            vertices=vertices,
+                                            centers=centers,
+                                            orientations=orientations,
+                                            colors=colors)
+        elif shape_class.lower() == 'polyv':  # Officially polyV
+            num_vertices = int(next(tokens))
+            vertices = []
+            for i in range(num_vertices):
+                xyz = next(tokens), next(tokens), next(tokens)
+                vertices.append([self._num(v) for v in xyz])
+            num_faces = int(next(tokens))
+            faces = []
+            for i in range(num_faces):
+                fv = []
+                nvert = int(next(tokens))
+                for j in range(nvert):
+                    fv.append(int(next(tokens)))
+                faces.append(fv)
+            return GeneralPolyShapeDefinition(shape_class=shape_class,
+                                              vertices=vertices,
+                                              faces=faces)
+        elif shape_class.lower() == 'poly3d':
+            num_vertices = int(next(tokens))
+            vertices = []
+            for i in range(num_vertices):
+                xyz = next(tokens), next(tokens), next(tokens)
+                vertices.append([self._num(v) for v in xyz])
+            try:
+                color = next(tokens)
+            except StopIteration:
+                color = None
+            return PolyShapeDefinition(shape_class=shape_class,
+                                       vertices=vertices,
+                                       color=color)
+        elif shape_class.lower() == 'spoly3d':
+            rounding_radius = float(next(tokens))
+            num_vertices = int(next(tokens))
+            vertices = []
+            for i in range(num_vertices):
+                xyz = next(tokens), next(tokens), next(tokens)
+                vertices.append([self._num(v) for v in xyz])
+            try:
+                color = next(tokens)
+            except StopIteration:
+                color = None
+            return SpheroPolyShapeDefinition(shape_class=shape_class,
+                                             vertices=vertices,
+                                             rounding_radius=rounding_radius,
+                                             color=color)
+        else:
             warnings.warn("Failed to parse shape definition, "
                           "using fallback mode. ({})".format(line))
             return FallbackShapeDefinition(line)
@@ -206,7 +233,7 @@ class PosFileFrame(Frame):
                 elif tokens[0] == 'rotation':
                     euler_angles = np.array([float(t) for t in tokens[1:]])
                     euler_angles *= np.pi / 180
-                    raw_frame.view_rotation = toQuaternion(* euler_angles)
+                    raw_frame.view_rotation = rowan.from_euler(*euler_angles, axis_type='extrinsic', convention='xyz')
                 else:
                     # assume we are reading positions now
                     if not monotype:
@@ -225,12 +252,24 @@ class PosFileFrame(Frame):
                         quat = tokens[-4:]
                     elif len(tokens) >= 3:
                         xyz = tokens[-3:]
-                        quat = (1, 0, 0, 0)
+                        quat = None
                     else:
                         raise ParserError(line)
                     raw_frame.types.append(name)
                     raw_frame.positions.append([self._num(v) for v in xyz])
-                    raw_frame.orientations.append([self._num(v) for v in quat])
+                    if quat is None:
+                        raw_frame.orientations.append(quat)
+                    else:
+                        raw_frame.orientations.append([self._num(v) for v in quat])
+
+        # If no valid orientations have been added, the array should be empty
+        if all([quat is None for quat in raw_frame.orientations]):
+            raw_frame.orientations = []
+        else:
+            # Replace values of None with an identity quaternion
+            for i in range(len(raw_frame.orientations)):
+                if raw_frame.orientations[i] is None:
+                    raw_frame.orientations[i] = [1, 0, 0, 0]
         return raw_frame
 
     def __str__(self):

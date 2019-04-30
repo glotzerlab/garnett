@@ -1,4 +1,4 @@
-# Copyright (c) 2016 The Regents of the University of Michigan
+# Copyright (c) 2016-2018 The Regents of the University of Michigan
 # This file is part of the General Simulation Data (GSD) project, released under the BSD 2-Clause License.
 
 """ hoomd schema reference implementation
@@ -8,18 +8,28 @@ GSD schema ``hoomd``. It is a simple, but high performance and memory
 efficient, reader and writer for the schema. See :ref:`hoomd-examples`
 for full examples.
 
-* :py:func:`create` - Create a hoomd schema GSD file.
+* :py:func:`create` - Create a hoomd schema GSD file (deprecated).
+* :py:func:`open` - Open a hoomd schema GSD file.
 * :py:class:`HOOMDTrajectory` - Read and write hoomd schema GSD files.
 * :py:class:`Snapshot` - Store the state of a single frame.
 
     * :py:class:`ConfigurationData` - Store configuration data in a snapshot.
     * :py:class:`ParticleData` - Store particle data in a snapshot.
-    * :py:class:`BondData` - Store particle data in a snapshot.
+    * :py:class:`BondData` - Store topology data in a snapshot.
 """
 
 import numpy
 from collections import OrderedDict
 import logging
+try:
+    from gsd import fl
+except ImportError:
+    fl = None;
+
+try:
+    import gsd
+except ImportError:
+    gsd = None;
 
 logger = logging.getLogger('gsd.hoomd')
 
@@ -200,10 +210,10 @@ class BondData(object):
         ======== ===
 
     Attributes:
-        N (int): Number of particles in the snapshot (:chunk:`bonds/N`, :chunk:`angles/N`, :chunk:`dihedrals/N`, :chunk:`impropers/N`).
-        types (list[str]): Names of the particle types (:chunk:`bonds/types`, :chunk:`angles/types`, :chunk:`dihedrals/types`, :chunk:`impropers/types`).
-        typeid (numpy.ndarray[uint32, ndim=1, mode='c']): N length array defining bond type ids (:chunk:`bonds/typeid`, :chunk:`angles/typeid`, :chunk:`dihedrals/typeid`, :chunk:`impropers/typeid`).
-        group (numpy.ndarray[uint32, ndim=2, mode='c']): NxM array defining tags in the particle bonds (:chunk:`bonds/group`, :chunk:`angles/group`, :chunk:`dihedrals/group`, :chunk:`impropers/group`).
+        N (int): Number of particles in the snapshot (:chunk:`bonds/N`, :chunk:`angles/N`, :chunk:`dihedrals/N`, :chunk:`impropers/N`, :chunk:`pairs/N`).
+        types (list[str]): Names of the particle types (:chunk:`bonds/types`, :chunk:`angles/types`, :chunk:`dihedrals/types`, :chunk:`impropers/types`, :chunk:`pairs/types`).
+        typeid (numpy.ndarray[uint32, ndim=1, mode='c']): N length array defining bond type ids (:chunk:`bonds/typeid`, :chunk:`angles/typeid`, :chunk:`dihedrals/typeid`, :chunk:`impropers/typeid`, :chunk:`pairs/types`).
+        group (numpy.ndarray[uint32, ndim=2, mode='c']): NxM array defining tags in the particle bonds (:chunk:`bonds/group`, :chunk:`angles/group`, :chunk:`dihedrals/group`, :chunk:`impropers/group`, :chunk:`pairs/group`).
     """
 
     def __init__(self, M):
@@ -304,6 +314,12 @@ class Snapshot(object):
         angles (:py:class:`BondData`): Angle data snapshot.
         dihedrals (:py:class:`BondData`): Dihedral data snapshot.
         impropers (:py:class:`BondData`): Improper data snapshot.
+        pairs (:py:class: `BondData`): Special pair interactions snapshot
+        state (dict): Dictionary containing state data
+
+    See the HOOMD schema specification for details on entries in the state dictionary. Entries in this dict are the
+    chunk name without the state prefix. For example, :chunk:`state/hpmc/sphere/radius` is stored in the dictionary
+    entry ``state['hpmc/sphere/radius']``.
     """
 
     def __init__(self):
@@ -314,6 +330,27 @@ class Snapshot(object):
         self.dihedrals = BondData(4);
         self.impropers = BondData(4);
         self.constraints = ConstraintData();
+        self.pairs = BondData(2);
+        self.state = {}
+
+        self._valid_state = ['hpmc/integrate/d',
+                             'hpmc/integrate/a',
+                             'hpmc/sphere/radius',
+                             'hpmc/ellipsoid/a',
+                             'hpmc/ellipsoid/b',
+                             'hpmc/ellipsoid/c',
+                             'hpmc/convex_polyhedron/N',
+                             'hpmc/convex_polyhedron/vertices',
+                             'hpmc/convex_spheropolyhedron/N',
+                             'hpmc/convex_spheropolyhedron/vertices',
+                             'hpmc/convex_spheropolyhedron/sweep_radius',
+                             'hpmc/convex_polygon/N',
+                             'hpmc/convex_polygon/vertices',
+                             'hpmc/convex_spheropolygon/N',
+                             'hpmc/convex_spheropolygon/vertices',
+                             'hpmc/convex_spheropolygon/sweep_radius',
+                             'hpmc/simple_polygon/N',
+                             'hpmc/simple_polygon/vertices']
 
     def validate(self):
         """ Validate all contained snapshot data.
@@ -328,6 +365,83 @@ class Snapshot(object):
         self.dihedrals.validate();
         self.impropers.validate();
         self.constraints.validate();
+        self.pairs.validate();
+
+        # validate HPMC state
+        if self.particles.types is not None:
+            NT = len(self.particles.types)
+        else:
+            NT = 1;
+
+        if 'hpmc/integrate/d' in self.state:
+            self.state['hpmc/integrate/d'] = numpy.ascontiguousarray(self.state['hpmc/integrate/d'], dtype=numpy.float64);
+            self.state['hpmc/integrate/d'] = self.state['hpmc/integrate/d'].reshape([1])
+
+        if 'hpmc/integrate/a' in self.state:
+            self.state['hpmc/integrate/a'] = numpy.ascontiguousarray(self.state['hpmc/integrate/a'], dtype=numpy.float64);
+            self.state['hpmc/integrate/a'] = self.state['hpmc/integrate/a'].reshape([1])
+
+        if 'hpmc/sphere/radius' in self.state:
+            self.state['hpmc/sphere/radius'] = numpy.ascontiguousarray(self.state['hpmc/sphere/radius'], dtype=numpy.float32);
+            self.state['hpmc/sphere/radius'] = self.state['hpmc/sphere/radius'].reshape([NT])
+
+        if 'hpmc/ellipsoid/a' in self.state:
+            self.state['hpmc/ellipsoid/a'] = numpy.ascontiguousarray(self.state['hpmc/ellipsoid/a'], dtype=numpy.float32);
+            self.state['hpmc/ellipsoid/a'] = self.state['hpmc/ellipsoid/a'].reshape([NT])
+            self.state['hpmc/ellipsoid/b'] = numpy.ascontiguousarray(self.state['hpmc/ellipsoid/b'], dtype=numpy.float32);
+            self.state['hpmc/ellipsoid/b'] = self.state['hpmc/ellipsoid/b'].reshape([NT])
+            self.state['hpmc/ellipsoid/c'] = numpy.ascontiguousarray(self.state['hpmc/ellipsoid/c'], dtype=numpy.float32);
+            self.state['hpmc/ellipsoid/c'] = self.state['hpmc/ellipsoid/c'].reshape([NT])
+
+        if 'hpmc/convex_polyhedron/N' in self.state:
+            self.state['hpmc/convex_polyhedron/N'] = numpy.ascontiguousarray(self.state['hpmc/convex_polyhedron/N'], dtype=numpy.uint32);
+            self.state['hpmc/convex_polyhedron/N'] = self.state['hpmc/convex_polyhedron/N'].reshape([NT])
+            sumN = numpy.sum(self.state['hpmc/convex_polyhedron/N'])
+
+            self.state['hpmc/convex_polyhedron/vertices'] = numpy.ascontiguousarray(self.state['hpmc/convex_polyhedron/vertices'], dtype=numpy.float32);
+            self.state['hpmc/convex_polyhedron/vertices'] = self.state['hpmc/convex_polyhedron/vertices'].reshape([sumN, 3])
+
+        if 'hpmc/convex_spheropolyhedron/N' in self.state:
+            self.state['hpmc/convex_spheropolyhedron/N'] = numpy.ascontiguousarray(self.state['hpmc/convex_spheropolyhedron/N'], dtype=numpy.uint32);
+            self.state['hpmc/convex_spheropolyhedron/N'] = self.state['hpmc/convex_spheropolyhedron/N'].reshape([NT])
+            sumN = numpy.sum(self.state['hpmc/convex_spheropolyhedron/N'])
+
+            self.state['hpmc/convex_spheropolyhedron/sweep_radius'] = numpy.ascontiguousarray(self.state['hpmc/convex_spheropolyhedron/sweep_radius'], dtype=numpy.float32);
+            self.state['hpmc/convex_spheropolyhedron/sweep_radius'] = self.state['hpmc/convex_spheropolyhedron/sweep_radius'].reshape([NT])
+
+            self.state['hpmc/convex_spheropolyhedron/vertices'] = numpy.ascontiguousarray(self.state['hpmc/convex_spheropolyhedron/vertices'], dtype=numpy.float32);
+            self.state['hpmc/convex_spheropolyhedron/vertices'] = self.state['hpmc/convex_spheropolyhedron/vertices'].reshape([sumN, 3])
+
+        if 'hpmc/convex_polygon/N' in self.state:
+            self.state['hpmc/convex_polygon/N'] = numpy.ascontiguousarray(self.state['hpmc/convex_polygon/N'], dtype=numpy.uint32);
+            self.state['hpmc/convex_polygon/N'] = self.state['hpmc/convex_polygon/N'].reshape([NT])
+            sumN = numpy.sum(self.state['hpmc/convex_polygon/N'])
+
+            self.state['hpmc/convex_polygon/vertices'] = numpy.ascontiguousarray(self.state['hpmc/convex_polygon/vertices'], dtype=numpy.float32);
+            self.state['hpmc/convex_polygon/vertices'] = self.state['hpmc/convex_polygon/vertices'].reshape([sumN, 2])
+
+        if 'hpmc/convex_spheropolygon/N' in self.state:
+            self.state['hpmc/convex_spheropolygon/N'] = numpy.ascontiguousarray(self.state['hpmc/convex_spheropolygon/N'], dtype=numpy.uint32);
+            self.state['hpmc/convex_spheropolygon/N'] = self.state['hpmc/convex_spheropolygon/N'].reshape([NT])
+            sumN = numpy.sum(self.state['hpmc/convex_spheropolygon/N'])
+
+            self.state['hpmc/convex_spheropolygon/sweep_radius'] = numpy.ascontiguousarray(self.state['hpmc/convex_spheropolygon/sweep_radius'], dtype=numpy.float32);
+            self.state['hpmc/convex_spheropolygon/sweep_radius'] = self.state['hpmc/convex_spheropolygon/sweep_radius'].reshape([NT])
+
+            self.state['hpmc/convex_spheropolygon/vertices'] = numpy.ascontiguousarray(self.state['hpmc/convex_spheropolygon/vertices'], dtype=numpy.float32);
+            self.state['hpmc/convex_spheropolygon/vertices'] = self.state['hpmc/convex_spheropolygon/vertices'].reshape([sumN, 2])
+
+        if 'hpmc/simple_polygon/N' in self.state:
+            self.state['hpmc/simple_polygon/N'] = numpy.ascontiguousarray(self.state['hpmc/simple_polygon/N'], dtype=numpy.uint32);
+            self.state['hpmc/simple_polygon/N'] = self.state['hpmc/simple_polygon/N'].reshape([NT])
+            sumN = numpy.sum(self.state['hpmc/simple_polygon/N'])
+
+            self.state['hpmc/simple_polygon/vertices'] = numpy.ascontiguousarray(self.state['hpmc/simple_polygon/vertices'], dtype=numpy.float32);
+            self.state['hpmc/simple_polygon/vertices'] = self.state['hpmc/simple_polygon/vertices'].reshape([sumN, 2])
+
+        for k in self.state:
+            if k not in self._valid_state:
+                raise RuntimeError('Not a valid state: ' + k)
 
 class HOOMDTrajectory(object):
     """ Read and write hoomd gsd files.
@@ -383,7 +497,7 @@ class HOOMDTrajectory(object):
         if self._initial_frame is None and len(self) > 0:
             self.read_frame(0);
 
-        for path in ['configuration', 'particles', 'bonds', 'angles', 'dihedrals', 'impropers', 'constraints']:
+        for path in ['configuration', 'particles', 'bonds', 'angles', 'dihedrals', 'impropers', 'constraints', 'pairs']:
             container = getattr(snapshot, path);
             for name in container._default_value:
                 if self._should_write(path, name, snapshot):
@@ -402,6 +516,10 @@ class HOOMDTrajectory(object):
                         data = b.view(dtype=numpy.int8).reshape(len(b), wid);
 
                     self.file.write_chunk(path + '/' + name, data)
+
+        # write state data
+        for state,data in snapshot.state.items():
+            self.file.write_chunk('state/' + state, data)
 
         self.file.end_frame();
 
@@ -433,11 +551,11 @@ class HOOMDTrajectory(object):
         if self._initial_frame is not None:
             initial_container = getattr(self._initial_frame, path);
             initial_data = getattr(initial_container, name);
-            if numpy.all(initial_data == data):
+            if numpy.array_equal(initial_data, data):
                 logger.debug('skipping data chunk, matches frame 0: ' + path + '/' + name);
                 return False;
 
-        if numpy.all(data == container._default_value[name]):
+        if numpy.array_equiv(data, container._default_value[name]):
             logger.debug('skipping data chunk, default value: ' + path + '/' + name);
             return False;
 
@@ -447,9 +565,8 @@ class HOOMDTrajectory(object):
         """ Append each item of the iterable to the file.
 
         Args:
-            iterable: An iterable object the provides :py:class:`Snapshot`
-            instances. This could be another HOOMDTrajectory, a generator
-            that modifies snapshots, or a simple list of snapshots.
+            iterable: An iterable object the provides :py:class:`Snapshot` instances. This could be another
+              HOOMDTrajectory, a generator that modifies snapshots, or a simple list of snapshots.
         """
 
         for item in iterable:
@@ -506,7 +623,7 @@ class HOOMDTrajectory(object):
                 snap.configuration.box = snap.configuration._default_value['box'];
 
         # then read all groups that have N, types, etc...
-        for path in ['particles', 'bonds', 'angles', 'dihedrals', 'impropers', 'constraints']:
+        for path in ['particles', 'bonds', 'angles', 'dihedrals', 'impropers', 'constraints', 'pairs']:
             container = getattr(snap, path);
             if self._initial_frame is not None:
                 initial_frame_container = getattr(self._initial_frame, path);
@@ -553,6 +670,11 @@ class HOOMDTrajectory(object):
 
                     container.__dict__[name].flags.writeable = False;
 
+        # read state data
+        for state in snap._valid_state:
+            if self.file.chunk_exists(frame=idx, name='state/' + state):
+                snap.state[state] = self.file.read_chunk(frame=idx, name='state/' + state);
+
         # store initial frame
         if self._initial_frame is None and idx == 0:
             self._initial_frame = snap;
@@ -581,3 +703,98 @@ class HOOMDTrajectory(object):
             return self.read_frame(key);
         else:
             raise TypeError;
+
+    def __enter__(self):
+        return self;
+
+    def __exit__(self, exc_type, exc_value, traceback):
+        self.file.close();
+
+def create(name, snapshot=None):
+    """ Create a hoomd gsd file from the given snapshot.
+
+    Args:
+        name (str): File name.
+        snapshot (:py:class:`Snapshot`): Snapshot to write to frame 0. No frame is written if snapshot is ``None``.
+
+    .. deprecated:: 1.2
+
+        As of version 1.2, you can create and open hoomd GSD files in the same call to
+        :py:func:`open`. :py:func:`create` is kept for backwards compatibility.
+
+    .. danger::
+        The file is overwritten if it already exists.
+    """
+    if fl is None:
+        raise RuntimeError("file layer module is not available");
+    if gsd is None:
+        raise RuntimeError("gsd module is not available");
+
+    logger.info('creating hoomd gsd file: ' + name);
+
+    gsd.fl.create(name=name, application='gsd.hoomd ' + gsd.__version__, schema='hoomd', schema_version=[1,2]);
+    with gsd.fl.GSDFile(name, 'wb') as f:
+        traj = HOOMDTrajectory(f);
+        if snapshot is not None:
+            traj.append(snapshot);
+
+def open(name, mode='rb'):
+    """ Open a hoomd schema GSD file.
+
+    The return value of :py:func:`open` can be used as a context manager.
+
+    Args:
+        name (str): File name to open.
+        mode (str): File open mode.
+
+    Returns:
+        An :py:class:`HOOMDTrajectory` instance that accesses the file *name* with the given mode.
+
+    Valid values for mode:
+
+    +------------------+---------------------------------------------+
+    | mode             | description                                 |
+    +==================+=============================================+
+    | ``'rb'``         | Open an existing file for reading.          |
+    +------------------+---------------------------------------------+
+    | ``'rb+'``        | Open an existing file for reading and       |
+    |                  | writing. *Inefficient for large files.*     |
+    +------------------+---------------------------------------------+
+    | ``'wb'``         | Open a file for writing. Creates the file   |
+    |                  | if needed, or overwrites an existing file.  |
+    +------------------+---------------------------------------------+
+    | ``'wb+'``        | Open a file for reading and writing.        |
+    |                  | Creates the file if needed, or overwrites   |
+    |                  | an existing file. *Inefficient for large    |
+    |                  | files.*                                     |
+    +------------------+---------------------------------------------+
+    | ``'xb'``         | Create a gsd file exclusively and opens it  |
+    |                  | for writing.                                |
+    |                  | Raise an :py:exc:`FileExistsError`          |
+    |                  | exception if it already exists.             |
+    +------------------+---------------------------------------------+
+    | ``'xb+'``        | Create a gsd file exclusively and opens it  |
+    |                  | for reading and writing.                    |
+    |                  | Raise an :py:exc:`FileExistsError`          |
+    |                  | exception if it already exists.             |
+    |                  | *Inefficient for large files.*              |
+    +------------------+---------------------------------------------+
+    | ``'ab'``         | Open an existing file for writing.          |
+    |                  | Does *not* create or overwrite existing     |
+    |                  | files.                                      |
+    +------------------+---------------------------------------------+
+
+    .. versionadded:: 1.2
+
+    """
+    if fl is None:
+        raise RuntimeError("file layer module is not available");
+    if gsd is None:
+        raise RuntimeError("gsd module is not available");
+
+    gsdfileobj = fl.open(name=name,
+                         mode=mode,
+                         application='gsd.hoomd ' + gsd.__version__,
+                         schema='hoomd',
+                         schema_version=[1,2]);
+    return HOOMDTrajectory(gsdfileobj);

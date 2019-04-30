@@ -59,15 +59,14 @@ def _euler_to_quaternion(alpha, q):
 
 
 def _box_matrix_from_frame_header(frame_header, tol=1e-12):
-    from math import cos, sqrt, pi
     fh = frame_header
 
     lx = fh.box_a
     xy = fh.box_b * fh.box_gamma
     xz = fh.box_c * fh.box_beta
-    ly = sqrt(fh.box_b*fh.box_b - xy*xy)
+    ly = np.sqrt(fh.box_b*fh.box_b - xy*xy)
     yz = (fh.box_b*fh.box_c*fh.box_alpha - xy*xz) / lx
-    lz = sqrt(fh.box_c*fh.box_c - xz*xz - yz*yz)
+    lz = np.sqrt(fh.box_c*fh.box_c - xz*xz - yz*yz)
 
     xy /= ly
     xz /= lz
@@ -203,6 +202,17 @@ class DCDFrame(Frame):
 
 
 class DCDTrajectory(Trajectory):
+
+    def arrays_loaded(self):
+        """Returns true if arrays are loaded into memory.
+
+        See also: :meth:`~.load_arrays`"""
+        return not (self._N is None or
+                    self._type is None or
+                    self._types is None or
+                    self._type_ids is None or
+                    self._positions is None or
+                    self._orientations is None)
 
     def load_arrays(self):
         # Determine array shapes

@@ -13,6 +13,10 @@ import glotzformats
 import numpy as np
 
 PYTHON_2 = sys.version_info[0] == 2
+if PYTHON_2:
+    from tempdir import TemporaryDirectory
+else:
+    from tempfile import TemporaryDirectory
 
 PATH = os.path.join(glotzformats.__path__[0], '..')
 IN_PATH = os.path.abspath(PATH) == os.path.abspath(os.getcwd())
@@ -21,11 +25,13 @@ IN_PATH = os.path.abspath(PATH) == os.path.abspath(os.getcwd())
 try:
     try:
         from hoomd import context
+        import hoomd
     except ImportError:
         from hoomd_script import context
         HOOMD_v1 = True
     else:
         HOOMD_v1 = False
+        hoomd.util.quiet_status()
 except ImportError:
     HOOMD = False
 else:
@@ -63,12 +69,15 @@ class BasePosFileWriterTest(BasePosFileReaderTest):
         return writer.write(trajectory, file)
 
     def assert_approximately_equal_frames(self, a, b,
-                                          decimals=6, atol=1e-5, ignore_orientations=False):
+                                          decimals=6, atol=1e-5,
+                                          ignore_orientations=False):
         self.assertEqual(a.box.round(decimals), b.box.round(decimals))
         self.assertEqual(a.types, b.types)
         self.assertTrue(np.allclose(a.positions, b.positions, atol=atol))
-        self.assertTrue(np.allclose(a.velocities, b.velocities, atol=atol))
-        if not ignore_orientations:
+        if a.velocities is not None and b.velocities is not None:
+            self.assertTrue(np.allclose(a.velocities, b.velocities, atol=atol))
+        if not ignore_orientations and \
+                (a.orientations is not None and b.orientations is not None):
             self.assertTrue(np.allclose(a.orientations, b.orientations, atol=atol))
         self.assertEqual(a.data, b.data)
         for key in chain(a.shapedef, b.shapedef):
@@ -144,7 +153,7 @@ class PosFileReaderTest(BasePosFileReaderTest):
 class HPMCPosFileReaderTest(BasePosFileReaderTest):
 
     def setUp(self):
-        self.tmp_dir = tempfile.TemporaryDirectory()
+        self.tmp_dir = TemporaryDirectory()
         self.addCleanup(self.tmp_dir.cleanup)
         self.fn_pos = os.path.join(self.tmp_dir.name, 'test.pos')
 
@@ -167,6 +176,7 @@ class HPMCPosFileReaderTest(BasePosFileReaderTest):
             self.system = init.create_lattice(
                 unitcell=lattice.sq(10), n=(2, 1))
             self.addCleanup(context.initialize, "--mode=cpu")
+            hoomd.option.set_notice_level(0)
         self.addCleanup(self.del_system)
         self.mc = hpmc.integrate.sphere(seed=10)
         self.mc.shape_param.set("A", diameter=1.0)
@@ -181,7 +191,7 @@ class HPMCPosFileReaderTest(BasePosFileReaderTest):
             context.current.sorter.set_params(grid=8)
         dump.pos(filename=self.fn_pos, period=1)
         run(10, quiet=True)
-        with open(self.fn_pos, 'r', encoding='utf-8') as posfile:
+        with io.open(self.fn_pos, 'r', encoding='utf-8') as posfile:
             self.read_trajectory(posfile)
 
     def test_convex_polyhedron(self):
@@ -198,6 +208,7 @@ class HPMCPosFileReaderTest(BasePosFileReaderTest):
             self.system = init.create_lattice(
                 unitcell=lattice.sq(10), n=(2, 1))
             self.addCleanup(context.initialize, "--mode=cpu")
+            hoomd.option.set_notice_level(0)
         self.addCleanup(self.del_system)
         self.mc = hpmc.integrate.convex_polygon(seed=10)
         self.addCleanup(self.del_mc)
@@ -220,7 +231,7 @@ class HPMCPosFileReaderTest(BasePosFileReaderTest):
         pos_writer = dump.pos(filename=self.fn_pos, period=1)
         self.mc.setup_pos_writer(pos_writer)
         run(10, quiet=True)
-        with open(self.fn_pos, 'r', encoding='utf-8') as posfile:
+        with io.open(self.fn_pos, 'r', encoding='utf-8') as posfile:
             self.read_trajectory(posfile)
 
 
@@ -304,9 +315,9 @@ class PosFileWriterTest(BasePosFileWriterTest):
         'Henzie_lithium_triclinic',
         'cubic_onep',
         'cubic_twop',
-        #'hex_onep',    # These tests are deactivated, because we currently
-        #'hex_twop',    # do not have a solution to keep the reference orientation
-        #'rand_test',   # the same. The systems are otherwise identical.
+        # 'hex_onep',    # These tests are deactivated, because we currently
+        # 'hex_twop',    # do not have a solution to keep the reference orientation
+        # 'rand_test',   # the same. The systems are otherwise identical.
         'scc',
         'switch_FeSiUC',
         'switch_scc')
@@ -329,8 +340,8 @@ class PosFileWriterTest(BasePosFileWriterTest):
         'xtalslice3_small',
         'FeSiUC',
         # For the following two, the box has a different sign...
-        #'xtalslice3_small_rotated',
-        #'switch_FeSiUC',
+        # 'xtalslice3_small_rotated',
+        # 'switch_FeSiUC',
         )
     def test_read_write_read_rotated(self, name):
         fn = os.path.join(PATH, 'samples', name + '.pos')
@@ -346,7 +357,7 @@ class PosFileWriterTest(BasePosFileWriterTest):
                     for f0, f1 in zip(traj0, traj1):
                         self.assert_approximately_equal_frames(
                             f0, f1, decimals=4, atol=1e-6,
-                            ignore_orientations=True # The shapes themselves are differently oriented
+                            ignore_orientations=True  # The shapes themselves are differently oriented
                             )
 
 
@@ -391,4 +402,5 @@ class InjavisReadWriteTest(BasePosFileWriterTest):
 
 if __name__ == '__main__':
     context.initialize("--mode=cpu")
+    hoomd.option.set_notice_level(0)
     unittest.main()

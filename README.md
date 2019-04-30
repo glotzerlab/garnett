@@ -6,14 +6,21 @@ This is a collection of samples, parsers and writers for formats used in the Glo
 
 ## Authors
 
-* Carl Simon Adorf, csadorf@umich.edu (Maintainer)
+* Carl Simon Adorf, csadorf@umich.edu
 * Richmond Newmann, newmanrs@umich.edu
+
+## Maintainers
+
+* Sophie Youjung Lee, syjlee@umich.edu
+* Carl Simon Adorf, csadorf@umich.edu
+* Bradley Dice, bdice@umich.edu
+
 
 ## Setup
 
 To install this package with pip, execute:
 
-    pip install git+https://$USER@bitbucket.org/glotzer/glotz-formats.git#egg=glotzformats --user
+    pip install git+https://github.com/glotzerlab/glotzformats.git#egg=glotzformats --user
 
 ## Documentation
 
@@ -59,9 +66,15 @@ sub_trajectory = traj[i:j]
 Access properties of trajectories:
 ```
 traj.load_arrays()
-traj.positions      # MxNx3
-traj.orientations   # MxNx4
-traj.types          # MxNx1
+traj.positions       # MxNx3
+traj.orientations    # MxNx4
+traj.velocities      # MxNx3
+traj.mass            # MxN
+traj.charge          # MxN
+traj.diameter        # MxN
+traj.moment_inertia  # MxNx3
+traj.angmom          # MxNx4
+traj.types           # MxN
 
 # where M=len(traj) and N=max((len(f) for f in traj))
 ```
@@ -70,9 +83,15 @@ Access properties of individual frames:
 ```
 frame = traj[i]
 frame.box              # 3x3 matrix (not required to be upper-triangular)
-frame.types            # Nx1
+frame.types            # N
 frame.positions        # Nx3
-frame.orientations     # NX4
+frame.orientations     # Nx4
+frame.velocities       # Nx3
+frame.mass             # N
+frame.charge           # N
+frame.diameter         # N
+frame.moment_inertia   # Nx3
+frame.angmom           # Nx4
 frame.data             # A dictionary of lists for each attribute
 frame.data_key         # A list of strings
 frame.shapedef         # A ordered dictionary of instances of ShapeDefinition
@@ -81,7 +100,7 @@ All matrices are `numpy` arrays.
 
 ## Example use with HOOMD-blue
 
-Click [here](https://bitbucket.org/glotzer/glotz-formats/src/master/examples/) for more examples.
+See the [examples directory](https://github.com/glotzerlab/glotzformats/tree/master/examples) for additional examples.
 
 ```
 #!python
@@ -101,16 +120,9 @@ traj[-1].copyto_snapshot(snapshot)
 
 ## Testing
 
-Ideally, you test with HOOMD-blue installed in your testing environment.
+To run all glotzformats tests, `ddt`, HOOMD-blue (`hoomd`), and `pycifrw` must be installed in the testing environments.
 
-In this case, execute tests with
-
-    hoomd -m unittest discover tests
-
-otherwise, run tests with:
+Execute the tests with
 
     python -m unittest discover tests
 
-or:
-
-    nosetest

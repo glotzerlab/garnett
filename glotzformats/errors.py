@@ -4,3 +4,7 @@ class ParserError(RuntimeError):
 
 class ParserWarning(RuntimeWarning):
     pass
+
+
+class GSDShapeError(RuntimeError):
+    pass
