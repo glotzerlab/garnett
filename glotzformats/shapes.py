@@ -105,10 +105,6 @@ class ArrowShape(Shape):
 class SphereUnionShape(Shape):
     """Shape class for sphere unions, such as rigid bodies of many spheres.
 
-    :param shape_class:
-        The shape class definition, e.g. 'sphere_union'.
-    :type shape_class:
-        str
     :param diameters:
         A list of sphere diameters.
     :type diameters:
