@@ -107,7 +107,7 @@ if __name__ == '__main__':
         shape_name = shape_class['name']
         print(shape_name)
         with hoomd.context.initialize() as context:
-            if shape_class['dimensions'] is 2:
+            if shape_class['dimensions'] == 2:
                 uc = hoomd.lattice.sq(a=5.0)
             else:
                 uc = hoomd.lattice.sc(a=5.0)
