@@ -294,6 +294,18 @@ texinfo_documents = [
 
 
 # Example configuration for intersphinx: refer to the Python standard library.
-intersphinx_mapping = {'https://docs.python.org/': None}
+intersphinx_mapping = {
+    'python': ('https://docs.python.org/', None),
+    'hoomd': ('https://hoomd-blue.readthedocs.io/en/stable/', None),
+}
 
-autodoc_mock_imports = ['numpy', 'numpy.core', 'numpy.core.numeric','dcdreader', 'gtar', 'CifFile', 'gsd', 'gsd.hoomd']
+autodoc_mock_imports = [
+    'numpy',
+    'numpy.core',
+    'numpy.core.numeric',
+    'dcdreader',
+    'gtar',
+    'CifFile',
+    'gsd',
+    'gsd.hoomd',
+]

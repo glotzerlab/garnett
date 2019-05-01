@@ -80,9 +80,10 @@ class SphereShape(Shape):
 
     @property
     def shape_dict(self):
-        """Shape as dictionary. Example::
+        """Shape as dictionary. Example:
 
-            {'type': 'Sphere', 'diameter': 1.0}
+            >>> SphereShape(2.0).shape_dict
+            {'type': 'Sphere', 'diameter': 2.0}
         """
         return {'type': 'Sphere',
                 'diameter': self.diameter}
@@ -171,10 +172,11 @@ class PolygonShape(Shape):
 
     @property
     def shape_dict(self):
-        """Shape as dictionary. Example::
+        """Shape as dictionary. Example:
 
+            >>> PolygonShape([[-0.5, -0.5], [0.5, -0.5], [0.5, 0.5]]).shape_dict
             {'type': 'Polygon', 'rounding_radius': 0,
-             'vertices': [[-0.5, -0.5], [0.5, -0.5], [0.5, 0.5], [-0.5, 0.5]]}
+             'vertices': [[-0.5, -0.5], [0.5, -0.5], [0.5, 0.5]]}
         """
         return {'type': 'Polygon',
                 'rounding_radius': 0,
@@ -214,10 +216,11 @@ class SpheropolygonShape(Shape):
 
     @property
     def shape_dict(self):
-        """Shape as dictionary. Example::
+        """Shape as dictionary. Example:
 
+            >>> SpheropolygonShape([[-0.5, -0.5], [0.5, -0.5], [0.5, 0.5]], 0.1).shape_dict
             {'type': 'Polygon', 'rounding_radius': 0.1,
-             'vertices': [[-0.5, -0.5], [0.5, -0.5], [0.5, 0.5], [-0.5, 0.5]]}
+             'vertices': [[-0.5, -0.5], [0.5, -0.5], [0.5, 0.5]]}
         """
         return {'type': 'Polygon',
                 'rounding_radius': self.rounding_radius,
@@ -251,8 +254,10 @@ class ConvexPolyhedronShape(Shape):
 
     @property
     def shape_dict(self):
-        """Shape as dictionary. Example::
+        """Shape as dictionary. Example:
 
+            >>> ConvexPolyhedronShape([[0.5, 0.5, 0.5], [0.5, -0.5, -0.5],
+                                       [-0.5, 0.5, -0.5], [-0.5, -0.5, 0.5]]).shape_dict
             {'type': 'ConvexPolyhedron', 'rounding_radius': 0,
              'vertices': [[0.5, 0.5, 0.5], [0.5, -0.5, -0.5],
                           [-0.5, 0.5, -0.5], [-0.5, -0.5, 0.5]]}
@@ -338,8 +343,10 @@ class ConvexSpheropolyhedronShape(Shape):
 
     @property
     def shape_dict(self):
-        """Shape as dictionary. Example::
+        """Shape as dictionary. Example:
 
+            >>> ConvexSpheropolyhedronShape([[0.5, 0.5, 0.5], [0.5, -0.5, -0.5],
+                                             [-0.5, 0.5, -0.5], [-0.5, -0.5, 0.5]], 0.1).shape_dict
             {'type': 'ConvexPolyhedron', 'rounding_radius': 0.1,
              'vertices': [[0.5, 0.5, 0.5], [0.5, -0.5, -0.5],
                           [-0.5, 0.5, -0.5], [-0.5, -0.5, 0.5]]}
@@ -388,8 +395,10 @@ class GeneralPolyhedronShape(Shape):
 
     @property
     def shape_dict(self):
-        """Shape as dictionary. Example::
+        """Shape as dictionary. Example:
 
+            >>> GeneralPolyhedronShape([[0.5, 0.5, 0.5], [0.5, -0.5, -0.5],
+                                        [-0.5, 0.5, -0.5], [-0.5, -0.5, 0.5]]).shape_dict
             {'type': 'Mesh',
              'vertices': [[0.5, 0.5, 0.5], [0.5, -0.5, -0.5],
                           [-0.5, 0.5, -0.5], [-0.5, -0.5, 0.5]],
