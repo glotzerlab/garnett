@@ -49,23 +49,23 @@ class ShapeTest(unittest.TestCase):
         with open(self.get_filename(shape_name), self.mode) as f:
             traj = self.reader().read(f)
             shapedef = traj[-1].shapedef
-        json_shape = shapedef['A'].json_shape
+        shape_dict = shapedef['A'].shape_dict
 
         # Check each field of the shape parameters and JSON shape definition
         if 'vertices' in shape_class['params']:
             npt.assert_allclose(shapedef['A'].vertices,
                                 shape_class['params']['vertices'])
-            npt.assert_allclose(json_shape['vertices'],
+            npt.assert_allclose(shape_dict['vertices'],
                                 shape_class['params']['vertices'])
         if 'diameter' in shape_class['params']:
             npt.assert_almost_equal(shapedef['A'].diameter,
                                     shape_class['params']['diameter'])
-            npt.assert_almost_equal(json_shape['diameter'],
+            npt.assert_almost_equal(shape_dict['diameter'],
                                     shape_class['params']['diameter'])
         if 'sweep_radius' in shape_class['params']:
             npt.assert_almost_equal(shapedef['A'].rounding_radius,
                                     shape_class['params']['sweep_radius'])
-            npt.assert_almost_equal(json_shape['rounding_radius'],
+            npt.assert_almost_equal(shape_dict['rounding_radius'],
                                     shape_class['params']['sweep_radius'])
 
 

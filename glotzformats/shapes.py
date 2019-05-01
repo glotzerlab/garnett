@@ -75,7 +75,7 @@ class SphereShape(Shape):
         return "{} {} {}".format(self.shape_class, self.diameter, self.color)
 
     @property
-    def json_shape(self):
+    def shape_dict(self):
         return {'type': 'Sphere',
                 'diameter': self.diameter}
 
@@ -166,7 +166,7 @@ class PolygonShape(Shape):
             self.color)
 
     @property
-    def json_shape(self):
+    def shape_dict(self):
         return {'type': 'Polygon',
                 'rounding_radius': 0,
                 'vertices': self.vertices}
@@ -204,7 +204,7 @@ class SpheropolygonShape(Shape):
             self.color)
 
     @property
-    def json_shape(self):
+    def shape_dict(self):
         return {'type': 'Polygon',
                 'rounding_radius': self.rounding_radius,
                 'vertices': self.vertices}
@@ -236,7 +236,7 @@ class ConvexPolyhedronShape(Shape):
             self.color)
 
     @property
-    def json_shape(self):
+    def shape_dict(self):
         return {'type': 'ConvexPolyhedron',
                 'rounding_radius': 0,
                 'vertices': self.vertices}
@@ -316,7 +316,7 @@ class ConvexSpheropolyhedronShape(Shape):
             self.color)
 
     @property
-    def json_shape(self):
+    def shape_dict(self):
         return {'type': 'ConvexPolyhedron',
                 'rounding_radius': self.rounding_radius,
                 'vertices': self.vertices}
@@ -356,7 +356,7 @@ class GeneralPolyhedronShape(Shape):
             self.color)
 
     @property
-    def json_shape(self):
+    def shape_dict(self):
         return {'type': 'Mesh',
                 'vertices': self.vertices,
                 'indices': self.faces}
