@@ -444,10 +444,10 @@ class Frame(object):
 
     def __getattribute__(self, attr):
         value = super(Frame, self).__getattribute__(attr);
-            if value is None:
-                raise AttributeError
-            else:
-                return value;
+        if value is None:
+            raise AttributeError
+        else:
+            return value;
 
     def _raw_frame_to_frame(self, raw_frame, dtype=None):
         """Generate a frame object from a raw frame object."""
