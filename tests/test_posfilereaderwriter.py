@@ -205,6 +205,7 @@ class HPMCPosFileReaderTest(BasePosFileReaderTest):
             from hoomd import init, data, run, hpmc, context, lattice
             from hoomd.update import sort as sorter
             from hoomd.deprecated import dump
+            hoomd.context.initialize('')
             self.system = init.create_lattice(
                 unitcell=lattice.sq(10), n=(2, 1))
             self.addCleanup(context.initialize, "--mode=cpu")
@@ -320,7 +321,8 @@ class PosFileWriterTest(BasePosFileWriterTest):
         # 'rand_test',   # the same. The systems are otherwise identical.
         'scc',
         'switch_FeSiUC',
-        'switch_scc')
+        'switch_scc'
+        )
     def test_read_write_read(self, name):
         fn = os.path.join(PATH, 'samples', name + '.pos')
         with open(fn) as samplefile:
