@@ -321,7 +321,8 @@ class PosFileWriterTest(BasePosFileWriterTest):
         # 'rand_test',   # the same. The systems are otherwise identical.
         'scc',
         'switch_FeSiUC',
-        'switch_scc'
+        'switch_scc',
+        'pos_2d'
         )
     def test_read_write_read(self, name):
         fn = os.path.join(PATH, 'samples', name + '.pos')
@@ -400,6 +401,15 @@ class InjavisReadWriteTest(BasePosFileWriterTest):
 
     def test_injavis_dialect(self):
         self.read_write_injavis(glotzformats.samples.POS_INJAVIS)
+
+    def test_hpmc_dialect_2d(self):
+        self.read_write_injavis(glotzformats.samples.POS_HPMC_2D)
+
+    def test_incsim_dialect_2d(self):
+        self.read_write_injavis(glotzformats.samples.POS_INCSIM_2D)
+
+    def test_monotype_dialect_2d(self):
+        self.read_write_injavis(glotzformats.samples.POS_MONOTYPE_2D)
 
 
 if __name__ == '__main__':
