@@ -396,13 +396,49 @@ class FrameSnapshotExport(TrajectoryTest):
         self.assertEqual(snapshot.particles.types, ['A'])
 
     def test_incsim_dialect(self):
-        self.make_snapshot(glotzformats.samples.POS_INCSIM)
+        snapshot = self.make_snapshot(glotzformats.samples.POS_INCSIM)
+        self.assertEqual(snapshot.box.Lx, 10.0)
+        self.assertEqual(snapshot.box.Ly, 10.0)
+        self.assertEqual(snapshot.box.Lz, 10.0)
+        self.assertEqual(snapshot.particles.types, ['A'])
 
     def test_monotype_dialect(self):
-        self.make_snapshot(glotzformats.samples.POS_MONOTYPE)
+        snapshot = self.make_snapshot(glotzformats.samples.POS_MONOTYPE)
+        self.assertEqual(snapshot.box.Lx, 10.0)
+        self.assertEqual(snapshot.box.Ly, 10.0)
+        self.assertEqual(snapshot.box.Lz, 10.0)
+        self.assertEqual(snapshot.particles.types, ['A'])
 
     def test_injavis_dialect(self):
-        self.make_snapshot(glotzformats.samples.POS_INJAVIS)
+        snapshot = self.make_snapshot(glotzformats.samples.POS_INJAVIS)
+        self.assertEqual(snapshot.box.Lx, 10.0)
+        self.assertEqual(snapshot.box.Ly, 10.0)
+        self.assertEqual(snapshot.box.Lz, 10.0)
+        self.assertEqual(snapshot.particles.types, ['A'])
+
+    def test_hpmc_dialect_2D(self):
+        snapshot = self.make_snapshot(glotzformats.samples.POS_HPMC_2D)
+        self.assertEqual(snapshot.box.Lx, 10.0)
+        self.assertEqual(snapshot.box.Ly, 10.0)
+        self.assertEqual(snapshot.box.Lz, 1.0)
+        self.assertEqual(snapshot.particles.types,['A'])
+        self.assertEqual(snapshot.particles.position,  np.array([
+            []
+        ]))
+
+    def test_incsim_dialect_2D(self):
+        snapshot = self.make_snapshot(glotzformats.samples.POS_INCSIM_2D)
+        self.assertEqual(snapshot.box.Lx, 10.0)
+        self.assertEqual(snapshot.box.Ly, 10.0)
+        self.assertEqual(snapshot.box.Lz, 1.0)
+        self.assertEqual(snapshot.particles.types, ['A'])
+
+    def test_monotype_dialect_2D(self):
+        snapshot = self.make_snapshot(glotzformats.samples.POS_MONOTYPE_2D)
+        self.assertEqual(snapshot.box.Lx, 25.0)
+        self.assertEqual(snapshot.box.Ly, 25.0)
+        self.assertEqual(snapshot.box.Lz, 1.0)
+        self.assertEqual(snapshot.particles.types, ['A'])
 
 
 if __name__ == '__main__':
