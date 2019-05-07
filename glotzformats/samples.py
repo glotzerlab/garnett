@@ -88,7 +88,7 @@ boxMatrix 25.0 0 0 0 25.0 0 0 0 1.0
 shape "poly3d 12 0.333333 1 0 1 0.333333 0 0.333333 0.333333 0 -1 -0.333333 0 -0.333333 -1 0 -0.333333 -0.333333 0 -0.333333 0.333333 0 -0.333333 1 0 -1 0.333333 0 0.333333 -0.333333 0 1 -0.333333 0 0.333333 -1 0"
 ff0000 -11.320217528 -8.749537435 0 1 0 0 0
 ff0000 -8.199472831 -9.791602851 0 1 0 0 0
-eof"""
+eof""" # noga: E501
 
 POS_INJAVIS = """//date: Thursday, July 23, 2015 2:50:06 PM
 #[data] Steps   Time    Vol     Packing Press   MSD     DeltaX  DeltaQ  DeltaV  AcceptX AcceptQ AcceptV Ensemble        Shear   Overlaps        X-Length        Y-Length        Z-Length        XY-Angle        XZ-Angle        YZ-Angle        RNGstate        RNGstatew
@@ -103,7 +103,7 @@ shape   "poly3d 12 0.333333     1       0.333333        1       0.333333        
 -8.19947283     -9.79160285     10.203158       0.250075053     -0.54761744     0.316252355     -0.73318624
 eof"""  # noqa: E501
 
-HOOMD_BLUE_XML = """<?xml version="1.0" encoding="utf-8"?>
+HOOMD_BLUE_XML = """<?xml version="1.0" encoding="UTF-8"?>
 <hoomd_xml version="1.6">
 <configuration time_step="0" dimensions="3" natoms="10" >
 <box lx="4.713492870331" ly="4.713492870331" lz="4.713492870331" xy="0" xz="0" yz="0"/>
@@ -156,16 +156,16 @@ HOOMD_BLUE_XML = """<?xml version="1.0" encoding="utf-8"?>
 1
 </diameter>
 <type num="10">
-a
-a
-a
-a
-a
-a
-a
-a
-a
-a
+A
+A
+A
+A
+A
+A
+A
+A
+A
+A
 </type>
 <body num="10">
 -1
@@ -203,7 +203,7 @@ a
 </hoomd_xml>
 """
 
-HOOMD_BLUE_XML_2D = """<?xml version="1.0" encoding="utf-8"?>
+HOOMD_BLUE_XML_2D = """<?xml version="1.0" encoding="UTF-8"?>
 <hoomd_xml version="1.6">
 <configuration time_step="0" dimensions="2" natoms="10" >
 <box lx="4.713492870331" ly="4.713492870331" lz="1.0" xy="0" xz="0" yz="0"/>
@@ -256,16 +256,16 @@ HOOMD_BLUE_XML_2D = """<?xml version="1.0" encoding="utf-8"?>
 1
 </diameter>
 <type num="10">
-a
-a
-a
-a
-a
-a
-a
-a
-a
-a
+A
+A
+A
+A
+A
+A
+A
+A
+A
+A
 </type>
 <body num="10">
 -1
@@ -325,7 +325,8 @@ _symmetry_equiv_pos_as_xyz
 3 '-y, -x, -z+1/2'
 4 '-x+y, -x, -z+1/2'
 5 '-y, x-y, -z+1/2'
-6 'x, y, -z+1/2' 7 '-x, -x+y, z+1/2'
+6 'x, y, -z+1/2' 
+7 '-x, -x+y, z+1/2'
 8 'x-y, -y, z+1/2'
 9 'y, x, z+1/2'
 10 'x-y, x, z+1/2'
