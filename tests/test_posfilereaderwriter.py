@@ -413,6 +413,5 @@ class InjavisReadWriteTest(BasePosFileWriterTest):
 
 
 if __name__ == '__main__':
-    context.initialize("--mode=cpu")
     hoomd.option.set_notice_level(0)
     unittest.main()

@@ -422,9 +422,6 @@ class FrameSnapshotExport(TrajectoryTest):
         self.assertEqual(snapshot.box.Ly, 10.0)
         self.assertEqual(snapshot.box.Lz, 1.0)
         self.assertEqual(snapshot.particles.types,['A'])
-        self.assertEqual(snapshot.particles.position,  np.array([
-            []
-        ]))
 
     def test_incsim_dialect_2D(self):
         snapshot = self.make_snapshot(glotzformats.samples.POS_INCSIM_2D)
