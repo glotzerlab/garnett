@@ -201,11 +201,11 @@ class BaseGSDHOOMDFileReaderTest(TrajectoryTest):
     def test_convex_polyhedron(self):
         self.system = hoomd.init.create_lattice(
             unitcell=hoomd.lattice.sc(10), n=(2, 1, 1))
-        self.addCleanup(hoomd.context.initialize, "--mode=cpu")
+        self.addcleanup(hoomd.context.initialize, "--mode=cpu")
         hoomd.option.set_notice_level(0)
-        self.addCleanup(self.del_system)
+        self.addcleanup(self.del_system)
         self.mc = hoomd.hpmc.integrate.convex_polyhedron(seed=10)
-        self.addCleanup(self.del_mc)
+        self.addcleanup(self.del_mc)
         shape_vertices = np.array([[-2, -1, -1],
                                    [-2, -1, 1],
                                    [-2, 1, -1],
@@ -214,7 +214,7 @@ class BaseGSDHOOMDFileReaderTest(TrajectoryTest):
                                    [2, -1, 1],
                                    [2, 1, -1],
                                    [2, 1, 1]])
-        self.mc.shape_param.set("A", vertices=shape_vertices)
+        self.mc.shape_param.set("a", vertices=shape_vertices)
         self.system.particles[0].position = (0, 0, 0)
         self.system.particles[0].orientation = (1, 0, 0, 0)
         self.system.particles[1].position = (2, 0, 0)
@@ -224,11 +224,11 @@ class BaseGSDHOOMDFileReaderTest(TrajectoryTest):
                                     group=hoomd.group.all(),
                                     period=1)
         gsd_writer.dump_state(self.mc)
-        hoomd.run(1, quiet=True)
+        hoomd.run(1, quiet=true)
         with open(self.fn_gsd, 'rb') as gsdfile:
-            gsd_reader = glotzformats.gsdhoomdfilereader.GSDHOOMDFileReader()
+            gsd_reader = glotzformats.gsdhoomdfilereader.gsdhoomdfilereader()
             traj = gsd_reader.read(gsdfile)
-            shape = traj[0].shapedef['A']
+            shape = traj[0].shapedef['a']
             assert shape.shape_class == 'poly3d'
             assert np.array_equal(shape.vertices, shape_vertices)
 
@@ -319,6 +319,62 @@ class BaseGSDHOOMDFileReaderTest(TrajectoryTest):
                     gf_prop = gf_prop_map.get(prop, prop)
                     self.assertTrue(
                         (getattr(traj, gf_prop)[0][i] == particle_props[prop]).all())
+
+    @unittest.skipIf(not HOOMD or not HPMC, 'requres HOOMD and HPMC')
+    def test_spheres_2d(self):
+        self.system = hoomd.init.create_lattice(
+            unitcell=hoomd.lattice.sq(a=10), n=2)
+        self.addCleanup(hoomd.context.initialize, "--mode=cpu")
+        hoomd.option.set_notice_level(0)
+        self.addCleanup(self.del_system)
+        self.mc = hoomd.hpmc.integrate.sphere(d=0.2, seed=10)
+        self.addCleanup(self.del_mc)
+        diameter_A = 0.75
+        self.mc.shape_param.set("A", diameter=diameter_A)
+        self.system.particles[0].position = (0, 0, 0)
+        self.system.particles[1].position = (2, 0, 0)
+        hoomd.context.current.sorter.set_params(grid=8)
+        gsd_writer = hoomd.dump.gsd(filename=self.fn_gsd,
+                                    group=hoomd.group.all(),
+                                    period=1)
+        gsd_writer.dump_state(self.mc)
+        hoomd.run(1, quiet=True)
+        with open(self.fn_gsd, 'rb') as gsdfile:
+            gsd_reader = glotzformats.gsdhoomdfilereader.GSDHOOMDFileReader()
+            traj = gsd_reader.read(gsdfile)
+            shape = traj[0].shapedef['A']
+            assert shape.shape_class == 'sphere'
+            assert np.isclose(shape.diameter, diameter_A)
+
+    @unittest.skipIf(not HOOMD or not HPMC, 'requires HOOMD and HPMC')
+    def test_convex_polyhedron_2d(self):
+        self.system = hoomd.init.create_lattice(
+            unitcell=hoomd.lattice.sq(a=10), n=2)
+        self.addcleanup(hoomd.context.initialize, "--mode=cpu")
+        hoomd.option.set_notice_level(0)
+        self.addcleanup(self.del_system)
+        self.mc = hoomd.hpmc.integrate.convex_polygon(seed=10)
+        self.addcleanup(self.del_mc)
+        shape_vertices = np.array(
+            [[-0.5, -0.5], [0.5, -0.5], [0.5, 0.5], [-0.5, 0.5]]
+        )
+        self.mc.shape_param.set("A", vertices=shape_vertices)
+        self.system.particles[0].position = (0, 0, 0)
+        self.system.particles[0].orientation = (1, 0, 0, 0)
+        self.system.particles[1].position = (2, 0, 0)
+        self.system.particles[1].orientation = (1, 0, 0, 0)
+        hoomd.context.current.sorter.set_params(grid=8)
+        gsd_writer = hoomd.dump.gsd(filename=self.fn_gsd,
+                                    group=hoomd.group.all(),
+                                    period=1)
+        gsd_writer.dump_state(self.mc)
+        hoomd.run(1, quiet=true)
+        with open(self.fn_gsd, 'rb') as gsdfile:
+            gsd_reader = glotzformats.gsdhoomdfilereader.gsdhoomdfilereader()
+            traj = gsd_reader.read(gsdfile)
+            shape = traj[0].shapedef['A']
+            assert shape.shape_class == 'poly3d'
+            assert np.array_equal(shape.vertices, shape_vertices)
 
 
 if __name__ == '__main__':
