@@ -201,11 +201,11 @@ class BaseGSDHOOMDFileReaderTest(TrajectoryTest):
     def test_convex_polyhedron(self):
         self.system = hoomd.init.create_lattice(
             unitcell=hoomd.lattice.sc(10), n=(2, 1, 1))
-        self.addcleanup(hoomd.context.initialize, "--mode=cpu")
+        self.addCleanup(hoomd.context.initialize, "--mode=cpu")
         hoomd.option.set_notice_level(0)
-        self.addcleanup(self.del_system)
+        self.addCleanup(self.del_system)
         self.mc = hoomd.hpmc.integrate.convex_polyhedron(seed=10)
-        self.addcleanup(self.del_mc)
+        self.addCleanup(self.del_mc)
         shape_vertices = np.array([[-2, -1, -1],
                                    [-2, -1, 1],
                                    [-2, 1, -1],
@@ -214,7 +214,7 @@ class BaseGSDHOOMDFileReaderTest(TrajectoryTest):
                                    [2, -1, 1],
                                    [2, 1, -1],
                                    [2, 1, 1]])
-        self.mc.shape_param.set("a", vertices=shape_vertices)
+        self.mc.shape_param.set("A", vertices=shape_vertices)
         self.system.particles[0].position = (0, 0, 0)
         self.system.particles[0].orientation = (1, 0, 0, 0)
         self.system.particles[1].position = (2, 0, 0)
@@ -224,11 +224,11 @@ class BaseGSDHOOMDFileReaderTest(TrajectoryTest):
                                     group=hoomd.group.all(),
                                     period=1)
         gsd_writer.dump_state(self.mc)
-        hoomd.run(1, quiet=true)
+        hoomd.run(1, quiet=True)
         with open(self.fn_gsd, 'rb') as gsdfile:
-            gsd_reader = glotzformats.gsdhoomdfilereader.gsdhoomdfilereader()
+            gsd_reader = glotzformats.gsdhoomdfilereader.GSDHOOMDFileReader()
             traj = gsd_reader.read(gsdfile)
-            shape = traj[0].shapedef['a']
+            shape = traj[0].shapedef['A']
             assert shape.shape_class == 'poly3d'
             assert np.array_equal(shape.vertices, shape_vertices)
 
@@ -347,14 +347,14 @@ class BaseGSDHOOMDFileReaderTest(TrajectoryTest):
             assert np.isclose(shape.diameter, diameter_A)
 
     @unittest.skipIf(not HOOMD or not HPMC, 'requires HOOMD and HPMC')
-    def test_convex_polyhedron_2d(self):
+    def test_convex_polygon_2d(self):
         self.system = hoomd.init.create_lattice(
             unitcell=hoomd.lattice.sq(a=10), n=2)
-        self.addcleanup(hoomd.context.initialize, "--mode=cpu")
+        self.addCleanup(hoomd.context.initialize, "--mode=cpu")
         hoomd.option.set_notice_level(0)
-        self.addcleanup(self.del_system)
+        self.addCleanup(self.del_system)
         self.mc = hoomd.hpmc.integrate.convex_polygon(seed=10)
-        self.addcleanup(self.del_mc)
+        self.addCleanup(self.del_mc)
         shape_vertices = np.array(
             [[-0.5, -0.5], [0.5, -0.5], [0.5, 0.5], [-0.5, 0.5]]
         )
@@ -368,12 +368,13 @@ class BaseGSDHOOMDFileReaderTest(TrajectoryTest):
                                     group=hoomd.group.all(),
                                     period=1)
         gsd_writer.dump_state(self.mc)
-        hoomd.run(1, quiet=true)
+        hoomd.run(1, quiet=True)
+        # Convex polygon is not supported at the moment
         with open(self.fn_gsd, 'rb') as gsdfile:
-            gsd_reader = glotzformats.gsdhoomdfilereader.gsdhoomdfilereader()
+            gsd_reader = glotzformats.gsdhoomdfilereader.GSDHOOMDFileReader()
             traj = gsd_reader.read(gsdfile)
             shape = traj[0].shapedef['A']
-            assert shape.shape_class == 'poly3d'
+            assert shape.shape_class == 'poly2d'
             assert np.array_equal(shape.vertices, shape_vertices)
 
 
