@@ -30,7 +30,8 @@ import copy
 import numpy as np
 
 from .trajectory import _RawFrameData, Frame, Trajectory
-from .trajectory import SphereShapeDefinition, PolyShapeDefinition, SpheroPolyShapeDefinition
+from .shapes import SphereShape, ConvexPolyhedronShape, ConvexSpheropolyhedronShape, \
+    PolygonShape, SpheropolygonShape
 
 try:
     from gsd.fl import GSDFile
@@ -69,7 +70,7 @@ def _parse_shape_definitions(frame, gsdfile, frame_index):
     if get_chunk(frame_index, 'state/hpmc/sphere/radius') is not None:
         radii = get_chunk(frame_index, 'state/hpmc/sphere/radius')
         for typename, radius in zip(types, radii):
-            shapedefs[typename] = SphereShapeDefinition(
+            shapedefs[typename] = SphereShape(
                 diameter=radius*2, color=None)
         return shapedefs
 
@@ -81,8 +82,8 @@ def _parse_shape_definitions(frame, gsdfile, frame_index):
         verts = get_chunk(frame_index, 'state/hpmc/convex_polyhedron/vertices')
         verts_split = [verts[start:end] for start, end in zip(N_start, N_end)]
         for typename, typeverts in zip(types, verts_split):
-            shapedefs[typename] = PolyShapeDefinition(
-                shape_class='poly3d', vertices=typeverts, color=None)
+            shapedefs[typename] = ConvexPolyhedronShape(
+                vertices=typeverts, color=None)
         return shapedefs
 
     # Convex Spheropolyhedra
@@ -97,24 +98,53 @@ def _parse_shape_definitions(frame, gsdfile, frame_index):
         sweep_radii = get_chunk(frame_index,
                                 'state/hpmc/convex_spheropolyhedron/sweep_radius')
         for typename, typeverts, radius in zip(types, verts_split, sweep_radii):
-            shapedefs[typename] = SpheroPolyShapeDefinition(
-                shape_class='spoly3d', vertices=typeverts,
-                rounding_radius=radius, color=None)
+            shapedefs[typename] = ConvexSpheropolyhedronShape(
+                vertices=typeverts, rounding_radius=radius, color=None)
         return shapedefs
 
-    # Shapes supported by state/hpmc but not glotzformats ShapeDefinitions:
+    # Ellipsoid is supported by state/hpmc but not glotzformats.shapes:
     if get_chunk(frame_index, 'state/hpmc/ellipsoid/a') is not None:
         warnings.warn('ellipsoid is not supported by glotzformats.')
 
+    # Convex Polygons
     if get_chunk(frame_index, 'state/hpmc/convex_polygon/N') is not None:
-        warnings.warn('convex_polygon is not supported by glotzformats.')
+        N = get_chunk(frame_index, 'state/hpmc/convex_polygon/N')
+        N_start = [sum(N[:i]) for i in range(len(N))]
+        N_end = [sum(N[:i+1]) for i in range(len(N))]
+        verts = get_chunk(frame_index, 'state/hpmc/convex_polygon/vertices')
+        verts_split = [verts[start:end] for start, end in zip(N_start, N_end)]
+        for typename, typeverts in zip(types, verts_split):
+            shapedefs[typename] = PolygonShape(
+                vertices=typeverts, color=None)
+        return shapedefs
 
+    # Convex Spheropolygons
     if get_chunk(frame_index, 'state/hpmc/convex_spheropolygon/N') is not None:
-        warnings.warn('convex_spheropolygon is not supported by glotzformats.')
+        N = get_chunk(frame_index, 'state/hpmc/convex_spheropolygon/N')
+        N_start = [sum(N[:i]) for i in range(len(N))]
+        N_end = [sum(N[:i+1]) for i in range(len(N))]
+        verts = get_chunk(frame_index, 'state/hpmc/convex_spheropolygon/vertices')
+        verts_split = [verts[start:end] for start, end in zip(N_start, N_end)]
+        sweep_radii = get_chunk(frame_index,
+                                'state/hpmc/convex_spheropolygon/sweep_radius')
+        for typename, typeverts, radius in zip(types, verts_split, sweep_radii):
+            shapedefs[typename] = SpheropolygonShape(
+                vertices=typeverts, rounding_radius=radius, color=None)
+        return shapedefs
 
+    # Simple Polygons
     if get_chunk(frame_index, 'state/hpmc/simple_polygon/N') is not None:
-        warnings.warn('simple_polygon is not supported by glotzformats.')
+        N = get_chunk(frame_index, 'state/hpmc/simple_polygon/N')
+        N_start = [sum(N[:i]) for i in range(len(N))]
+        N_end = [sum(N[:i+1]) for i in range(len(N))]
+        verts = get_chunk(frame_index, 'state/hpmc/simple_polygon/vertices')
+        verts_split = [verts[start:end] for start, end in zip(N_start, N_end)]
+        for typename, typeverts in zip(types, verts_split):
+            shapedefs[typename] = PolygonShape(
+                vertices=typeverts, color=None)
+        return shapedefs
 
+    # If no shapes were detected, return the empty shapedefs dict.
     return shapedefs
 
 

@@ -15,6 +15,7 @@ glotzformats - documentation
    readerswriters
    trajectory
    formats
+   shapes
    development
 
 

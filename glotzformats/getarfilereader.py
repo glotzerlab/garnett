@@ -15,15 +15,16 @@ import numpy as np
 import gtar
 
 from .trajectory import _RawFrameData, Box, Frame, Trajectory
-from .trajectory import FallbackShapeDefinition, SphereShapeDefinition, \
-    GeneralPolyShapeDefinition, PolyShapeDefinition, SpheroPolyShapeDefinition
+from .shapes import FallbackShape, SphereShape, ConvexPolyhedronShape, \
+    ConvexSpheropolyhedronShape, GeneralPolyhedronShape, PolygonShape, \
+    SpheropolygonShape
 
 logger = logging.getLogger(__name__)
 
 
 def _parse_shape_definition(shape):
     if not shape:
-        return FallbackShapeDefinition('')
+        return FallbackShape('')
 
     rounding_radius = shape.get('rounding_radius', 0)
     shape_type = shape['type'].lower()
@@ -32,24 +33,31 @@ def _parse_shape_definition(shape):
 
     if shape_type in ('sphere', 'disk'):
         diameter = shape.get('diameter', 2*shape.get('rounding_radius', 0.5))
-        shapedef = SphereShapeDefinition(diameter=diameter, color=None)
+        shapedef = SphereShape(diameter=diameter, color=None)
     elif shape_type == 'convexpolyhedron':
         if rounding_radius == 0:
-            shapedef = PolyShapeDefinition(
-                shape_class='poly3d', vertices=shape['vertices'], color=None)
+            shapedef = ConvexPolyhedronShape(vertices=shape['vertices'], color=None)
         else:
-            shapedef = SpheroPolyShapeDefinition(
-                shape_class='spoly3d', vertices=shape['vertices'],
-                rounding_radius=rounding_radius, color=None)
+            shapedef = ConvexSpheropolyhedronShape(vertices=shape['vertices'],
+                                                   rounding_radius=rounding_radius,
+                                                   color=None)
     elif shape_type == 'polyhedron':
-        shapedef = GeneralPolyShapeDefinition(
-            shape_class='polyV', vertices=shape['vertices'], faces=shape['faces'],
-            facet_colors=shape['colors'], color=None)
+        shapedef = GeneralPolyhedronShape(vertices=shape['vertices'],
+                                          faces=shape['faces'],
+                                          facet_colors=shape['colors'],
+                                          color=None)
+    elif shape_type == 'polygon':
+        if rounding_radius == 0:
+            shapedef = PolygonShape(vertices=shape['vertices'], color=None)
+        else:
+            shapedef = SpheropolygonShape(vertices=shape['vertices'],
+                                          rounding_radius=rounding_radius,
+                                          color=None)
 
     if shapedef is None:
         logger.warning("Failed to parse shape definition: shape {} not supported. "
                        "Using fallback mode.".format(shape_type))
-        shapedef = FallbackShapeDefinition(json.dumps(shape))
+        shapedef = FallbackShape(json.dumps(shape))
 
     return shapedef
 

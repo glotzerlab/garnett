@@ -31,32 +31,3 @@ The box instance gives access to the box of individual frames.
    :members:
    :undoc-members:
    :inherited-members:
-
-
-Shape Definitions
------------------
-
-Shape definitions contain information about the shape of individual particles.
-
-.. autoclass:: glotzformats.trajectory.ShapeDefinition
-   :members:
-   :undoc-members:
-   :inherited-members:
-
-.. autoclass:: glotzformats.trajectory.SphereShapeDefinition
-   :members:
-   :undoc-members:
-   :inherited-members:
-
-.. autoclass:: glotzformats.trajectory.PolyShapeDefinition
-   :members:
-   :undoc-members:
-   :inherited-members:
-
-.. autoclass:: glotzformats.trajectory.ArrowShapeDefinition
-   :members:
-   :undoc-members:
-   :inherited-members:
-
-.. autoclass:: glotzformats.trajectory.FallbackShapeDefinition
-   :members:
