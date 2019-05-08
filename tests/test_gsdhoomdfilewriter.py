@@ -24,11 +24,11 @@ def get_filename(filename):
     return os.path.join(TESTDATA_PATH, filename)
 
 
-class ColorlessShape(glotzformats.trajectory.ShapeDefinition):
+class ColorlessShape(glotzformats.shapes.Shape):
     """ShapeDefinition without colors, for comparing formats.
 
     :param other: Another ShapeDefinition object.
-    :type other: :py:class:`glotzformats.trajectory.ShapeDefinition`
+    :type other: :py:class:`glotzformats.shapes.Shape`
     """
 
     def __init__(self, other):

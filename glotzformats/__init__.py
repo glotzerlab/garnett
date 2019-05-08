@@ -7,6 +7,7 @@ from . import formats
 from . import reader
 from . import writer
 from . import samples
+from . import shapes
 from . import trajectory
 from .util import read, write
 
@@ -17,6 +18,7 @@ __all__ = [
     'reader',
     'writer',
     'samples',
+    'shapes',
     'trajectory',
     'read',
     'write',
