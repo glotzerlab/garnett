@@ -57,6 +57,19 @@ class BasePosFileReaderTest(unittest.TestCase):
         reader = glotzformats.reader.PosFileReader(precision=precision)
         return reader.read(stream)
 
+    def assert_raise_attribute_error(self,frame):
+        self.assertRaises(AttributeError,frame.velocities);
+        self.assertRaises(AttributeError,frame.mass);
+        self.assertRaises(AttributeError,frame.charge);
+        self.assertRaises(AttributeError,frame.diameter);
+        self.assertRaises(AttributeError,frame.moment_inertia);
+        self.assertRaises(AttributeError,frame.angmom);
+        self.assertRaises(AttributeError,frame.image);
+        #self.assertRaises(AttributeError,frame.data);
+        #self.assertRaises(AttributeError,frame.data_keys);
+        #self.assertRaises(AttributeError,frame.view_rotation);
+        self.assertRaises(AttributeError,frame.mass);
+        self.assertRaises(AttributeError,frame.velocities);
 
 class BasePosFileWriterTest(BasePosFileReaderTest):
 
@@ -111,6 +124,7 @@ class PosFileReaderTest(BasePosFileReaderTest):
             N = len(frame)
             self.assertEqual(frame.types, ['A'] * N)
             self.assertEqual(frame.box, box_expected)
+            self.assert_raise_attribute_error(frame)
 
     def test_incsim_dialect(self):
         if PYTHON_2:
@@ -123,6 +137,7 @@ class PosFileReaderTest(BasePosFileReaderTest):
             N = len(frame)
             self.assertEqual(frame.types, ['A'] * N)
             self.assertEqual(frame.box, box_expected)
+            self.assert_raise_attribute_error(frame)
 
     def test_monotype_dialect(self):
         if PYTHON_2:
@@ -135,6 +150,7 @@ class PosFileReaderTest(BasePosFileReaderTest):
             N = len(frame)
             self.assertEqual(frame.types, ['A'] * N)
             self.assertEqual(frame.box, box_expected)
+            self.assert_raise_attribute_error(frame)
 
     def test_injavis_dialect(self):
         if PYTHON_2:
@@ -147,6 +163,7 @@ class PosFileReaderTest(BasePosFileReaderTest):
             N = len(frame)
             self.assertEqual(frame.types, ['A'] * N)
             self.assertEqual(frame.box, box_expected)
+            self.assert_raise_attribute_error(frame)
 
 
 @unittest.skipIf(not HPMC, 'requires HPMC')
