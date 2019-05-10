@@ -37,19 +37,20 @@ class BaseDCDFileReaderTest(TrajectoryTest):
         return self.reader().read(dcdfile, top_traj[0])
 
     def assert_raise_attribute_error(self,frame):
-            self.assertRaises(AttributeError,frame.types);
-            self.assertRaises(AttributeError,frame.orientations);
-            self.assertRaises(AttributeError,frame.charge);
-            self.assertRaises(AttributeError,frame.diameter);
-            self.assertRaises(AttributeError,frame.moment_inertia);
-            self.assertRaises(AttributeError,frame.angmom);
-            self.assertRaises(AttributeError,frame.image);
-            self.assertRaises(AttributeError,frame.data);
-            self.assertRaises(AttributeError,frame.data_keys);
-            self.assertRaises(AttributeError,frame.shapedef);
-            self.assertRaises(AttributeError,frame.view_rotation);
-            self.assertRaises(AttributeError,frame.mass);
-            self.assertRaises(AttributeError,frame.velocities);
+        with self.assertRaises(AttributeError):
+            frame.types;
+            frame.orientations;
+            frame.charge;
+            frame.diameter;
+            frame.moment_inertia;
+            frame.angmom;
+            frame.image;
+            frame.data;
+            frame.data_keys;
+            frame.shapedef;
+            frame.view_rotation;
+            frame.mass;
+            frame.velocities;
 
     def test_read(self):
         traj = self.get_traj()
