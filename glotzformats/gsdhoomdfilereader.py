@@ -150,13 +150,12 @@ def _parse_shape_definitions(frame, gsdfile, frame_index):
 
 class GSDHoomdFrame(Frame):
 
-    def __init__(self, traj, frame_index, t_frame, gsdfile,
-                 read_gsd_shape_data):
+    def __init__(self, traj, frame_index, t_frame, gsdfile):
         self.traj = traj
         self.frame_index = frame_index
         self.t_frame = t_frame
         self.gsdfile = gsdfile
-        self.read_gsd_shape_data = read_gsd_shape_data
+
         super(GSDHoomdFrame, self).__init__()
 
     def read(self):
@@ -212,13 +211,9 @@ class GSDHOOMDFileReader(object):
                 xml_frame = xml_reader.read(xmlfile)[0]
                 traj = gsd_reader.read(gsdfile, xml_frame)
 
-    :param bool read_gsd_shape_data: If True (default), the reader will use
-                                     shape data parsed from the GSD file
-                                     instead of from the provided frame.
     """
 
-    def __init__(self, read_gsd_shape_data=True):
-        self.read_gsd_shape_data = read_gsd_shape_data
+    def __init__(self):
 
     def read(self, stream, frame=None):
         """Read binary stream and return a trajectory instance.
@@ -243,8 +238,7 @@ class GSDHOOMDFileReader(object):
                           "Falling back to pure python reader.")
             gsdfile = PyGSDFile(stream)
             traj = gsdhoomd.HOOMDTrajectory(gsdfile)
-        frames = [GSDHoomdFrame(traj, i, t_frame=frame, gsdfile=gsdfile,
-                                read_gsd_shape_data=self.read_gsd_shape_data)
+        frames = [GSDHoomdFrame(traj, i, t_frame=frame, gsdfile=gsdfile)
                   for i in range(len(traj))]
         logger.info("Read {} frames.".format(len(frames)))
         return Trajectory(frames)
