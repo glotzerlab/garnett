@@ -58,18 +58,16 @@ class BasePosFileReaderTest(unittest.TestCase):
         return reader.read(stream)
 
     def assert_raise_attribute_error(self,frame):
-        self.assertRaises(AttributeError,frame.velocities);
-        self.assertRaises(AttributeError,frame.mass);
-        self.assertRaises(AttributeError,frame.charge);
-        self.assertRaises(AttributeError,frame.diameter);
-        self.assertRaises(AttributeError,frame.moment_inertia);
-        self.assertRaises(AttributeError,frame.angmom);
-        self.assertRaises(AttributeError,frame.image);
+        with self.assertRaises(AttributeError):
+            frame.velocities;
+            frame.charge;
+            frame.diameter;
+            frame.moment_inertia;
+            frame.angmom;
+            frame.image;
         #self.assertRaises(AttributeError,frame.data);
         #self.assertRaises(AttributeError,frame.data_keys);
         #self.assertRaises(AttributeError,frame.view_rotation);
-        self.assertRaises(AttributeError,frame.mass);
-        self.assertRaises(AttributeError,frame.velocities);
 
 class BasePosFileWriterTest(BasePosFileReaderTest):
 
