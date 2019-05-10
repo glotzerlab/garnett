@@ -36,6 +36,21 @@ class BaseDCDFileReaderTest(TrajectoryTest):
         dcdfile = io.BytesIO(base64.b64decode(glotzformats.samples.DCD_BASE64))
         return self.reader().read(dcdfile, top_traj[0])
 
+    def assert_raise_attribute_error(self,frame):
+            self.assertRaises(AttributeError,frame.types);
+            self.assertRaises(AttributeError,frame.orientations);
+            self.assertRaises(AttributeError,frame.charge);
+            self.assertRaises(AttributeError,frame.diameter);
+            self.assertRaises(AttributeError,frame.moment_inertia);
+            self.assertRaises(AttributeError,frame.angmom);
+            self.assertRaises(AttributeError,frame.image);
+            self.assertRaises(AttributeError,frame.data);
+            self.assertRaises(AttributeError,frame.data_keys);
+            self.assertRaises(AttributeError,frame.shapedef);
+            self.assertRaises(AttributeError,frame.view_rotation);
+            self.assertRaises(AttributeError,frame.mass);
+            self.assertRaises(AttributeError,frame.velocities);
+
     def test_read(self):
         traj = self.get_traj()
         self.assertEqual(len(traj), 10)
@@ -58,6 +73,8 @@ class BaseDCDFileReaderTest(TrajectoryTest):
             [1.78225398064, -0.266534328461, -1.39306223392],
             [0.162209749222, -2.22765517235, -1.27463591099]])))
 
+        for frame in traj:
+            self.assert_raise_attribute_error(frame);
 
 if __name__ == '__main__':
     unittest.main()
