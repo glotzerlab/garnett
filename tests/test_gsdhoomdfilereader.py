@@ -4,6 +4,8 @@ import io
 import unittest
 import base64
 import numpy as np
+import collections
+from glotzformats.shapes import ConvexPolyhedronShape
 
 import glotzformats
 from test_trajectory import TrajectoryTest
@@ -56,11 +58,36 @@ class BaseGSDHOOMDFileReaderTest(TrajectoryTest):
         gsdfile = io.BytesIO(base64.b64decode(glotzformats.samples.GSD_BASE64))
         return gsd_reader.read(gsdfile, top_traj[0])
 
+    def get_gsd_traj_with_pos_frame(self,read_pos):
+        if read_pos:
+            pos_reader = glotzformats.reader.PosFileReader();
+            if PYTHON_2:
+                frame =  pos_reader.read(io.StringIO(
+                        unicode(glotzformats.samples.POS_HPMC)))[0]  # noqa
+            else:
+                frame =  pos_reader.read(
+                        io.StringIO(glotzformats.samples.POS_HPMC))[0]
+        else:
+            frame = None;
+        gsd_reader = self.reader()
+        gsdfile = io.BytesIO(base64.b64decode(glotzformats.samples.GSD_BASE64))
+        return frame, gsd_reader.read(gsdfile, frame)
+
     def del_system(self):
         del self.system
 
     def del_mc(self):
         del self.mc
+
+    def test_gsd_with_pos_frame(self):
+        frame, traj = self.get_gsd_traj_with_pos_frame(read_pos=True);
+        assert frame is not None;
+        self.assertEqual(traj[0].shapedef,frame.shapedef);
+
+    def test_gsd_without_pos_frame(self):
+        frame, traj = self.get_gsd_traj_with_pos_frame(read_pos=False);
+        assert frame is None;
+        self.assertEqual(traj[0].shapedef,collections.OrderedDict());
 
     def test_read(self):
         traj = self.get_traj()
