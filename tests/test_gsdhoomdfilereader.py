@@ -5,7 +5,6 @@ import unittest
 import base64
 import numpy as np
 import collections
-from glotzformats.shapes import ConvexPolyhedronShape
 
 import glotzformats
 from test_trajectory import TrajectoryTest
