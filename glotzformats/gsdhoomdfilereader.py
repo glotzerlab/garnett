@@ -211,13 +211,9 @@ class GSDHOOMDFileReader(object):
                 xml_frame = xml_reader.read(xmlfile)[0]
                 traj = gsd_reader.read(gsdfile, xml_frame)
 
-    :param bool read_gsd_shape_data: If True (default), the reader will use
-                                     shape data parsed from the GSD file
-                                     instead of from the provided frame.
     """
 
-    def __init__(self, read_gsd_shape_data=True):
-        self.read_gsd_shape_data = read_gsd_shape_data
+    def __init__(self, read_gsd_shape_data=None):
 
     def read(self, stream, frame=None):
         """Read binary stream and return a trajectory instance.
