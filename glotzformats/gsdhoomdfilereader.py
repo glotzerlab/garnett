@@ -214,6 +214,8 @@ class GSDHOOMDFileReader(object):
     """
 
     def __init__(self, read_gsd_shape_data=None):
+        if read_gsd_shape_data is not None:
+            warnings.warn("Ignoring read_gsd_shape_data",warnings.DeprecationWarning)
 
     def read(self, stream, frame=None):
         """Read binary stream and return a trajectory instance.
