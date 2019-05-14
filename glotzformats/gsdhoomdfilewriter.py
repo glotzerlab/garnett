@@ -110,6 +110,7 @@ class GSDHOOMDFileWriter(object):
 
                 snap = gsd.hoomd.Snapshot()
                 snap.particles.N = len(frame)
+                N = len(frame)
                 try:
                     types = list(set(frame.types));
                 except AttributeError:
