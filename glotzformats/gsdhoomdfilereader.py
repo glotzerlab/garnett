@@ -155,20 +155,21 @@ class GSDHoomdFrame(Frame):
         self.frame_index = frame_index
         self.t_frame = t_frame
         self.gsdfile = gsdfile
-
         super(GSDHoomdFrame, self).__init__()
 
     def read(self):
         raw_frame = _RawFrameData()
+        frame = self.traj.read_frame(self.frame_index)
+        # If frame is provided, read shape data from it
         if self.t_frame is not None:
             raw_frame.data = copy.deepcopy(self.t_frame.data)
             raw_frame.data_keys = copy.deepcopy(self.t_frame.data_keys)
             raw_frame.shapedef = copy.deepcopy(self.t_frame.shapedef)
             raw_frame.box_dimensions = self.t_frame.box.dimensions
         else:
+        # Fallback to gsd shape data if no frame is provided
             raw_frame.shapedef.update(
-                _parse_shape_definitions(frame, self.gsdfile, self.frame_index))
-        frame = self.traj.read_frame(self.frame_index)
+                _parse_shape_definitions(frame, self.gsdfile, self.frame_index));
         raw_frame.box = _box_matrix(frame.configuration.box)
         raw_frame.box_dimensions = int(frame.configuration.dimensions)
         raw_frame.types = [frame.particles.types[t] for t in frame.particles.typeid]
@@ -213,9 +214,9 @@ class GSDHOOMDFileReader(object):
 
     """
 
-    def __init__(self,read_gsd_shape_data=None):
+    def __init__(self, read_gsd_shape_data=None):
         if read_gsd_shape_data is not None:
-            raise ValueError("read_gsd_shape_data is no longer supported");
+            warnings.warn("Ignoring read_gsd_shape_data", DeprecationWarning)
 
     def read(self, stream, frame=None):
         """Read binary stream and return a trajectory instance.
