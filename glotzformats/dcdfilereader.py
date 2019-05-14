@@ -216,16 +216,12 @@ class DCDTrajectory(Trajectory):
         """Returns true if arrays are loaded into memory.
 
         See also: :meth:`~.load_arrays`"""
-        try:
-            self._N;
-            self._type;
-            self._types;
-            self._type_ids;
-            self._positions;
-            self._orientations;
-            return True;
-        except AttributeError:
-            return False;
+        return not (self._N is None or
+                    self._type is None or
+                    self._types is None or
+                    self._type_ids is None or
+                    self._positions is None or
+                    self._orientations is None)
 
 
     def load_arrays(self):
