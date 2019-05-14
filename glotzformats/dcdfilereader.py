@@ -149,11 +149,13 @@ class DCDFrame(Frame):
         if ort is None:
             ort = np.zeros((N, 4), dtype=self._dtype)
         self._read(xyz=xyz)
-        if self.t_frame is None:
+        if self.__dict__["t_frame"] is None:
+        # try:
             self._types = [self.default_type] * len(self)
+        # except AttributeError:
         else:
             self._types = self.t_frame.types
-        if self.t_frame is None or self.t_frame.box.dimensions == 3:
+        if self.__dict__["t_frame"] is None or self.t_frame.box.dimensions == 3:
             ort.T[0] = 1.0
             ort.T[1:] = 0
         elif self.t_frame.box.dimensions == 2:
@@ -165,10 +167,14 @@ class DCDFrame(Frame):
         self._orientations = ort
 
     def _loaded(self):
-        return not (self._types is None or
-                    self._box is None or
-                    self._positions is None or
-                    self._orientations is None)
+        try:
+            self._types;
+            self._box;
+            self._positions;
+            self._orientations;
+            return True;
+        except AttributeError:
+            return False;
 
     def read(self):
         raw_frame = _RawFrameData()
@@ -207,12 +213,17 @@ class DCDTrajectory(Trajectory):
         """Returns true if arrays are loaded into memory.
 
         See also: :meth:`~.load_arrays`"""
-        return not (self._N is None or
-                    self._type is None or
-                    self._types is None or
-                    self._type_ids is None or
-                    self._positions is None or
-                    self._orientations is None)
+        try:
+            self._N;
+            self._type;
+            self._types;
+            self._type_ids;
+            self._positions;
+            self._orientations;
+            return True;
+        except AttributeError:
+            return False;
+
 
     def load_arrays(self):
         # Determine array shapes

@@ -81,7 +81,7 @@ class PosFileWriter(object):
                 for row in rows:
                     _write(' '.join(row))
                 _write('#[done]')
-            except AssertionError:
+            except AttributeError:
                 _write('')
             # boxMatrix and rotation
             box_matrix = np.array(frame.box.get_box_matrix())
@@ -90,7 +90,7 @@ class PosFileWriter(object):
                 try:
                     for i in range(3):
                         box_matrix[:, i] = rowan.rotate(frame.view_rotation, box_matrix[:, i])
-                except AssertionError:
+                except AttributeError:
                     # Do nothing
                     pass
 
@@ -98,7 +98,7 @@ class PosFileWriter(object):
                 try:
                     angles = rowan.to_euler(frame.view_rotation, axis_type='extrinsic', convention='xyz') * 180 / math.pi
                     _write('rotation ' + ' '.join((str(_num(_)) for _ in angles)))
-                except AssertionError:
+                except AttributeError:
                     _write('');
 
             _write('boxMatrix ', end='')
@@ -141,7 +141,7 @@ class PosFileWriter(object):
 
                 try:
                     shapedef = frame.shapedef[name]
-                except AttributeError:
+                except (AttributeError, KeyError):
                     shapedef = DEFAULT_SHAPE_DEFINITION
 
                 if self._rotate:
