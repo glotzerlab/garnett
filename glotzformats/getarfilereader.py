@@ -9,6 +9,7 @@ Authors: Matthew Spellings, Carl Simon Adorf
 """
 
 import json
+from json.decoder import JSONDecodeError
 import logging
 
 import numpy as np
@@ -132,8 +133,24 @@ class GetarFrame(Frame):
         if 'type_names.json' in self._records and 'type_shapes.json' in self._records:
             names = json.loads(self._trajectory.getRecord(
                 self._records['type_names.json'], self._frame))
-            shapes = json.loads(self._trajectory.getRecord(
-                self._records['type_shapes.json'], self._frame))
+            try:
+                shapes = json.loads(self._trajectory.getRecord(
+                    self._records['type_shapes.json'], self._frame))
+            except JSONDecodeError:
+                """We know that some frame must have a type_shapes.json
+                defined, because it is in self._records. However, the current
+                frame self._frame does not have a type_shapes.json record
+                defined and threw a JSONDecodeError while attempting to parse
+                the nonexistent data. Instead, we will try to find the frame
+                closest to self._frame that has a type_shapes.json record
+                defined (sorting by the absolute value of the frame indices)
+                and use that set of shape definitions."""
+                closest_frame_with_shapes = sorted(self._trajectory.queryFrames(
+                    self._records['type_shapes.json']),
+                    key=lambda f: abs(int(f)-int(self._frame)))[0]
+                shapes = json.loads(self._trajectory.getRecord(
+                    self._records['type_shapes.json'],
+                    closest_frame_with_shapes))
             for name, shape in zip(names, shapes):
                 shape_def = _parse_shape_definition(shape)
                 raw_frame.shapedef.update({name: shape_def})
