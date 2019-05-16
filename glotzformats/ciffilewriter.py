@@ -54,7 +54,7 @@ class CifFileWriter(object):
         writer = CifFileWriter()
 
         # write to screen:
-        write.write(trajectory)
+        writer.write(trajectory)
 
         # write to file:
         with open('a_ciffile.pos', 'w') as ciffile:

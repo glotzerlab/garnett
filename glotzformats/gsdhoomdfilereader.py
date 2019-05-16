@@ -150,24 +150,36 @@ def _parse_shape_definitions(frame, gsdfile, frame_index):
 
 class GSDHoomdFrame(Frame):
 
-    def __init__(self, traj, frame_index, t_frame, gsdfile,
-                 read_gsd_shape_data):
+    def __init__(self, traj, frame_index, t_frame, gsdfile):
         self.traj = traj
         self.frame_index = frame_index
         self.t_frame = t_frame
         self.gsdfile = gsdfile
-        self.read_gsd_shape_data = read_gsd_shape_data
         super(GSDHoomdFrame, self).__init__()
 
     def read(self):
         raw_frame = _RawFrameData()
-        if self.t_frame is not None:
-            raw_frame.data = copy.deepcopy(self.t_frame.data)
-            raw_frame.data_keys = copy.deepcopy(self.t_frame.data_keys)
-            if not self.read_gsd_shape_data:
-                raw_frame.shapedef = copy.deepcopy(self.t_frame.shapedef)
-            raw_frame.box_dimensions = self.t_frame.box.dimensions
         frame = self.traj.read_frame(self.frame_index)
+
+        try:
+            raw_frame.data = copy.deepcopy(self.t_frame.data)
+        except AttributeError:
+            pass
+        try:
+            raw_frame.data_keys = copy.deepcopy(self.t_frame.data_keys)
+        except AttributeError:
+            pass
+        try:
+            raw_frame.box_dimensions = self.t_frame.box.dimensions
+        except AttributeError:
+            pass
+        # If frame is provided, read shape data from it
+        try:
+            raw_frame.shapedef = copy.deepcopy(self.t_frame.shapedef)
+        except AttributeError:
+        # Fallback to gsd shape data if no frame is provided
+            raw_frame.shapedef.update(
+                _parse_shape_definitions(frame, self.gsdfile, self.frame_index));
         raw_frame.box = _box_matrix(frame.configuration.box)
         raw_frame.box_dimensions = int(frame.configuration.dimensions)
         raw_frame.types = [frame.particles.types[t] for t in frame.particles.typeid]
@@ -179,9 +191,6 @@ class GSDHoomdFrame(Frame):
         raw_frame.diameter = frame.particles.diameter
         raw_frame.moment_inertia = frame.particles.moment_inertia
         raw_frame.angmom = frame.particles.angmom
-        if self.read_gsd_shape_data:
-            raw_frame.shapedef.update(
-                _parse_shape_definitions(frame, self.gsdfile, self.frame_index))
         return raw_frame
 
     def __str__(self):
@@ -213,13 +222,11 @@ class GSDHOOMDFileReader(object):
                 xml_frame = xml_reader.read(xmlfile)[0]
                 traj = gsd_reader.read(gsdfile, xml_frame)
 
-    :param bool read_gsd_shape_data: If True (default), the reader will use
-                                     shape data parsed from the GSD file
-                                     instead of from the provided frame.
     """
 
-    def __init__(self, read_gsd_shape_data=True):
-        self.read_gsd_shape_data = read_gsd_shape_data
+    def __init__(self, read_gsd_shape_data=None):
+        if read_gsd_shape_data is not None:
+            warnings.warn("Ignoring read_gsd_shape_data", DeprecationWarning)
 
     def read(self, stream, frame=None):
         """Read binary stream and return a trajectory instance.
@@ -244,8 +251,7 @@ class GSDHOOMDFileReader(object):
                           "Falling back to pure python reader.")
             gsdfile = PyGSDFile(stream)
             traj = gsdhoomd.HOOMDTrajectory(gsdfile)
-        frames = [GSDHoomdFrame(traj, i, t_frame=frame, gsdfile=gsdfile,
-                                read_gsd_shape_data=self.read_gsd_shape_data)
+        frames = [GSDHoomdFrame(traj, i, t_frame=frame, gsdfile=gsdfile)
                   for i in range(len(traj))]
         logger.info("Read {} frames.".format(len(frames)))
         return Trajectory(frames)
