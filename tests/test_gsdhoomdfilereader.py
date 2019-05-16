@@ -395,12 +395,11 @@ class BaseGSDHOOMDFileReaderTest(TrajectoryTest):
                                     period=1)
         gsd_writer.dump_state(self.mc)
         hoomd.run(1, quiet=True)
-        # Convex polygon is not supported at the moment
         with open(self.fn_gsd, 'rb') as gsdfile:
             gsd_reader = glotzformats.gsdhoomdfilereader.GSDHOOMDFileReader()
             traj = gsd_reader.read(gsdfile)
             shape = traj[0].shapedef['A']
-            assert shape.shape_class == 'polygon'
+            assert shape.shape_class == 'poly3d'
             assert np.array_equal(shape.vertices, shape_vertices)
 
 
