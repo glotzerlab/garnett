@@ -60,14 +60,16 @@ class BasePosFileReaderTest(unittest.TestCase):
     def assert_raise_attribute_error(self,frame):
         with self.assertRaises(AttributeError):
             frame.velocities;
+        with self.assertRaises(AttributeError):
             frame.charge;
+        with self.assertRaises(AttributeError):
             frame.diameter;
+        with self.assertRaises(AttributeError):
             frame.moment_inertia;
+        with self.assertRaises(AttributeError):
             frame.angmom;
+        with self.assertRaises(AttributeError):
             frame.image;
-        #self.assertRaises(AttributeError,frame.data);
-        #self.assertRaises(AttributeError,frame.data_keys);
-        #self.assertRaises(AttributeError,frame.view_rotation);
 
 class BasePosFileWriterTest(BasePosFileReaderTest):
 
