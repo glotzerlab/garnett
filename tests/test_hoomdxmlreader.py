@@ -25,8 +25,6 @@ class BaseHOOMDXMLFileReaderTest(unittest.TestCase):
         with self.assertRaises(AttributeError):
             frame.orientations;
         with self.assertRaises(AttributeError):
-            frame.shapedef;
-        with self.assertRaises(AttributeError):
             frame.moment_inertia;
         with self.assertRaises(AttributeError):
             frame.angmom;
