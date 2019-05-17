@@ -70,7 +70,7 @@ class BaseHOOMDXMLFileReaderTest(unittest.TestCase):
                 [0, 4.713492870331, 0],
                 [0, 0, 4.713492870331]])))
 
-       self.assert_raise_attribute_error(traj[0]);
+        self.assert_raise_attribute_error(traj[0]);
 
 if __name__ == '__main__':
     unittest.main()
