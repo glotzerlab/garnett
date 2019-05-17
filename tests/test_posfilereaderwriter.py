@@ -231,7 +231,6 @@ class HPMCPosFileReaderTest(BasePosFileReaderTest):
             from hoomd import init, data, run, hpmc, context, lattice
             from hoomd.update import sort as sorter
             from hoomd.deprecated import dump
-            hoomd.context.initialize('')
             self.system = init.create_lattice(
                 unitcell=lattice.sq(10), n=(2, 1))
             self.addCleanup(context.initialize, "--mode=cpu")
@@ -444,5 +443,6 @@ class InjavisReadWriteTest(BasePosFileWriterTest):
 
 
 if __name__ == '__main__':
+    hoomd.context.initialize("--mode=cpu")
     hoomd.option.set_notice_level(0)
     unittest.main()
