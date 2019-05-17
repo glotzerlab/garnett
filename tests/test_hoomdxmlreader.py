@@ -21,6 +21,20 @@ class BaseHOOMDXMLFileReaderTest(unittest.TestCase):
             return reader.read(
                 io.StringIO(glotzformats.samples.HOOMD_BLUE_XML))
 
+    def assert_raise_attribute_error(self,frame):
+        with self.assertRaises(AttributeError):
+            frame.orientations;
+        with self.assertRaises(AttributeError):
+            frame.shapedef;
+        with self.assertRaises(AttributeError):
+            frame.moment_inertia;
+        with self.assertRaises(AttributeError):
+            frame.angmom;
+        with self.assertRaises(AttributeError):
+            frame.image;
+        with self.assertRaises(AttributeError):
+            frame.view_rotation;
+
     def test_read(self):
         traj = self.read_trajectory()
         self.assertEqual(len(traj), 1)
@@ -56,6 +70,7 @@ class BaseHOOMDXMLFileReaderTest(unittest.TestCase):
                 [0, 4.713492870331, 0],
                 [0, 0, 4.713492870331]])))
 
+       self.assert_raise_attribute_error(traj[0]);
 
 if __name__ == '__main__':
     unittest.main()
