@@ -45,18 +45,24 @@ class BaseDCDFileReaderTest(TrajectoryTest):
 
     def assert_raise_attribute_error(self,frame):
         with self.assertRaises(AttributeError):
-            frame.types;
-            frame.orientations;
             frame.charge;
+        with self.assertRaises(AttributeError):
             frame.diameter;
+        with self.assertRaises(AttributeError):
             frame.moment_inertia;
+        with self.assertRaises(AttributeError):
             frame.angmom;
+        with self.assertRaises(AttributeError):
             frame.image;
+        with self.assertRaises(AttributeError):
             frame.data;
+        with self.assertRaises(AttributeError):
             frame.data_keys;
-            frame.shapedef;
+        with self.assertRaises(AttributeError):
             frame.view_rotation;
+        with self.assertRaises(AttributeError):
             frame.mass;
+        with self.assertRaises(AttributeError):
             frame.velocities;
 
     def test_read(self):
