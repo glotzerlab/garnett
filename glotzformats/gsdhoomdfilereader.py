@@ -234,16 +234,14 @@ class GSDHOOMDFileReader(object):
                 xml_frame = xml_reader.read(xmlfile)[0]
                 traj = gsd_reader.read(gsdfile, xml_frame)
 
-    :param bool read_gsd_shape_data: This keyword is now deprecated (**default: None**).
-                By default, shape information is read from a passed frame object, if one
+    About the read_gsd_shape_data parameter: This parameter was removed. By default,
+                shape information is read from a passed frame object, if one
                 provided. Otherwise, shape information is read from the gsd file.
 
     """
 
-    def __init__(self, read_gsd_shape_data=None):
-        if read_gsd_shape_data is not None:
-            warnings.warn("The 'read_gsd_shape_data' keyword argument \
-                    is deprecated and will be ignored!", DeprecationWarning);
+    def __init__(self):
+        pass
 
     def read(self, stream, frame=None):
         """Read binary stream and return a trajectory instance.
