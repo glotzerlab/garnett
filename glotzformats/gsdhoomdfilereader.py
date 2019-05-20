@@ -160,8 +160,10 @@ class GSDHoomdFrame(Frame):
     :type frame_index:
         int
     :param t_frame:
-        A frame containing shape information
-        that is not encoded in the GSD-format.
+        A frame containing shape information that is not encoded in
+        the GSD-format. By default, shape information is read from the
+        passed frame object, if one provided. Otherwise, shape information
+        is read from the gsd file.
     :type :
         :class:`trajectory.Frame`
     :param gsdfile:
@@ -249,7 +251,10 @@ class GSDHOOMDFileReader(object):
         :param stream: The stream, which contains the gsd-file.
         :type stream: A file-like binary stream
         :param frame: A frame containing shape information
-            that is not encoded in the GSD-format.
+            that is not encoded in the GSD-format. By default,
+            shape information is read from the passed frame object,
+            if one provided. Otherwise, shape information
+            is read from the gsd file.
         :type frame: :class:`trajectory.Frame`"""
         if NATIVE:
             try:
