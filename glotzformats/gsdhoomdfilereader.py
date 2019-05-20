@@ -149,6 +149,26 @@ def _parse_shape_definitions(frame, gsdfile, frame_index):
 
 
 class GSDHoomdFrame(Frame):
+    """Extends the Frame object for GSD files.
+
+    :param traj:
+        Trajectory containing the frame to cast
+    :type traj:
+        :class:`trajectory.Trajectory`
+    :param frame_index:
+        The index of the frame to cast
+    :type frame_index:
+        int
+    :param t_frame:
+        A frame containing shape information
+        that is not encoded in the GSD-format.
+    :type :
+        :class:`trajectory.Frame`
+    :param gsdfile:
+        A gsd file object.
+    :type gsdfile:
+        :class:`gsd.fl.GSDFile`
+    """
 
     def __init__(self, traj, frame_index, t_frame, gsdfile):
         self.traj = traj
