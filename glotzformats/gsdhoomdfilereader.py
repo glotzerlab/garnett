@@ -149,25 +149,49 @@ def _parse_shape_definitions(frame, gsdfile, frame_index):
 
 
 class GSDHoomdFrame(Frame):
+    """Extends the Frame object for GSD files.
 
-    def __init__(self, traj, frame_index, t_frame, gsdfile,
-                 read_gsd_shape_data):
+    :param traj:
+        Trajectory containing the frame to cast
+    :type traj:
+        :class:`trajectory.Trajectory`
+    :param frame_index:
+        The index of the frame to cast
+    :type frame_index:
+        int
+    :param t_frame:
+        A frame containing shape information that is not encoded in
+        the GSD-format. By default, shape information is read from the
+        passed frame object, if one provided. Otherwise, shape information
+        is read from the gsd file.
+    :type :
+        :class:`trajectory.Frame`
+    :param gsdfile:
+        A gsd file object.
+    :type gsdfile:
+        :class:`gsd.fl.GSDFile`
+    """
+
+    def __init__(self, traj, frame_index, t_frame, gsdfile):
         self.traj = traj
         self.frame_index = frame_index
         self.t_frame = t_frame
         self.gsdfile = gsdfile
-        self.read_gsd_shape_data = read_gsd_shape_data
         super(GSDHoomdFrame, self).__init__()
 
     def read(self):
         raw_frame = _RawFrameData()
+        frame = self.traj.read_frame(self.frame_index)
+        # If frame is provided, read shape data from it
         if self.t_frame is not None:
             raw_frame.data = copy.deepcopy(self.t_frame.data)
             raw_frame.data_keys = copy.deepcopy(self.t_frame.data_keys)
-            if not self.read_gsd_shape_data:
-                raw_frame.shapedef = copy.deepcopy(self.t_frame.shapedef)
+            raw_frame.shapedef = copy.deepcopy(self.t_frame.shapedef)
             raw_frame.box_dimensions = self.t_frame.box.dimensions
-        frame = self.traj.read_frame(self.frame_index)
+        else:
+        # Fallback to gsd shape data if no frame is provided
+            raw_frame.shapedef.update(
+                _parse_shape_definitions(frame, self.gsdfile, self.frame_index));
         raw_frame.box = _box_matrix(frame.configuration.box)
         raw_frame.box_dimensions = int(frame.configuration.dimensions)
         raw_frame.types = [frame.particles.types[t] for t in frame.particles.typeid]
@@ -179,9 +203,6 @@ class GSDHoomdFrame(Frame):
         raw_frame.diameter = frame.particles.diameter
         raw_frame.moment_inertia = frame.particles.moment_inertia
         raw_frame.angmom = frame.particles.angmom
-        if self.read_gsd_shape_data:
-            raw_frame.shapedef.update(
-                _parse_shape_definitions(frame, self.gsdfile, self.frame_index))
         return raw_frame
 
     def __str__(self):
@@ -213,13 +234,16 @@ class GSDHOOMDFileReader(object):
                 xml_frame = xml_reader.read(xmlfile)[0]
                 traj = gsd_reader.read(gsdfile, xml_frame)
 
-    :param bool read_gsd_shape_data: If True (default), the reader will use
-                                     shape data parsed from the GSD file
-                                     instead of from the provided frame.
+    :param bool read_gsd_shape_data: This keyword is now deprecated (**default: None**).
+                By default, shape information is read from a passed frame object, if one
+                provided. Otherwise, shape information is read from the gsd file.
+
     """
 
-    def __init__(self, read_gsd_shape_data=True):
-        self.read_gsd_shape_data = read_gsd_shape_data
+    def __init__(self, read_gsd_shape_data=None):
+        if read_gsd_shape_data is not None:
+            warnings.warn("The 'read_gsd_shape_data' keyword argument \
+                    is deprecated and will be ignored!", DeprecationWarning);
 
     def read(self, stream, frame=None):
         """Read binary stream and return a trajectory instance.
@@ -227,7 +251,10 @@ class GSDHOOMDFileReader(object):
         :param stream: The stream, which contains the gsd-file.
         :type stream: A file-like binary stream
         :param frame: A frame containing shape information
-            that is not encoded in the GSD-format.
+            that is not encoded in the GSD-format. By default,
+            shape information is read from the passed frame object,
+            if one provided. Otherwise, shape information
+            is read from the gsd file.
         :type frame: :class:`trajectory.Frame`"""
         if NATIVE:
             try:
@@ -244,8 +271,7 @@ class GSDHOOMDFileReader(object):
                           "Falling back to pure python reader.")
             gsdfile = PyGSDFile(stream)
             traj = gsdhoomd.HOOMDTrajectory(gsdfile)
-        frames = [GSDHoomdFrame(traj, i, t_frame=frame, gsdfile=gsdfile,
-                                read_gsd_shape_data=self.read_gsd_shape_data)
+        frames = [GSDHoomdFrame(traj, i, t_frame=frame, gsdfile=gsdfile)
                   for i in range(len(traj))]
         logger.info("Read {} frames.".format(len(frames)))
         return Trajectory(frames)
