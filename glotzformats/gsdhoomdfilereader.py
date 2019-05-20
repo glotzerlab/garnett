@@ -234,8 +234,8 @@ class GSDHOOMDFileReader(object):
                 xml_frame = xml_reader.read(xmlfile)[0]
                 traj = gsd_reader.read(gsdfile, xml_frame)
 
-    :param bool read_gsd_shape_data: This keyword is now deprecated (**default: None**).
-                By default, shape information is read from a passed frame object, if one
+    :param bool read_gsd_shape_data: This keyword is no longer in use. By default,
+                shape information is read from a passed frame object, if one
                 provided. Otherwise, shape information is read from the gsd file.
 
     """
