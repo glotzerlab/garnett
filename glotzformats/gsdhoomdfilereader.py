@@ -149,6 +149,28 @@ def _parse_shape_definitions(frame, gsdfile, frame_index):
 
 
 class GSDHoomdFrame(Frame):
+    """Extends the Frame object for GSD files.
+
+    :param traj:
+        Trajectory containing the frame to cast
+    :type traj:
+        :class:`trajectory.Trajectory`
+    :param frame_index:
+        The index of the frame to cast
+    :type frame_index:
+        int
+    :param t_frame:
+        A frame containing shape information that is not encoded in
+        the GSD-format. By default, shape information is read from the
+        passed frame object, if one provided. Otherwise, shape information
+        is read from the gsd file.
+    :type :
+        :class:`trajectory.Frame`
+    :param gsdfile:
+        A gsd file object.
+    :type gsdfile:
+        :class:`gsd.fl.GSDFile`
+    """
 
     def __init__(self, traj, frame_index, t_frame, gsdfile):
         self.traj = traj
@@ -239,7 +261,10 @@ class GSDHOOMDFileReader(object):
         :param stream: The stream, which contains the gsd-file.
         :type stream: A file-like binary stream
         :param frame: A frame containing shape information
-            that is not encoded in the GSD-format.
+            that is not encoded in the GSD-format. By default,
+            shape information is read from the passed frame object,
+            if one provided. Otherwise, shape information
+            is read from the gsd file.
         :type frame: :class:`trajectory.Frame`"""
         if NATIVE:
             try:
