@@ -222,6 +222,7 @@ class BaseGSDHOOMDFileReaderTest(TrajectoryTest):
             shape = traj[0].shapedef['A']
             assert shape.shape_class == 'sphere'
             assert np.isclose(shape.diameter, diameter_A)
+            assert np.isclose(shape.orientable, False)
 
     @unittest.skipIf(not HOOMD or not HPMC, 'requires HOOMD and HPMC')
     def test_convex_polyhedron(self):
