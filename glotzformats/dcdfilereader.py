@@ -149,11 +149,10 @@ class DCDFrame(Frame):
         if ort is None:
             ort = np.zeros((N, 4), dtype=self._dtype)
         self._read(xyz=xyz)
-        if self.__dict__["t_frame"] is None:
-        # try:
+        try:
+            self.t_frame;
             self._types = [self.default_type] * len(self)
-        # except AttributeError:
-        else:
+        except AttributeError:
             self._types = self.t_frame.types
         if self.__dict__["t_frame"] is None or self.t_frame.box.dimensions == 3:
             ort.T[0] = 1.0
