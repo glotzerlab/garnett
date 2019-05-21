@@ -65,7 +65,7 @@ class SphereShape(Shape):
     :type diameter:
         float
     :param orientable:
-         Set to True for spheres with orientation
+         Set to True for spheres with orientation (default: :code:`False`).
     :type orientable:
         bool
     :param color:
