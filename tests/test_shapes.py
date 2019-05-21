@@ -67,6 +67,18 @@ class ShapeTest(unittest.TestCase):
                                     shape_class['params']['sweep_radius'])
             npt.assert_almost_equal(shape_dict['rounding_radius'],
                                     shape_class['params']['sweep_radius'])
+        if 'orientable' in shape_class['params']:
+            # Only the GSD format supports this attribute. For other formats,
+            # it should be set to the default False.
+            if self.__class__.__name__ == "GSDShapeTest":
+                npt.assert_almost_equal(shapedef['A'].orientable,
+                                        shape_class['params']['orientable'])
+                npt.assert_almost_equal(shape_dict['orientable'],
+                                        shape_class['params']['orientable'])
+            else:
+                npt.assert_almost_equal(shapedef['A'].orientable,False)
+                npt.assert_almost_equal(shape_dict['orientable'],False)
+
 
 
 @ddt
