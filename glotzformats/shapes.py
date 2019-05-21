@@ -64,16 +64,21 @@ class SphereShape(Shape):
         Diameter of the sphere.
     :type diameter:
         float
+    :param orientable:
+         Set to True for spheres with orientation
+    :type orientable:
+        bool
     :param color:
         Hexadecimal color string in format :code:`RRGGBBAA` (default: :code:`None`).
     :type color:
         str
     """
 
-    def __init__(self, diameter, color=None):
+    def __init__(self, diameter, orientable=False, color=None):
         super(SphereShape, self).__init__(
             shape_class='sphere', color=color)
         self.diameter = diameter
+        self.orientable = orientable
 
     def __str__(self):
         return "{} {} {}".format(self.shape_class, self.diameter, self.color)
@@ -86,7 +91,8 @@ class SphereShape(Shape):
             {'type': 'Sphere', 'diameter': 2.0}
         """
         return {'type': 'Sphere',
-                'diameter': self.diameter}
+                'diameter': self.diameter,
+                'orientable': self.orientable}
 
 
 class ArrowShape(Shape):
