@@ -44,28 +44,12 @@ class ShapeTest(unittest.TestCase):
         return os.path.join(SHAPE_DATA_PATH,
                             '{}.{}'.format(shape_name, self.extension))
 
-    def get_shapedef_dict(self,shape_class):
+    def check_shape_class(self, shape_class):
         shape_name = shape_class['name']
         with open(self.get_filename(shape_name), self.mode) as f:
             traj = self.reader().read(f)
             shapedef = traj[-1].shapedef
         shape_dict = shapedef['A'].shape_dict
-        return shapedef, shape_dict
-
-    def check_shape_class_gsd_decorator(self,f):
-        def wrapper(shape_class):
-            f(shape_class);
-            shapedef, shape_dict = self.get_shapedef_dict(shape_class);
-            npt.assert_almost_equal(shapedef['A'].orientable,
-                                    shape_class['params']['orientable'])
-            npt.assert_almost_equal(shape_dict['orientable'],
-                                    shape_class['params']['orientable'])
-        return wrapper
-
-
-    def check_shape_class(self, shape_class):
-
-        shapedef, shape_dict = self.get_shapedef_dict(shape_class);
 
         # Check each field of the shape parameters and JSON shape definition
         if 'vertices' in shape_class['params']:
@@ -93,7 +77,6 @@ class GSDShapeTest(ShapeTest):
 
     @data(*annotate_shape_test('GSDHOOMDFileReader', get_shape_classes()))
     def test_shapes(self, shape_class):
-        @check_shape_class_gsd_decorator
         self.check_shape_class(shape_class)
 
 
