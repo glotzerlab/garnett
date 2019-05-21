@@ -68,10 +68,11 @@ def _parse_shape_definitions(frame, gsdfile, frame_index):
 
     # Spheres
     if get_chunk(frame_index, 'state/hpmc/sphere/radius') is not None:
-        radii = get_chunk(frame_index, 'state/hpmc/sphere/radius')
-        for typename, radius in zip(types, radii):
+        radii = get_chunk(frame_index, 'state/hpmc/sphere/radius');
+        orient = get_chunk(frame_index, 'state/hpmc/sphere/orientable');
+        for typename, radius, ort in zip(types, radii, orient):
             shapedefs[typename] = SphereShape(
-                diameter=radius*2, color=None)
+                diameter=radius*2, orientable=ort, color=None)
         return shapedefs
 
     # Convex Polyhedra
