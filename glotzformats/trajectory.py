@@ -290,11 +290,17 @@ class Frame(object):
 
     def loaded(self):
         "Returns True if the frame is loaded into memory."
-        return self.__dict__['frame_data'] is not None
+        try:
+            self.frame_data;
+            return True;
+        except AttributeError:
+            return False;
 
     def load(self):
         "Load the frame into memory."
-        if self.__dict__['frame_data'] is None:
+        try:
+            self.frame_data;
+        except AttributeError:
             logger.debug("Loading frame.")
             self.frame_data = self._raw_frame_to_frame(self.read(), dtype=self._dtype)
 
