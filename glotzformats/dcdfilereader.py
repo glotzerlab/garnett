@@ -151,9 +151,9 @@ class DCDFrame(Frame):
         self._read(xyz=xyz)
         try:
             self.t_frame;
-            self._types = [self.default_type] * len(self)
-        except AttributeError:
             self._types = self.t_frame.types
+        except AttributeError:
+            self._types = [self.default_type] * len(self)
         if self.__dict__["t_frame"] is None or self.t_frame.box.dimensions == 3:
             ort.T[0] = 1.0
             ort.T[1:] = 0
