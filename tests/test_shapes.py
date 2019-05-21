@@ -62,10 +62,6 @@ class ShapeTest(unittest.TestCase):
                                     shape_class['params']['diameter'])
             npt.assert_almost_equal(shape_dict['diameter'],
                                     shape_class['params']['diameter'])
-            npt.assert_almost_equal(shapedef['A'].orientable,
-                                    shape_class['params']['orientable'])
-            npt.assert_almost_equal(shape_dict['orientable'],
-                                    shape_class['params']['orientable'])
         if 'sweep_radius' in shape_class['params']:
             npt.assert_almost_equal(shapedef['A'].rounding_radius,
                                     shape_class['params']['sweep_radius'])
