@@ -88,7 +88,8 @@ class SphereShape(Shape):
         """Shape as dictionary. Example:
 
             >>> SphereShape(2.0).shape_dict
-            {'type': 'Sphere', 'diameter': 2.0}
+            {'type': 'Sphere', 'diameter': 2.0,
+            'orientable': True}
         """
         return {'type': 'Sphere',
                 'diameter': self.diameter,
