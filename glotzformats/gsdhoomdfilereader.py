@@ -102,9 +102,15 @@ def _parse_shape_definitions(frame, gsdfile, frame_index):
                 vertices=typeverts, rounding_radius=radius, color=None)
         return shapedefs
 
-    # Ellipsoid is supported by state/hpmc but not glotzformats.shapes:
+    # Ellipsoid
     if get_chunk(frame_index, 'state/hpmc/ellipsoid/a') is not None:
-        warnings.warn('ellipsoid is not supported by glotzformats.')
+        a_all = get_chunk(frame_index, 'state/hpmc/ellipsoid/a')
+        b_all = get_chunk(frame_index, 'state/hpmc/ellipsoid/b')
+        c_all = get_chunk(frame_index, 'state/hpmc/ellipsoid/c')
+        for typename, a, b, c in zip(types, a_all, b_all, c_all):
+            shapedefs[typename] = EllipsoidShape(
+                a=a, b=b, c=c, color=None
+            )
 
     # Convex Polygons
     if get_chunk(frame_index, 'state/hpmc/convex_polygon/N') is not None:
