@@ -224,6 +224,36 @@ class BaseGSDHOOMDFileReaderTest(TrajectoryTest):
             assert np.isclose(shape.diameter, diameter_A)
 
     @unittest.skipIf(not HOOMD or not HPMC, 'requires HOOMD and HPMC')
+    def test_ellipsoid(self):
+        self.system = hoomd.init.create_lattice(
+            unitcell=hoomd.lattice.sc(10), n=(2, 1, 1))
+        self.addCleanup(hoomd.context.initialize, "--mode=cpu")
+        hoomd.option.set_notice_level(0)
+        self.addCleanup(self.del_system)
+        self.mc = hoomd.hpmc.integrate.ellipsoid(seed=10)
+        self.addCleanup(self.del_mc)
+        a = float(0.5)
+        b = float(0.25)
+        c = float(0.125)
+        self.mc.shape_param.set("A", a=a, b=b, c=c)
+        self.system.particles[0].position = (0, 0, 0)
+        self.system.particles[1].position = (2, 0, 0)
+        hoomd.context.current.sorter.set_params(grid=8)
+        gsd_writer = hoomd.dump.gsd(filename=self.fn_gsd,
+                                    group=hoomd.group.all(),
+                                    period=1)
+        gsd_writer.dump_state(self.mc)
+        hoomd.run(1, quiet=True)
+        with open(self.fn_gsd, 'rb') as gsdfile:
+            gsd_reader = glotzformats.gsdhoomdfilereader.GSDHOOMDFileReader()
+            traj = gsd_reader.read(gsdfile)
+            shape = traj[0].shapedef['A']
+            assert shape.shape_class == 'ellipsoid'
+            assert np.isclose(shape.a, a)
+            assert np.isclose(shape.b, b)
+            assert np.isclose(shape.c, c)
+
+    @unittest.skipIf(not HOOMD or not HPMC, 'requires HOOMD and HPMC')
     def test_convex_polyhedron(self):
         self.system = hoomd.init.create_lattice(
             unitcell=hoomd.lattice.sc(10), n=(2, 1, 1))
