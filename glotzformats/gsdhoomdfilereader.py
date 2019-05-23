@@ -203,6 +203,7 @@ class GSDHoomdFrame(Frame):
         raw_frame.diameter = frame.particles.diameter
         raw_frame.moment_inertia = frame.particles.moment_inertia
         raw_frame.angmom = frame.particles.angmom
+        raw_frame.image = frame.image
         return raw_frame
 
     def __str__(self):
