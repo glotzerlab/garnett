@@ -439,9 +439,7 @@ class BaseGSDHOOMDFileReaderTest(TrajectoryTest):
             assert np.array_equal(traj[0].moment_inertia, np.zeros([2,3]).astype(float))
             assert np.array_equal(traj[0].angmom, np.zeros([2,4]).astype(float))
             assert np.array_equal(traj[0].charge, np.zeros([2]).astype(float))
-            # Check if image is exported by default
-            with self.assertRaises(AttributeError):
-                traj[0].image
+            assert np.array_equal(traj[0].image, np.zeros([2, 3]).astype(float))
 
 
 if __name__ == '__main__':
