@@ -31,7 +31,7 @@ import numpy as np
 
 from .trajectory import _RawFrameData, Frame, Trajectory
 from .shapes import SphereShape, ConvexPolyhedronShape, ConvexSpheropolyhedronShape, \
-    PolygonShape, SpheropolygonShape
+    PolygonShape, SpheropolygonShape, EllipsoidShape
 
 try:
     from gsd.fl import GSDFile

@@ -18,7 +18,7 @@ import numpy as np
 from .trajectory import _RawFrameData, Frame, Trajectory
 from .shapes import FallbackShape, SphereShape, ArrowShape, SphereUnionShape, \
     ConvexPolyhedronShape, ConvexSpheropolyhedronShape, \
-    ConvexPolyhedronUnionShape, GeneralPolyhedronShape
+    ConvexPolyhedronUnionShape, GeneralPolyhedronShape, EllipsoidShape
 import rowan
 
 from .errors import ParserError, ParserWarning
