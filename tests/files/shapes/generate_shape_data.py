@@ -131,7 +131,7 @@ if __name__ == '__main__':
                     group=hoomd.group.all(), overwrite=True)
                 gsd_dump.dump_state(mc)
             except NotImplementedError:
-                print("%s not implimented for gsd files." % shape_name)
+                pass
 
             try:
                 getar_dump = hoomd.dump.getar(
@@ -140,14 +140,14 @@ if __name__ == '__main__':
                 getar_dump.writeJSON('type_shapes.json', mc.get_type_shapes(),
                                      dynamic=False)
             except NotImplementedError:
-                print("%s not implimented for getar files." % shape_name)
+                pass
 
             try:
                 pos_dump = hoomd.deprecated.dump.pos(
                     '{}.pos'.format(shape_name), period=1)
                 mc.setup_pos_writer(pos_dump)
             except NotImplementedError:
-                print("%s not implimented for pos files." % shape_name)
+                pass
 
             hoomd.run(10)
 
