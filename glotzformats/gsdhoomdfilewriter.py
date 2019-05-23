@@ -107,21 +107,57 @@ class GSDHOOMDFileWriter(object):
 
         with gsd.hoomd.open(name=filename, mode=mode) as traj_outfile:
             for i, frame in enumerate(trajectory):
-                types = list(set(frame.types))
+
                 snap = gsd.hoomd.Snapshot()
                 snap.particles.N = len(frame)
-                snap.particles.types = types
-                snap.particles.typeid = [types.index(typeid) for typeid in frame.types]
-                snap.particles.position = frame.positions
-                snap.particles.orientation = frame.orientations
-                snap.particles.velocity = frame.velocities
-                snap.particles.mass = frame.mass
-                snap.particles.charge = frame.charge
-                snap.particles.diameter = frame.diameter
-                snap.particles.moment_inertia = frame.moment_inertia
-                snap.particles.angmom = frame.angmom
+                N = len(frame)
+                try:
+                    types = list(set(frame.types));
+                except AttributeError:
+                    types = ['A']
+                snap.particles.types = types;
+                try:
+                    snap.particles.typeid = [types.index(typeid) for typeid in frame.types]
+                except AttributeError:
+                    snap.particles.typeid = np.zeros(N,dtype=np.uint32)
+                try:
+                    snap.particles.position = frame.positions
+                except AttributeError:
+                    snap.particles.position = np.zeros([N,3],dtype=np.float32);
+                try:
+                    snap.particles.orientation = frame.orientations;
+                except AttributeError:
+                    snap.particles.orientation = np.zeros([N,4],dtype=np.float32);
+                    snap.particles.orientation[:,0] = 1;
+                try:
+                    snap.particles.velocity = frame.velocities
+                except AttributeError:
+                    snap.particles.velocity = np.zeros([N,3],dtype=np.float32);
+                try:
+                    snap.particles.mass = frame.mass;
+                except AttributeError:
+                    snap.particles.mass = np.ones(N,dtype=np.float32)
+                try:
+                    snap.particles.charge = frame.charge;
+                except AttributeError:
+                    snap.particles.charge = np.zeros(N,dtype=np.float32);
+                try:
+                    snap.particles.diameter = frame.diameter
+                except AttributeError:
+                    snap.particles.diameter = np.ones(N,dtype=np.float32)
+                try:
+                    snap.particles.moment_inertia = frame.moment_inertia
+                except AttributeError:
+                    snap.particles.moment_inertia = np.zeros([N,3],dtype=np.float32);
+                try:
+                    snap.particles.angmom = frame.angmom
+                except AttributeError:
+                    snap.particles.angmom = np.zeros([N,4],dtype=np.float32);
                 snap.configuration.box = frame.box.get_box_array()
-                _write_shape_definitions(snap, frame.shapedef)
+                try:
+                    _write_shape_definitions(snap, frame.shapedef)
+                except AttributeError:
+                    _write_shape_definitions(snap, {})
                 traj_outfile.append(snap)
                 logger.debug("Wrote frame {}.".format(i + 1))
         logger.info("Wrote {} frames.".format(i + 1))

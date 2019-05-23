@@ -182,13 +182,23 @@ class GSDHoomdFrame(Frame):
     def read(self):
         raw_frame = _RawFrameData()
         frame = self.traj.read_frame(self.frame_index)
-        # If frame is provided, read shape data from it
-        if self.t_frame is not None:
+
+        try:
             raw_frame.data = copy.deepcopy(self.t_frame.data)
+        except AttributeError:
+            pass
+        try:
             raw_frame.data_keys = copy.deepcopy(self.t_frame.data_keys)
-            raw_frame.shapedef = copy.deepcopy(self.t_frame.shapedef)
+        except AttributeError:
+            pass
+        try:
             raw_frame.box_dimensions = self.t_frame.box.dimensions
-        else:
+        except AttributeError:
+            pass
+        # If frame is provided, read shape data from it
+        try:
+            raw_frame.shapedef = copy.deepcopy(self.t_frame.shapedef)
+        except AttributeError:
         # Fallback to gsd shape data if no frame is provided
             raw_frame.shapedef.update(
                 _parse_shape_definitions(frame, self.gsdfile, self.frame_index));

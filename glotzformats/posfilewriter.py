@@ -69,7 +69,8 @@ class PosFileWriter(object):
                 file.write(msg + end)
         for i, frame in enumerate(trajectory):
             # data section
-            if frame.data is not None:
+            try:
+            # if frame.data is not None:
                 header_keys = frame.data_keys
                 _write('#[data] ', end='')
                 _write(' '.join(header_keys))
@@ -80,48 +81,76 @@ class PosFileWriter(object):
                 for row in rows:
                     _write(' '.join(row))
                 _write('#[done]')
-
+            except AttributeError:
+                _write('')
             # boxMatrix and rotation
             box_matrix = np.array(frame.box.get_box_matrix())
-            if self._rotate and frame.view_rotation is not None:
-                for i in range(3):
-                    box_matrix[:, i] = rowan.rotate(frame.view_rotation, box_matrix[:, i])
 
-            if frame.view_rotation is not None and not self._rotate:
-                angles = rowan.to_euler(frame.view_rotation, axis_type='extrinsic', convention='xyz') * 180 / math.pi
-                _write('rotation ' + ' '.join((str(_num(_)) for _ in angles)))
+            if self._rotate:
+                try:
+                    for i in range(3):
+                        box_matrix[:, i] = rowan.rotate(frame.view_rotation, box_matrix[:, i])
+                except AttributeError:
+                    # Do nothing
+                    pass
+
+            if not self._rotate:
+                try:
+                    angles = rowan.to_euler(frame.view_rotation, axis_type='extrinsic', convention='xyz') * 180 / math.pi
+                    _write('rotation ' + ' '.join((str(_num(_)) for _ in angles)))
+                except AttributeError:
+                    _write('');
 
             _write('boxMatrix ', end='')
             _write(' '.join((str(_num(v)) for v in box_matrix.flatten())))
 
             # shape defs
-            required = set(frame.types).intersection(
-                set(frame.shapedef.keys()))
-            not_defined = set(frame.types).difference(
-                set(frame.shapedef.keys()))
-            for name in required:
-                _write('def {} "{}"'.format(name, frame.shapedef[name]))
-            for name in not_defined:
-                logger.info(
-                    "No shape defined for '{}'. "
-                    "Using fallback definition.".format(name))
-                _write('def {} "{}"'.format(name, DEFAULT_SHAPE_DEFINITION))
+            # this can probably be refactored in a more elegant way, but this
+            # should do it for now
+            try:
+                required = set(frame.types).intersection(
+                    set(frame.shapedef.keys()))
+                not_defined = set(frame.types).difference(
+                    set(frame.shapedef.keys()))
+                for name in required:
+                    _write('def {} "{}"'.format(name, frame.shapedef[name]))
+                for name in not_defined:
+                    logger.info(
+                        "No shape defined for '{}'. "
+                        "Using fallback definition.".format(name))
+                    _write('def {} "{}"'.format(name, DEFAULT_SHAPE_DEFINITION))
+            except AttributeError:
+                # if frame.shapedef raises AttributeError, then set all
+                # shape definitions to DEFAULT_SHAPE_DEFINITION. Assumes
+                # frames.types is not None.
+                for name in frame.types:
+                    _write('def {} "{}"'.format(name, DEFAULT_SHAPE_DEFINITION))
+
 
             # Orientations must be provided for all particles
             # If the frame does not have orientations, identity quaternions are used
-            orientations = frame.orientations
-            if orientations is None:
+            try:
+                orientations = frame.orientations
+            except AttributeError:
                 orientations = np.array([[1, 0, 0, 0]] * len(frame.types))
 
             for name, pos, rot in zip(frame.types, frame.positions,
                                       orientations):
 
                 _write(name, end=' ')
-                shapedef = frame.shapedef.get(name, DEFAULT_SHAPE_DEFINITION)
 
-                if self._rotate and frame.view_rotation is not None:
-                    pos = rowan.rotate(frame.view_rotation, pos)
-                    rot = rowan.multiply(frame.view_rotation, rot)
+                try:
+                    shapedef = frame.shapedef[name]
+                except (AttributeError, KeyError):
+                    shapedef = DEFAULT_SHAPE_DEFINITION
+
+                if self._rotate:
+                    try:
+                        pos = rowan.rotate(frame.view_rotation, pos)
+                        rot = rowan.multiply(frame.view_rotation, rot)
+                    except AttributeError:
+                        # do nothing
+                        pass
 
                 if isinstance(shapedef, SphereShape):
                     _write(' '.join((str(_num(v)) for v in pos)))

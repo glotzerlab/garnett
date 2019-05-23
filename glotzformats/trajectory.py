@@ -203,6 +203,13 @@ class Frame(object):
         self.frame_data = None
         self._dtype = dtype
 
+    def __getattribute__(self, attr):
+        value = super(Frame, self).__getattribute__(attr);
+        if value is None:
+            raise AttributeError
+        else:
+            return value;
+
     def _raw_frame_to_frame(self, raw_frame, dtype=None):
         """Generate a frame object from a raw frame object."""
         N = len(raw_frame.types)
@@ -283,11 +290,11 @@ class Frame(object):
 
     def loaded(self):
         "Returns True if the frame is loaded into memory."
-        return self.frame_data is not None
+        return self.__dict__['frame_data'] is not None
 
     def load(self):
         "Load the frame into memory."
-        if self.frame_data is None:
+        if self.__dict__['frame_data'] is None:
             logger.debug("Loading frame.")
             self.frame_data = self._raw_frame_to_frame(self.read(), dtype=self._dtype)
 
@@ -837,9 +844,11 @@ class Trajectory(BaseTrajectory):
 
         for i, frame in enumerate(self.frames):
             for prop in prop_list:
-                frame_prop = getattr(frame, prop)
-                if frame_prop is not None:
+                try:
+                    frame_prop = getattr(frame, prop)
                     props[prop][i] = frame_prop
+                except AttributeError:
+                    pass
 
         for prop in prop_list:
             if prop == 'image':

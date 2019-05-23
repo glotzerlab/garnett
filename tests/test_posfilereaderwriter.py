@@ -57,6 +57,17 @@ class BasePosFileReaderTest(unittest.TestCase):
         reader = glotzformats.reader.PosFileReader(precision=precision)
         return reader.read(stream)
 
+    def assert_raise_attribute_error(self,frame):
+        with self.assertRaises(AttributeError):
+            frame.velocities;
+            frame.charge;
+            frame.diameter;
+            frame.moment_inertia;
+            frame.angmom;
+            frame.image;
+        #self.assertRaises(AttributeError,frame.data);
+        #self.assertRaises(AttributeError,frame.data_keys);
+        #self.assertRaises(AttributeError,frame.view_rotation);
 
 class BasePosFileWriterTest(BasePosFileReaderTest):
 
@@ -74,12 +85,20 @@ class BasePosFileWriterTest(BasePosFileReaderTest):
         self.assertEqual(a.box.round(decimals), b.box.round(decimals))
         self.assertEqual(a.types, b.types)
         self.assertTrue(np.allclose(a.positions, b.positions, atol=atol))
-        if a.velocities is not None and b.velocities is not None:
+        try:
+        # if a.velocities is not None and b.velocities is not None:
             self.assertTrue(np.allclose(a.velocities, b.velocities, atol=atol))
-        if not ignore_orientations and \
-                (a.orientations is not None and b.orientations is not None):
-            self.assertTrue(np.allclose(a.orientations, b.orientations, atol=atol))
-        self.assertEqual(a.data, b.data)
+        except:
+            pass
+        if not ignore_orientations:
+            try:
+                self.assertTrue(np.allclose(a.orientations, b.orientations, atol=atol))
+            except AttributeError:
+                pass
+        try:
+            self.assertEqual(a.data, b.data)
+        except AttributeError:
+            pass
         for key in chain(a.shapedef, b.shapedef):
             self.assertEqual(a.shapedef[key], b.shapedef[key])
 
@@ -111,6 +130,7 @@ class PosFileReaderTest(BasePosFileReaderTest):
             N = len(frame)
             self.assertEqual(frame.types, ['A'] * N)
             self.assertEqual(frame.box, box_expected)
+            self.assert_raise_attribute_error(frame)
 
     def test_incsim_dialect(self):
         if PYTHON_2:
@@ -123,6 +143,7 @@ class PosFileReaderTest(BasePosFileReaderTest):
             N = len(frame)
             self.assertEqual(frame.types, ['A'] * N)
             self.assertEqual(frame.box, box_expected)
+            self.assert_raise_attribute_error(frame)
 
     def test_monotype_dialect(self):
         if PYTHON_2:
@@ -135,6 +156,7 @@ class PosFileReaderTest(BasePosFileReaderTest):
             N = len(frame)
             self.assertEqual(frame.types, ['A'] * N)
             self.assertEqual(frame.box, box_expected)
+            self.assert_raise_attribute_error(frame)
 
     def test_injavis_dialect(self):
         if PYTHON_2:
@@ -147,6 +169,7 @@ class PosFileReaderTest(BasePosFileReaderTest):
             N = len(frame)
             self.assertEqual(frame.types, ['A'] * N)
             self.assertEqual(frame.box, box_expected)
+            self.assert_raise_attribute_error(frame)
 
 
 @unittest.skipIf(not HPMC, 'requires HPMC')
@@ -192,7 +215,10 @@ class HPMCPosFileReaderTest(BasePosFileReaderTest):
         dump.pos(filename=self.fn_pos, period=1)
         run(10, quiet=True)
         with io.open(self.fn_pos, 'r', encoding='utf-8') as posfile:
-            self.read_trajectory(posfile)
+            traj = self.read_trajectory(posfile)
+            shape = traj[0].shapedef['A']
+            assert shape.shape_class == 'sphere'
+            assert np.isclose(shape.diameter, float(1.0))
 
     def test_convex_polyhedron(self):
         if HOOMD_v1:
@@ -210,16 +236,19 @@ class HPMCPosFileReaderTest(BasePosFileReaderTest):
             self.addCleanup(context.initialize, "--mode=cpu")
             hoomd.option.set_notice_level(0)
         self.addCleanup(self.del_system)
-        self.mc = hpmc.integrate.convex_polygon(seed=10)
+        self.mc = hpmc.integrate.convex_polyhedron(seed=10)
         self.addCleanup(self.del_mc)
-        self.mc.shape_param.set("A", vertices=[(-2, -1, -1),
-                                               (-2, 1, -1),
-                                               (-2, -1, 1),
-                                               (-2, 1, 1),
-                                               (2, -1, -1),
-                                               (2, 1, -1),
-                                               (2, -1, 1),
-                                               (2, 1, 1)])
+        shape_vertices = np.array(
+           [[-2, -1, -1],
+           [-2, 1, -1],
+           [-2, -1, 1],
+           [-2, 1, 1],
+           [2, -1, -1],
+           [2, 1, -1],
+           [2, -1, 1],
+           [2, 1, 1]]
+        )
+        self.mc.shape_param.set("A", vertices=shape_vertices)
         self.system.particles[0].position = (0, 0, 0)
         self.system.particles[0].orientation = (1, 0, 0, 0)
         self.system.particles[1].position = (2, 0, 0)
@@ -232,8 +261,10 @@ class HPMCPosFileReaderTest(BasePosFileReaderTest):
         self.mc.setup_pos_writer(pos_writer)
         run(10, quiet=True)
         with io.open(self.fn_pos, 'r', encoding='utf-8') as posfile:
-            self.read_trajectory(posfile)
-
+            traj = self.read_trajectory(posfile)
+            shape = traj[0].shapedef['A']
+            assert shape.shape_class == 'poly3d'
+            assert np.array_equal(shape.vertices, shape_vertices)
 
 @ddt
 class PosFileWriterTest(BasePosFileWriterTest):
@@ -320,7 +351,9 @@ class PosFileWriterTest(BasePosFileWriterTest):
         # 'rand_test',   # the same. The systems are otherwise identical.
         'scc',
         'switch_FeSiUC',
-        'switch_scc')
+        'switch_scc',
+        'pos_2d'
+        )
     def test_read_write_read(self, name):
         fn = os.path.join(PATH, 'samples', name + '.pos')
         with open(fn) as samplefile:
@@ -399,8 +432,17 @@ class InjavisReadWriteTest(BasePosFileWriterTest):
     def test_injavis_dialect(self):
         self.read_write_injavis(glotzformats.samples.POS_INJAVIS)
 
+    def test_hpmc_dialect_2d(self):
+        self.read_write_injavis(glotzformats.samples.POS_HPMC_2D)
+
+    def test_incsim_dialect_2d(self):
+        self.read_write_injavis(glotzformats.samples.POS_INCSIM_2D)
+
+    def test_monotype_dialect_2d(self):
+        self.read_write_injavis(glotzformats.samples.POS_MONOTYPE_2D)
+
 
 if __name__ == '__main__':
-    context.initialize("--mode=cpu")
+    hoomd.context.initialize("--mode=cpu")
     hoomd.option.set_notice_level(0)
     unittest.main()
