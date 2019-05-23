@@ -194,6 +194,42 @@ class HPMCPosFileReaderTest(BasePosFileReaderTest):
         with io.open(self.fn_pos, 'r', encoding='utf-8') as posfile:
             self.read_trajectory(posfile)
 
+    def test_ellipsoid(self):
+        if HOOMD_v1:
+            from hoomd_script import init, sorter, data, dump, run
+            self.system = init.create_empty(N=2, box=data.boxdim(
+                L=10, dimensions=2), particle_types=['A'])
+            self.addCleanup(init.reset)
+        else:
+            from hoomd import init, data, run, context, lattice
+            from hoomd.update import sort as sorter
+            from hoomd.deprecated import dump
+            self.system = init.create_lattice(
+                unitcell=lattice.sq(10), n=(2, 1))
+            self.addCleanup(context.initialize, "--mode=cpu")
+            hoomd.option.set_notice_level(0)
+        self.addCleanup(self.del_system)
+        self.mc = hpmc.integrate.ellipsoid(seed=10)
+        a = float(0.5)
+        b = float(0.25)
+        c = float(0.125)
+        self.mc.shape_param.set("A", a=a, b=b, c=c)
+        self.addCleanup(self.del_mc)
+        self.system.particles[0].position = (0, 0, 0)
+        self.system.particles[0].orientation = (1, 0, 0, 0)
+        self.system.particles[1].position = (2, 0, 0)
+        self.system.particles[1].orientation = (1, 0, 0, 0)
+        if HOOMD_v1:
+            sorter.set_params(grid=8)
+        else:
+            context.current.sorter.set_params(grid=8)
+
+        pos_writer = dump.pos(filename=self.fn_pos, period=1)
+        self.mc.setup_pos_writer(pos_writer)
+        run(10, quiet=True)
+        with io.open(self.fn_pos, 'r', encoding='utf-8') as posfile:
+            self.read_trajectory(posfile)
+
     def test_convex_polyhedron(self):
         if HOOMD_v1:
             from hoomd_script import init, sorter, data, dump, run
