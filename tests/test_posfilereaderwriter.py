@@ -210,9 +210,9 @@ class HPMCPosFileReaderTest(BasePosFileReaderTest):
             hoomd.option.set_notice_level(0)
         self.addCleanup(self.del_system)
         self.mc = hpmc.integrate.ellipsoid(seed=10)
-        a = float(0.5)
-        b = float(0.25)
-        c = float(0.125)
+        a = 0.5
+        b = 0.25
+        c = 0.125
         self.mc.shape_param.set("A", a=a, b=b, c=c)
         self.addCleanup(self.del_mc)
         self.system.particles[0].position = (0, 0, 0)
