@@ -413,15 +413,15 @@ class EllipsoidShape(Shape):
     """Shape class for ellipsoids of with principle axes a, b, and c.
 
     :param a:
-        Principle axis a of the ellipsoid (radius in the x direction).
+        Principal axis a of the ellipsoid (radius in the x direction).
     :type a:
         float
     :param b:
-        Principle axis b of the ellipsoid (radius in the x direction).
+        Principal axis b of the ellipsoid (radius in the y direction).
     :type b:
         float
     :param c:
-        Principle axis c of the ellipsoid (radius in the x direction).
+        Principal axis c of the ellipsoid (radius in the z direction).
     :type c:
         float
     :param color:
