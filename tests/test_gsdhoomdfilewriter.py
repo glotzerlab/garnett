@@ -96,6 +96,16 @@ class BaseGSDHOOMDFileWriterTest(unittest.TestCase):
                 written_traj = self.reader.read(tmpfile)
                 assertEqualShapedefs(written_traj[0].shapedef, traj[0].shapedef)
 
+    def test_write_ellipsoid_shapedef(self):
+        # Write to / read from a temp file
+        tmpfile = tempfile.NamedTemporaryFile(mode='wb')
+
+        with tmpfile:
+            with glotzformats.read(get_filename('shapes/ellipsoid_3d.pos')) as traj:
+                self.writer.write(traj, tmpfile)
+                written_traj = self.reader.read(tmpfile)
+                assertEqualShapedefs(written_traj[0].shapedef, traj[0].shapedef)
+
 
 if __name__ == '__main__':
     unittest.main()
