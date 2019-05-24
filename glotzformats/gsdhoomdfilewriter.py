@@ -10,7 +10,7 @@ import logging
 import numpy as np
 
 from .shapes import SphereShape, ConvexPolyhedronShape, ConvexSpheropolyhedronShape, \
-    PolygonShape, SpheropolygonShape
+    PolygonShape, SpheropolygonShape, EllipsoidShape
 from .errors import GSDShapeError
 
 logger = logging.getLogger(__name__)
@@ -62,6 +62,10 @@ def _write_shape_definitions(snap, shapedefs):
             state['hpmc/convex_spheropolygon/vertices'] = vertices
             state['hpmc/convex_spheropolygon/sweep_radius'] = \
                 compute_property(lambda shape: shape.rounding_radius)
+        elif shape_type is EllipsoidShape:
+            state['hpmc/ellipsoid/a'] = compute_property(lambda shape: shape.a)
+            state['hpmc/ellipsoid/b'] = compute_property(lambda shape: shape.b)
+            state['hpmc/ellipsoid/c'] = compute_property(lambda shape: shape.c)
         else:
             raise GSDShapeError('Unsupported shape: {}'.format(shape_type))
 
