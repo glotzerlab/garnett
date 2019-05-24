@@ -105,9 +105,9 @@ shape_classes = [
         'cls': 'ellipsoid',
         'dimensions': 3,
         'params': {
-            'a': float(0.5),
-            'b': float(0.25),
-            'c': float(0.125),
+            'a': 0.5,
+            'b': 0.25,
+            'c': 0.125,
         },
     },
 ]
