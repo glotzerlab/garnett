@@ -125,13 +125,10 @@ if __name__ == '__main__':
             mc = getattr(hoomd.hpmc.integrate, shape_class['cls'])(seed=42)
             mc.shape_param.set('A', **shape_class['params'])
 
-            try:
-                gsd_dump = hoomd.dump.gsd(
-                    '{}.gsd'.format(shape_name), period=1,
-                    group=hoomd.group.all(), overwrite=True)
-                gsd_dump.dump_state(mc)
-            except NotImplementedError:
-                pass
+            gsd_dump = hoomd.dump.gsd(
+                '{}.gsd'.format(shape_name), period=1,
+                group=hoomd.group.all(), overwrite=True)
+            gsd_dump.dump_state(mc)
 
             try:
                 getar_dump = hoomd.dump.getar(
@@ -142,12 +139,9 @@ if __name__ == '__main__':
             except NotImplementedError:
                 pass
 
-            try:
-                pos_dump = hoomd.deprecated.dump.pos(
-                    '{}.pos'.format(shape_name), period=1)
-                mc.setup_pos_writer(pos_dump)
-            except NotImplementedError:
-                pass
+            pos_dump = hoomd.deprecated.dump.pos(
+                '{}.pos'.format(shape_name), period=1)
+            mc.setup_pos_writer(pos_dump)
 
             hoomd.run(10)
 
