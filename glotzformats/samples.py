@@ -88,7 +88,7 @@ boxMatrix 25.0 0 0 0 25.0 0 0 0 1.0
 shape "poly3d 12 0.333333 1 0 1 0.333333 0 0.333333 0.333333 0 -1 -0.333333 0 -0.333333 -1 0 -0.333333 -0.333333 0 -0.333333 0.333333 0 -0.333333 1 0 -1 0.333333 0 0.333333 -0.333333 0 1 -0.333333 0 0.333333 -1 0"
 ff0000 -11.320217528 -8.749537435 0 1 0 0 0
 ff0000 -8.199472831 -9.791602851 0 1 0 0 0
-eof""" # noga: E501
+eof"""  # noqa: E501
 
 POS_INJAVIS = """//date: Thursday, July 23, 2015 2:50:06 PM
 #[data] Steps   Time    Vol     Packing Press   MSD     DeltaX  DeltaQ  DeltaV  AcceptX AcceptQ AcceptV Ensemble        Shear   Overlaps        X-Length        Y-Length        Z-Length        XY-Angle        XZ-Angle        YZ-Angle        RNGstate        RNGstatew
@@ -325,7 +325,7 @@ _symmetry_equiv_pos_as_xyz
 3 '-y, -x, -z+1/2'
 4 '-x+y, -x, -z+1/2'
 5 '-y, x-y, -z+1/2'
-6 'x, y, -z+1/2' 
+6 'x, y, -z+1/2'
 7 '-x, -x+y, z+1/2'
 8 'x-y, -y, z+1/2'
 9 'y, x, z+1/2'
