@@ -68,8 +68,8 @@ def _parse_shape_definitions(frame, gsdfile, frame_index):
 
     # Spheres
     if get_chunk(frame_index, 'state/hpmc/sphere/radius') is not None:
-        radii = get_chunk(frame_index, 'state/hpmc/sphere/radius');
-        orient = get_chunk(frame_index, 'state/hpmc/sphere/orientable');
+        radii = get_chunk(frame_index, 'state/hpmc/sphere/radius')
+        orient = get_chunk(frame_index, 'state/hpmc/sphere/orientable')
         # Since the orientable chunk was only added in HOOMD Schema version 1.3,
         # not all GSD files may have it. Thus, it is set to False in such cases.
         if orient is None:
@@ -194,9 +194,9 @@ class GSDHoomdFrame(Frame):
             raw_frame.shapedef = copy.deepcopy(self.t_frame.shapedef)
             raw_frame.box_dimensions = self.t_frame.box.dimensions
         else:
-        # Fallback to gsd shape data if no frame is provided
+            # Fallback to gsd shape data if no frame is provided
             raw_frame.shapedef.update(
-                _parse_shape_definitions(frame, self.gsdfile, self.frame_index));
+                _parse_shape_definitions(frame, self.gsdfile, self.frame_index))
         raw_frame.box = _box_matrix(frame.configuration.box)
         raw_frame.box_dimensions = int(frame.configuration.dimensions)
         raw_frame.types = [frame.particles.types[t] for t in frame.particles.typeid]
