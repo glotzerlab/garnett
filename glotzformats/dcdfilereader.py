@@ -150,7 +150,7 @@ class DCDFrame(Frame):
             ort = np.zeros((N, 4), dtype=self._dtype)
         self._read(xyz=xyz)
         try:
-            self.t_frame;
+            self.t_frame
             self._types = self.t_frame.types
         except AttributeError:
             self._types = [self.default_type] * len(self)
@@ -167,13 +167,13 @@ class DCDFrame(Frame):
 
     def _loaded(self):
         try:
-            self._types;
-            self._box;
-            self._positions;
-            self._orientations;
-            return True;
+            self._types
+            self._box
+            self._positions
+            self._orientations
+            return True
         except AttributeError:
-            return False;
+            return False
 
     def read(self):
         raw_frame = _RawFrameData()
@@ -221,7 +221,6 @@ class DCDTrajectory(Trajectory):
                     self._type_ids is None or
                     self._positions is None or
                     self._orientations is None)
-
 
     def load_arrays(self):
         # Determine array shapes

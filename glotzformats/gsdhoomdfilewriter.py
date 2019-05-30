@@ -112,47 +112,47 @@ class GSDHOOMDFileWriter(object):
                 snap.particles.N = len(frame)
                 N = len(frame)
                 try:
-                    types = list(set(frame.types));
+                    types = list(set(frame.types))
                 except AttributeError:
                     types = ['A']
-                snap.particles.types = types;
+                snap.particles.types = types
                 try:
                     snap.particles.typeid = [types.index(typeid) for typeid in frame.types]
                 except AttributeError:
-                    snap.particles.typeid = np.zeros(N,dtype=np.uint32)
+                    snap.particles.typeid = np.zeros(N, dtype=np.uint32)
                 try:
                     snap.particles.position = frame.positions
                 except AttributeError:
-                    snap.particles.position = np.zeros([N,3],dtype=np.float32);
+                    snap.particles.position = np.zeros([N, 3], dtype=np.float32)
                 try:
-                    snap.particles.orientation = frame.orientations;
+                    snap.particles.orientation = frame.orientations
                 except AttributeError:
-                    snap.particles.orientation = np.zeros([N,4],dtype=np.float32);
-                    snap.particles.orientation[:,0] = 1;
+                    snap.particles.orientation = np.zeros([N, 4], dtype=np.float32)
+                    snap.particles.orientation[:, 0] = 1
                 try:
                     snap.particles.velocity = frame.velocities
                 except AttributeError:
-                    snap.particles.velocity = np.zeros([N,3],dtype=np.float32);
+                    snap.particles.velocity = np.zeros([N, 3], dtype=np.float32)
                 try:
-                    snap.particles.mass = frame.mass;
+                    snap.particles.mass = frame.mass
                 except AttributeError:
-                    snap.particles.mass = np.ones(N,dtype=np.float32)
+                    snap.particles.mass = np.ones(N, dtype=np.float32)
                 try:
-                    snap.particles.charge = frame.charge;
+                    snap.particles.charge = frame.charge
                 except AttributeError:
-                    snap.particles.charge = np.zeros(N,dtype=np.float32);
+                    snap.particles.charge = np.zeros(N, dtype=np.float32)
                 try:
                     snap.particles.diameter = frame.diameter
                 except AttributeError:
-                    snap.particles.diameter = np.ones(N,dtype=np.float32)
+                    snap.particles.diameter = np.ones(N, dtype=np.float32)
                 try:
                     snap.particles.moment_inertia = frame.moment_inertia
                 except AttributeError:
-                    snap.particles.moment_inertia = np.zeros([N,3],dtype=np.float32);
+                    snap.particles.moment_inertia = np.zeros([N, 3], dtype=np.float32)
                 try:
                     snap.particles.angmom = frame.angmom
                 except AttributeError:
-                    snap.particles.angmom = np.zeros([N,4],dtype=np.float32);
+                    snap.particles.angmom = np.zeros([N, 4], dtype=np.float32)
                 snap.configuration.box = frame.box.get_box_array()
                 try:
                     _write_shape_definitions(snap, frame.shapedef)

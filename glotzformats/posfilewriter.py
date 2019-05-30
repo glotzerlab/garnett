@@ -70,7 +70,7 @@ class PosFileWriter(object):
         for i, frame in enumerate(trajectory):
             # data section
             try:
-            # if frame.data is not None:
+               # if frame.data is not None:
                 header_keys = frame.data_keys
                 _write('#[data] ', end='')
                 _write(' '.join(header_keys))
@@ -96,10 +96,12 @@ class PosFileWriter(object):
 
             if not self._rotate:
                 try:
-                    angles = rowan.to_euler(frame.view_rotation, axis_type='extrinsic', convention='xyz') * 180 / math.pi
+                    angles = rowan.to_euler(frame.view_rotation, \
+                             axis_type='extrinsic', \
+                             convention='xyz') * 180 / math.pi
                     _write('rotation ' + ' '.join((str(_num(_)) for _ in angles)))
                 except AttributeError:
-                    _write('');
+                    _write('')
 
             _write('boxMatrix ', end='')
             _write(' '.join((str(_num(v)) for v in box_matrix.flatten())))
@@ -125,7 +127,6 @@ class PosFileWriter(object):
                 # frames.types is not None.
                 for name in frame.types:
                     _write('def {} "{}"'.format(name, DEFAULT_SHAPE_DEFINITION))
-
 
             # Orientations must be provided for all particles
             # If the frame does not have orientations, identity quaternions are used

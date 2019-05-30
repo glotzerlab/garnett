@@ -204,11 +204,11 @@ class Frame(object):
         self._dtype = dtype
 
     def __getattribute__(self, attr):
-        value = super(Frame, self).__getattribute__(attr);
+        value = super(Frame, self).__getattribute__(attr)
         if value is None:
             raise AttributeError
         else:
-            return value;
+            return value
 
     def _raw_frame_to_frame(self, raw_frame, dtype=None):
         """Generate a frame object from a raw frame object."""
@@ -291,10 +291,10 @@ class Frame(object):
     def loaded(self):
         "Returns True if the frame is loaded into memory."
         try:
-            self.frame_data;
-            return True;
+            self.frame_data
+            return True
         except AttributeError:
-            return False;
+            return False
 
     def load(self):
         "Load the frame into memory."
