@@ -299,7 +299,7 @@ class Frame(object):
     def load(self):
         "Load the frame into memory."
         try:
-            self.frame_data;
+            self.frame_data
         except AttributeError:
             logger.debug("Loading frame.")
             self.frame_data = self._raw_frame_to_frame(self.read(), dtype=self._dtype)

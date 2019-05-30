@@ -70,7 +70,7 @@ class PosFileWriter(object):
         for i, frame in enumerate(trajectory):
             # data section
             try:
-               # if frame.data is not None:
+                # if frame.data is not None:
                 header_keys = frame.data_keys
                 _write('#[data] ', end='')
                 _write(' '.join(header_keys))
@@ -96,9 +96,9 @@ class PosFileWriter(object):
 
             if not self._rotate:
                 try:
-                    angles = rowan.to_euler(frame.view_rotation, \
-                             axis_type='extrinsic', \
-                             convention='xyz') * 180 / math.pi
+                    angles = rowan.to_euler(frame.view_rotation,
+                                            axis_type='extrinsic',
+                                            convention='xyz') * 180 / math.pi
                     _write('rotation ' + ' '.join((str(_num(_)) for _ in angles)))
                 except AttributeError:
                     _write('')
