@@ -73,13 +73,12 @@ class ShapeTest(unittest.TestCase):
             # default False.
             if not self.__class__.__name__ == "POSShapeTest":
                 self.assertEqual(shapedef['A'].orientable,
-                                        shape_class['params']['orientable'])
+                                 shape_class['params']['orientable'])
                 self.assertEqual(shape_dict['orientable'],
-                                        shape_class['params']['orientable'])
+                                 shape_class['params']['orientable'])
             else:
                 self.assertEqual(shapedef['A'].orientable, False)
                 self.assertEqual(shape_dict['orientable'], False)
-
 
 
 @ddt
