@@ -189,9 +189,9 @@ class GSDHoomdFrame(Frame):
             raw_frame.shapedef = copy.deepcopy(self.t_frame.shapedef)
             raw_frame.box_dimensions = self.t_frame.box.dimensions
         else:
-        # Fallback to gsd shape data if no frame is provided
+            # Fallback to gsd shape data if no frame is provided
             raw_frame.shapedef.update(
-                _parse_shape_definitions(frame, self.gsdfile, self.frame_index));
+                _parse_shape_definitions(frame, self.gsdfile, self.frame_index))
         raw_frame.box = _box_matrix(frame.configuration.box)
         raw_frame.box_dimensions = int(frame.configuration.dimensions)
         raw_frame.types = [frame.particles.types[t] for t in frame.particles.typeid]
