@@ -192,7 +192,7 @@ class HPMCPosFileReaderTest(BasePosFileReaderTest):
         dump.pos(filename=self.fn_pos, period=1)
         run(10, quiet=True)
         with io.open(self.fn_pos, 'r', encoding='utf-8') as posfile:
-            self.read_trajectory(posfile)
+            traj = self.read_trajectory(posfile)
             shape = traj[0].shapedef['A']
             assert shape.shape_class == 'sphere'
             assert np.isclose(shape.diameter, float(1.0))
@@ -215,14 +215,17 @@ class HPMCPosFileReaderTest(BasePosFileReaderTest):
         self.addCleanup(self.del_system)
         self.mc = hpmc.integrate.convex_polyhedron(seed=10)
         self.addCleanup(self.del_mc)
-        self.mc.shape_param.set("A", vertices=[(-2, -1, -1),
-                                               (-2, 1, -1),
-                                               (-2, -1, 1),
-                                               (-2, 1, 1),
-                                               (2, -1, -1),
-                                               (2, 1, -1),
-                                               (2, -1, 1),
-                                               (2, 1, 1)])
+        shape_vertices = np.array(
+           [[-2, -1, -1],
+           [-2, 1, -1],
+           [-2, -1, 1],
+           [-2, 1, 1],
+           [2, -1, -1],
+           [2, 1, -1],
+           [2, -1, 1],
+           [2, 1, 1]]
+        )
+        self.mc.shape_param.set("A", vertices=shape_vertices)
         self.system.particles[0].position = (0, 0, 0)
         self.system.particles[0].orientation = (1, 0, 0, 0)
         self.system.particles[1].position = (2, 0, 0)
@@ -235,7 +238,7 @@ class HPMCPosFileReaderTest(BasePosFileReaderTest):
         self.mc.setup_pos_writer(pos_writer)
         run(10, quiet=True)
         with io.open(self.fn_pos, 'r', encoding='utf-8') as posfile:
-            self.read_trajectory(posfile)
+            traj = self.read_trajectory(posfile)
             shape = traj[0].shapedef['A']
             assert shape.shape_class == 'poly3d'
             assert np.array_equal(shape.vertices, shape_vertices)
