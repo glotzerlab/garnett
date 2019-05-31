@@ -213,7 +213,7 @@ class HPMCPosFileReaderTest(BasePosFileReaderTest):
             self.addCleanup(context.initialize, "--mode=cpu")
             hoomd.option.set_notice_level(0)
         self.addCleanup(self.del_system)
-        self.mc = hpmc.integrate.convex_polygon(seed=10)
+        self.mc = hpmc.integrate.convex_polyhedron(seed=10)
         self.addCleanup(self.del_mc)
         self.mc.shape_param.set("A", vertices=[(-2, -1, -1),
                                                (-2, 1, -1),
