@@ -55,13 +55,13 @@ def _box_matrix(box):
 
 def _parse_shape_definitions(frame, gsdfile, frame_index):
 
-    def get_chunk(i, chunk):
+    def get_chunk(i, chunk, default=None):
         if gsdfile.chunk_exists(i, chunk):
             return gsdfile.read_chunk(i, chunk)
         elif gsdfile.chunk_exists(0, chunk):
             return gsdfile.read_chunk(0, chunk)
         else:
-            return None
+            return default
 
     shapedefs = dict()
     types = frame.particles.types
