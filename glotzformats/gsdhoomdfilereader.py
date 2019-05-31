@@ -69,14 +69,14 @@ def _parse_shape_definitions(frame, gsdfile, frame_index):
     # Spheres
     if get_chunk(frame_index, 'state/hpmc/sphere/radius') is not None:
         radii = get_chunk(frame_index, 'state/hpmc/sphere/radius')
-        orient = get_chunk(frame_index, 'state/hpmc/sphere/orientable')
+        orientables = get_chunk(frame_index, 'state/hpmc/sphere/orientable')
         # Since the orientable chunk was only added in HOOMD Schema version 1.3,
         # not all GSD files may have it. Thus, it is set to False in such cases.
-        if orient is None:
-            orient = [False]*len(radii)
-        for typename, radius, ort in zip(types, radii, orient):
+        if orientables is None:
+            orientables = [False]*len(radii)
+        for typename, radius, orientable in zip(types, radii, orientables):
             shapedefs[typename] = SphereShape(
-                diameter=radius*2, orientable=ort, color=None)
+                diameter=radius*2, orientable=orientable, color=None)
         return shapedefs
 
     # Convex Polyhedra
