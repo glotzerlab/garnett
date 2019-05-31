@@ -193,6 +193,9 @@ class HPMCPosFileReaderTest(BasePosFileReaderTest):
         run(10, quiet=True)
         with io.open(self.fn_pos, 'r', encoding='utf-8') as posfile:
             self.read_trajectory(posfile)
+            shape = traj[0].shapedef['A']
+            assert shape.shape_class == 'sphere'
+            assert np.isclose(shape.diameter, float(1.0))
 
     def test_convex_polyhedron(self):
         if HOOMD_v1:
@@ -233,6 +236,9 @@ class HPMCPosFileReaderTest(BasePosFileReaderTest):
         run(10, quiet=True)
         with io.open(self.fn_pos, 'r', encoding='utf-8') as posfile:
             self.read_trajectory(posfile)
+            shape = traj[0].shapedef['A']
+            assert shape.shape_class == 'poly3d'
+            assert np.array_equal(shape.vertices, shape_vertices)
 
 
 @ddt
