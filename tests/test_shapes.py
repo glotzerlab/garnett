@@ -72,13 +72,13 @@ class ShapeTest(unittest.TestCase):
             # not support the orientable flag and should be set to the
             # default False.
             if not self.__class__.__name__ == "POSShapeTest":
-                npt.assert_almost_equal(shapedef['A'].orientable,
+                self.assertEqual(shapedef['A'].orientable,
                                         shape_class['params']['orientable'])
-                npt.assert_almost_equal(shape_dict['orientable'],
+                self.assertEqual(shape_dict['orientable'],
                                         shape_class['params']['orientable'])
             else:
-                npt.assert_almost_equal(shapedef['A'].orientable, False)
-                npt.assert_almost_equal(shape_dict['orientable'], False)
+                self.assertEqual(shapedef['A'].orientable, False)
+                self.assertEqual(shape_dict['orientable'], False)
 
 
 
