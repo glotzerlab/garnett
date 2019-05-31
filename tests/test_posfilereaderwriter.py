@@ -215,16 +215,9 @@ class HPMCPosFileReaderTest(BasePosFileReaderTest):
         self.addCleanup(self.del_system)
         self.mc = hpmc.integrate.convex_polyhedron(seed=10)
         self.addCleanup(self.del_mc)
-        shape_vertices = np.array(
-           [[-2, -1, -1],
-           [-2, 1, -1],
-           [-2, -1, 1],
-           [-2, 1, 1],
-           [2, -1, -1],
-           [2, 1, -1],
-           [2, -1, 1],
-           [2, 1, 1]]
-        )
+        shape_vertices = np.array([[-2, -1, -1], [-2, 1, -1], [-2, -1, 1],
+                                   [-2, 1, 1], [2, -1, -1], [2, 1, -1],
+                                   [2, -1, 1], [2, 1, 1]])
         self.mc.shape_param.set("A", vertices=shape_vertices)
         self.system.particles[0].position = (0, 0, 0)
         self.system.particles[0].orientation = (1, 0, 0, 0)
