@@ -79,6 +79,21 @@ class ShapeTest(unittest.TestCase):
             else:
                 self.assertEqual(shapedef['A'].orientable, False)
                 self.assertEqual(shape_dict['orientable'], False)
+        if 'a' in shape_class['params']:
+            npt.assert_almost_equal(shapedef['A'].a,
+                                    shape_class['params']['a'])
+            npt.assert_almost_equal(shape_dict['a'],
+                                    shape_class['params']['a'])
+        if 'b' in shape_class['params']:
+            npt.assert_almost_equal(shapedef['A'].b,
+                                    shape_class['params']['b'])
+            npt.assert_almost_equal(shape_dict['b'],
+                                    shape_class['params']['b'])
+        if 'c' in shape_class['params']:
+            npt.assert_almost_equal(shapedef['A'].c,
+                                    shape_class['params']['c'])
+            npt.assert_almost_equal(shape_dict['c'],
+                                    shape_class['params']['c'])
 
 
 @ddt

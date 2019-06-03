@@ -413,3 +413,57 @@ class GeneralPolyhedronShape(Shape):
         return {'type': 'Mesh',
                 'vertices': self.vertices,
                 'indices': self.faces}
+
+
+class EllipsoidShape(Shape):
+    """Shape class for ellipsoids of with principal axes a, b, and c.
+
+    :param a:
+        Principal axis a of the ellipsoid (radius in the x direction).
+    :type a:
+        float
+    :param b:
+        Principal axis b of the ellipsoid (radius in the y direction).
+    :type b:
+        float
+    :param c:
+        Principal axis c of the ellipsoid (radius in the z direction).
+    :type c:
+        float
+    :param color:
+        Hexadecimal color string in format :code:`RRGGBBAA` (default: :code:`None`).
+    :type color:
+        str
+    """
+
+    def __init__(self, a, b, c, color=None):
+        super(EllipsoidShape, self).__init__(
+            shape_class='ellipsoid', color=color)
+        self.a = a
+        self.b = b
+        self.c = c
+
+    def __str__(self):
+        return "{} {} {} {} {}".format(
+            self.shape_class,
+            self.a,
+            self.b,
+            self.c,
+            self.color
+        )
+
+    @property
+    def shape_dict(self):
+        """Shape as dictionary. Example:
+
+            >>> EllipsoidShape(7.0, 5.0, 3.0).shape_dict
+            {'type': 'Ellipsoid',
+            'a': 7.0,
+            'b': 5.0,
+            'c': 3.0}
+
+        """
+        return {'type:': 'Ellipsoid',
+                'a': self.a,
+                'b': self.b,
+                'c': self.c}
