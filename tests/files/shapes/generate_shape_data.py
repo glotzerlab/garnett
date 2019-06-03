@@ -130,6 +130,7 @@ if __name__ == '__main__':
                 group=hoomd.group.all(), overwrite=True)
             gsd_dump.dump_state(mc)
 
+            # Ellipsoid shape do not have get_type_shapes() implementation yet. Need try: block
             try:
                 getar_dump = hoomd.dump.getar(
                     '{}.zip'.format(shape_name), mode='w',
