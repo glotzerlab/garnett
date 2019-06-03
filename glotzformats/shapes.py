@@ -410,7 +410,7 @@ class GeneralPolyhedronShape(Shape):
 
 
 class EllipsoidShape(Shape):
-    """Shape class for ellipsoids of with principle axes a, b, and c.
+    """Shape class for ellipsoids of with principal axes a, b, and c.
 
     :param a:
         Principal axis a of the ellipsoid (radius in the x direction).
