@@ -100,6 +100,16 @@ shape_classes = [
             'sweep_radius': 0.2,
         },
     },
+    {
+        'name': 'ellipsoid_3d',
+        'cls': 'ellipsoid',
+        'dimensions': 3,
+        'params': {
+            'a': 0.5,
+            'b': 0.25,
+            'c': 0.125,
+        },
+    },
 ]
 
 if __name__ == '__main__':
@@ -114,18 +124,26 @@ if __name__ == '__main__':
             hoomd.init.create_lattice(uc, n=3)
             mc = getattr(hoomd.hpmc.integrate, shape_class['cls'])(seed=42)
             mc.shape_param.set('A', **shape_class['params'])
+
             gsd_dump = hoomd.dump.gsd(
                 '{}.gsd'.format(shape_name), period=1,
                 group=hoomd.group.all(), overwrite=True)
             gsd_dump.dump_state(mc)
-            getar_dump = hoomd.dump.getar(
-                '{}.zip'.format(shape_name), mode='w',
-                static=['viz_static'], dynamic={'viz_aniso_dynamic': 1})
-            getar_dump.writeJSON('type_shapes.json', mc.get_type_shapes(),
-                                 dynamic=False)
+
+            # Ellipsoid shape do not have get_type_shapes() implementation yet. Need try: block
+            try:
+                getar_dump = hoomd.dump.getar(
+                    '{}.zip'.format(shape_name), mode='w',
+                    static=['viz_static'], dynamic={'viz_aniso_dynamic': 1})
+                getar_dump.writeJSON('type_shapes.json', mc.get_type_shapes(),
+                                     dynamic=False)
+            except NotImplementedError:
+                pass
+
             pos_dump = hoomd.deprecated.dump.pos(
                 '{}.pos'.format(shape_name), period=1)
             mc.setup_pos_writer(pos_dump)
+
             hoomd.run(10)
 
     with open('shape_data.json', 'w') as jsonfile:
