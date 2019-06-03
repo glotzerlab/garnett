@@ -364,8 +364,7 @@ class PosFileWriterTest(BasePosFileWriterTest):
         self.assertEqual(traj, traj_cmp)
         for frame in traj_cmp:
             self.assertTrue(isinstance(
-                frame.shapedef['A'], EllipsoidShape
-            ))
+                frame.shapedef['A'], EllipsoidShape))
 
     @unittest.skipIf(not IN_PATH, 'tests not executed from repository root')
     @data(
