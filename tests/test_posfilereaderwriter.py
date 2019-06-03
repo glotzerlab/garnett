@@ -352,9 +352,9 @@ class PosFileWriterTest(BasePosFileWriterTest):
             sample = io.StringIO(glotzformats.samples.POS_INJAVIS)
         traj = self.read_trajectory(sample)
         traj.load()
-        a = float(0.5)
-        b = float(0.25)
-        c = float(0.125)
+        a = 0.5
+        b = 0.25
+        c = 0.125
         for frame in traj:
             frame.shapedef['A'] = EllipsoidShape(a=a, b=b, c=c)
         dump = io.StringIO()

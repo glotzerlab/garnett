@@ -232,9 +232,9 @@ class BaseGSDHOOMDFileReaderTest(TrajectoryTest):
         self.addCleanup(self.del_system)
         self.mc = hoomd.hpmc.integrate.ellipsoid(seed=10)
         self.addCleanup(self.del_mc)
-        a = float(0.5)
-        b = float(0.25)
-        c = float(0.125)
+        a = 0.5
+        b = 0.25
+        c = 0.125
         self.mc.shape_param.set("A", a=a, b=b, c=c)
         self.system.particles[0].position = (0, 0, 0)
         self.system.particles[1].position = (2, 0, 0)
