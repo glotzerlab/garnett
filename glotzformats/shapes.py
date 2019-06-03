@@ -432,8 +432,7 @@ class EllipsoidShape(Shape):
 
     def __init__(self, a, b, c, color=None):
         super(EllipsoidShape, self).__init__(
-            shape_class='ellipsoid', color=color
-        )
+            shape_class='ellipsoid', color=color)
         self.a = a
         self.b = b
         self.c = c

@@ -109,8 +109,7 @@ def _parse_shape_definitions(frame, gsdfile, frame_index):
         c_all = get_chunk(frame_index, 'state/hpmc/ellipsoid/c')
         for typename, a, b, c in zip(types, a_all, b_all, c_all):
             shapedefs[typename] = EllipsoidShape(
-                a=a, b=b, c=c, color=None
-            )
+                a=a, b=b, c=c, color=None)
 
     # Convex Polygons
     if get_chunk(frame_index, 'state/hpmc/convex_polygon/N') is not None:
