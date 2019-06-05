@@ -373,8 +373,7 @@ class Frame(object):
     def positions(self):
         "Nx3 array of coordinates for N particles in 3 dimensions."
         self.load()
-        value = self._raise_attributeerror('positions')
-        return value
+        return self._raise_attributeerror('positions')
 
     @positions.setter
     def positions(self, value):
@@ -396,8 +395,7 @@ class Frame(object):
     def orientations(self):
         "Nx4 array of rotational coordinates for N particles represented as quaternions."
         self.load()
-        value = self._raise_attributeerror('orientations')
-        return value
+        return self._raise_attributeerror('orientations')
 
     @orientations.setter
     def orientations(self, value):
@@ -417,8 +415,7 @@ class Frame(object):
     def velocities(self):
         "Nx3 array of velocities for N particles in 3 dimensions."
         self.load()
-        value = self._raise_attributeerror('velocities')
-        return value
+        return self._raise_attributeerror('velocities')
 
     @velocities.setter
     def velocities(self, value):
@@ -438,8 +435,7 @@ class Frame(object):
     def mass(self):
         "Nx1 array of masses for N particles."
         self.load()
-        value = self._raise_attributeerror('mass')
-        return value
+        return self._raise_attributeerror('mass')
 
     @mass.setter
     def mass(self, value):
@@ -458,8 +454,7 @@ class Frame(object):
     def charge(self):
         "Nx1 array of charges for N particles."
         self.load()
-        value = self._raise_attributeerror('charge')
-        return value
+        return self._raise_attributeerror('charge')
 
     @charge.setter
     def charge(self, value):
@@ -478,8 +473,7 @@ class Frame(object):
     def diameter(self):
         "Nx1 array of diameters for N particles."
         self.load()
-        value = self._raise_attributeerror('diameter')
-        return value
+        return self._raise_attributeerror('diameter')
 
     @diameter.setter
     def diameter(self, value):
@@ -498,8 +492,7 @@ class Frame(object):
     def moment_inertia(self):
         "Nx3 array of principal moments of inertia for N particles in 3 dimensions."
         self.load()
-        value = self._raise_attributeerror('moment_inertia')
-        return value
+        return self._raise_attributeerror('moment_inertia')
 
     @moment_inertia.setter
     def moment_inertia(self, value):
@@ -519,8 +512,7 @@ class Frame(object):
     def angmom(self):
         "Nx4 array of angular momenta for N particles represented as quaternions."
         self.load()
-        value = self._raise_attributeerror('angmom')
-        return value
+        return self._raise_attributeerror('angmom')
 
     @angmom.setter
     def angmom(self, value):
@@ -540,8 +532,7 @@ class Frame(object):
     def image(self):
         "Nx3 array of periodic images for N particles in 3 dimensions."
         self.load()
-        value = self._raise_attributeerror('image')
-        return value
+        return self._raise_attributeerror('image')
 
     @image.setter
     def image(self, value):
@@ -582,8 +573,7 @@ class Frame(object):
     def shapedef(self):
         "A ordered dictionary of instances of :class:`~.shapes.ShapeDefinition`."
         self.load()
-        value = self._raise_attributeerror('shapedef')
-        return value
+        return self._raise_attributeerror('shapedef')
 
     @shapedef.setter
     def shapedef(self, value):
