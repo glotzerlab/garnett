@@ -203,6 +203,13 @@ class Frame(object):
         self.frame_data = None
         self._dtype = dtype
 
+    def _raise_attributeerror(self,attr):
+        value = getattr(self.frame_data, attr, None)
+        if value is None:
+            raise AttributeError('{} not available for this frame'.format(attr))
+        else:
+            return value
+
     def _raw_frame_to_frame(self, raw_frame, dtype=None):
         """Generate a frame object from a raw frame object."""
         N = len(raw_frame.types)
@@ -366,7 +373,8 @@ class Frame(object):
     def positions(self):
         "Nx3 array of coordinates for N particles in 3 dimensions."
         self.load()
-        return self.frame_data.positions
+        value = self._raise_attributeerror('positions')
+        return value
 
     @positions.setter
     def positions(self, value):
@@ -388,7 +396,8 @@ class Frame(object):
     def orientations(self):
         "Nx4 array of rotational coordinates for N particles represented as quaternions."
         self.load()
-        return self.frame_data.orientations
+        value = self._raise_attributeerror('orientations')
+        return value
 
     @orientations.setter
     def orientations(self, value):
@@ -408,7 +417,8 @@ class Frame(object):
     def velocities(self):
         "Nx3 array of velocities for N particles in 3 dimensions."
         self.load()
-        return self.frame_data.velocities
+        value = self._raise_attributeerror('velocities')
+        return value
 
     @velocities.setter
     def velocities(self, value):
@@ -428,7 +438,8 @@ class Frame(object):
     def mass(self):
         "Nx1 array of masses for N particles."
         self.load()
-        return self.frame_data.mass
+        value = self._raise_attributeerror('mass')
+        return value
 
     @mass.setter
     def mass(self, value):
@@ -447,7 +458,8 @@ class Frame(object):
     def charge(self):
         "Nx1 array of charges for N particles."
         self.load()
-        return self.frame_data.charge
+        value = self._raise_attributeerror('charge')
+        return value
 
     @charge.setter
     def charge(self, value):
@@ -466,7 +478,8 @@ class Frame(object):
     def diameter(self):
         "Nx1 array of diameters for N particles."
         self.load()
-        return self.frame_data.diameter
+        value = self._raise_attributeerror('diameter')
+        return value
 
     @diameter.setter
     def diameter(self, value):
@@ -485,7 +498,8 @@ class Frame(object):
     def moment_inertia(self):
         "Nx3 array of principal moments of inertia for N particles in 3 dimensions."
         self.load()
-        return self.frame_data.moment_inertia
+        value = self._raise_attributeerror('moment_inertia')
+        return value
 
     @moment_inertia.setter
     def moment_inertia(self, value):
@@ -505,7 +519,8 @@ class Frame(object):
     def angmom(self):
         "Nx4 array of angular momenta for N particles represented as quaternions."
         self.load()
-        return self.frame_data.angmom
+        value = self._raise_attributeerror('angmom')
+        return value
 
     @angmom.setter
     def angmom(self, value):
@@ -525,7 +540,8 @@ class Frame(object):
     def image(self):
         "Nx3 array of periodic images for N particles in 3 dimensions."
         self.load()
-        return self.frame_data.image
+        value = self._raise_attributeerror('image')
+        return value
 
     @image.setter
     def image(self, value):
@@ -566,7 +582,8 @@ class Frame(object):
     def shapedef(self):
         "A ordered dictionary of instances of :class:`~.shapes.ShapeDefinition`."
         self.load()
-        return self.frame_data.shapedef
+        value = self._raise_attributeerror('shapedef')
+        return value
 
     @shapedef.setter
     def shapedef(self, value):
@@ -576,7 +593,8 @@ class Frame(object):
     @property
     def view_rotation(self):
         self.load()
-        return self.frame_data.view_rotation
+        value = self._raise_attributeerror('view_rotation')
+        return value
 
 
 class BaseTrajectory(object):
@@ -837,7 +855,10 @@ class Trajectory(BaseTrajectory):
 
         for i, frame in enumerate(self.frames):
             for prop in prop_list:
-                frame_prop = getattr(frame, prop)
+                try:
+                    frame_prop = frame._raise_attributeerror(prop)
+                except AttributeError:
+                    frame_prop = None
                 if frame_prop is not None:
                     props[prop][i] = frame_prop
 
