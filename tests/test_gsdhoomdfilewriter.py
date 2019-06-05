@@ -106,6 +106,22 @@ class BaseGSDHOOMDFileWriterTest(unittest.TestCase):
                 written_traj = self.reader.read(tmpfile)
                 assertEqualShapedefs(written_traj[0].shapedef, traj[0].shapedef)
 
+    def test_write_defaults(self):
+        tmpfile = tempfile.NamedTemporaryFile(mode='wb')
+        with tmpfile:
+            with glotzformats.read(get_filename('shapes/ellipsoid_3d.pos')) as traj:
+                self.writer.write(traj, tmpfile)
+                written_traj = self.reader.read(tmpfile)
+                assert np.array_equal(written_traj[0].mass, np.ones(27).astype(float))
+                assert np.array_equal(written_traj[0].velocities, np.zeros([27,3]).astype(float))
+                assert np.array_equal(written_traj[0].diameter, np.ones(27).astype(float))
+                assert np.array_equal(written_traj[0].moment_inertia, np.zeros([27,3]).astype(float))
+                assert np.array_equal(written_traj[0].angmom, np.zeros([27,4]).astype(float))
+                assert np.array_equal(written_traj[0].charge, np.zeros([27]).astype(float))
+                # temporarily putting this here until image isue is resolved
+                with self.assertRaises(AttributeError):
+                    written_traj[0].image
+
 
 if __name__ == '__main__':
     unittest.main()
