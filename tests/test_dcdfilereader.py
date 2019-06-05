@@ -43,7 +43,7 @@ class BaseDCDFileReaderTest(TrajectoryTest):
         top_traj = self.read_top_trajectory()
         return self.reader().read(self.get_sample_file(), top_traj[0])
 
-    def assert_raise_attribute_error(self,frame):
+    def assert_raise_attribute_error(self, frame):
         with self.assertRaises(AttributeError):
             frame.charge
         with self.assertRaises(AttributeError):

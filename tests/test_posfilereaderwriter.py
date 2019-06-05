@@ -57,7 +57,7 @@ class BasePosFileReaderTest(unittest.TestCase):
         reader = glotzformats.reader.PosFileReader(precision=precision)
         return reader.read(stream)
 
-    def assert_raise_attribute_error(self,frame):
+    def assert_raise_attribute_error(self, frame):
         with self.assertRaises(AttributeError):
             frame.velocities
         with self.assertRaises(AttributeError):

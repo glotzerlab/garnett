@@ -113,10 +113,10 @@ class BaseGSDHOOMDFileWriterTest(unittest.TestCase):
                 self.writer.write(traj, tmpfile)
                 written_traj = self.reader.read(tmpfile)
                 assert np.array_equal(written_traj[0].mass, np.ones(27).astype(float))
-                assert np.array_equal(written_traj[0].velocities, np.zeros([27,3]).astype(float))
+                assert np.array_equal(written_traj[0].velocities, np.zeros([27, 3]).astype(float))
                 assert np.array_equal(written_traj[0].diameter, np.ones(27).astype(float))
-                assert np.array_equal(written_traj[0].moment_inertia, np.zeros([27,3]).astype(float))
-                assert np.array_equal(written_traj[0].angmom, np.zeros([27,4]).astype(float))
+                assert np.array_equal(written_traj[0].moment_inertia, np.zeros([27, 3]).astype(float))
+                assert np.array_equal(written_traj[0].angmom, np.zeros([27, 4]).astype(float))
                 assert np.array_equal(written_traj[0].charge, np.zeros([27]).astype(float))
                 # temporarily putting this here until image isue is resolved
                 with self.assertRaises(AttributeError):
