@@ -593,8 +593,7 @@ class Frame(object):
     @property
     def view_rotation(self):
         self.load()
-        value = self._raise_attributeerror('view_rotation')
-        return value
+        return self.frame_data.view_rotation
 
 
 class BaseTrajectory(object):
