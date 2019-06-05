@@ -57,6 +57,20 @@ class BasePosFileReaderTest(unittest.TestCase):
         reader = glotzformats.reader.PosFileReader(precision=precision)
         return reader.read(stream)
 
+    def assert_raise_attribute_error(self,frame):
+        with self.assertRaises(AttributeError):
+            frame.velocities
+        with self.assertRaises(AttributeError):
+            frame.charge
+        with self.assertRaises(AttributeError):
+            frame.diameter
+        with self.assertRaises(AttributeError):
+            frame.moment_inertia
+        with self.assertRaises(AttributeError):
+            frame.angmom
+        with self.assertRaises(AttributeError):
+            frame.image
+
 
 class BasePosFileWriterTest(BasePosFileReaderTest):
 
@@ -115,6 +129,7 @@ class PosFileReaderTest(BasePosFileReaderTest):
             N = len(frame)
             self.assertEqual(frame.types, ['A'] * N)
             self.assertEqual(frame.box, box_expected)
+            self.assert_raise_attribute_error(frame)
 
     def test_incsim_dialect(self):
         if PYTHON_2:
@@ -127,6 +142,7 @@ class PosFileReaderTest(BasePosFileReaderTest):
             N = len(frame)
             self.assertEqual(frame.types, ['A'] * N)
             self.assertEqual(frame.box, box_expected)
+            self.assert_raise_attribute_error(frame)
 
     def test_monotype_dialect(self):
         if PYTHON_2:
@@ -139,6 +155,7 @@ class PosFileReaderTest(BasePosFileReaderTest):
             N = len(frame)
             self.assertEqual(frame.types, ['A'] * N)
             self.assertEqual(frame.box, box_expected)
+            self.assert_raise_attribute_error(frame)
 
     def test_injavis_dialect(self):
         if PYTHON_2:
@@ -151,6 +168,7 @@ class PosFileReaderTest(BasePosFileReaderTest):
             N = len(frame)
             self.assertEqual(frame.types, ['A'] * N)
             self.assertEqual(frame.box, box_expected)
+            self.assert_raise_attribute_error(frame)
 
 
 @unittest.skipIf(not HPMC, 'requires HPMC')
