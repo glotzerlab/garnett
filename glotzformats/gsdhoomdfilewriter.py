@@ -122,39 +122,39 @@ class GSDHOOMDFileWriter(object):
                 try:
                     snap.particles.typeid = [types.index(typeid) for typeid in frame.types]
                 except AttributeError:
-                    snap.particles.typeid = np.zeros(N, dtype=np.uint32)
+                    pass
                 try:
                     snap.particles.position = frame.positions
                 except AttributeError:
-                    snap.particles.position = np.zeros([N, 3], dtype=np.float32)
+                    pass
                 try:
                     snap.particles.orientation = frame.orientations
                 except AttributeError:
-                    snap.particles.orientation = np.array([[1, 0, 0, 0]]*N, dtype=np.float32)
+                    pass
                 try:
                     snap.particles.velocity = frame.velocities
                 except AttributeError:
-                    snap.particles.velocity = np.zeros([N, 3], dtype=np.float32)
+                    pass
                 try:
                     snap.particles.mass = frame.mass
                 except AttributeError:
-                    snap.particles.mass = np.ones(N, dtype=np.float32)
+                    pass
                 try:
                     snap.particles.charge = frame.charge
                 except AttributeError:
-                    snap.particles.charge = np.zeros(N, dtype=np.float32)
+                    pass
                 try:
                     snap.particles.diameter = frame.diameter
                 except AttributeError:
-                    snap.particles.diameter = np.ones(N, dtype=np.float32)
+                    pass
                 try:
                     snap.particles.moment_inertia = frame.moment_inertia
                 except AttributeError:
-                    snap.particles.moment_inertia = np.zeros([N, 3], dtype=np.float32)
+                    pass
                 try:
                     snap.particles.angmom = frame.angmom
                 except AttributeError:
-                    snap.particles.angmom = np.zeros([N, 4], dtype=np.float32)
+                    pass
                 snap.configuration.box = frame.box.get_box_array()
                 try:
                     _write_shape_definitions(snap, frame.shapedef)
