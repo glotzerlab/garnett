@@ -203,7 +203,7 @@ class Frame(object):
         self.frame_data = None
         self._dtype = dtype
 
-    def _raise_attributeerror(self,attr):
+    def _raise_attributeerror(self, attr):
         value = getattr(self.frame_data, attr, None)
         if value is None:
             raise AttributeError('{} not available for this frame'.format(attr))

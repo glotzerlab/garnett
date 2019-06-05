@@ -130,7 +130,7 @@ class GSDHOOMDFileWriter(object):
                 try:
                     snap.particles.orientation = frame.orientations
                 except AttributeError:
-                    snap.particles.orientation = np.array([1,0,0,0]*N, dtype=np.float32).reshape(N,4)
+                    snap.particles.orientation = np.array([1, 0, 0, 0]*N, dtype=np.float32).reshape(N, 4)
                 try:
                     snap.particles.velocity = frame.velocities
                 except AttributeError:
