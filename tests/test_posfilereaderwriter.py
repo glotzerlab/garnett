@@ -57,6 +57,20 @@ class BasePosFileReaderTest(unittest.TestCase):
         reader = glotzformats.reader.PosFileReader(precision=precision)
         return reader.read(stream)
 
+    def assert_raise_attribute_error(self, frame):
+        with self.assertRaises(AttributeError):
+            frame.velocities
+        with self.assertRaises(AttributeError):
+            frame.charge
+        with self.assertRaises(AttributeError):
+            frame.diameter
+        with self.assertRaises(AttributeError):
+            frame.moment_inertia
+        with self.assertRaises(AttributeError):
+            frame.angmom
+        with self.assertRaises(AttributeError):
+            frame.image
+
 
 class BasePosFileWriterTest(BasePosFileReaderTest):
 
@@ -74,11 +88,15 @@ class BasePosFileWriterTest(BasePosFileReaderTest):
         self.assertEqual(a.box.round(decimals), b.box.round(decimals))
         self.assertEqual(a.types, b.types)
         self.assertTrue(np.allclose(a.positions, b.positions, atol=atol))
-        if a.velocities is not None and b.velocities is not None:
+        try:
             self.assertTrue(np.allclose(a.velocities, b.velocities, atol=atol))
-        if not ignore_orientations and \
-                (a.orientations is not None and b.orientations is not None):
-            self.assertTrue(np.allclose(a.orientations, b.orientations, atol=atol))
+        except AttributeError:
+            pass
+        if not ignore_orientations:
+            try:
+                self.assertTrue(np.allclose(a.orientations, b.orientations, atol=atol))
+            except AttributeError:
+                pass
         self.assertEqual(a.data, b.data)
         for key in chain(a.shapedef, b.shapedef):
             self.assertEqual(a.shapedef[key], b.shapedef[key])
@@ -111,6 +129,7 @@ class PosFileReaderTest(BasePosFileReaderTest):
             N = len(frame)
             self.assertEqual(frame.types, ['A'] * N)
             self.assertEqual(frame.box, box_expected)
+            self.assert_raise_attribute_error(frame)
 
     def test_incsim_dialect(self):
         if PYTHON_2:
@@ -123,6 +142,7 @@ class PosFileReaderTest(BasePosFileReaderTest):
             N = len(frame)
             self.assertEqual(frame.types, ['A'] * N)
             self.assertEqual(frame.box, box_expected)
+            self.assert_raise_attribute_error(frame)
 
     def test_monotype_dialect(self):
         if PYTHON_2:
@@ -135,6 +155,7 @@ class PosFileReaderTest(BasePosFileReaderTest):
             N = len(frame)
             self.assertEqual(frame.types, ['A'] * N)
             self.assertEqual(frame.box, box_expected)
+            self.assert_raise_attribute_error(frame)
 
     def test_injavis_dialect(self):
         if PYTHON_2:
@@ -147,6 +168,7 @@ class PosFileReaderTest(BasePosFileReaderTest):
             N = len(frame)
             self.assertEqual(frame.types, ['A'] * N)
             self.assertEqual(frame.box, box_expected)
+            self.assert_raise_attribute_error(frame)
 
 
 @unittest.skipIf(not HPMC, 'requires HPMC')
