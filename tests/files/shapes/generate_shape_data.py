@@ -54,6 +54,7 @@ shape_classes = [
         'dimensions': 2,
         'params': {
             'diameter': 1,
+            'orientable': True
         },
     },
     {
@@ -62,6 +63,7 @@ shape_classes = [
         'dimensions': 3,
         'params': {
             'diameter': 1,
+            'orientable': True
         },
     },
     {

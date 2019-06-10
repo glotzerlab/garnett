@@ -70,6 +70,18 @@ class ShapeTest(unittest.TestCase):
                                     shape_class['params']['sweep_radius'])
             npt.assert_almost_equal(shape_dict['rounding_radius'],
                                     shape_class['params']['sweep_radius'])
+        if 'orientable' in shape_class['params']:
+            # Of the three shape supporting formats, only POS files do
+            # not support the orientable flag and should be set to the
+            # default False.
+            if not self.__class__.__name__ == "POSShapeTest":
+                self.assertEqual(shapedef['A'].orientable,
+                                 shape_class['params']['orientable'])
+                self.assertEqual(shape_dict['orientable'],
+                                 shape_class['params']['orientable'])
+            else:
+                self.assertEqual(shapedef['A'].orientable, False)
+                self.assertEqual(shape_dict['orientable'], False)
         if 'a' in shape_class['params']:
             npt.assert_almost_equal(shapedef['A'].a,
                                     shape_class['params']['a'])

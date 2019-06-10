@@ -38,6 +38,7 @@ def _write_shape_definitions(snap, shapedefs):
     else:
         if shape_type is SphereShape:
             state['hpmc/sphere/radius'] = compute_property(lambda shape: 0.5*shape.diameter)
+            state['hpmc/sphere/orientable'] = compute_property(lambda shape: shape.orientable)
         elif shape_type is ConvexPolyhedronShape:
             state['hpmc/convex_polyhedron/N'] = compute_property(lambda shape: len(shape.vertices))
             vertices = compute_property(lambda shape: shape.vertices)

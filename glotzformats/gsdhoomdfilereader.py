@@ -55,13 +55,13 @@ def _box_matrix(box):
 
 def _parse_shape_definitions(frame, gsdfile, frame_index):
 
-    def get_chunk(i, chunk):
+    def get_chunk(i, chunk, default=None):
         if gsdfile.chunk_exists(i, chunk):
             return gsdfile.read_chunk(i, chunk)
         elif gsdfile.chunk_exists(0, chunk):
             return gsdfile.read_chunk(0, chunk)
         else:
-            return None
+            return default
 
     shapedefs = dict()
     types = frame.particles.types
@@ -69,9 +69,14 @@ def _parse_shape_definitions(frame, gsdfile, frame_index):
     # Spheres
     if get_chunk(frame_index, 'state/hpmc/sphere/radius') is not None:
         radii = get_chunk(frame_index, 'state/hpmc/sphere/radius')
-        for typename, radius in zip(types, radii):
+        orientables = get_chunk(frame_index, 'state/hpmc/sphere/orientable')
+        # Since the orientable chunk was only added in HOOMD Schema version 1.3,
+        # not all GSD files may have it. Thus, it is set to False in such cases.
+        if orientables is None:
+            orientables = [False]*len(radii)
+        for typename, radius, orientable in zip(types, radii, orientables):
             shapedefs[typename] = SphereShape(
-                diameter=radius*2, color=None)
+                diameter=radius*2, orientable=orientable, color=None)
         return shapedefs
 
     # Convex Polyhedra

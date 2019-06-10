@@ -207,7 +207,7 @@ class BaseGSDHOOMDFileReaderTest(TrajectoryTest):
         self.mc = hoomd.hpmc.integrate.sphere(seed=10)
         self.addCleanup(self.del_mc)
         diameter_A = 0.75
-        self.mc.shape_param.set("A", diameter=diameter_A)
+        self.mc.shape_param.set("A", diameter=diameter_A, orientable=True)
         self.system.particles[0].position = (0, 0, 0)
         self.system.particles[1].position = (2, 0, 0)
         hoomd.context.current.sorter.set_params(grid=8)
@@ -222,6 +222,7 @@ class BaseGSDHOOMDFileReaderTest(TrajectoryTest):
             shape = traj[0].shapedef['A']
             assert shape.shape_class == 'sphere'
             assert np.isclose(shape.diameter, diameter_A)
+            self.assertEqual(shape.orientable, True)
 
     @unittest.skipIf(not HOOMD or not HPMC, 'requires HOOMD and HPMC')
     def test_ellipsoid(self):
