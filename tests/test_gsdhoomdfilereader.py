@@ -224,6 +224,34 @@ class BaseGSDHOOMDFileReaderTest(TrajectoryTest):
             assert np.isclose(shape.diameter, diameter_A)
             self.assertEqual(shape.orientable, True)
 
+    @unittest.skipIf(not HOOMD or not HPMC, 'requres HOOMD and HPMC')
+    def test_spheres_2d(self):
+        self.system = hoomd.init.create_lattice(
+            unitcell=hoomd.lattice.sq(a=10), n=2)
+        self.addCleanup(hoomd.context.initialize, "--mode=cpu")
+        hoomd.option.set_notice_level(0)
+        self.addCleanup(self.del_system)
+        self.mc = hoomd.hpmc.integrate.sphere(d=0.2, seed=10)
+        self.addCleanup(self.del_mc)
+        diameter_A = 0.75
+        self.mc.shape_param.set("A", diameter=diameter_A, orientable=True)
+        self.system.particles[0].position = (0, 0, 0)
+        self.system.particles[1].position = (2, 0, 0)
+        hoomd.context.current.sorter.set_params(grid=8)
+        gsd_writer = hoomd.dump.gsd(filename=self.fn_gsd,
+                                    group=hoomd.group.all(),
+                                    period=1)
+        gsd_writer.dump_state(self.mc)
+        hoomd.run(1, quiet=True)
+        with open(self.fn_gsd, 'rb') as gsdfile:
+            gsd_reader = glotzformats.gsdhoomdfilereader.GSDHOOMDFileReader()
+            traj = gsd_reader.read(gsdfile)
+            shape = traj[0].shapedef['A']
+            assert shape.shape_class == 'sphere'
+            assert np.isclose(shape.diameter, diameter_A)
+            assert np.isclose(traj[-1].box.Lz, 1)
+            self.assertEqual(shape.orientable, True)
+
     @unittest.skipIf(not HOOMD or not HPMC, 'requires HOOMD and HPMC')
     def test_ellipsoid(self):
         self.system = hoomd.init.create_lattice(
