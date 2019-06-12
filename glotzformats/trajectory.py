@@ -1140,7 +1140,7 @@ def _regularize_box(positions, velocities,
     xy = box[0, 1]/Ly
     xz = box[0, 2]/Lz
     yz = box[1, 2]/Lz
-    box = Box(Lx=Lx, Ly=Ly, Lz=Lz, xy=xy, xz=xz, yz=yz)
+    box = Box(Lx=Lx, Ly=Ly, Lz=Lz, xy=xy, xz=xz, yz=yz, dimensions=dimensions)
     return positions, velocities, orientations, angmom, box
 
 
