@@ -250,8 +250,7 @@ class BaseGSDHOOMDFileReaderTest(TrajectoryTest):
             assert shape.shape_class == 'sphere'
             assert np.isclose(shape.diameter, diameter_A)
             self.assertEqual(shape.orientable, True)
-            # Should this be 2?
-            assert traj[-1].box.dimensions == 3
+            assert traj[-1].box.dimensions == 2
             assert np.isclose(traj[-1].box.Lz, 1)
 
 
@@ -284,8 +283,7 @@ class BaseGSDHOOMDFileReaderTest(TrajectoryTest):
             shape = traj[0].shapedef['A']
             assert shape.shape_class == 'poly3d'
             assert np.array_equal(shape.vertices, shape_vertices)
-            # Should this be 2?
-            assert traj[-1].box.dimensions == 3
+            assert traj[-1].box.dimensions == 2
             assert np.isclose(traj[-1].box.Lz, 1)
 
     @unittest.skipIf(not HOOMD or not HPMC, 'requires HOOMD and HPMC')
