@@ -286,7 +286,9 @@ class PosFileFrame(Frame):
 
         # If all the z coordinates are zero, set box dimension to 2
         zs = np.array([ xyz[-1] for xyz in raw_frame.positions ])
-        # account for precision loss when there is rotation
+        # Account for precision loss when there is rotation.
+        # This is a bit sloppy but it works for the test cases.
+        # How to improve?
         if raw_frame.view_rotation is not None:
             eps = 1e-5
         else:
