@@ -426,7 +426,7 @@ class FrameSnapshotExport(TrajectoryTest):
         self.assertEqual(snapshot.box.Ly, 10.0)
         self.assertEqual(snapshot.box.Lz, 1.0)
         #need to fix the dimension in posreader
-        self.assertEqual(snapshot.box.dimensions,3)
+        self.assertEqual(snapshot.box.dimensions,2)
         self.assertEqual(snapshot.particles.types,['A'])
 
     def test_incsim_dialect_2D(self):
@@ -435,7 +435,7 @@ class FrameSnapshotExport(TrajectoryTest):
         self.assertEqual(snapshot.box.Ly, 10.0)
         self.assertEqual(snapshot.box.Lz, 1.0)
         #need to fix the dimension in posreader
-        self.assertEqual(snapshot.box.dimensions,3)
+        self.assertEqual(snapshot.box.dimensions,2)
         self.assertEqual(snapshot.particles.types, ['A'])
 
     def test_monotype_dialect_2D(self):
@@ -444,7 +444,7 @@ class FrameSnapshotExport(TrajectoryTest):
         self.assertEqual(snapshot.box.Ly, 25.0)
         self.assertEqual(snapshot.box.Lz, 1.0)
         #need to fix the dimension in posreader
-        self.assertEqual(snapshot.box.dimensions,3)
+        self.assertEqual(snapshot.box.dimensions,2)
         self.assertEqual(snapshot.particles.types, ['A'])
 
 
