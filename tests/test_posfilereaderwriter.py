@@ -402,7 +402,8 @@ class PosFileWriterTest(BasePosFileWriterTest):
         # 'rand_test',   # the same. The systems are otherwise identical.
         'scc',
         'switch_FeSiUC',
-        'switch_scc')
+        'switch_scc',
+        'pos_2d')
     def test_read_write_read(self, name):
         fn = os.path.join(PATH, 'samples', name + '.pos')
         with open(fn) as samplefile:
