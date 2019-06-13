@@ -425,7 +425,6 @@ class FrameSnapshotExport(TrajectoryTest):
         self.assertEqual(snapshot.box.Lx, 10.0)
         self.assertEqual(snapshot.box.Ly, 10.0)
         self.assertEqual(snapshot.box.Lz, 1.0)
-        #need to fix the dimension in posreader
         self.assertEqual(snapshot.box.dimensions,2)
         self.assertEqual(snapshot.particles.types,['A'])
 
@@ -434,7 +433,6 @@ class FrameSnapshotExport(TrajectoryTest):
         self.assertEqual(snapshot.box.Lx, 10.0)
         self.assertEqual(snapshot.box.Ly, 10.0)
         self.assertEqual(snapshot.box.Lz, 1.0)
-        #need to fix the dimension in posreader
         self.assertEqual(snapshot.box.dimensions,2)
         self.assertEqual(snapshot.particles.types, ['A'])
 
@@ -443,7 +441,6 @@ class FrameSnapshotExport(TrajectoryTest):
         self.assertEqual(snapshot.box.Lx, 25.0)
         self.assertEqual(snapshot.box.Ly, 25.0)
         self.assertEqual(snapshot.box.Lz, 1.0)
-        #need to fix the dimension in posreader
         self.assertEqual(snapshot.box.dimensions,2)
         self.assertEqual(snapshot.particles.types, ['A'])
 
