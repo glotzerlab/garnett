@@ -397,9 +397,9 @@ class PosFileWriterTest(BasePosFileWriterTest):
         'Henzie_lithium_triclinic',
         'cubic_onep',
         'cubic_twop',
-        # # 'hex_onep',    # These tests are deactivated, because we currently
-        # # 'hex_twop',    # do not have a solution to keep the reference orientation
-        # # 'rand_test',   # the same. The systems are otherwise identical.
+        # 'hex_onep',    # These tests are deactivated, because we currently
+        # 'hex_twop',    # do not have a solution to keep the reference orientation
+        # 'rand_test',   # the same. The systems are otherwise identical.
         'scc',
         'switch_FeSiUC',
         'switch_scc',
