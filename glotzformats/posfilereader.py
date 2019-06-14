@@ -284,18 +284,6 @@ class PosFileFrame(Frame):
                     else:
                         raw_frame.orientations.append([self._num(v) for v in quat])
 
-        # If all the z coordinates are zero, set box dimension to 2
-        zs = np.array([ xyz[-1] for xyz in raw_frame.positions ])
-        # Account for precision loss when there is rotation.
-        # This is a bit sloppy but it works for the test cases.
-        # How to improve?
-        if raw_frame.view_rotation is not None:
-            eps = 1e-5
-        else:
-            eps = 1e-10
-        if np.allclose(zs , eps):
-            raw_frame.box_dimensions = 2
-
         # If no valid orientations have been added, the array should be empty
         if all([quat is None for quat in raw_frame.orientations]):
             raw_frame.orientations = []

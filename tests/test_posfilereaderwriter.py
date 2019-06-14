@@ -389,21 +389,22 @@ class PosFileWriterTest(BasePosFileWriterTest):
                 frame.shapedef['A'], EllipsoidShape))
 
     @unittest.skipIf(not IN_PATH, 'tests not executed from repository root')
-    @data(
-        'hpmc_sphere',
-        'hpmc_sphere_rotated',
-        'FeSiUC',
-        'Henzie_lithium_cubic_uc',
-        'Henzie_lithium_triclinic',
-        'cubic_onep',
-        'cubic_twop',
-        # 'hex_onep',    # These tests are deactivated, because we currently
-        # 'hex_twop',    # do not have a solution to keep the reference orientation
-        # 'rand_test',   # the same. The systems are otherwise identical.
-        'scc',
-        'switch_FeSiUC',
-        'switch_scc',
-        'pos_2d')
+    @data('hpmc_sphere_rotated'
+        # 'hpmc_sphere',
+        # 'hpmc_sphere_rotated',
+        # 'FeSiUC',
+        # 'Henzie_lithium_cubic_uc',
+        # 'Henzie_lithium_triclinic',
+        # 'cubic_onep',
+        # 'cubic_twop',
+        # # 'hex_onep',    # These tests are deactivated, because we currently
+        # # 'hex_twop',    # do not have a solution to keep the reference orientation
+        # # 'rand_test',   # the same. The systems are otherwise identical.
+        # 'scc',
+        # 'switch_FeSiUC',
+        # 'switch_scc',
+        # 'pos_2d'
+        )
     def test_read_write_read(self, name):
         fn = os.path.join(PATH, 'samples', name + '.pos')
         with open(fn) as samplefile:
@@ -416,12 +417,12 @@ class PosFileWriterTest(BasePosFileWriterTest):
                     for f0, f1 in zip(traj0, traj1):
                         self.assert_approximately_equal_frames(f0, f1)
 
-    @unittest.skipIf(not IN_PATH, 'tests not executed from repository root')
-    @data(
-        'hpmc_sphere',
-        'hpmc_sphere_rotated',
-        'xtalslice3_small',
-        'FeSiUC',
+    # @unittest.skipIf(not IN_PATH, 'tests not executed from repository root')
+    @data('hpmc_sphere_rotated'
+        # 'hpmc_sphere',
+        # 'hpmc_sphere_rotated',
+        # 'xtalslice3_small',
+        # 'FeSiUC',
         # For the following two, the box has a different sign...
         # 'xtalslice3_small_rotated',
         # 'switch_FeSiUC',
