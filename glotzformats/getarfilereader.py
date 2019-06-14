@@ -116,10 +116,15 @@ class GetarFrame(Frame):
             raw_frame.types = len(raw_frame.positions) * [self._default_type]
 
         if 'box' in self._records:
-            dimensions = (
-                self._trajectory.getRecord(
-                    self._records['dimensions'], self._frame)[0]
-                if 'dimensions' in self._records else 3)
+            # Read dimension if stored
+            if 'dimensions' in self._records:
+                dimensions = self._trajectory.getRecord(
+                             self._records['dimensions'], self._frame)[0]
+            # Fallback to detection based on z coordinates
+            else:
+                zs = raw_frame.positions[:,2]
+                dimensions = 2 if np.allclose(zs, 0.0, atol=1e-7) else 3
+
             box = self._trajectory.getRecord(self._records['box'], self._frame)
             gbox = Box(
                 **dict(

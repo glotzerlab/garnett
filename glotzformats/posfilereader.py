@@ -288,10 +288,9 @@ class PosFileFrame(Frame):
         if raw_frame.view_rotation is not None:
             pos = rowan.rotate(rowan.inverse(raw_frame.view_rotation), raw_frame.positions)
         else:
-            pos = raw_frame.positions
+            pos = np.asarray(raw_frame.positions)
         # If all the z coordinates are close to zero, set box dimension to 2
-        zs = np.array([xyz[-1] for xyz in pos])
-        if np.allclose(zs, 0.0, atol=1e-7):
+        if np.allclose(pos[:,2], 0.0, atol=1e-7):
             raw_frame.box_dimensions = 2
 
         # If no valid orientations have been added, the array should be empty
