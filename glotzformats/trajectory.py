@@ -778,6 +778,13 @@ class Trajectory(BaseTrajectory):
             raise RuntimeError(
                 "Trajectory arrays not loaded! Use load_arrays() or load().")
 
+    def _raise_attributeerror(self, attr):
+        value = getattr(self, attr, None)
+        if value is None:
+            raise AttributeError('{} not available for this frame'.format(attr))
+        else:
+            return value
+
     def _max_N(self):
         "Returns the size of the largest frame within this trajectory."
         return max((len(f) for f in self.frames))
@@ -916,8 +923,10 @@ class Trajectory(BaseTrajectory):
         :raises RuntimeError: When accessed before
             calling :meth:`~.load_arrays` or
             :meth:`~.Trajectory.load`."""
+
         self._assertarrays_loaded()
-        return np.asarray(self._N, dtype=np.int_)
+        _N = self._raise_attributeerror('_N')
+        return np.asarray(_N, dtype=np.int_)
 
     @property
     def types(self):
@@ -975,7 +984,7 @@ class Trajectory(BaseTrajectory):
             calling :meth:`~.load_arrays` or
             :meth:`~.Trajectory.load`."""
         self._assertarrays_loaded()
-        return self._positions
+        return self._raise_attributeerror('_positions')
 
     @property
     def orientations(self):
@@ -989,7 +998,7 @@ class Trajectory(BaseTrajectory):
             calling :meth:`~.load_arrays` or
             :meth:`~.Trajectory.load`."""
         self._assertarrays_loaded()
-        return self._orientations
+        return self._raise_attributeerror('_orientations')
 
     @property
     def velocities(self):
@@ -1001,7 +1010,7 @@ class Trajectory(BaseTrajectory):
             calling :meth:`~.load_arrays` or
             :meth:`~.Trajectory.load`."""
         self._assertarrays_loaded()
-        return self._velocities
+        return self._raise_attributeerror('_velocities')
 
     @property
     def mass(self):
@@ -1013,7 +1022,7 @@ class Trajectory(BaseTrajectory):
             calling :meth:`~.load_arrays` or
             :meth:`~.Trajectory.load`."""
         self._assertarrays_loaded()
-        return self._mass
+        return self._raise_attributeerror('_mass')
 
     @property
     def charge(self):
@@ -1025,7 +1034,7 @@ class Trajectory(BaseTrajectory):
             calling :meth:`~.load_arrays` or
             :meth:`~.Trajectory.load`."""
         self._assertarrays_loaded()
-        return self._charge
+        return self._raise_attributeerror('_charge')
 
     @property
     def diameter(self):
@@ -1037,7 +1046,7 @@ class Trajectory(BaseTrajectory):
             calling :meth:`~.load_arrays` or
             :meth:`~.Trajectory.load`."""
         self._assertarrays_loaded()
-        return self._diameter
+        return self._raise_attributeerror('_diameter')
 
     @property
     def moment_inertia(self):
@@ -1051,7 +1060,7 @@ class Trajectory(BaseTrajectory):
             calling :meth:`~.load_arrays` or
             :meth:`~.Trajectory.load`."""
         self._assertarrays_loaded()
-        return self._moment_inertia
+        return self._raise_attributeerror('_moment_inertia')
 
     @property
     def angmom(self):
@@ -1063,7 +1072,7 @@ class Trajectory(BaseTrajectory):
             calling :meth:`~.load_arrays` or
             :meth:`~.Trajectory.load`."""
         self._assertarrays_loaded()
-        return self._angmom
+        return self._raise_attributeerror('_angmom')
 
     @property
     def image(self):
@@ -1075,7 +1084,7 @@ class Trajectory(BaseTrajectory):
             calling :meth:`~.load_arrays` or
             :meth:`~.Trajectory.load`."""
         self._assertarrays_loaded()
-        return self._image
+        return self._raise_attributeerror('_image')
 
 
 def _regularize_box(positions, velocities,
