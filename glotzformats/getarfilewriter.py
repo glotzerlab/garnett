@@ -46,6 +46,7 @@ class GetarFileWriter(object):
         'diameter': 'diameter.f32.ind',
         'moment_inertia': 'moment_inertia.f32.ind',
         'angmom': 'angular_momentum_quat.f32.ind',
+        'image': 'image.f32.ind',
         }
 
     def makeRecord(self, name, index=None, prefix=None):

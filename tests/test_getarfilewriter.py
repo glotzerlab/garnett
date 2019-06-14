@@ -34,7 +34,7 @@ class BaseGetarFileWriterTest(unittest.TestCase):
         readwrite_props = ['N', 'types', 'type_ids',
                            'positions', 'orientations', 'velocities',
                            'mass', 'charge', 'diameter',
-                           'moment_inertia', 'angmom']
+                           'moment_inertia', 'angmom', 'image']
         original_data = {}
         for prop in readwrite_props:
             original_data[prop] = getattr(traj, prop)
