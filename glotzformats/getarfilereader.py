@@ -115,9 +115,11 @@ class GetarFrame(Frame):
             raw_frame.types = len(raw_frame.positions) * [self._default_type]
 
         if 'box' in self._records:
+            # Read dimension if stored
             if 'dimensions' in self._records:
                 dimensions = self._trajectory.getRecord(
                              self._records['dimensions'], self._frame)[0]
+            # Fallback to detection based on z coordinates
             else:
                 zs = np.array([xyz[-1] for xyz in raw_frame.positions])
                 dimensions = 2 if np.allclose(zs, 0.0, atol=1e-7) else 3
