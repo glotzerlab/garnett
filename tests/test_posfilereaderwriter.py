@@ -416,7 +416,7 @@ class PosFileWriterTest(BasePosFileWriterTest):
                     for f0, f1 in zip(traj0, traj1):
                         self.assert_approximately_equal_frames(f0, f1)
 
-    # @unittest.skipIf(not IN_PATH, 'tests not executed from repository root')
+    @unittest.skipIf(not IN_PATH, 'tests not executed from repository root')
     @data(
         'hpmc_sphere',
         'hpmc_sphere_rotated',
