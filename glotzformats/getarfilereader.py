@@ -121,7 +121,7 @@ class GetarFrame(Frame):
                              self._records['dimensions'], self._frame)[0]
             # Fallback to detection based on z coordinates
             else:
-                zs = np.array([xyz[-1] for xyz in raw_frame.positions])
+                zs = raw_frame.positions[:,2]
                 dimensions = 2 if np.allclose(zs, 0.0, atol=1e-7) else 3
 
             box = self._trajectory.getRecord(self._records['box'], self._frame)
