@@ -196,6 +196,7 @@ class BaseGSDHOOMDFileReaderTest(TrajectoryTest):
          [3.,  4.,  0.],
          [3.,  4.,  2.],
          [3.,  4.,  4.]])))
+        assert np.array_equal(traj[0].image, np.zeros([100, 3]))
 
     @unittest.skipIf(not HOOMD or not HPMC, 'requires HOOMD and HPMC')
     def test_sphere(self):
