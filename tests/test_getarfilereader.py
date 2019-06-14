@@ -46,7 +46,6 @@ class BaseGetarFileReaderTest(unittest.TestCase):
             self.velocities[:, 2] = 0
 
         with gtar.GTAR(self.getar_file_fn, 'w') as traj:
-            traj.writePath('frames/0/dimensions.f32.ind', dim)
             traj.writePath('frames/0/position.f32.ind', self.positions)
             traj.writePath('frames/0/orientation.f32.ind', self.orientations)
             traj.writePath('frames/0/velocity.f32.ind', self.velocities)
@@ -126,7 +125,6 @@ class NoTypesGetarFileReaderTest(BaseGetarFileReaderTest):
             self.velocities[:, 2] = 0
 
         with gtar.GTAR(self.getar_file_fn, 'w') as traj:
-            traj.writePath('frames/0/dimensions.f32.ind', dim)
             traj.writePath('frames/0/position.f32.ind', self.positions)
             traj.writePath('frames/0/orientation.f32.ind', self.orientations)
             traj.writePath('frames/0/velocity.f32.ind', self.velocities)
