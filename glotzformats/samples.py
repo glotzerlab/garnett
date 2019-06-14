@@ -15,7 +15,7 @@ def A "poly3d 4 1.0 0.0 -0.707106 -1.0 0.0 -0.707106 0.0 1.0 0.707106 0.0 -1.0 0
 A 1.82294440269 15.4535045624 14.8948659897 1 0 0 0
 A -7.82164478302 10.8672037125 -2.95065999031 1 0 0 0
 A -6.764575947059 -14.8567379768 -8.685973902168 0.9805919875544 0.1852591352614 0.06382813748332 0.006661502213598
-eof"""
+eof"""  # noqa: E501
 
 POS_HPMC_2D = """boxMatrix 10 0 0 0 10 0 0 0 1
 def A "poly3d 4 0.5 0.5 0 -0.5 0.5 0 0.5 0.5 0 0.5 -0.5 0 008800"
@@ -35,7 +35,7 @@ A 1.82294440269 3.4535045624 0 1 0 0 0
 A -2.82164478302 1.8672037125 0  1 0 0 0
 A -3.71628189087 -2.6842060089 0 1 0 0 0
 eof
-"""
+"""  # noqa: E501
 
 POS_INCSIM = """#[data] Steps X-Length Y-Length Z-Length
 000000  10.000  10.000  10.000
@@ -52,7 +52,7 @@ eof
 000003  10.000  10.000  10.000
 000004  10.000  10.000  10.000
 000005  10.000  10.000  10.000
-#[done]"""
+#[done]"""  # noqa: E501
 
 POS_INCSIM_2D = """#[data] Steps X-Length Y-Length Z-Length
 000000  10.000  10.000  1.000
@@ -70,7 +70,7 @@ eof
 000004  10.000  10.000  1.000
 000005  10.000  10.000  1.000
 #[done]
-"""
+"""  # noqa: E501
 
 POS_MONOTYPE = """#[data] Steps           Time            Vol             Packing         Press           MSD             DeltaX          DeltaQ          DeltaV          AcceptX         AcceptQ         AcceptV         Ensemble        Shear           Overlaps        X-Length        Y-Length        Z-Length        XY-Angle        XZ-Angle        YZ-Angle        RNGstate        RNGstatew
 5683290 0       13854.542584873 0.553368299     11      2.219808854     0.089573664     0.060274335     0.749136778     0.296100599     0.27948962      0.285714286     2       0       0       24.017662106    24.017662106    24.017662106    90      90      90      3728705625      1305200346
@@ -88,7 +88,7 @@ boxMatrix 25.0 0 0 0 25.0 0 0 0 1.0
 shape "poly3d 12 0.333333 1 0 1 0.333333 0 0.333333 0.333333 0 -1 -0.333333 0 -0.333333 -1 0 -0.333333 -0.333333 0 -0.333333 0.333333 0 -0.333333 1 0 -1 0.333333 0 0.333333 -0.333333 0 1 -0.333333 0 0.333333 -1 0"
 ff0000 -11.320217528 -8.749537435 0 1 0 0 0
 ff0000 -8.199472831 -9.791602851 0 1 0 0 0
-eof""" # noga: E501
+eof"""  # noqa: E501
 
 POS_INJAVIS = """//date: Thursday, July 23, 2015 2:50:06 PM
 #[data] Steps   Time    Vol     Packing Press   MSD     DeltaX  DeltaQ  DeltaV  AcceptX AcceptQ AcceptV Ensemble        Shear   Overlaps        X-Length        Y-Length        Z-Length        XY-Angle        XZ-Angle        YZ-Angle        RNGstate        RNGstatew

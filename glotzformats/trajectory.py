@@ -269,7 +269,7 @@ class Frame(object):
         ret.data_keys = raw_frame.data_keys
         ret.view_rotation = raw_frame.view_rotation
         # If all the z coordinates are zero, set box dimension to 2
-        zs = np.array([ xyz[-1] for xyz in ret.positions ])
+        zs = np.array([xyz[-1] for xyz in ret.positions])
         if np.allclose(zs, 0.0, atol=1e-6):
             ret.box.dimensions = 2
 

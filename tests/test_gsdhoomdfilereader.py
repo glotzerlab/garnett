@@ -253,7 +253,6 @@ class BaseGSDHOOMDFileReaderTest(TrajectoryTest):
             assert traj[-1].box.dimensions == 2
             assert np.isclose(traj[-1].box.Lz, 1)
 
-
     @unittest.skipIf(not HOOMD or not HPMC, 'requires HOOMD and HPMC')
     def test_convex_polygon_2d(self):
         self.system = hoomd.init.create_lattice(
