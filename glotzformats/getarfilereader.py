@@ -93,7 +93,8 @@ class GetarFrame(Frame):
             'angular_momentum_quat': 'angmom'}
         supported_records = ['position', 'orientation', 'velocity',
                              'mass', 'charge', 'diameter',
-                             'moment_inertia', 'angular_momentum_quat']
+                             'moment_inertia', 'angular_momentum_quat',
+                             'image']
         for name in supported_records:
             try:
                 values = self._trajectory.getRecord(
