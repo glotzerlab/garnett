@@ -286,7 +286,7 @@ class PosFileFrame(Frame):
 
         # Perform inverse rotation to recover original coordinates
         if raw_frame.view_rotation is not None:
-            pos = rowan.rotate(rowan.inverse(raw_frame.view_rotation),raw_frame.positions)
+            pos = rowan.rotate(rowan.inverse(raw_frame.view_rotation), raw_frame.positions)
         else:
             pos = raw_frame.positions
         # If all the z coordinates are close to zero, set box dimension to 2
