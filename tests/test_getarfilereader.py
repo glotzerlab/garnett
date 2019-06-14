@@ -56,7 +56,7 @@ class BaseGetarFileReaderTest(unittest.TestCase):
             traj.writePath('frames/0/moment_inertia.f32.ind', self.moment_inertia)
             traj.writePath('frames/0/angular_momentum_quat.f32.ind', self.angmom)
             traj.writePath('frames/0/box.f32.ind', self.box)
-            traj.writePath('frames/0/image.f32.ind', self.image)
+            traj.writePath('frames/0/image.i32.ind', self.image)
             traj.writePath('type.u32.ind', types)
             traj.writePath('type_names.json', json.dumps(type_names))
 
@@ -139,7 +139,7 @@ class NoTypesGetarFileReaderTest(BaseGetarFileReaderTest):
             traj.writePath('frames/0/moment_inertia.f32.ind', self.moment_inertia)
             traj.writePath('frames/0/angular_momentum_quat.f32.ind', self.angmom)
             traj.writePath('frames/0/box.f32.ind', self.box)
-            traj.writePath('angle/0/image.f32.ind', self.image)
+            traj.writePath('angle/0/image.i32.ind', self.image)
             traj.writePath('angle/type.u32.ind', [0])
             traj.writePath('angle/type_names.json', '["Angle_A"]')
 
