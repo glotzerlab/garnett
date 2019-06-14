@@ -64,16 +64,21 @@ class SphereShape(Shape):
         Diameter of the sphere.
     :type diameter:
         float
+    :param orientable:
+         Set to True for spheres with orientation (default: :code:`False`).
+    :type orientable:
+        bool
     :param color:
         Hexadecimal color string in format :code:`RRGGBBAA` (default: :code:`None`).
     :type color:
         str
     """
 
-    def __init__(self, diameter, color=None):
+    def __init__(self, diameter, orientable=False, color=None):
         super(SphereShape, self).__init__(
             shape_class='sphere', color=color)
         self.diameter = diameter
+        self.orientable = orientable
 
     def __str__(self):
         return "{} {} {}".format(self.shape_class, self.diameter, self.color)
@@ -83,10 +88,11 @@ class SphereShape(Shape):
         """Shape as dictionary. Example:
 
             >>> SphereShape(2.0).shape_dict
-            {'type': 'Sphere', 'diameter': 2.0}
+            {'type': 'Sphere', 'diameter': 2.0, 'orientable': False}
         """
         return {'type': 'Sphere',
-                'diameter': self.diameter}
+                'diameter': self.diameter,
+                'orientable': self.orientable}
 
 
 class ArrowShape(Shape):
@@ -407,3 +413,57 @@ class GeneralPolyhedronShape(Shape):
         return {'type': 'Mesh',
                 'vertices': self.vertices,
                 'indices': self.faces}
+
+
+class EllipsoidShape(Shape):
+    """Shape class for ellipsoids of with principal axes a, b, and c.
+
+    :param a:
+        Principal axis a of the ellipsoid (radius in the x direction).
+    :type a:
+        float
+    :param b:
+        Principal axis b of the ellipsoid (radius in the y direction).
+    :type b:
+        float
+    :param c:
+        Principal axis c of the ellipsoid (radius in the z direction).
+    :type c:
+        float
+    :param color:
+        Hexadecimal color string in format :code:`RRGGBBAA` (default: :code:`None`).
+    :type color:
+        str
+    """
+
+    def __init__(self, a, b, c, color=None):
+        super(EllipsoidShape, self).__init__(
+            shape_class='ellipsoid', color=color)
+        self.a = a
+        self.b = b
+        self.c = c
+
+    def __str__(self):
+        return "{} {} {} {} {}".format(
+            self.shape_class,
+            self.a,
+            self.b,
+            self.c,
+            self.color
+        )
+
+    @property
+    def shape_dict(self):
+        """Shape as dictionary. Example:
+
+            >>> EllipsoidShape(7.0, 5.0, 3.0).shape_dict
+            {'type': 'Ellipsoid',
+            'a': 7.0,
+            'b': 5.0,
+            'c': 3.0}
+
+        """
+        return {'type:': 'Ellipsoid',
+                'a': self.a,
+                'b': self.b,
+                'c': self.c}

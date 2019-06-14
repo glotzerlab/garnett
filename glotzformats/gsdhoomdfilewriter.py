@@ -10,7 +10,7 @@ import logging
 import numpy as np
 
 from .shapes import SphereShape, ConvexPolyhedronShape, ConvexSpheropolyhedronShape, \
-    PolygonShape, SpheropolygonShape
+    PolygonShape, SpheropolygonShape, EllipsoidShape
 from .errors import GSDShapeError
 
 logger = logging.getLogger(__name__)
@@ -38,6 +38,7 @@ def _write_shape_definitions(snap, shapedefs):
     else:
         if shape_type is SphereShape:
             state['hpmc/sphere/radius'] = compute_property(lambda shape: 0.5*shape.diameter)
+            state['hpmc/sphere/orientable'] = compute_property(lambda shape: shape.orientable)
         elif shape_type is ConvexPolyhedronShape:
             state['hpmc/convex_polyhedron/N'] = compute_property(lambda shape: len(shape.vertices))
             vertices = compute_property(lambda shape: shape.vertices)
@@ -62,6 +63,10 @@ def _write_shape_definitions(snap, shapedefs):
             state['hpmc/convex_spheropolygon/vertices'] = vertices
             state['hpmc/convex_spheropolygon/sweep_radius'] = \
                 compute_property(lambda shape: shape.rounding_radius)
+        elif shape_type is EllipsoidShape:
+            state['hpmc/ellipsoid/a'] = compute_property(lambda shape: shape.a)
+            state['hpmc/ellipsoid/b'] = compute_property(lambda shape: shape.b)
+            state['hpmc/ellipsoid/c'] = compute_property(lambda shape: shape.c)
         else:
             raise GSDShapeError('Unsupported shape: {}'.format(shape_type))
 
@@ -107,21 +112,55 @@ class GSDHOOMDFileWriter(object):
 
         with gsd.hoomd.open(name=filename, mode=mode) as traj_outfile:
             for i, frame in enumerate(trajectory):
-                types = list(set(frame.types))
+                N = len(frame)
                 snap = gsd.hoomd.Snapshot()
-                snap.particles.N = len(frame)
+                snap.particles.N = N
+                try:
+                    types = list(set(frame.types))
+                except AttributeError:
+                    types = ['A']
                 snap.particles.types = types
-                snap.particles.typeid = [types.index(typeid) for typeid in frame.types]
-                snap.particles.position = frame.positions
-                snap.particles.orientation = frame.orientations
-                snap.particles.velocity = frame.velocities
-                snap.particles.mass = frame.mass
-                snap.particles.charge = frame.charge
-                snap.particles.diameter = frame.diameter
-                snap.particles.moment_inertia = frame.moment_inertia
-                snap.particles.angmom = frame.angmom
+                try:
+                    snap.particles.typeid = [types.index(typeid) for typeid in frame.types]
+                except AttributeError:
+                    pass
+                try:
+                    snap.particles.position = frame.positions
+                except AttributeError:
+                    pass
+                try:
+                    snap.particles.orientation = frame.orientations
+                except AttributeError:
+                    pass
+                try:
+                    snap.particles.velocity = frame.velocities
+                except AttributeError:
+                    pass
+                try:
+                    snap.particles.mass = frame.mass
+                except AttributeError:
+                    pass
+                try:
+                    snap.particles.charge = frame.charge
+                except AttributeError:
+                    pass
+                try:
+                    snap.particles.diameter = frame.diameter
+                except AttributeError:
+                    pass
+                try:
+                    snap.particles.moment_inertia = frame.moment_inertia
+                except AttributeError:
+                    pass
+                try:
+                    snap.particles.angmom = frame.angmom
+                except AttributeError:
+                    pass
                 snap.configuration.box = frame.box.get_box_array()
-                _write_shape_definitions(snap, frame.shapedef)
+                try:
+                    _write_shape_definitions(snap, frame.shapedef)
+                except AttributeError:
+                    _write_shape_definitions(snap, {})
                 traj_outfile.append(snap)
                 logger.debug("Wrote frame {}.".format(i + 1))
         logger.info("Wrote {} frames.".format(i + 1))

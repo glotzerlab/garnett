@@ -33,7 +33,8 @@ def _parse_shape_definition(shape):
 
     if shape_type in ('sphere', 'disk'):
         diameter = shape.get('diameter', 2*shape.get('rounding_radius', 0.5))
-        shapedef = SphereShape(diameter=diameter, color=None)
+        orientable = shape.get('orientable', False)
+        shapedef = SphereShape(diameter=diameter, orientable=orientable, color=None)
     elif shape_type == 'convexpolyhedron':
         if rounding_radius == 0:
             shapedef = ConvexPolyhedronShape(vertices=shape['vertices'], color=None)

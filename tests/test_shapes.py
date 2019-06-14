@@ -29,9 +29,12 @@ class ShapeTestData(dict):
 
 def annotate_shape_test(test_class, shape_classes):
     for s in shape_classes:
-        s = ShapeTestData(s)
-        setattr(s, '__name__', '{}_{}'.format(test_class, s['name']))
-        yield s
+        # skipping ellipsoid test until HOOMD provides a
+        # get_type_shapes method for ellipsoids
+        if test_class == 'GetarShapeTest' and s != 'ellipsoid_3d':
+            s = ShapeTestData(s)
+            setattr(s, '__name__', '{}_{}'.format(test_class, s['name']))
+            yield s
 
 
 @ddt
@@ -67,6 +70,33 @@ class ShapeTest(unittest.TestCase):
                                     shape_class['params']['sweep_radius'])
             npt.assert_almost_equal(shape_dict['rounding_radius'],
                                     shape_class['params']['sweep_radius'])
+        if 'orientable' in shape_class['params']:
+            # Of the three shape supporting formats, only POS files do
+            # not support the orientable flag and should be set to the
+            # default False.
+            if not self.__class__.__name__ == "POSShapeTest":
+                self.assertEqual(shapedef['A'].orientable,
+                                 shape_class['params']['orientable'])
+                self.assertEqual(shape_dict['orientable'],
+                                 shape_class['params']['orientable'])
+            else:
+                self.assertEqual(shapedef['A'].orientable, False)
+                self.assertEqual(shape_dict['orientable'], False)
+        if 'a' in shape_class['params']:
+            npt.assert_almost_equal(shapedef['A'].a,
+                                    shape_class['params']['a'])
+            npt.assert_almost_equal(shape_dict['a'],
+                                    shape_class['params']['a'])
+        if 'b' in shape_class['params']:
+            npt.assert_almost_equal(shapedef['A'].b,
+                                    shape_class['params']['b'])
+            npt.assert_almost_equal(shape_dict['b'],
+                                    shape_class['params']['b'])
+        if 'c' in shape_class['params']:
+            npt.assert_almost_equal(shapedef['A'].c,
+                                    shape_class['params']['c'])
+            npt.assert_almost_equal(shape_dict['c'],
+                                    shape_class['params']['c'])
 
 
 @ddt

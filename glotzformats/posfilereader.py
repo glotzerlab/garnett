@@ -18,7 +18,7 @@ import numpy as np
 from .trajectory import _RawFrameData, Frame, Trajectory
 from .shapes import FallbackShape, SphereShape, ArrowShape, SphereUnionShape, \
     ConvexPolyhedronShape, ConvexSpheropolyhedronShape, \
-    ConvexPolyhedronUnionShape, GeneralPolyhedronShape
+    ConvexPolyhedronUnionShape, GeneralPolyhedronShape, EllipsoidShape
 import rowan
 
 from .errors import ParserError, ParserWarning
@@ -178,6 +178,18 @@ class PosFileFrame(Frame):
             return ConvexSpheropolyhedronShape(vertices=vertices,
                                                rounding_radius=rounding_radius,
                                                color=color)
+        elif shape_class.lower() == 'ellipsoid':
+            a = float(next(tokens))
+            b = float(next(tokens))
+            c = float(next(tokens))
+            try:
+                color = next(tokens)
+            except StopIteration:
+                color = None
+            return EllipsoidShape(a=a,
+                                  b=b,
+                                  c=c,
+                                  color=color)
         else:
             warnings.warn("Failed to parse shape definition, "
                           "using fallback mode. ({})".format(line))

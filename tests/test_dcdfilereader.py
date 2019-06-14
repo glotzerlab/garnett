@@ -43,6 +43,22 @@ class BaseDCDFileReaderTest(TrajectoryTest):
         top_traj = self.read_top_trajectory()
         return self.reader().read(self.get_sample_file(), top_traj[0])
 
+    def assert_raise_attribute_error(self, frame):
+        with self.assertRaises(AttributeError):
+            frame.charge
+        with self.assertRaises(AttributeError):
+            frame.diameter
+        with self.assertRaises(AttributeError):
+            frame.moment_inertia
+        with self.assertRaises(AttributeError):
+            frame.angmom
+        with self.assertRaises(AttributeError):
+            frame.image
+        with self.assertRaises(AttributeError):
+            frame.mass
+        with self.assertRaises(AttributeError):
+            frame.velocities
+
     def test_read(self):
         assert self.read_top_trajectory()
         traj = self.get_traj()
@@ -66,6 +82,9 @@ class BaseDCDFileReaderTest(TrajectoryTest):
             [0.11570763588, 0.873030900955, -0.880133986473],
             [1.78225398064, -0.266534328461, -1.39306223392],
             [0.162209749222, -2.22765517235, -1.27463591099]])))
+
+        for frame in traj:
+            self.assert_raise_attribute_error(frame)
 
 
 if __name__ == '__main__':

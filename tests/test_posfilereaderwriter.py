@@ -57,6 +57,20 @@ class BasePosFileReaderTest(unittest.TestCase):
         reader = glotzformats.reader.PosFileReader(precision=precision)
         return reader.read(stream)
 
+    def assert_raise_attribute_error(self, frame):
+        with self.assertRaises(AttributeError):
+            frame.velocities
+        with self.assertRaises(AttributeError):
+            frame.charge
+        with self.assertRaises(AttributeError):
+            frame.diameter
+        with self.assertRaises(AttributeError):
+            frame.moment_inertia
+        with self.assertRaises(AttributeError):
+            frame.angmom
+        with self.assertRaises(AttributeError):
+            frame.image
+
 
 class BasePosFileWriterTest(BasePosFileReaderTest):
 
@@ -74,11 +88,15 @@ class BasePosFileWriterTest(BasePosFileReaderTest):
         self.assertEqual(a.box.round(decimals), b.box.round(decimals))
         self.assertEqual(a.types, b.types)
         self.assertTrue(np.allclose(a.positions, b.positions, atol=atol))
-        if a.velocities is not None and b.velocities is not None:
+        try:
             self.assertTrue(np.allclose(a.velocities, b.velocities, atol=atol))
-        if not ignore_orientations and \
-                (a.orientations is not None and b.orientations is not None):
-            self.assertTrue(np.allclose(a.orientations, b.orientations, atol=atol))
+        except AttributeError:
+            pass
+        if not ignore_orientations:
+            try:
+                self.assertTrue(np.allclose(a.orientations, b.orientations, atol=atol))
+            except AttributeError:
+                pass
         self.assertEqual(a.data, b.data)
         for key in chain(a.shapedef, b.shapedef):
             self.assertEqual(a.shapedef[key], b.shapedef[key])
@@ -111,6 +129,7 @@ class PosFileReaderTest(BasePosFileReaderTest):
             N = len(frame)
             self.assertEqual(frame.types, ['A'] * N)
             self.assertEqual(frame.box, box_expected)
+            self.assert_raise_attribute_error(frame)
 
     def test_incsim_dialect(self):
         if PYTHON_2:
@@ -123,6 +142,7 @@ class PosFileReaderTest(BasePosFileReaderTest):
             N = len(frame)
             self.assertEqual(frame.types, ['A'] * N)
             self.assertEqual(frame.box, box_expected)
+            self.assert_raise_attribute_error(frame)
 
     def test_monotype_dialect(self):
         if PYTHON_2:
@@ -135,6 +155,7 @@ class PosFileReaderTest(BasePosFileReaderTest):
             N = len(frame)
             self.assertEqual(frame.types, ['A'] * N)
             self.assertEqual(frame.box, box_expected)
+            self.assert_raise_attribute_error(frame)
 
     def test_injavis_dialect(self):
         if PYTHON_2:
@@ -147,6 +168,7 @@ class PosFileReaderTest(BasePosFileReaderTest):
             N = len(frame)
             self.assertEqual(frame.types, ['A'] * N)
             self.assertEqual(frame.box, box_expected)
+            self.assert_raise_attribute_error(frame)
 
 
 @unittest.skipIf(not HPMC, 'requires HPMC')
@@ -192,6 +214,45 @@ class HPMCPosFileReaderTest(BasePosFileReaderTest):
         dump.pos(filename=self.fn_pos, period=1)
         run(10, quiet=True)
         with io.open(self.fn_pos, 'r', encoding='utf-8') as posfile:
+            traj = self.read_trajectory(posfile)
+            shape = traj[0].shapedef['A']
+            assert shape.shape_class == 'sphere'
+            assert np.isclose(shape.diameter, float(1.0))
+
+    def test_ellipsoid(self):
+        if HOOMD_v1:
+            from hoomd_script import init, sorter, data, dump, run
+            self.system = init.create_empty(N=2, box=data.boxdim(
+                L=10, dimensions=2), particle_types=['A'])
+            self.addCleanup(init.reset)
+        else:
+            from hoomd import init, data, run, context, lattice
+            from hoomd.update import sort as sorter
+            from hoomd.deprecated import dump
+            self.system = init.create_lattice(
+                unitcell=lattice.sq(10), n=(2, 1))
+            self.addCleanup(context.initialize, "--mode=cpu")
+            hoomd.option.set_notice_level(0)
+        self.addCleanup(self.del_system)
+        self.mc = hpmc.integrate.ellipsoid(seed=10)
+        a = 0.5
+        b = 0.25
+        c = 0.125
+        self.mc.shape_param.set("A", a=a, b=b, c=c)
+        self.addCleanup(self.del_mc)
+        self.system.particles[0].position = (0, 0, 0)
+        self.system.particles[0].orientation = (1, 0, 0, 0)
+        self.system.particles[1].position = (2, 0, 0)
+        self.system.particles[1].orientation = (1, 0, 0, 0)
+        if HOOMD_v1:
+            sorter.set_params(grid=8)
+        else:
+            context.current.sorter.set_params(grid=8)
+
+        pos_writer = dump.pos(filename=self.fn_pos, period=1)
+        self.mc.setup_pos_writer(pos_writer)
+        run(10, quiet=True)
+        with io.open(self.fn_pos, 'r', encoding='utf-8') as posfile:
             self.read_trajectory(posfile)
 
     def test_convex_polyhedron(self):
@@ -210,16 +271,12 @@ class HPMCPosFileReaderTest(BasePosFileReaderTest):
             self.addCleanup(context.initialize, "--mode=cpu")
             hoomd.option.set_notice_level(0)
         self.addCleanup(self.del_system)
-        self.mc = hpmc.integrate.convex_polygon(seed=10)
+        self.mc = hpmc.integrate.convex_polyhedron(seed=10)
         self.addCleanup(self.del_mc)
-        self.mc.shape_param.set("A", vertices=[(-2, -1, -1),
-                                               (-2, 1, -1),
-                                               (-2, -1, 1),
-                                               (-2, 1, 1),
-                                               (2, -1, -1),
-                                               (2, 1, -1),
-                                               (2, -1, 1),
-                                               (2, 1, 1)])
+        shape_vertices = np.array([[-2, -1, -1], [-2, 1, -1], [-2, -1, 1],
+                                   [-2, 1, 1], [2, -1, -1], [2, 1, -1],
+                                   [2, -1, 1], [2, 1, 1]])
+        self.mc.shape_param.set("A", vertices=shape_vertices)
         self.system.particles[0].position = (0, 0, 0)
         self.system.particles[0].orientation = (1, 0, 0, 0)
         self.system.particles[1].position = (2, 0, 0)
@@ -232,7 +289,10 @@ class HPMCPosFileReaderTest(BasePosFileReaderTest):
         self.mc.setup_pos_writer(pos_writer)
         run(10, quiet=True)
         with io.open(self.fn_pos, 'r', encoding='utf-8') as posfile:
-            self.read_trajectory(posfile)
+            traj = self.read_trajectory(posfile)
+            shape = traj[0].shapedef['A']
+            assert shape.shape_class == 'poly3d'
+            assert np.array_equal(shape.vertices, shape_vertices)
 
 
 @ddt
@@ -305,6 +365,28 @@ class PosFileWriterTest(BasePosFileWriterTest):
         for frame in traj_cmp:
             self.assertTrue(isinstance(
                 frame.shapedef['A'], ArrowShape))
+
+    def test_ellipsoid(self):
+        from glotzformats.shapes import EllipsoidShape
+        if PYTHON_2:
+            sample = io.StringIO(unicode(glotzformats.samples.POS_INJAVIS))  # noqa
+        else:
+            sample = io.StringIO(glotzformats.samples.POS_INJAVIS)
+        traj = self.read_trajectory(sample)
+        traj.load()
+        a = 0.5
+        b = 0.25
+        c = 0.125
+        for frame in traj:
+            frame.shapedef['A'] = EllipsoidShape(a=a, b=b, c=c)
+        dump = io.StringIO()
+        self.write_trajectory(traj, dump)
+        dump.seek(0)
+        traj_cmp = self.read_trajectory(dump)
+        self.assertEqual(traj, traj_cmp)
+        for frame in traj_cmp:
+            self.assertTrue(isinstance(
+                frame.shapedef['A'], EllipsoidShape))
 
     @unittest.skipIf(not IN_PATH, 'tests not executed from repository root')
     @data(

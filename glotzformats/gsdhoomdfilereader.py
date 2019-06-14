@@ -31,7 +31,7 @@ import numpy as np
 
 from .trajectory import _RawFrameData, Frame, Trajectory
 from .shapes import SphereShape, ConvexPolyhedronShape, ConvexSpheropolyhedronShape, \
-    PolygonShape, SpheropolygonShape
+    PolygonShape, SpheropolygonShape, EllipsoidShape
 
 try:
     from gsd.fl import GSDFile
@@ -55,13 +55,13 @@ def _box_matrix(box):
 
 def _parse_shape_definitions(frame, gsdfile, frame_index):
 
-    def get_chunk(i, chunk):
+    def get_chunk(i, chunk, default=None):
         if gsdfile.chunk_exists(i, chunk):
             return gsdfile.read_chunk(i, chunk)
         elif gsdfile.chunk_exists(0, chunk):
             return gsdfile.read_chunk(0, chunk)
         else:
-            return None
+            return default
 
     shapedefs = dict()
     types = frame.particles.types
@@ -69,9 +69,14 @@ def _parse_shape_definitions(frame, gsdfile, frame_index):
     # Spheres
     if get_chunk(frame_index, 'state/hpmc/sphere/radius') is not None:
         radii = get_chunk(frame_index, 'state/hpmc/sphere/radius')
-        for typename, radius in zip(types, radii):
+        orientables = get_chunk(frame_index, 'state/hpmc/sphere/orientable')
+        # Since the orientable chunk was only added in HOOMD Schema version 1.3,
+        # not all GSD files may have it. Thus, it is set to False in such cases.
+        if orientables is None:
+            orientables = [False]*len(radii)
+        for typename, radius, orientable in zip(types, radii, orientables):
             shapedefs[typename] = SphereShape(
-                diameter=radius*2, color=None)
+                diameter=radius*2, orientable=orientable, color=None)
         return shapedefs
 
     # Convex Polyhedra
@@ -102,9 +107,14 @@ def _parse_shape_definitions(frame, gsdfile, frame_index):
                 vertices=typeverts, rounding_radius=radius, color=None)
         return shapedefs
 
-    # Ellipsoid is supported by state/hpmc but not glotzformats.shapes:
+    # Ellipsoid
     if get_chunk(frame_index, 'state/hpmc/ellipsoid/a') is not None:
-        warnings.warn('ellipsoid is not supported by glotzformats.')
+        a_all = get_chunk(frame_index, 'state/hpmc/ellipsoid/a')
+        b_all = get_chunk(frame_index, 'state/hpmc/ellipsoid/b')
+        c_all = get_chunk(frame_index, 'state/hpmc/ellipsoid/c')
+        for typename, a, b, c in zip(types, a_all, b_all, c_all):
+            shapedefs[typename] = EllipsoidShape(
+                a=a, b=b, c=c, color=None)
 
     # Convex Polygons
     if get_chunk(frame_index, 'state/hpmc/convex_polygon/N') is not None:
@@ -189,9 +199,9 @@ class GSDHoomdFrame(Frame):
             raw_frame.shapedef = copy.deepcopy(self.t_frame.shapedef)
             raw_frame.box_dimensions = self.t_frame.box.dimensions
         else:
-        # Fallback to gsd shape data if no frame is provided
+            # Fallback to gsd shape data if no frame is provided
             raw_frame.shapedef.update(
-                _parse_shape_definitions(frame, self.gsdfile, self.frame_index));
+                _parse_shape_definitions(frame, self.gsdfile, self.frame_index))
         raw_frame.box = _box_matrix(frame.configuration.box)
         raw_frame.box_dimensions = int(frame.configuration.dimensions)
         raw_frame.types = [frame.particles.types[t] for t in frame.particles.typeid]
