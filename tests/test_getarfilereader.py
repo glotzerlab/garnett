@@ -42,8 +42,8 @@ class BaseGetarFileReaderTest(unittest.TestCase):
         self.box = np.array([1.0, 1.0, 1.0, 0.0, 0.0, 0.0])
         self.types = [type_names[t] for t in types]
         if dim == 2:
-            self.positions[:,2]  = 0
-            self.velocities[:,2] = 0
+            self.positions[:, 2] = 0
+            self.velocities[:, 2] = 0
 
         with gtar.GTAR(self.getar_file_fn, 'w') as traj:
             traj.writePath('frames/0/position.f32.ind', self.positions)
@@ -102,6 +102,7 @@ class BaseGetarFileReaderTest(unittest.TestCase):
         np.testing.assert_allclose(frame.angmom, self.angmom)
         self.assertEqual(frame.types, self.types)
 
+
 @unittest.skipIf(not GTAR, 'GetarFileReader requires the gtar module.')
 class NoTypesGetarFileReaderTest(BaseGetarFileReaderTest):
     """This test makes sure that when angle (or other non-particle) types
@@ -120,8 +121,8 @@ class NoTypesGetarFileReaderTest(BaseGetarFileReaderTest):
         self.box = np.array([1.0, 1.0, 1.0, 0.0, 0.0, 0.0])
         self.types = N*['A']
         if dim == 2:
-            self.positions[:,2]  = 0
-            self.velocities[:,2] = 0
+            self.positions[:, 2] = 0
+            self.velocities[:, 2] = 0
 
         with gtar.GTAR(self.getar_file_fn, 'w') as traj:
             traj.writePath('frames/0/position.f32.ind', self.positions)
