@@ -268,6 +268,7 @@ class Frame(object):
         ret.data = raw_frame.data
         ret.data_keys = raw_frame.data_keys
         ret.view_rotation = raw_frame.view_rotation
+
         assert N == len(ret.types)
         assert N == len(ret.positions)
         if ret.orientations is not None:
@@ -1140,7 +1141,7 @@ def _regularize_box(positions, velocities,
     xy = box[0, 1]/Ly
     xz = box[0, 2]/Lz
     yz = box[1, 2]/Lz
-    box = Box(Lx=Lx, Ly=Ly, Lz=Lz, xy=xy, xz=xz, yz=yz)
+    box = Box(Lx=Lx, Ly=Ly, Lz=Lz, xy=xy, xz=xz, yz=yz, dimensions=dimensions)
     return positions, velocities, orientations, angmom, box
 
 

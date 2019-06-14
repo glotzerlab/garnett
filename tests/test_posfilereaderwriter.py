@@ -402,7 +402,8 @@ class PosFileWriterTest(BasePosFileWriterTest):
         # 'rand_test',   # the same. The systems are otherwise identical.
         'scc',
         'switch_FeSiUC',
-        'switch_scc')
+        'switch_scc',
+        'pos_2d')
     def test_read_write_read(self, name):
         fn = os.path.join(PATH, 'samples', name + '.pos')
         with open(fn) as samplefile:
@@ -446,11 +447,11 @@ class PosFileWriterTest(BasePosFileWriterTest):
 @unittest.skip("injavis is currently not starting correctly.")
 class InjavisReadWriteTest(BasePosFileWriterTest):
 
-    def read_write_injavis(self, sample):
+    def read_write_injavis(self, sample_file):
         if PYTHON_2:
-            sample_file = io.StringIO(unicode(glotzformats.samples.POS_HPMC))  # noqa
+            sample_file = io.StringIO(unicode(sample_file))  # noqa
         else:
-            sample_file = io.StringIO(glotzformats.samples.POS_HPMC)
+            sample_file = io.StringIO(sample_file)
         # account for low injavis precision
         traj0 = self.read_trajectory(sample_file, precision=7)
         with tempfile.NamedTemporaryFile('w', suffix='.pos') as tmpfile0:
@@ -480,6 +481,15 @@ class InjavisReadWriteTest(BasePosFileWriterTest):
 
     def test_injavis_dialect(self):
         self.read_write_injavis(glotzformats.samples.POS_INJAVIS)
+
+    def test_hpmc_dialect_2d(self):
+        self.read_write_injavis(glotzformats.samples.POS_HPMC_2D)
+
+    def test_incsim_dialect_2d(self):
+        self.read_write_injavis(glotzformats.samples.POS_INCSIM_2D)
+
+    def test_monotype_dialect_2d(self):
+        self.read_write_injavis(glotzformats.samples.POS_MONOTYPE_2D)
 
 
 if __name__ == '__main__':
