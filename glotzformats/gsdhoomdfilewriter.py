@@ -157,6 +157,7 @@ class GSDHOOMDFileWriter(object):
                 except AttributeError:
                     pass
                 snap.configuration.box = frame.box.get_box_array()
+                snap.configuration.dimensions = frame.box.dimensions
                 try:
                     _write_shape_definitions(snap, frame.shapedef)
                 except AttributeError:
