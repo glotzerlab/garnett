@@ -156,6 +156,10 @@ class GSDHOOMDFileWriter(object):
                     snap.particles.angmom = frame.angmom
                 except AttributeError:
                     pass
+                try:
+                    snap.particles.image = frame.image
+                except AttributeError:
+                    pass
                 snap.configuration.box = frame.box.get_box_array()
                 snap.configuration.dimensions = frame.box.dimensions
                 try:
