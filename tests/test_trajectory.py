@@ -321,7 +321,6 @@ class TrajectoryTest(unittest.TestCase):
             traj.angmom
         traj.load_arrays()
         try:
-        # if traj.angmom is not None and None not in traj.angmom:
             if None not in traj.angmom:
                 if len(traj.angmom.shape) > 1:
                     self.assertTrue(np.issubdtype(
