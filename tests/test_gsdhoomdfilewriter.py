@@ -118,7 +118,7 @@ class BaseGSDHOOMDFileWriterTest(unittest.TestCase):
                 assert np.array_equal(written_traj[0].moment_inertia, np.zeros([27, 3]).astype(float))
                 assert np.array_equal(written_traj[0].angmom, np.zeros([27, 4]).astype(float))
                 assert np.array_equal(written_traj[0].charge, np.zeros([27]).astype(float))
-                assert np.array_equal(written_traj[0].image, np.zeros([27, 3]).astype(float))
+                assert np.array_equal(written_traj[0].image, np.zeros([27, 3]).astype(np.int32))
 
 
 if __name__ == '__main__':
