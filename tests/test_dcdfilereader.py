@@ -86,7 +86,7 @@ class BaseDCDFileReaderTest(TrajectoryTest):
         for frame in traj:
             self.assert_raise_attribute_error(frame)
 
-        traj.load()
+        traj.load_arrays()
         self.assert_raise_attribute_error(traj)
 
 

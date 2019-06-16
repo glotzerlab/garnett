@@ -131,7 +131,7 @@ class PosFileReaderTest(BasePosFileReaderTest):
             self.assertEqual(frame.box, box_expected)
             self.assert_raise_attribute_error(frame)
 
-        traj.load()
+        traj.load_arrays()
         self.assert_raise_attribute_error(traj)
 
     def test_incsim_dialect(self):
@@ -147,7 +147,7 @@ class PosFileReaderTest(BasePosFileReaderTest):
             self.assertEqual(frame.box, box_expected)
             self.assert_raise_attribute_error(frame)
 
-        traj.load()
+        traj.load_arrays()
         self.assert_raise_attribute_error(traj)
 
     def test_monotype_dialect(self):
@@ -163,7 +163,7 @@ class PosFileReaderTest(BasePosFileReaderTest):
             self.assertEqual(frame.box, box_expected)
             self.assert_raise_attribute_error(frame)
 
-        traj.load()
+        traj.load_arrays()
         self.assert_raise_attribute_error(traj)
 
     def test_injavis_dialect(self):
@@ -179,7 +179,7 @@ class PosFileReaderTest(BasePosFileReaderTest):
             self.assertEqual(frame.box, box_expected)
             self.assert_raise_attribute_error(frame)
 
-        traj.load()
+        traj.load_arrays()
         self.assert_raise_attribute_error(traj)
 
 
@@ -365,7 +365,7 @@ class PosFileWriterTest(BasePosFileWriterTest):
         else:
             sample = io.StringIO(glotzformats.samples.POS_INJAVIS)
         traj = self.read_trajectory(sample)
-        traj.load()
+        traj.load_arrays()
         for frame in traj:
             frame.shapedef['A'] = ArrowShape()
             frame.orientations.T[3] = 0
@@ -385,7 +385,7 @@ class PosFileWriterTest(BasePosFileWriterTest):
         else:
             sample = io.StringIO(glotzformats.samples.POS_INJAVIS)
         traj = self.read_trajectory(sample)
-        traj.load()
+        traj.load_arrays()
         a = 0.5
         b = 0.25
         c = 0.125
