@@ -781,7 +781,7 @@ class Trajectory(BaseTrajectory):
     def _raise_attributeerror(self, attr):
         value = getattr(self, attr, None)
         if value is None:
-            raise AttributeError('{} not available for this frame'.format(attr))
+            raise AttributeError('{} not available for this trajectory'.format(attr))
         else:
             return value
 
@@ -925,8 +925,7 @@ class Trajectory(BaseTrajectory):
             :meth:`~.Trajectory.load`."""
 
         self._assertarrays_loaded()
-        _N = self._raise_attributeerror('_N')
-        return np.asarray(_N, dtype=np.int_)
+        return np.asarray(self._N, dtype=np.int_)
 
     @property
     def types(self):
