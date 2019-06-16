@@ -37,7 +37,7 @@ class BaseGetarFileReaderTest(unittest.TestCase):
         self.diameter = np.random.rand(N)
         self.moment_inertia = np.random.rand(N, 3)
         self.angmom = np.random.rand(N, 4)
-        self.image = np.random.randint(-1000, 1000, size=(N, 3))
+        self.image = np.random.randint(-1000, 1000, size=(N, 3), dtype=np.int32)
         types = N // 2 * [0] + (N - N // 2) * [1]
         type_names = ['A', 'B']
         self.box = np.array([1.0, 1.0, 1.0, 0.0, 0.0, 0.0])
@@ -122,7 +122,7 @@ class NoTypesGetarFileReaderTest(BaseGetarFileReaderTest):
         self.diameter = np.random.rand(N)
         self.moment_inertia = np.random.rand(N, 3)
         self.angmom = np.random.rand(N, 4)
-        self.image = np.random.randint(1, size=(N, 3))
+        self.image = np.random.randint(-1000, 1000, size=(N, 3), dtype=np.int32)
         self.box = np.array([1.0, 1.0, 1.0, 0.0, 0.0, 0.0])
         self.types = N*['A']
         if dim == 2:
