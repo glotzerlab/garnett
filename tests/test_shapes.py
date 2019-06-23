@@ -31,10 +31,11 @@ def annotate_shape_test(test_class, shape_classes):
     for s in shape_classes:
         # skipping ellipsoid test until HOOMD provides a
         # get_type_shapes method for ellipsoids
-        if test_class == 'GetarShapeTest' and s != 'ellipsoid_3d':
-            s = ShapeTestData(s)
-            setattr(s, '__name__', '{}_{}'.format(test_class, s['name']))
-            yield s
+        if test_class == 'GetarFileReader' and s['name'] == 'ellipsoid_3d':
+            continue
+        s = ShapeTestData(s)
+        setattr(s, '__name__', '{}_{}'.format(test_class, s['name']))
+        yield s
 
 
 @ddt
