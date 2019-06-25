@@ -414,7 +414,8 @@ class BaseGSDHOOMDFileReaderTest(TrajectoryTest):
             charge=1,
             diameter=2,
             moment_inertia=(2, 0.5, 1),
-            angular_momentum=(1, 2, 3, 4))
+            angular_momentum=(1, 2, 3, 4),
+            image=(3, 5, 1))
         self.mc.shape_param.set("A", vertices=shape_vertices)
         for i in range(len(self.system.particles)):
             for prop in particle_props:
