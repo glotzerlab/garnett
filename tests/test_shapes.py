@@ -29,10 +29,6 @@ class ShapeTestData(dict):
 
 def annotate_shape_test(test_class, shape_classes):
     for s in shape_classes:
-        # skipping ellipsoid test until HOOMD provides a
-        # get_type_shapes method for ellipsoids
-        if test_class == 'GetarFileReader' and s['name'] == 'ellipsoid_3d':
-            continue
         s = ShapeTestData(s)
         setattr(s, '__name__', '{}_{}'.format(test_class, s['name']))
         yield s
@@ -120,7 +116,10 @@ class GetarShapeTest(ShapeTest):
 
     @data(*annotate_shape_test('GetarFileReader', get_shape_classes()))
     def test_shapes(self, shape_class):
-        self.check_shape_class(shape_class)
+        # skipping ellipsoid test until HOOMD provides a
+        # get_type_shapes method for ellipsoids
+        if shape_class['name'] != 'ellipsoid_3d':
+            self.check_shape_class(shape_class)
 
 
 @ddt
