@@ -130,7 +130,7 @@ class POSShapeTest(ShapeTest):
 
     @data(*annotate_shape_test('PosFileReader', get_shape_classes()))
     def test_shapes(self, shape_class):
-        if shape_class['dimensions'] == 3 or len(shape_class['params'].get('vertices', [])) >= 3:
+        if shape_class['dimensions'] == 3 or shape_class['cls'] == 'convex_polygon':
             self.check_shape_class(shape_class)
 
 
