@@ -130,8 +130,7 @@ class POSShapeTest(ShapeTest):
 
     @data(*annotate_shape_test('PosFileReader', get_shape_classes()))
     def test_shapes(self, shape_class):
-        # Ignore 2D shapes because POS files assume everything is 3D
-        if shape_class['dimensions'] == 3:
+        if shape_class['dimensions'] == 3 or len(shape_class['params'].get('vertices', [])) >= 3:
             self.check_shape_class(shape_class)
 
 
