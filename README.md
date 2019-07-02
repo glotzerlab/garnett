@@ -14,7 +14,8 @@ This is a collection of samples, parsers and writers for formats used in the Glo
 * Sophie Youjung Lee, syjlee@umich.edu
 * Carl Simon Adorf, csadorf@umich.edu
 * Bradley Dice, bdice@umich.edu
-
+* Luis Y. Rivera-Rivera, lyrivera@umich.edu
+* Kelly Wang, kelwang@umich.edu
 
 ## Setup
 
