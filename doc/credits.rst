@@ -1,7 +1,7 @@
 Source code
 -----------
 
-GSD is used to construct trajectory object from GSD files and is available at https://github.com/glotzerlab/gsd - Used under the BSD license::
+GSD is used to construct trajectory objects from GSD files and is available at https://github.com/glotzerlab/gsd - Used under the BSD license::
  
     Copyright (c) 2016-2019 The Regents of the University of Michigan
     All rights reserved.
