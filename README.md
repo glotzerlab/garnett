@@ -125,3 +125,6 @@ Execute the tests with
 
     python -m unittest discover tests
 
+or
+
+    nosetests
