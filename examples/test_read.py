@@ -26,11 +26,6 @@ def test_read(file, reader, *args, **kwargs):
         frame.load()
         print(frame)
 
-
-class RestrictedFile(glotzformats.formats.FileFormat):
-    pass
-    
-
 def main():
     if GTAR:
         for fn in glob.glob('../samples/*.tar'):
@@ -48,8 +43,6 @@ def main():
     for fn in glob.glob('../samples/*.pos'):
         with open(fn) as file:
             test_read(file, glotzformats.reader.PosFileReader())
-        with open(fn) as file:
-            test_read(RestrictedFile(file), glotzformats.reader.PosFileReader())
     return 0
 
 if __name__ == '__main__':
