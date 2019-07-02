@@ -1,7 +1,7 @@
 Source code
 -----------
 
-The PyCifRW project is used to parse ciff file streams. The PyCifRW project is located at
+The PyCifRW project is used to parse cif file streams. The PyCifRW project is located at
 https://bitbucket.org/jamesrhester/pycifrw/overview - Used under the following license::
 
     PYCIFRW License Agreement (Python License, Version 2)
