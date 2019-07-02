@@ -4,11 +4,6 @@
 
 This is a collection of samples, parsers and writers for formats used in the Glotzer Group at the University of Michigan, Ann Arbor.
 
-## Authors
-
-* Carl Simon Adorf, csadorf@umich.edu
-* Richmond Newmann, newmanrs@umich.edu
-
 ## Maintainers
 
 * Luis Y. Rivera-Rivera, lyrivera@umich.edu
