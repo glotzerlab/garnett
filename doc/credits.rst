@@ -2,12 +2,9 @@ Source code
 -----------
 
 The PyCifRW project is used to parse ciff file streams. The PyCifRW project is located at
-https://bitbucket.org/jamesrhester/pycifrw/overview. Its license is
-provided below.
+https://bitbucket.org/jamesrhester/pycifrw/overview - Used under the following license::
 
-  PYCIFRW License Agreement (Python License, Version 2)
-  -----------------------------------------------------
-
+    PYCIFRW License Agreement (Python License, Version 2)
 
     1. This LICENSE AGREEMENT is between the Australian Nuclear Science
     and Technology Organisation ("ANSTO"), and the Individual or
