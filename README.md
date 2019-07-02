@@ -46,7 +46,7 @@ with gf.read('gsdfile.gsd') as traj:
         pos = frame.positions
 
 with gf.read('posfile.pos') as traj:
-    gf.write(traj, 'gsdfile.pos')
+    gf.write(traj, 'gsdfile.gsd')
 ```
 
 ### Data access
