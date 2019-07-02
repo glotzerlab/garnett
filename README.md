@@ -39,16 +39,14 @@ To build the documentation yourself using sphinx, execute within the repository:
 
 ```
 #!python
-from glotzformats.reader import PosFileReader
-from glotzformats.writer import PosFileWriter
+import glotzformats as gf
 
-pos_reader = PosFileReader()
-with open('posfile.pos') as posfile:
-    traj = pos_reader.read(posfile)
+with gf.read('gsdfile.gsd') as traj:
+    for frame in traj:
+        pos = frame.positions
 
-pos_writer = PosFileWriter()
-with open('posfile2.pos', 'w') as posfile:
-    pos_writer.write(traj, posfile)
+with gf.read('posfile.pos') as traj:
+    gf.write(traj, 'gsdfile.pos')
 ```
 
 ### Data access
