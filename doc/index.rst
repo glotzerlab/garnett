@@ -17,6 +17,7 @@ glotzformats - documentation
    formats
    shapes
    development
+   credits
 
 
 Indices and tables
