@@ -1,3 +1,29 @@
+Credits
+=======
+
+Glotzformats Developers
+_______________________
+
+The following people contributed to the :py:mod:`glotzformats` package.
+
+Carl Simon Adorf, University of Michigan
+    * [Put contributions here]
+
+Richmond Newmann
+    * [Put contributions here]
+
+Bradley Dice, University of Michigan
+    * [Put contributions here]
+
+Sophie Youjung Lee, University of Michigan
+    * [Put contributions here]
+
+Luis Y. Rivera-Rivera, University of Michigan
+    * [Put contributions here]
+
+Kelly Wang, University of Michigan
+    * [Put contributions here]
+
 Source code
 -----------
 
