@@ -17,7 +17,7 @@ import numpy as np
 
 from .trajectory import _RawFrameData, Frame, Trajectory
 from .shapes import FallbackShape, SphereShape, ArrowShape, SphereUnionShape, \
-    ConvexPolyhedronShape, ConvexSpheropolyhedronShape, \
+    PolygonShape, ConvexPolyhedronShape, ConvexSpheropolyhedronShape, \
     ConvexPolyhedronUnionShape, GeneralPolyhedronShape, EllipsoidShape
 import rowan
 
@@ -148,6 +148,16 @@ class PosFileFrame(Frame):
                 color = next(tokens)
             except StopIteration:
                 color = None
+            vertices = np.asarray(vertices)
+            if (vertices[:, 2] == 0).all():
+                # If the z-components of all vertices are zero,
+                # create a 2D polygon instead
+                return PolygonShape(vertices=vertices[:, :2],
+                                    color=color)
+            else:
+                return ConvexPolyhedronShape(vertices=vertices,
+                                             color=color)
+
             return ConvexPolyhedronShape(vertices=vertices,
                                          color=color)
         elif shape_class.lower() == 'spoly3d':
@@ -161,6 +171,10 @@ class PosFileFrame(Frame):
                 color = next(tokens)
             except StopIteration:
                 color = None
+            # Note: In POS files, there is no way to distinguish a 2D
+            # spheropolygon with class spoly3d from a 3D spheropolyhedron whose
+            # vertices lie in the x-y plane (with a rounding radius, it becomes
+            # 3D).
             return ConvexSpheropolyhedronShape(vertices=vertices,
                                                rounding_radius=rounding_radius,
                                                color=color)
