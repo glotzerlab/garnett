@@ -118,7 +118,3 @@ To run all glotzformats tests, `ddt`, HOOMD-blue (`hoomd`), and `pycifrw` must b
 Execute the tests with
 
     python -m unittest discover tests
-
-or
-
-    nosetests
