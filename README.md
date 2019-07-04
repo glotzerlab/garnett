@@ -31,8 +31,7 @@ To build the documentation yourself using sphinx, execute within the repository:
 
 ### Reading and writing
 
-```
-#!python
+``` python
 import glotzformats as gf
 
 with gf.read('gsdfile.gsd') as traj:
@@ -46,8 +45,7 @@ with gf.read('posfile.pos') as traj:
 ### Data access
 
 Access individual frames by indexing or create sub trajectories with slicing:
-```
-#!python
+```python
 first_frame = traj[0]
 last_frame = traj[-1]
 n_th_frame = traj[n]
