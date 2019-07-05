@@ -14,7 +14,6 @@ glotzformats - documentation
    quickstart
    readerswriters
    trajectory
-   formats
    shapes
    development
    credits
