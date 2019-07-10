@@ -17,7 +17,7 @@ import gtar
 from .trajectory import _RawFrameData, Box, Frame, Trajectory
 from .shapes import FallbackShape, SphereShape, ConvexPolyhedronShape, \
     ConvexSpheropolyhedronShape, GeneralPolyhedronShape, PolygonShape, \
-    SpheropolygonShape
+    SpheropolygonShape, EllipsoidShape
 
 logger = logging.getLogger(__name__)
 
@@ -54,6 +54,8 @@ def _parse_shape_definition(shape):
             shapedef = SpheropolygonShape(vertices=shape['vertices'],
                                           rounding_radius=rounding_radius,
                                           color=None)
+    elif shape_type == 'ellipsoid':
+        shapedef = EllipsoidShape(a=shape['a'], b=shape['b'], c=shape['c'], color=None)
 
     if shapedef is None:
         logger.warning("Failed to parse shape definition: shape {} not supported. "
