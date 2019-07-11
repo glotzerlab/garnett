@@ -95,17 +95,24 @@ class PosFileWriter(object):
             _write(' '.join((str(_num(v)) for v in box_matrix.flatten())))
 
             # shape defs
-            required = set(frame.types).intersection(
-                set(frame.shapedef.keys()))
-            not_defined = set(frame.types).difference(
-                set(frame.shapedef.keys()))
-            for name in required:
-                _write('def {} "{}"'.format(name, frame.shapedef[name]))
-            for name in not_defined:
-                logger.info(
-                    "No shape defined for '{}'. "
-                    "Using fallback definition.".format(name))
-                _write('def {} "{}"'.format(name, DEFAULT_SHAPE_DEFINITION))
+            try:
+                required = set(frame.types).intersection(
+                    set(frame.shapedef.keys()))
+                not_defined = set(frame.types).difference(
+                    set(frame.shapedef.keys()))
+                for name in required:
+                    _write('def {} "{}"'.format(name, frame.shapedef[name]))
+                for name in not_defined:
+                    logger.info(
+                        "No shape defined for '{}'. "
+                        "Using fallback definition.".format(name))
+                    _write('def {} "{}"'.format(name, DEFAULT_SHAPE_DEFINITION))
+            except AttributeError:
+                for name in frame.types:
+                    logger.info(
+                        "No shape defined for '{}'. "
+                        "Using fallback definition.".format(name))
+                    _write('def {} "{}"'.format(name, DEFAULT_SHAPE_DEFINITION))
 
             # Orientations must be provided for all particles
             # If the frame does not have orientations, identity quaternions are used
@@ -118,7 +125,10 @@ class PosFileWriter(object):
                                       orientations):
 
                 _write(name, end=' ')
-                shapedef = frame.shapedef.get(name, DEFAULT_SHAPE_DEFINITION)
+                try:
+                    shapedef = frame.shapedef.get(name)
+                except AttributeError:
+                    shapedef = DEFAULT_SHAPE_DEFINITION
 
                 if self._rotate and frame.view_rotation is not None:
                     pos = rowan.rotate(frame.view_rotation, pos)

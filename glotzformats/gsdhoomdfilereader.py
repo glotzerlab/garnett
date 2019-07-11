@@ -64,7 +64,8 @@ def _parse_shape_definitions(frame, gsdfile, frame_index):
         else:
             return default
 
-    shapedefs = dict()
+    # shapedefs = dict()
+    shapedefs = collections.OrderedDict()
     types = frame.particles.types
 
     # Spheres
@@ -81,7 +82,7 @@ def _parse_shape_definitions(frame, gsdfile, frame_index):
         return shapedefs
 
     # Convex Polyhedra
-    if get_chunk(frame_index, 'state/hpmc/convex_polyhedron/N') is not None:
+    elif get_chunk(frame_index, 'state/hpmc/convex_polyhedron/N') is not None:
         N = get_chunk(frame_index, 'state/hpmc/convex_polyhedron/N')
         N_start = [sum(N[:i]) for i in range(len(N))]
         N_end = [sum(N[:i+1]) for i in range(len(N))]
@@ -93,7 +94,7 @@ def _parse_shape_definitions(frame, gsdfile, frame_index):
         return shapedefs
 
     # Convex Spheropolyhedra
-    if get_chunk(frame_index,
+    elif get_chunk(frame_index,
                  'state/hpmc/convex_spheropolyhedron/N') is not None:
         N = get_chunk(frame_index, 'state/hpmc/convex_spheropolyhedron/N')
         N_start = [sum(N[:i]) for i in range(len(N))]
@@ -109,16 +110,17 @@ def _parse_shape_definitions(frame, gsdfile, frame_index):
         return shapedefs
 
     # Ellipsoid
-    if get_chunk(frame_index, 'state/hpmc/ellipsoid/a') is not None:
+    elif get_chunk(frame_index, 'state/hpmc/ellipsoid/a') is not None:
         a_all = get_chunk(frame_index, 'state/hpmc/ellipsoid/a')
         b_all = get_chunk(frame_index, 'state/hpmc/ellipsoid/b')
         c_all = get_chunk(frame_index, 'state/hpmc/ellipsoid/c')
         for typename, a, b, c in zip(types, a_all, b_all, c_all):
             shapedefs[typename] = EllipsoidShape(
                 a=a, b=b, c=c, color=None)
+        return shapedefs
 
     # Convex Polygons
-    if get_chunk(frame_index, 'state/hpmc/convex_polygon/N') is not None:
+    elif get_chunk(frame_index, 'state/hpmc/convex_polygon/N') is not None:
         N = get_chunk(frame_index, 'state/hpmc/convex_polygon/N')
         N_start = [sum(N[:i]) for i in range(len(N))]
         N_end = [sum(N[:i+1]) for i in range(len(N))]
@@ -130,7 +132,7 @@ def _parse_shape_definitions(frame, gsdfile, frame_index):
         return shapedefs
 
     # Convex Spheropolygons
-    if get_chunk(frame_index, 'state/hpmc/convex_spheropolygon/N') is not None:
+    elif get_chunk(frame_index, 'state/hpmc/convex_spheropolygon/N') is not None:
         N = get_chunk(frame_index, 'state/hpmc/convex_spheropolygon/N')
         N_start = [sum(N[:i]) for i in range(len(N))]
         N_end = [sum(N[:i+1]) for i in range(len(N))]
@@ -144,7 +146,7 @@ def _parse_shape_definitions(frame, gsdfile, frame_index):
         return shapedefs
 
     # Simple Polygons
-    if get_chunk(frame_index, 'state/hpmc/simple_polygon/N') is not None:
+    elif get_chunk(frame_index, 'state/hpmc/simple_polygon/N') is not None:
         N = get_chunk(frame_index, 'state/hpmc/simple_polygon/N')
         N_start = [sum(N[:i]) for i in range(len(N))]
         N_end = [sum(N[:i+1]) for i in range(len(N))]
@@ -155,8 +157,9 @@ def _parse_shape_definitions(frame, gsdfile, frame_index):
                 vertices=typeverts, color=None)
         return shapedefs
 
-    # If no shapes were detected, return the empty shapedefs dict.
-    return shapedefs
+    else:
+        # If no shapes were detected, return the empty shapedefs dict.
+        return None
 
 
 class GSDHoomdFrame(Frame):
@@ -192,7 +195,7 @@ class GSDHoomdFrame(Frame):
 
     def read(self):
         raw_frame = _RawFrameData()
-        raw_frame.shapedef = collections.OrderedDict()
+        # raw_frame.shapedef = collections.OrderedDict()
         frame = self.traj.read_frame(self.frame_index)
         # If frame is provided, read shape data from it
         if self.t_frame is not None:
@@ -205,8 +208,9 @@ class GSDHoomdFrame(Frame):
                 pass
         else:
             # Fallback to gsd shape data if no frame is provided
-            raw_frame.shapedef.update(
-                _parse_shape_definitions(frame, self.gsdfile, self.frame_index))
+            raw_frame.shapedef = _parse_shape_definitions(frame, self.gsdfile, self.frame_index)
+            # raw_frame.shapedef.update(
+            #     _parse_shape_definitions(frame, self.gsdfile, self.frame_index))
         raw_frame.box = _box_matrix(frame.configuration.box)
         raw_frame.box_dimensions = int(frame.configuration.dimensions)
         raw_frame.types = [frame.particles.types[t] for t in frame.particles.typeid]
