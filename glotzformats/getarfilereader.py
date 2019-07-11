@@ -10,6 +10,7 @@ Authors: Matthew Spellings, Carl Simon Adorf
 
 import json
 import logging
+import collections
 
 import numpy as np
 import gtar
@@ -88,6 +89,7 @@ class GetarFrame(Frame):
 
     def read(self):
         raw_frame = _RawFrameData()
+        raw_frame.shapedef = collections.OrderedDict()
         gf_prop_map = {
             'position': 'positions',
             'orientation': 'orientations',

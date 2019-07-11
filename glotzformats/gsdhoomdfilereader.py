@@ -26,6 +26,7 @@ The example is given for a hoomd-blue xml frame:
 import logging
 import warnings
 import copy
+import collections
 
 import numpy as np
 
@@ -191,6 +192,7 @@ class GSDHoomdFrame(Frame):
 
     def read(self):
         raw_frame = _RawFrameData()
+        raw_frame.shapedef = collections.OrderedDict()
         frame = self.traj.read_frame(self.frame_index)
         # If frame is provided, read shape data from it
         if self.t_frame is not None:

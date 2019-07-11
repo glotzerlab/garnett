@@ -222,6 +222,7 @@ class PosFileFrame(Frame):
                     "Failed to read line #{}: {}.".format(i, line))
         monotype = False
         raw_frame = _RawFrameData()
+        raw_frame.shapedef = collections.OrderedDict()
         raw_frame.view_rotation = None
         for i, line in enumerate(self.stream):
             if _is_comment(line):
