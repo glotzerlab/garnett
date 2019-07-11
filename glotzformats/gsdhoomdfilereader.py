@@ -198,8 +198,11 @@ class GSDHoomdFrame(Frame):
         if self.t_frame is not None:
             raw_frame.data = copy.deepcopy(self.t_frame.data)
             raw_frame.data_keys = copy.deepcopy(self.t_frame.data_keys)
-            raw_frame.shapedef = copy.deepcopy(self.t_frame.shapedef)
             raw_frame.box_dimensions = self.t_frame.box.dimensions
+            try:
+                raw_frame.shapedef = copy.deepcopy(self.t_frame.shapedef)
+            except AttributeError:
+                pass
         else:
             # Fallback to gsd shape data if no frame is provided
             raw_frame.shapedef.update(
