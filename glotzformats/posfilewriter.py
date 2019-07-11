@@ -108,6 +108,8 @@ class PosFileWriter(object):
                         "Using fallback definition.".format(name))
                     _write('def {} "{}"'.format(name, DEFAULT_SHAPE_DEFINITION))
             except AttributeError:
+                # If AttributeError is raised because the frame does not contain
+                # shape information, fill them all with the default shape
                 for name in frame.types:
                     logger.info(
                         "No shape defined for '{}'. "
