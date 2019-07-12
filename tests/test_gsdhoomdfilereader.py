@@ -86,7 +86,8 @@ class BaseGSDHOOMDFileReaderTest(TrajectoryTest):
     def test_gsd_without_pos_frame(self):
         frame, traj = self.get_gsd_traj_with_pos_frame(read_pos=False)
         assert frame is None
-        self.assertEqual(traj[0].shapedef, collections.OrderedDict())
+        with self.assertRaises(AttributeError):
+            frame.shapedef
 
     def test_read(self):
         traj = self.get_traj()
