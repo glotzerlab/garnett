@@ -93,8 +93,7 @@ def _parse_shape_definitions(frame, gsdfile, frame_index):
         return shapedefs
 
     # Convex Spheropolyhedra
-    elif get_chunk(frame_index,
-                 'state/hpmc/convex_spheropolyhedron/N') is not None:
+    elif get_chunk(frame_index, 'state/hpmc/convex_spheropolyhedron/N') is not None:
         N = get_chunk(frame_index, 'state/hpmc/convex_spheropolyhedron/N')
         N_start = [sum(N[:i]) for i in range(len(N))]
         N_end = [sum(N[:i+1]) for i in range(len(N))]

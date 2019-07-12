@@ -4,7 +4,6 @@ import io
 import unittest
 import base64
 import numpy as np
-import collections
 
 import glotzformats
 from test_trajectory import TrajectoryTest
