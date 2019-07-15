@@ -176,7 +176,10 @@ class DCDFrame(Frame):
             raw_frame.data = copy.deepcopy(self.t_frame.data)
             raw_frame.data_keys = copy.deepcopy(self.t_frame.data_keys)
             raw_frame.box_dimensions = self.t_frame.box.dimensions
-            raw_frame.shapdef = copy.deepcopy(getattr(self.t_frame, 'shapedef', None))
+            try:
+                raw_frame.shapedef = copy.deepcopy(self.t_frame.shapedef)
+            except AttributeError:
+                pass
         if not self._loaded():
             self._load()
         assert self._loaded()
