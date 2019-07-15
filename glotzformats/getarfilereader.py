@@ -90,7 +90,8 @@ class GetarFrame(Frame):
             'position': 'positions',
             'orientation': 'orientations',
             'velocity': 'velocities',
-            'angular_momentum_quat': 'angmom'}
+            'angular_momentum_quat': 'angmom',
+            'image': 'image'}
         supported_records = ['position', 'orientation', 'velocity',
                              'mass', 'charge', 'diameter',
                              'moment_inertia', 'angular_momentum_quat',
