@@ -28,7 +28,7 @@ project = signac.get_project()
 for job in project:
     with job:
         sp = job.statepoint()
-        if not os.path.isfile('init.gsd'):
+        if not job.isfile('init.gsd'):
             print("Initialize system.")
             with hoomd.context.SimulationContext():
                 system = hoomd.init.create_lattice(
