@@ -58,6 +58,8 @@ class BaseDCDFileReaderTest(TrajectoryTest):
             frame.mass
         with self.assertRaises(AttributeError):
             frame.velocities
+        with self.assertRaises(AttributeError):
+            frame.shapedef
 
     def test_read(self):
         assert self.read_top_trajectory()

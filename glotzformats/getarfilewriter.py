@@ -92,8 +92,6 @@ class GetarFileWriter(object):
             try:
                 shape_contents.append(frame.shapedef[typename].shape_dict)
             except AttributeError:
-                logger.warn('Shape type {} is unsupported for getar writing.'.format(
-                    frame.shapedef[typename].__class__))
                 shape_contents.append(None)
             except KeyError:
                 logger.info('Type name \'{}\' has no stored shape information.'.format(

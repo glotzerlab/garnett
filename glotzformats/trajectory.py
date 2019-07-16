@@ -5,7 +5,6 @@ The trajectory module provides classes to store discretized
 trajectories."""
 
 import logging
-import collections
 
 import numpy as np
 
@@ -117,7 +116,7 @@ class FrameData(object):
         "A dictionary of lists for each attribute."
         self.data_keys = None
         "A list of strings, where each string represents one attribute."
-        self.shapedef = collections.OrderedDict()
+        self.shapedef = None
         "A ordered dictionary of instances of :class:`~.shapes.ShapeDefinition`."
         self.view_rotation = None
         "A quaternion specifying a rotation that should be applied for visualization."
@@ -184,7 +183,7 @@ class _RawFrameData(object):
         self.data = None
         self.data_keys = None                       # A list of strings
         # A ordered dictionary of instances of ShapeDefinition
-        self.shapedef = collections.OrderedDict()
+        self.shapedef = None
         # A view rotation (does not affect the actual trajectory)
         self.view_rotation = None
 

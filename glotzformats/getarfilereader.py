@@ -10,6 +10,7 @@ Authors: Matthew Spellings, Carl Simon Adorf
 
 import json
 import logging
+import collections
 
 import numpy as np
 import gtar
@@ -17,7 +18,7 @@ import gtar
 from .trajectory import _RawFrameData, Box, Frame, Trajectory
 from .shapes import FallbackShape, SphereShape, ConvexPolyhedronShape, \
     ConvexSpheropolyhedronShape, GeneralPolyhedronShape, PolygonShape, \
-    SpheropolygonShape
+    SpheropolygonShape, EllipsoidShape
 
 logger = logging.getLogger(__name__)
 
@@ -54,6 +55,8 @@ def _parse_shape_definition(shape):
             shapedef = SpheropolygonShape(vertices=shape['vertices'],
                                           rounding_radius=rounding_radius,
                                           color=None)
+    elif shape_type == 'ellipsoid':
+        shapedef = EllipsoidShape(a=shape['a'], b=shape['b'], c=shape['c'], color=None)
 
     if shapedef is None:
         logger.warning("Failed to parse shape definition: shape {} not supported. "
@@ -86,6 +89,7 @@ class GetarFrame(Frame):
 
     def read(self):
         raw_frame = _RawFrameData()
+        raw_frame.shapedef = collections.OrderedDict()
         gf_prop_map = {
             'position': 'positions',
             'orientation': 'orientations',
@@ -121,7 +125,7 @@ class GetarFrame(Frame):
                              self._records['dimensions'], self._frame)[0]
             # Fallback to detection based on z coordinates
             else:
-                zs = raw_frame.positions[:,2]
+                zs = raw_frame.positions[:, 2]
                 dimensions = 2 if np.allclose(zs, 0.0, atol=1e-7) else 3
 
             box = self._trajectory.getRecord(self._records['box'], self._frame)

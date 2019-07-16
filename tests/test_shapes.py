@@ -29,12 +29,9 @@ class ShapeTestData(dict):
 
 def annotate_shape_test(test_class, shape_classes):
     for s in shape_classes:
-        # skipping ellipsoid test until HOOMD provides a
-        # get_type_shapes method for ellipsoids
-        if test_class == 'GetarShapeTest' and s != 'ellipsoid_3d':
-            s = ShapeTestData(s)
-            setattr(s, '__name__', '{}_{}'.format(test_class, s['name']))
-            yield s
+        s = ShapeTestData(s)
+        setattr(s, '__name__', '{}_{}'.format(test_class, s['name']))
+        yield s
 
 
 @ddt
@@ -130,8 +127,7 @@ class POSShapeTest(ShapeTest):
 
     @data(*annotate_shape_test('PosFileReader', get_shape_classes()))
     def test_shapes(self, shape_class):
-        # Ignore 2D shapes because POS files assume everything is 3D
-        if shape_class['dimensions'] == 3:
+        if shape_class['dimensions'] == 3 or shape_class['cls'] == 'convex_polygon':
             self.check_shape_class(shape_class)
 
 
