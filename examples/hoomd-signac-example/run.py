@@ -38,12 +38,14 @@ for job in project:
                     snapshot.particles.velocity,
                     np.random.random(snapshot.particles.velocity.shape))
 
-            with hoomd.context.SimulationContext():
-                hoomd.init.read_snapshot(snapshot)
+            # with hoomd.context.SimulationContext():
+            #     hoomd.init.read_snapshot(snapshot)
+                system.restore_snapshot(snapshot)
                 hoomd.dump.gsd(filename='init.gsd', period=None, group=hoomd.group.all())
                 hoomd.deprecated.dump.xml(hoomd.group.all(), filename='init.xml', vis=True)
 
         with hoomd.context.SimulationContext():
+
             hoomd.init.read_gsd(filename='init.gsd', restart='restart.gsd')
 
             print("tstep", hoomd.get_step())
