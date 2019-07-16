@@ -25,7 +25,7 @@ def restart_pos(filename):
 project = signac.get_project()
 
 
-for job in project.find_jobs():
+for job in project:
     with job:
         sp = job.statepoint()
         if not os.path.isfile('init.gsd'):
@@ -44,7 +44,6 @@ for job in project.find_jobs():
                 hoomd.deprecated.dump.xml(hoomd.group.all(), filename='init.xml', vis=True)
 
         with hoomd.context.SimulationContext():
-            
             hoomd.init.read_gsd(filename='init.gsd', restart='restart.gsd')
 
             print("tstep", hoomd.get_step())
