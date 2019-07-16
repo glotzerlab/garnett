@@ -31,15 +31,11 @@ for job in project:
         if not job.isfile('init.gsd'):
             print("Initialize system.")
             with hoomd.context.SimulationContext():
-                system = hoomd.init.create_lattice(
-                    unitcell=hoomd.lattice.sc(a=2.0), n=[4,5,5])
+                system = hoomd.init.create_lattice(unitcell=hoomd.lattice.sc(a=2.0), n=5)
                 snapshot = system.take_snapshot()
                 np.copyto(
                     snapshot.particles.velocity,
                     np.random.random(snapshot.particles.velocity.shape))
-
-            # with hoomd.context.SimulationContext():
-            #     hoomd.init.read_snapshot(snapshot)
                 system.restore_snapshot(snapshot)
                 hoomd.dump.gsd(filename='init.gsd', period=None, group=hoomd.group.all())
                 hoomd.deprecated.dump.xml(hoomd.group.all(), filename='init.xml', vis=True)
