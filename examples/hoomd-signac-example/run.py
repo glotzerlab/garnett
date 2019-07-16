@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 import os
 import numpy as np
-import warnings
 from contextlib import contextmanager
 
 import signac
