@@ -44,12 +44,8 @@ for job in project.find_jobs():
                 hoomd.deprecated.dump.xml(hoomd.group.all(), filename='init.xml', vis=True)
 
         with hoomd.context.SimulationContext():
-            warnings.warn("Using HOOMD GSD-restart work-around!")
-            if os.path.isfile('restart.gsd'):
-                hoomd.init.read_gsd('restart.gsd')
-            else:
-                hoomd.init.read_gsd('init.gsd')
-            # hoomd.init.read_gsd(filename='init.gsd', restart='restart.gsd')
+            
+            hoomd.init.read_gsd(filename='init.gsd', restart='restart.gsd')
 
             print("tstep", hoomd.get_step())
 
