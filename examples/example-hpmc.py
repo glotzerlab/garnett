@@ -1,8 +1,8 @@
 # Demonstration with the cube example
 from __future__ import print_function
 from __future__ import division
-from hoomd_script import *
-from hoomd_plugins import hpmc
+import hoomd
+from hoomd import hpmc
 
 import numpy as np
 
