@@ -1,6 +1,6 @@
 import signac
 
-project = signac.get_project()
+project = signac.init_project('lj-signac-example')
 
 sps = [{
     'epsilon': 1.0,
