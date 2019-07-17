@@ -2,52 +2,45 @@
 from __future__ import print_function
 from __future__ import division
 import hoomd
-from hoomd import hpmc
+from hoomd import deprecated, hpmc
 
 import numpy as np
-
-from glotzformats.reader import PosFileReader
-from glotzformats.writer import PosFileWriter
-
-context.initialize()
-
+import glotzformats as gf
 import os
-try:
-    system = init.read_xml('cube.xml')
-except RuntimeError:
-    snapshot = data.make_snapshot(N=4, box=data.boxdim(L=10, dimensions=3))
-    np.copyto(snapshot.particles.position, np.array([
-            [2, 0, 0],
-            [4, 0, 0],
-            [0, 4, 0],
-            [0, 0, 4],
-        ]))
-    system = init.read_snapshot(snapshot)
-    dump.xml('cube.xml', all=True)
 
-mc = hpmc.integrate.convex_polyhedron(seed=452784, d=0.2, a=0.4)
-mc.shape_param.set('A', vertices=[(0.5, 0.5, 0.5), (0.5, -0.5, -0.5), (-0.5, 0.5, -0.5), (-0.5, -0.5, 0.5)])
-pos = dump.pos(filename='cube.pos', period=10)
-mc.setup_pos_writer(pos)
-run(1000)
+hoomd.context.initialize()
 
-pos_reader = PosFileReader()
-with open('cube.pos') as posfile:
-    traj = pos_reader.read(posfile)
+# vertices of a cube
+verts = [[-1,-1,-1],[-1,-1,1],[-1,1,1],[-1,1,-1],
+         [1,-1,-1],[1,-1,1],[1,1,1],[1,1,-1]]
 
-# Restore a snapshot
-sn2 = system.take_snapshot()
-traj[-1].copyto_snapshot(sn2)
+with hoomd.context.SimulationContext():
+    try:
+        system = deprecated.init.read_xml('cube.xml')
+    except RuntimeError:
+        snapshot = hoomd.data.make_snapshot(N=4, box=hoomd.data.boxdim(L=10, dimensions=3))
+        np.copyto(snapshot.particles.position, np.array([
+                [2, 0, 0],
+                [4, 0, 0],
+                [0, 4, 0],
+                [0, 0, 4],
+            ]))
+        system = hoomd.init.read_snapshot(snapshot)
+        deprecated.dump.xml(hoomd.group.all(),'cube.xml', all=True)
 
-# New system
-init.reset()
-with open('cube.pos') as posfile:
-    traj = pos_reader.read(posfile)
-snapshot = traj[-1].make_snapshot()
-system = init.read_snapshot(snapshot)
+    mc = hpmc.integrate.convex_polyhedron(seed=452784, d=0.2, a=0.4)
+    mc.shape_param.set('A', vertices=verts)
+    pos = deprecated.dump.pos(filename='cube.pos', period=10)
+    mc.setup_pos_writer(pos)
+    hoomd.run(1000)
 
-mc = hpmc.integrate.convex_polyhedron(seed=452784, d=0.2, a=0.4)
-mc.shape_param.set('A', vertices=[(0.5, 0.5, 0.5), (0.5, -0.5, -0.5), (-0.5, 0.5, -0.5), (-0.5, -0.5, 0.5)])
-pos = dump.pos(filename='cube.pos', period=10)
-mc.setup_pos_writer(pos)
-run(1000)
+with hoomd.context.SimulationContext():
+
+    with gf.read('cube.pos') as traj:
+        snapshot = traj[-1].make_snapshot()
+        system = hoomd.init.read_snapshot(snapshot)
+
+    mc = hpmc.integrate.convex_polyhedron(seed=452784, d=0.2, a=0.4)
+    mc.shape_param.set('A', vertices=verts)
+    hoomd.dump.gsd(filename='cube.gsd', group=hoomd.group.all(), period=10)
+    hoomd.run(1000)
