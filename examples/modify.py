@@ -1,12 +1,8 @@
 #!/usr/bin/env python
 
 import logging
-
 import numpy as np
-
-from glotzformats.reader import PosFileReader
-from glotzformats.writer import PosFileWriter
-from glotzformats.trajectory import Trajectory
+import glotzformats as gf
 
 logger = logging.getLogger(__name__)
 
@@ -17,12 +13,9 @@ def center(frame):
 
 
 def main(args):
-    pos_reader = PosFileReader()
-    pos_writer = PosFileWriter()
-    with open(args.posfile) as posfile:
-        traj = pos_reader.read(posfile)
+    with gf.read(args.file) as traj:
         traj_centered = Trajectory((center(frame) for frame in traj))
-        pos_writer.write(traj_centered)
+        gf.write(traj_centered, args.file)
 
     return 0
 
@@ -30,11 +23,11 @@ if __name__ == '__main__':
     import argparse
     import sys
     parser = argparse.ArgumentParser(
-        description="Read a pos-file.")
+        description="Read a file.")
     parser.add_argument(
-        'posfile',
+        'file',
         type=str,
-        help="Filename of a pos-file.")
+        help="Filename of a file.")
     args = parser.parse_args()
     logging.basicConfig(level=logging.INFO)
     sys.exit(main(args))
