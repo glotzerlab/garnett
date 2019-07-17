@@ -24,9 +24,6 @@ def main(args):
         traj_centered = Trajectory((center(frame) for frame in traj))
         pos_writer.write(traj_centered)
 
-        # or short:
-        # pos_writer.write(
-        #    Trajectory((center(f) for f in pos_.read.read(posfile))))
     return 0
 
 if __name__ == '__main__':
