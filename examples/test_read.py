@@ -4,7 +4,7 @@ import os
 import glob
 import logging
 
-import glotzformats
+import glotzformats as gf
 
 try:
     import gtar
@@ -18,31 +18,39 @@ except ImportError:
     MDTRAJ=False
 else:
     MDTRAJ=True
+try:
+    import gsd
+except ImportError:
+    GSD = False
+else:
+    GSD = True
 
 
-def test_read(file, reader, *args, **kwargs):
-    traj = reader.read(file, *args, **kwargs)
-    for frame in traj:
-        frame.load()
-        print(frame)
+def test_read(file, template=None):
+    with gf.read(file, template=template) as traj:
+        for frame in traj:
+            frame.load()
+            print(frame)
 
 def main():
     if GTAR:
         for fn in glob.glob('../samples/*.tar'):
-            with open(fn, 'rb') as file:
-                test_read(file, glotzformats.reader.GetarFileReader())
+            test_read(fn)
+
     if MDTRAJ:
         for fn in glob.glob('../samples/*.dcd'):
-            with open(glob.glob('../samples/*.xml')[0]) as xmlfile:
-                frame = glotzformats.reader.HoomdBlueXMLFileReader().read(xmlfile)[0]
-                with open(fn, 'rb') as file:
-                    test_read(file, glotzformats.reader.DCDReader(), frame)
+            test_read(fn)
+
+    if GSD:
+        for fn in glob.glob('../samples/*.gsd'):
+            test_read(fn)
+
     for fn in glob.glob('../samples/*.xml'):
-        with open(fn) as file:
-            test_read(file, glotzformats.reader.HoomdBlueXMLFileReader())
+        test_read(fn)
+
     for fn in glob.glob('../samples/*.pos'):
-        with open(fn) as file:
-            test_read(file, glotzformats.reader.PosFileReader())
+        test_read(fn)
+
     return 0
 
 if __name__ == '__main__':
