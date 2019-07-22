@@ -12,12 +12,6 @@ except ImportError:
 else:
     GTAR = True
 try:
-    import mdtraj
-except ImportError:
-    MDTRAJ=False
-else:
-    MDTRAJ=True
-try:
     import gsd
 except ImportError:
     GSD = False
@@ -36,13 +30,12 @@ def main():
         for fn in glob.glob('../samples/*.tar'):
             test_read(fn)
 
-    if MDTRAJ:
-        for fn in glob.glob('../samples/*.dcd'):
-            test_read(fn)
-
     if GSD:
         for fn in glob.glob('../samples/*.gsd'):
             test_read(fn)
+
+    for fn in glob.glob('../samples/*.dcd'):
+        test_read(fn)
 
     for fn in glob.glob('../samples/*.xml'):
         test_read(fn)
