@@ -26,7 +26,7 @@ with hoomd.context.SimulationContext():
                 [0, 0, 4],
             ]))
         system = hoomd.init.read_snapshot(snapshot)
-        deprecated.dump.xml(hoomd.group.all(),'cube.xml', all=True)
+        deprecated.dump.xml(hoomd.group.all(), 'cube.xml', all=True)
 
     mc = hpmc.integrate.convex_polyhedron(seed=452784, d=0.2, a=0.4)
     mc.shape_param.set('A', vertices=verts)
