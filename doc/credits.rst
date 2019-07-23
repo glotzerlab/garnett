@@ -1,3 +1,54 @@
+Credits
+=======
+
+Glotzformats Developers
+-----------------------
+
+The following people have contributed to the :py:mod:`glotzformats` package.
+
+Carl Simon Adorf, University of Michigan
+    * Original Author
+    * Former Maintainer
+    * Trajectory classes
+    * Shapes classes
+    * Testing framework
+    * CIF file writer
+    * DCD file reader
+    * GSD file reader
+    * HOOMD XML file reader
+    * POS file reader
+    * POS file writer
+
+Richmond Newman, University of Michigan
+    * Original Author
+    * POS file reader
+    
+Matthew Spellings, University of Michigan
+    * CIF file reader
+    * GETAR file reader
+    
+Julia Dshemuchadse, University of Michigan
+    * CIF file writer
+    
+Vyas Ramasubramani, University of Michigan
+    * GSD file writer
+
+Bradley Dice, University of Michigan
+    * Maintainer
+    * GETAR file writer
+    * Support for additional frame properties
+    * Improved support for parsing and writing particle shapes
+
+Sophie Youjung Lee, University of Michigan
+    * Former Maintainer
+    * Universal read and write functions
+
+Luis Y. Rivera-Rivera, University of Michigan
+    * Maintainer
+
+Kelly Wang, University of Michigan
+    * Maintainer
+
 Source code
 -----------
 
