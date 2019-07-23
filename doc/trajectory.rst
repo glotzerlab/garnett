@@ -7,7 +7,7 @@ In the simplest case, trajectories are just a sequence of :py:class:`~.trajector
 Trajectories
 ------------
 
-.. autoclass:: glotzformats.trajectory.Trajectory
+.. autoclass:: garnett.trajectory.Trajectory
    :members:
    :undoc-members:
    :inherited-members:
@@ -17,7 +17,7 @@ Frames
 
 Trajectory data can be accessed via individual frames.
 
-.. autoclass:: glotzformats.trajectory.Frame
+.. autoclass:: garnett.trajectory.Frame
    :members:
    :undoc-members:
    :inherited-members:
@@ -27,7 +27,7 @@ Box
 
 The box instance gives access to the box of individual frames.
 
-.. autoclass:: glotzformats.trajectory.Box
+.. autoclass:: garnett.trajectory.Box
    :members:
    :undoc-members:
    :inherited-members:

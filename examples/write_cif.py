@@ -2,7 +2,7 @@
 
 import argparse
 
-import glotzformats as gf
+import garnett as gf
 
 def main(args):
     pos_reader = gf.reader.PosFileReader()

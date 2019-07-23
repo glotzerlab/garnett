@@ -105,7 +105,7 @@ class GetarFileWriter(object):
         """Serialize a trajectory into gtar-format and write it to a file.
 
         :param trajectory: The trajectory to serialize
-        :type trajectory: :class:`~glotzformats.trajectory.Trajectory`
+        :type trajectory: :class:`~garnett.trajectory.Trajectory`
         :param filename: The file to write to."""
 
         try:

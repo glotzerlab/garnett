@@ -12,17 +12,17 @@ else:
     CYTHON = True
 
 setup(
-    name='glotzformats',
+    name='garnett',
     version='0.4.1',
     packages=find_packages(),
 
-    ext_modules=cythonize('glotzformats/*.pyx') if CYTHON else [],
+    ext_modules=cythonize('garnett/*.pyx') if CYTHON else [],
     include_dirs=[np.get_include()] if CYTHON else [],
 
     author='Carl Simon Adorf',
     author_email='csadorf@umich.edu',
     description="Samples, parsers, and writers for formats used in the Glotzer Group",
-    keywords=['glotzer formats'],
+    keywords='simulation trajectory formats particle',
 
     classifiers=[
         "Intended Audience :: Science/Research",

@@ -2,14 +2,14 @@
 Readers & Writers
 =================
 
-This is the API documentation for all readers and writers provided by **glotzformats**.
+This is the API documentation for all readers and writers provided by **garnett**.
 
 Automatic reader/writer
 =======================
 
-.. autofunction:: glotzformats.read
+.. autofunction:: garnett.read
 
-.. autofunction:: glotzformats.write
+.. autofunction:: garnett.write
 
 
 General API
@@ -20,8 +20,8 @@ All readers and writers work with **file-like objects** and use the following AP
 
 .. code-block:: python
 
-    reader = glotzformats.reader.Reader()
-    writer = glotzformats.writer.Writer()
+    reader = garnett.reader.Reader()
+    writer = garnett.writer.Writer()
 
     with open('trajectory_file') as infile:
         traj = reader.read(infile)
@@ -43,7 +43,7 @@ All readers and writers work with **file-like objects** and use the following AP
 
     .. code-block:: python
 
-        dcd_reader = glotzformats.reader.DCDFileReader()
+        dcd_reader = garnett.reader.DCDFileReader()
         with open('dump.dcd', 'rb') as dcdfile:
             dcd_traj = dcd_reader.read(dcdfile)
 
@@ -68,8 +68,8 @@ This table outlines the supported properties of each format reader and writer.
 |    XML |     R     |  R  |       R      |      R     |  N/A  |                N/A                |
 +--------+-----------+-----+--------------+------------+-------+-----------------------------------+
 
-RW indicates glotzformats can read and write on this format.
-R indicates glotzformats can only read.
+RW indicates garnett can read and write on this format.
+R indicates garnett can only read.
 N/A indicates the format does not support storing this property.
 Additional Properties: Mass, Charge, Diameter, Angular momentum, Moment of inertia
 + None
@@ -85,12 +85,12 @@ The *POS*-format is a non-standardized *text-based* format which is human-readab
 The format is used as primary input/output format for the **injavis** visualization tool.
 HOOMD-blue provides a writer for this format, which is classified as deprecated since version 2.0.
 
-.. autoclass:: glotzformats.reader.PosFileReader
+.. autoclass:: garnett.reader.PosFileReader
     :members:
     :undoc-members:
     :inherited-members:
 
-.. autoclass:: glotzformats.writer.PosFileWriter
+.. autoclass:: garnett.writer.PosFileWriter
     :members:
     :undoc-members:
     :inherited-members:
@@ -103,12 +103,12 @@ HOOMD-blue provides a writer for this format.
 
 See also: `<http://gsd.readthedocs.io>`_
 
-.. autoclass:: glotzformats.reader.GSDHOOMDFileReader
+.. autoclass:: garnett.reader.GSDHOOMDFileReader
     :members:
     :undoc-members:
     :inherited-members:
 
-.. autoclass:: glotzformats.writer.GSDHOOMDFileWriter
+.. autoclass:: garnett.writer.GSDHOOMDFileWriter
     :members:
     :undoc-members:
     :inherited-members:
@@ -119,7 +119,7 @@ GeTAR
 The *GeTAR*-format is a highly versatile, *binary* format for storing and reading trajectory data.
 HOOMD-blue provides a writer for this format.
 
-.. autoclass:: glotzformats.reader.GetarFileReader
+.. autoclass:: garnett.reader.GetarFileReader
     :members:
     :undoc-members:
     :inherited-members:
@@ -130,7 +130,7 @@ HOOMD-blue XML
 The HOOMD-blue XML-format contains topological information about one individual frame.
 HOOMD-blue provides a writer for this format, which is classified as deprecated since version 2.0.
 
-.. autoclass:: glotzformats.reader.HOOMDXMLFileReader
+.. autoclass:: garnett.reader.HOOMDXMLFileReader
     :members:
     :undoc-members:
     :inherited-members:
@@ -142,34 +142,34 @@ The *DCD*-format is a very storage efficient *binary* format for storing simple 
 The format contains only data about xyz-positions and the boxes of individual frames.
 
 HOOMD-blue provides a writer for this format with a special dialect for 2-dimensional systems.
-The *glotzformats* dcd-reader is capable of reading both the standard and the 2-dim. dialect.
+The *garnett* dcd-reader is capable of reading both the standard and the 2-dim. dialect.
 
 .. note::
     Unlike most other readers, the :py:class:`~.reader.DCDFileReader` will return an instance
     of :py:class:`~.DCDTrajectory`, which is optimized for the DCD-format.
     This special trajectory class provides the :py:meth:`~.DCDTrajectory.xyz` method for accessing xyz-coordinates with minimal overhead.
 
-.. autoclass:: glotzformats.reader.DCDFileReader
+.. autoclass:: garnett.reader.DCDFileReader
     :members:
     :undoc-members:
     :inherited-members:
 
-.. autoclass:: glotzformats.dcdfilereader.DCDTrajectory
+.. autoclass:: garnett.dcdfilereader.DCDTrajectory
     :members:
 
-.. autoclass:: glotzformats.reader.PyDCDFileReader
+.. autoclass:: garnett.reader.PyDCDFileReader
 
 CIF
 ---
 
 The *cif*-format is a *text-based* format primarily used in the context of crystallography.
 
-.. autoclass:: glotzformats.reader.CifFileReader
+.. autoclass:: garnett.reader.CifFileReader
     :members:
     :undoc-members:
     :inherited-members:
 
-.. autoclass:: glotzformats.writer.CifFileWriter
+.. autoclass:: garnett.writer.CifFileWriter
     :members:
     :undoc-members:
     :inherited-members:

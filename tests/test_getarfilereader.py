@@ -4,7 +4,7 @@ import sys
 import json
 
 import numpy as np
-import glotzformats
+import garnett
 
 try:
     import gtar
@@ -24,7 +24,7 @@ else:
 class BaseGetarFileReaderTest(unittest.TestCase):
 
     def setUp(self):
-        self.tmp_dir = TemporaryDirectory(prefix='glotzformats_getar_tmp')
+        self.tmp_dir = TemporaryDirectory(prefix='garnett_getar_tmp')
         self.addCleanup(self.tmp_dir.cleanup)
         self.getar_file_fn = os.path.join(self.tmp_dir.name, 'sample.tar')
 
@@ -61,7 +61,7 @@ class BaseGetarFileReaderTest(unittest.TestCase):
             traj.writePath('type_names.json', json.dumps(type_names))
 
     def read_trajectory(self):
-        reader = glotzformats.reader.GetarFileReader()
+        reader = garnett.reader.GetarFileReader()
         self.getarfile = open(self.getar_file_fn, 'rb')
         self.addCleanup(self.getarfile.close)
         return reader.read(self.getarfile)
@@ -73,7 +73,7 @@ class BaseGetarFileReaderTest(unittest.TestCase):
         self.assertEqual(len(traj), 1)
         frame = traj[0]
         self.assertEqual(len(frame), N)
-        self.assertEqual(frame.box, glotzformats.trajectory.Box(1.0, 1.0, 1.0))
+        self.assertEqual(frame.box, garnett.trajectory.Box(1.0, 1.0, 1.0))
         self.assertEqual(frame.box.dimensions, 3)
         np.testing.assert_allclose(frame.positions, self.positions)
         np.testing.assert_allclose(frame.orientations, self.orientations)
@@ -93,7 +93,7 @@ class BaseGetarFileReaderTest(unittest.TestCase):
         self.assertEqual(len(traj), 1)
         frame = traj[0]
         self.assertEqual(len(frame), N)
-        self.assertEqual(frame.box, glotzformats.trajectory.Box(1.0, 1.0, 1.0, dimensions=2))
+        self.assertEqual(frame.box, garnett.trajectory.Box(1.0, 1.0, 1.0, dimensions=2))
         self.assertEqual(frame.box.dimensions, 2)
         np.testing.assert_allclose(frame.positions, self.positions)
         np.testing.assert_allclose(frame.orientations, self.orientations)

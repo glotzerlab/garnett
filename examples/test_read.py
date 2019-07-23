@@ -4,7 +4,7 @@ import os
 import glob
 import logging
 
-import glotzformats
+import garnett
 
 try:
     import gtar
@@ -30,19 +30,19 @@ def main():
     if GTAR:
         for fn in glob.glob('../samples/*.tar'):
             with open(fn, 'rb') as file:
-                test_read(file, glotzformats.reader.GetarFileReader())
+                test_read(file, garnett.reader.GetarFileReader())
     if MDTRAJ:
         for fn in glob.glob('../samples/*.dcd'):
             with open(glob.glob('../samples/*.xml')[0]) as xmlfile:
-                frame = glotzformats.reader.HoomdBlueXMLFileReader().read(xmlfile)[0]
+                frame = garnett.reader.HoomdBlueXMLFileReader().read(xmlfile)[0]
                 with open(fn, 'rb') as file:
-                    test_read(file, glotzformats.reader.DCDReader(), frame)
+                    test_read(file, garnett.reader.DCDReader(), frame)
     for fn in glob.glob('../samples/*.xml'):
         with open(fn) as file:
-            test_read(file, glotzformats.reader.HoomdBlueXMLFileReader())
+            test_read(file, garnett.reader.HoomdBlueXMLFileReader())
     for fn in glob.glob('../samples/*.pos'):
         with open(fn) as file:
-            test_read(file, glotzformats.reader.PosFileReader())
+            test_read(file, garnett.reader.PosFileReader())
     return 0
 
 if __name__ == '__main__':

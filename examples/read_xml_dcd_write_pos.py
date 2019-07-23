@@ -2,7 +2,7 @@
 
 import logging
 
-import glotzformats as gf
+import garnett as gf
 
 logger = logging.getLogger(__name__)
 

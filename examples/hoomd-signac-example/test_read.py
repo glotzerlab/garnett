@@ -1,6 +1,6 @@
 import signac
 
-import glotzformats as gf
+import garnett as gf
 import gsd
 import gsd.fl
 import gsd.hoomd
@@ -32,7 +32,7 @@ for job in project.find_jobs():
                 traj = gf.reader.GSDHOOMDFileReader().read(gsdfile, top_traj[0])
                 traj.load()
                 print(traj)
-                
+
 
         with open('init.xml') as xmlfile:
             top_traj = gf.reader.HOOMDXMLFileReader().read(xmlfile)

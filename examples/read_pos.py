@@ -2,7 +2,7 @@
 
 import logging
 
-from glotzformats.reader import PosFileReader
+from garnett.reader import PosFileReader
 
 logger = logging.getLogger(__name__)
 

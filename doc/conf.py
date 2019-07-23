@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 #
-# glotzformats documentation build configuration file, created by
+# garnett documentation build configuration file, created by
 # sphinx-quickstart on Fri Nov  6 18:00:11 2015.
 #
 # This file is execfile()d with the current directory set to its
@@ -55,7 +55,7 @@ source_suffix = '.rst'
 master_doc = 'index'
 
 # General information about the project.
-project = 'glotzformats'
+project = 'garnett'
 copyright = '2015-2016, Carl Simon Adorf; 2017, Glotzer Group'
 author = 'Carl Simon Adorf'
 
@@ -209,7 +209,7 @@ html_static_path = ['_static']
 #html_search_scorer = 'scorer.js'
 
 # Output file base name for HTML help builder.
-htmlhelp_basename = 'glotzformatsdoc'
+htmlhelp_basename = 'garnettdoc'
 
 # -- Options for LaTeX output ---------------------------------------------
 
@@ -231,7 +231,7 @@ latex_elements = {
 # (source start file, target name, title,
 #  author, documentclass [howto, manual, or own class]).
 latex_documents = [
-  (master_doc, 'glotzformats.tex', 'glotzformats Documentation',
+  (master_doc, 'garnett.tex', 'garnett Documentation',
    'Carl Simon Adorf', 'manual'),
 ]
 
@@ -261,7 +261,7 @@ latex_documents = [
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
 man_pages = [
-    (master_doc, 'glotzformats', 'glotzformats Documentation',
+    (master_doc, 'garnett', 'garnett Documentation',
      [author], 1)
 ]
 
@@ -275,8 +275,8 @@ man_pages = [
 # (source start file, target name, title, author,
 #  dir menu entry, description, category)
 texinfo_documents = [
-  (master_doc, 'glotzformats', 'glotzformats Documentation',
-   author, 'glotzformats', 'One line description of project.',
+  (master_doc, 'garnett', 'garnett Documentation',
+   author, 'garnett', 'One line description of project.',
    'Miscellaneous'),
 ]
 

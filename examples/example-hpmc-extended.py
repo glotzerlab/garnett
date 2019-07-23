@@ -6,8 +6,8 @@ from hoomd_plugins import hpmc
 
 import numpy as np
 
-from glotzformats.reader import PosFileReader
-from glotzformats.writer import PosFileWriter
+from garnett.reader import PosFileReader
+from garnett.writer import PosFileWriter
 
 context.initialize()
 

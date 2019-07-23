@@ -15,11 +15,11 @@ This is a collection of samples, parsers and writers for formats used in the Glo
 
 To install this package with pip, execute:
 
-    pip install git+https://github.com/glotzerlab/glotzformats.git#egg=glotzformats --user
+    pip install git+https://github.com/glotzerlab/garnett.git#egg=garnett --user
 
 ## Documentation
 
-**The package's documentation is available at:** [http://glotzerlab.engin.umich.edu/glotzformats/](http://glotzerlab.engin.umich.edu/glotzformats/)
+**The package's documentation is available at:** [http://glotzerlab.engin.umich.edu/garnett/](http://glotzerlab.engin.umich.edu/garnett/)
 
 To build the documentation yourself using sphinx, execute within the repository:
 
@@ -32,7 +32,7 @@ To build the documentation yourself using sphinx, execute within the repository:
 ### Reading and writing
 
 ``` python
-import glotzformats as gf
+import garnett as gf
 
 # Autodetects file format for a uniform trajectory API
 with gf.read('gsdfile.gsd') as traj:
@@ -93,7 +93,7 @@ All matrices are `numpy` arrays.
 
 ## Example use with HOOMD-blue
 
-See the [examples directory](https://github.com/glotzerlab/glotzformats/tree/master/examples) for additional examples.
+See the [examples directory](https://github.com/glotzerlab/garnett/tree/master/examples) for additional examples.
 
 ```
 #!python
@@ -113,7 +113,7 @@ traj[-1].copyto_snapshot(snapshot)
 
 ## Testing
 
-To run all glotzformats tests, `ddt`, HOOMD-blue (`hoomd`), and `pycifrw` must be installed in the testing environments.
+To run all garnett tests, `ddt`, HOOMD-blue (`hoomd`), and `pycifrw` must be installed in the testing environments.
 
 Execute the tests with
 

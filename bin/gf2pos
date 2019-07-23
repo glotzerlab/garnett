@@ -3,13 +3,13 @@
 # All rights reserved.
 # This software is licensed under the BSD 3-Clause License.
 
-"Convert glotzformats compatible trajectories to POS."
+"Convert garnett compatible trajectories to POS."
 import os
 import sys
 import argparse
 import logging
 
-import glotzformats as gf
+import garnett as gf
 from tqdm import tqdm
 
 
@@ -174,7 +174,7 @@ if __name__ == '__main__':
     fmt_list = ", ".join(fmts[:-1]) + ", or {}".format(fmts[-1])
 
     parser = argparse.ArgumentParser(
-        description="Convert glotzformats compatible trajectories to POS.")
+        description="Convert garnett compatible trajectories to POS.")
     parser.add_argument(
         'infile',
         type=str,

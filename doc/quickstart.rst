@@ -8,12 +8,12 @@ Reading and writing of trajectories
 Reading and writing with automatic filetype detection
 -----------------------------------------------------
 
-The :py:meth:`glotzformats.read` and :py:meth:`glotzformats.write` functions will automatically determine the type of a trajectory from its file extension.
+The :py:meth:`garnett.read` and :py:meth:`garnett.write` functions will automatically determine the type of a trajectory from its file extension.
 This can be used to quickly load and save :py:class:`~.trajectory.Trajectory` objects.
 
 .. code-block:: python
 
-    import glotzformats as gf
+    import garnett as gf
     # Load a GSD file...
     with gf.read('dump.gsd') as traj:
         print(len(traj))
@@ -28,8 +28,8 @@ The following code uses the :py:class:`~.reader.PosFileReader` and :py:class:`~.
 
 .. code-block:: python
 
-    from glotzformats.reader import PosFileReader
-    from glotzformats.writer import PosFileWriter
+    from garnett.reader import PosFileReader
+    from garnett.writer import PosFileWriter
 
     pos_reader = PosFileReader()
     pos_writer = PosFileWriter()
@@ -128,9 +128,9 @@ This is an example on how to modify frames in-place:
 
     import numpy as np
 
-    from glotzformats.reader import PosFileReader
-    from glotzformats.reader import PosFileWriter
-    from glotzformats.trajectory import Trajectory
+    from garnett.reader import PosFileReader
+    from garnett.reader import PosFileWriter
+    from garnett.trajectory import Trajectory
 
     def center(frame):
         frame.positions -= np.average(frame.positions, axis=0)
@@ -182,14 +182,14 @@ Sub-trajectories inherit already loaded data:
 Example use with HOOMD-blue
 ===========================
 
-The **glotzformats** frames can be used to initialize HOOMD-blue by creating snapshots with the :py:meth:`~.Frame.make_snapshot` method or by copying the frame data to existing snapshots with the :py:meth:`~.Frame.copyto_snapshot` methods:
+The **garnett** frames can be used to initialize HOOMD-blue by creating snapshots with the :py:meth:`~.Frame.make_snapshot` method or by copying the frame data to existing snapshots with the :py:meth:`~.Frame.copyto_snapshot` methods:
 
 .. code-block:: python
 
     from hoomd import init
     # For versions <2.x: from hoomd_script import init
 
-    from glotzformats.reader import PosFileReader
+    from garnett.reader import PosFileReader
 
     pos_reader = PosFileReader()
     with open('cube.pos') as posfile:
