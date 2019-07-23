@@ -1,7 +1,7 @@
 from __future__ import print_function
+from setuptools import setup, find_packages
 import sys
 
-from setuptools import setup, find_packages
 try:
     from Cython.Build import cythonize
     import numpy as np
@@ -10,10 +10,6 @@ except ImportError:
     CYTHON = False
 else:
     CYTHON = True
-
-if not sys.version_info >= (2, 7):
-    print("This package requires python version >= 2.7.")
-    sys.exit(1)
 
 setup(
     name='glotzformats',
@@ -30,13 +26,18 @@ setup(
 
     classifiers=[
         "Intended Audience :: Science/Research",
-        "License :: OSI Approved :: MIT License",
+        "License :: OSI Approved :: BSD License",
         "Topic :: Scientific/Engineering :: Physics",
     ],
+
+    python_requires='>=2.7, !=3.0.*, !=3.1.*, !=3.2.*, <4',
 
     install_requires=[
         'rowan>=0.5'
     ],
 
-    tests_require=['nose', 'ddt'],
+    tests_require=[
+        'nose',
+        'ddt'
+    ],
 )
