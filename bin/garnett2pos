@@ -109,7 +109,7 @@ def color_by_type(frame):
     return frame
 
 
-def gf2pos(fn, outfile, args, template=None):
+def garnett2pos(fn, outfile, args, template=None):
     extension = os.path.splitext(fn)[1]
     informat = FORMATS[
         extension] if args.informat is None else args.informat.lower()
@@ -163,10 +163,10 @@ def main(args):
             if not args.force and os.path.isfile(fn_out):
                 print("File '{}' already exists, skipping.".format(fn_out))
             with open(fn_out, 'w') as outfile:
-                gf2pos(fn, outfile, args, template)
+                garnett2pos(fn, outfile, args, template)
     else:
         for fn in args.infile:
-            gf2pos(fn, sys.stdout, args, template)
+            garnett2pos(fn, sys.stdout, args, template)
 
 
 if __name__ == '__main__':
