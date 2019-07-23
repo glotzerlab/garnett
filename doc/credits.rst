@@ -8,10 +8,12 @@ The following people have contributed to the :py:mod:`glotzformats` package.
 
 Carl Simon Adorf, University of Michigan
     * Original Author
-    * Maintainer
+    * Former Maintainer
+    * Trajectory classes
+    * Shapes classes
+    * Testing framework
     * CIF file writer
     * DCD file reader
-    * GETAR file reader
     * GSD file reader
     * HOOMD XML file reader
     * POS file reader
