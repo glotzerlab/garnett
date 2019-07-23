@@ -425,7 +425,7 @@ class BaseGSDHOOMDFileReaderTest(TrajectoryTest):
                                     period=None,
                                     dynamic=['attribute', 'property', 'momentum'])
         gsd_writer.dump_state(self.mc)
-        gf_prop_map = dict(
+        prop_map = dict(
             position='positions',
             orientation='orientations',
             velocity='velocities',
@@ -435,10 +435,10 @@ class BaseGSDHOOMDFileReaderTest(TrajectoryTest):
             traj = gsd_reader.read(gsdfile)
             traj.load_arrays()
             for i in range(traj.N[0]):
-                for prop in particle_props:
-                    gf_prop = gf_prop_map.get(prop, prop)
+                for prop_name in particle_props:
+                    prop = prop_map.get(prop_name, prop_name)
                     self.assertTrue(
-                        (getattr(traj, gf_prop)[0][i] == particle_props[prop]).all())
+                        (getattr(traj, prop)[0][i] == particle_props[prop_name]).all())
 
 
 if __name__ == '__main__':

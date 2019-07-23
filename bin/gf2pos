@@ -9,7 +9,7 @@ import sys
 import argparse
 import logging
 
-import garnett as gf
+import garnett
 from tqdm import tqdm
 
 
@@ -40,8 +40,8 @@ MODES = {
 }
 
 
-pos_reader = gf.reader.PosFileReader()
-pos_writer = gf.writer.PosFileWriter()
+pos_reader = garnett.reader.PosFileReader()
+pos_writer = garnett.writer.PosFileWriter()
 
 
 def _build_slice(slice_string):
@@ -122,10 +122,10 @@ def gf2pos(fn, outfile, args, template=None):
 
     with open(fn, inmode) as infile:
         if informat == 'gsd':
-            gsd_reader = gf.reader.GSDHoomdFileReader()
+            gsd_reader = garnett.reader.GSDHoomdFileReader()
             traj = gsd_reader.read(infile, template)
         elif informat == 'gtar':
-            getar_reader = gf.reader.GetarFileReader()
+            getar_reader = garnett.reader.GetarFileReader()
             traj = getar_reader.read(infile)
         elif informat == 'pos':
             traj = pos_reader.read(infile)

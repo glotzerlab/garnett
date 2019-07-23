@@ -13,12 +13,12 @@ This can be used to quickly load and save :py:class:`~.trajectory.Trajectory` ob
 
 .. code-block:: python
 
-    import garnett as gf
+    import garnett
     # Load a GSD file...
-    with gf.read('dump.gsd') as traj:
+    with garnett.read('dump.gsd') as traj:
         print(len(traj))
         # ...do things with the trajectory, then output a GTAR file
-        gf.write(traj, 'output.tar')
+        garnett.write(traj, 'output.tar')
 
 Using reader and writer classes
 -------------------------------

@@ -32,16 +32,16 @@ To build the documentation yourself using sphinx, execute within the repository:
 ### Reading and writing
 
 ``` python
-import garnett as gf
+import garnett
 
 # Autodetects file format for a uniform trajectory API
-with gf.read('gsdfile.gsd') as traj:
+with garnett.read('gsdfile.gsd') as traj:
     for frame in traj:
         pos = frame.positions
 
 # Simple conversion of trajectory formats
-with gf.read('posfile.pos') as traj:
-    gf.write(traj, 'gsdfile.gsd')
+with garnett.read('posfile.pos') as traj:
+    garnett.write(traj, 'gsdfile.gsd')
 ```
 
 ### Data access

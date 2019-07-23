@@ -2,11 +2,11 @@
 
 import argparse
 
-import garnett as gf
+import garnett
 
 def main(args):
-    pos_reader = gf.reader.PosFileReader()
-    cif_writer = gf.writer.CifFileWriter()
+    pos_reader = garnett.reader.PosFileReader()
+    cif_writer = garnett.writer.CifFileWriter()
     with open(args.posfile) as posfile:
         traj = pos_reader.read(posfile)
         cif_writer.write(traj)

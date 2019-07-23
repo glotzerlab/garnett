@@ -2,15 +2,15 @@
 
 import logging
 
-import garnett as gf
+import garnett
 
 logger = logging.getLogger(__name__)
 
 
 def main(args):
-    pos_writer = gf.writer.PosFileWriter()
-    xml_reader = gf.reader.HoomdBlueXMLFileReader()
-    dcd_reader = gf.reader.DCDFileReader()
+    pos_writer = garnett.writer.PosFileWriter()
+    xml_reader = garnett.reader.HoomdBlueXMLFileReader()
+    dcd_reader = garnett.reader.DCDFileReader()
 
     with open(args.xmlfile) as xmlfile:
         frame = xml_reader.read(xmlfile)[0]
