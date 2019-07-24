@@ -1,6 +1,5 @@
-# Copyright (c) 2019 The Regents of the University of Michigan
-# All rights reserved.
-# This software is licensed under the BSD 3-Clause License.
+# Copyright (c) 2016-2018 The Regents of the University of Michigan
+# This file is part of the General Simulation Data (GSD) project, released under the BSD 2-Clause License.
 
 """ GSD reader written in pure python
 
