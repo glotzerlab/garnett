@@ -6,7 +6,7 @@ import tempfile
 
 import numpy as np
 
-import glotzformats
+import garnett
 
 try:
     import gsd  # noqa: F401
@@ -24,11 +24,11 @@ def get_filename(filename):
     return os.path.join(TESTDATA_PATH, filename)
 
 
-class ColorlessShape(glotzformats.shapes.Shape):
+class ColorlessShape(garnett.shapes.Shape):
     """ShapeDefinition without colors, for comparing formats.
 
     :param other: Another ShapeDefinition object.
-    :type other: :py:class:`glotzformats.shapes.Shape`
+    :type other: :py:class:`garnett.shapes.Shape`
     """
 
     def __init__(self, other):
@@ -48,8 +48,8 @@ def assertEqualShapedefs(first, second):
 
 @unittest.skipIf(not GSD, 'GSDHOOMDFileWriter requires the gsd module.')
 class BaseGSDHOOMDFileWriterTest(unittest.TestCase):
-    reader_class = glotzformats.reader.GSDHOOMDFileReader
-    writer_class = glotzformats.writer.GSDHOOMDFileWriter
+    reader_class = garnett.reader.GSDHOOMDFileReader
+    writer_class = garnett.writer.GSDHOOMDFileWriter
 
     def setUp(self):
         self.reader = type(self).reader_class()
@@ -58,7 +58,7 @@ class BaseGSDHOOMDFileWriterTest(unittest.TestCase):
     def test_write(self):
         # Note that this test assumes that the reader is working, and therefore
         # could fail if the reader is broken even if the writer is fine.
-        gsdfile = io.BytesIO(base64.b64decode(glotzformats.samples.GSD_BASE64))
+        gsdfile = io.BytesIO(base64.b64decode(garnett.samples.GSD_BASE64))
 
         traj = self.reader.read(gsdfile)
         traj.load_arrays()
@@ -91,7 +91,7 @@ class BaseGSDHOOMDFileWriterTest(unittest.TestCase):
         tmpfile = tempfile.NamedTemporaryFile(mode='wb')
 
         with tmpfile:
-            with glotzformats.read(get_filename('FeSiUC.pos')) as traj:
+            with garnett.read(get_filename('FeSiUC.pos')) as traj:
                 self.writer.write(traj, tmpfile)
                 written_traj = self.reader.read(tmpfile)
                 assertEqualShapedefs(written_traj[0].shapedef, traj[0].shapedef)
@@ -101,7 +101,7 @@ class BaseGSDHOOMDFileWriterTest(unittest.TestCase):
         tmpfile = tempfile.NamedTemporaryFile(mode='wb')
 
         with tmpfile:
-            with glotzformats.read(get_filename('shapes/ellipsoid_3d.pos')) as traj:
+            with garnett.read(get_filename('shapes/ellipsoid_3d.pos')) as traj:
                 self.writer.write(traj, tmpfile)
                 written_traj = self.reader.read(tmpfile)
                 assertEqualShapedefs(written_traj[0].shapedef, traj[0].shapedef)
@@ -109,7 +109,7 @@ class BaseGSDHOOMDFileWriterTest(unittest.TestCase):
     def test_write_defaults(self):
         tmpfile = tempfile.NamedTemporaryFile(mode='wb')
         with tmpfile:
-            with glotzformats.read(get_filename('shapes/ellipsoid_3d.pos')) as traj:
+            with garnett.read(get_filename('shapes/ellipsoid_3d.pos')) as traj:
                 self.writer.write(traj, tmpfile)
                 written_traj = self.reader.read(tmpfile)
                 assert np.array_equal(written_traj[0].mass, np.ones(27).astype(float))

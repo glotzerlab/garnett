@@ -2,14 +2,15 @@
 
 import logging
 
-import glotzformats as gf
+from garnett.reader import PosFileReader
+from garnett.writer import PosFileWriter
 
 logger = logging.getLogger(__name__)
 
 
 def main(args):
-    with gf.read(args.infile) as traj:
-        gf.write(traj, args.outfile)
+    with garnett.read(args.infile) as traj:
+        garnett.write(traj, args.outfile)
     return 0
 
 

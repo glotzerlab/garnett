@@ -3,7 +3,7 @@ import io
 import unittest
 import tempfile
 
-import glotzformats
+import garnett
 import numpy as np
 
 PYTHON_2 = sys.version_info[0] == 2
@@ -43,14 +43,14 @@ else:
 
 
 class TrajectoryTest(unittest.TestCase):
-    sample = glotzformats.samples.POS_HPMC
-    reader = glotzformats.reader.PosFileReader
+    sample = garnett.samples.POS_HPMC
+    reader = garnett.reader.PosFileReader
 
     def read_trajectory(self, stream, precision=None):
-        reader = glotzformats.reader.PosFileReader(precision=precision)
+        reader = garnett.reader.PosFileReader(precision=precision)
         return reader.read(stream)
 
-    def get_trajectory(self, sample=glotzformats.samples.POS_HPMC):
+    def get_trajectory(self, sample=garnett.samples.POS_HPMC):
         if PYTHON_2:
             sample_file = io.StringIO(unicode(sample))  # noqa
         else:
@@ -70,7 +70,7 @@ class TrajectoryTest(unittest.TestCase):
         str(traj)
 
     def test_frame_inheritance(self):
-        from glotzformats.trajectory import Frame
+        from garnett.trajectory import Frame
         sample_file = self.get_sample_file()
         traj = self.reader().read(sample_file)
         for frame in traj:
@@ -107,7 +107,7 @@ class TrajectoryTest(unittest.TestCase):
         for frame in traj:
             self.assertTrue(isinstance(frame.positions, np.ndarray))
             self.assertTrue(frame.positions.dtype ==
-                            glotzformats.trajectory.DEFAULT_DTYPE)
+                            garnett.trajectory.DEFAULT_DTYPE)
         for dtype in (np.float32, np.float64):
             traj.set_dtype(dtype)
             for frame in traj:
@@ -173,7 +173,7 @@ class TrajectoryTest(unittest.TestCase):
         traj.load_arrays()
         if traj.positions is not None and None not in traj.positions:
             self.assertTrue(np.issubdtype(
-                traj.positions.dtype, glotzformats.trajectory.DEFAULT_DTYPE))
+                traj.positions.dtype, garnett.trajectory.DEFAULT_DTYPE))
             self.assertEqual(traj.positions.shape, (len(traj), len(traj[0]), 3))
             self.assertTrue((traj.positions[0] == traj[0].positions).all())
             with self.assertRaises(ValueError):
@@ -191,7 +191,7 @@ class TrajectoryTest(unittest.TestCase):
         if traj.orientations is not None and None not in traj.orientations:
             if len(traj.orientations.shape) > 1:
                 self.assertTrue(np.issubdtype(
-                    traj.orientations.dtype, glotzformats.trajectory.DEFAULT_DTYPE))
+                    traj.orientations.dtype, garnett.trajectory.DEFAULT_DTYPE))
                 self.assertEqual(traj.orientations.shape,
                                  (len(traj), len(traj[0]), 4))
                 self.assertTrue((traj.orientations[0] == traj[0].orientations).all())
@@ -210,7 +210,7 @@ class TrajectoryTest(unittest.TestCase):
         if traj.velocities is not None and None not in traj.velocities:
             if len(traj.velocities.shape) > 1:
                 self.assertTrue(np.issubdtype(
-                    traj.velocities.dtype, glotzformats.trajectory.DEFAULT_DTYPE))
+                    traj.velocities.dtype, garnett.trajectory.DEFAULT_DTYPE))
                 self.assertEqual(traj.velocities.shape,
                                  (len(traj), len(traj[0]), 3))
                 self.assertTrue((traj.velocities[0] == traj[0].velocities).all())
@@ -229,7 +229,7 @@ class TrajectoryTest(unittest.TestCase):
         if traj.mass is not None and None not in traj.mass:
             if len(traj.mass.shape) > 1:
                 self.assertTrue(np.issubdtype(
-                    traj.mass.dtype, glotzformats.trajectory.DEFAULT_DTYPE))
+                    traj.mass.dtype, garnett.trajectory.DEFAULT_DTYPE))
                 self.assertEqual(traj.mass.shape,
                                  (len(traj), len(traj[0])))
                 self.assertTrue((traj.mass[0] == traj[0].mass).all())
@@ -248,7 +248,7 @@ class TrajectoryTest(unittest.TestCase):
         if traj.charge is not None and None not in traj.charge:
             if len(traj.charge.shape) > 1:
                 self.assertTrue(np.issubdtype(
-                    traj.charge.dtype, glotzformats.trajectory.DEFAULT_DTYPE))
+                    traj.charge.dtype, garnett.trajectory.DEFAULT_DTYPE))
                 self.assertEqual(traj.charge.shape,
                                  (len(traj), len(traj[0])))
                 self.assertTrue((traj.charge[0] == traj[0].charge).all())
@@ -267,7 +267,7 @@ class TrajectoryTest(unittest.TestCase):
         if traj.diameter is not None and None not in traj.diameter:
             if len(traj.diameter.shape) > 1:
                 self.assertTrue(np.issubdtype(
-                    traj.diameter.dtype, glotzformats.trajectory.DEFAULT_DTYPE))
+                    traj.diameter.dtype, garnett.trajectory.DEFAULT_DTYPE))
                 self.assertEqual(traj.diameter.shape,
                                  (len(traj), len(traj[0])))
                 self.assertTrue((traj.diameter[0] == traj[0].diameter).all())
@@ -286,7 +286,7 @@ class TrajectoryTest(unittest.TestCase):
         if traj.moment_inertia is not None and None not in traj.moment_inertia:
             if len(traj.moment_inertia.shape) > 1:
                 self.assertTrue(np.issubdtype(
-                    traj.moment_inertia.dtype, glotzformats.trajectory.DEFAULT_DTYPE))
+                    traj.moment_inertia.dtype, garnett.trajectory.DEFAULT_DTYPE))
                 self.assertEqual(traj.moment_inertia.shape,
                                  (len(traj), len(traj[0]), 3))
                 self.assertTrue((traj.moment_inertia[0] == traj[0].moment_inertia).all())
@@ -302,7 +302,7 @@ class TrajectoryTest(unittest.TestCase):
         if traj.angmom is not None and None not in traj.angmom:
             if len(traj.angmom.shape) > 1:
                 self.assertTrue(np.issubdtype(
-                    traj.angmom.dtype, glotzformats.trajectory.DEFAULT_DTYPE))
+                    traj.angmom.dtype, garnett.trajectory.DEFAULT_DTYPE))
                 self.assertEqual(traj.angmom.shape,
                                  (len(traj), len(traj[0]), 4))
                 self.assertTrue((traj.angmom[0] == traj[0].angmom).all())
@@ -389,7 +389,7 @@ class FrameSnapshotExport(TrajectoryTest):
             run(1, quiet=True)  # sanity check
 
     def test_hpmc_dialect(self):
-        snapshot = self.make_snapshot(glotzformats.samples.POS_HPMC)
+        snapshot = self.make_snapshot(garnett.samples.POS_HPMC)
         self.assertEqual(snapshot.box.Lx, 10.0)
         self.assertEqual(snapshot.box.Ly, 10.0)
         self.assertEqual(snapshot.box.Lz, 10.0)
@@ -397,7 +397,7 @@ class FrameSnapshotExport(TrajectoryTest):
         self.assertEqual(snapshot.particles.types, ['A'])
 
     def test_incsim_dialect(self):
-        snapshot = self.make_snapshot(glotzformats.samples.POS_INCSIM)
+        snapshot = self.make_snapshot(garnett.samples.POS_INCSIM)
         self.assertEqual(snapshot.box.Lx, 10.0)
         self.assertEqual(snapshot.box.Ly, 10.0)
         self.assertEqual(snapshot.box.Lz, 10.0)
@@ -405,7 +405,7 @@ class FrameSnapshotExport(TrajectoryTest):
         self.assertEqual(snapshot.particles.types, ['A'])
 
     def test_monotype_dialect(self):
-        snapshot = self.make_snapshot(glotzformats.samples.POS_MONOTYPE)
+        snapshot = self.make_snapshot(garnett.samples.POS_MONOTYPE)
         self.assertEqual(snapshot.box.Lx, 10.0)
         self.assertEqual(snapshot.box.Ly, 10.0)
         self.assertEqual(snapshot.box.Lz, 10.0)
@@ -413,7 +413,7 @@ class FrameSnapshotExport(TrajectoryTest):
         self.assertEqual(snapshot.particles.types, ['A'])
 
     def test_injavis_dialect(self):
-        snapshot = self.make_snapshot(glotzformats.samples.POS_INJAVIS)
+        snapshot = self.make_snapshot(garnett.samples.POS_INJAVIS)
         self.assertEqual(snapshot.box.Lx, 10.0)
         self.assertEqual(snapshot.box.Ly, 10.0)
         self.assertEqual(snapshot.box.Lz, 10.0)
@@ -421,7 +421,7 @@ class FrameSnapshotExport(TrajectoryTest):
         self.assertEqual(snapshot.particles.types, ['A'])
 
     def test_hpmc_dialect_2D(self):
-        snapshot = self.make_snapshot(glotzformats.samples.POS_HPMC_2D)
+        snapshot = self.make_snapshot(garnett.samples.POS_HPMC_2D)
         self.assertEqual(snapshot.box.Lx, 10.0)
         self.assertEqual(snapshot.box.Ly, 10.0)
         self.assertEqual(snapshot.box.Lz, 1.0)
@@ -429,7 +429,7 @@ class FrameSnapshotExport(TrajectoryTest):
         self.assertEqual(snapshot.particles.types, ['A'])
 
     def test_incsim_dialect_2D(self):
-        snapshot = self.make_snapshot(glotzformats.samples.POS_INCSIM_2D)
+        snapshot = self.make_snapshot(garnett.samples.POS_INCSIM_2D)
         self.assertEqual(snapshot.box.Lx, 10.0)
         self.assertEqual(snapshot.box.Ly, 10.0)
         self.assertEqual(snapshot.box.Lz, 1.0)
@@ -437,7 +437,7 @@ class FrameSnapshotExport(TrajectoryTest):
         self.assertEqual(snapshot.particles.types, ['A'])
 
     def test_monotype_dialect_2D(self):
-        snapshot = self.make_snapshot(glotzformats.samples.POS_MONOTYPE_2D)
+        snapshot = self.make_snapshot(garnett.samples.POS_MONOTYPE_2D)
         self.assertEqual(snapshot.box.Lx, 25.0)
         self.assertEqual(snapshot.box.Ly, 25.0)
         self.assertEqual(snapshot.box.Lz, 1.0)

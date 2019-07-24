@@ -4,14 +4,14 @@ import glob
 import logging
 from importlib.util import find_spec
 
-import glotzformats as gf
+import garnett
 
 GTAR = find_spec('gtar')
 GSD = find_spec('gsd')
 
 
 def test_read(file, template=None):
-    with gf.read(file, template=template) as traj:
+    with garnett.read(file, template=template) as traj:
         for frame in traj:
             frame.load()
             print(frame)
@@ -20,7 +20,6 @@ def test_read(file, template=None):
 def main():
     if GTAR:
         for fn in glob.glob('../samples/*.tar'):
-            test_read(fn)
 
     if GSD:
         for fn in glob.glob('../samples/*.gsd'):

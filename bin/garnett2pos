@@ -3,13 +3,13 @@
 # All rights reserved.
 # This software is licensed under the BSD 3-Clause License.
 
-"Convert glotzformats compatible trajectories to POS."
+"Convert garnett compatible trajectories to POS."
 import os
 import sys
 import argparse
 import logging
 
-import glotzformats as gf
+import garnett
 from tqdm import tqdm
 
 
@@ -40,8 +40,8 @@ MODES = {
 }
 
 
-pos_reader = gf.reader.PosFileReader()
-pos_writer = gf.writer.PosFileWriter()
+pos_reader = garnett.reader.PosFileReader()
+pos_writer = garnett.writer.PosFileWriter()
 
 
 def _build_slice(slice_string):
@@ -109,7 +109,7 @@ def color_by_type(frame):
     return frame
 
 
-def gf2pos(fn, outfile, args, template=None):
+def garnett2pos(fn, outfile, args, template=None):
     extension = os.path.splitext(fn)[1]
     informat = FORMATS[
         extension] if args.informat is None else args.informat.lower()
@@ -122,10 +122,10 @@ def gf2pos(fn, outfile, args, template=None):
 
     with open(fn, inmode) as infile:
         if informat == 'gsd':
-            gsd_reader = gf.reader.GSDHoomdFileReader()
+            gsd_reader = garnett.reader.GSDHoomdFileReader()
             traj = gsd_reader.read(infile, template)
         elif informat == 'gtar':
-            getar_reader = gf.reader.GetarFileReader()
+            getar_reader = garnett.reader.GetarFileReader()
             traj = getar_reader.read(infile)
         elif informat == 'pos':
             traj = pos_reader.read(infile)
@@ -163,10 +163,10 @@ def main(args):
             if not args.force and os.path.isfile(fn_out):
                 print("File '{}' already exists, skipping.".format(fn_out))
             with open(fn_out, 'w') as outfile:
-                gf2pos(fn, outfile, args, template)
+                garnett2pos(fn, outfile, args, template)
     else:
         for fn in args.infile:
-            gf2pos(fn, sys.stdout, args, template)
+            garnett2pos(fn, sys.stdout, args, template)
 
 
 if __name__ == '__main__':
@@ -174,7 +174,7 @@ if __name__ == '__main__':
     fmt_list = ", ".join(fmts[:-1]) + ", or {}".format(fmts[-1])
 
     parser = argparse.ArgumentParser(
-        description="Convert glotzformats compatible trajectories to POS.")
+        description="Convert garnett compatible trajectories to POS.")
     parser.add_argument(
         'infile',
         type=str,

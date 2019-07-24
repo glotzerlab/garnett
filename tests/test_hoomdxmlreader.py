@@ -4,7 +4,7 @@ import unittest
 
 import numpy as np
 
-import glotzformats
+import garnett
 
 
 PYTHON_2 = sys.version_info[0] == 2
@@ -13,7 +13,7 @@ PYTHON_2 = sys.version_info[0] == 2
 class BaseHOOMDXMLFileReaderTest(unittest.TestCase):
 
     def read_trajectory(self, sample_file):
-        reader = glotzformats.reader.HOOMDXMLFileReader()
+        reader = garnett.reader.HOOMDXMLFileReader()
         if PYTHON_2:
             return reader.read(io.StringIO(unicode(sample_file)))  # noqa
         else:
@@ -21,7 +21,7 @@ class BaseHOOMDXMLFileReaderTest(unittest.TestCase):
                 io.StringIO(sample_file))
 
     def test_read_3d(self):
-        traj = self.read_trajectory(glotzformats.samples.HOOMD_BLUE_XML)
+        traj = self.read_trajectory(garnett.samples.HOOMD_BLUE_XML)
         self.assertEqual(len(traj), 1)
         self.assertEqual(len(traj[0]), 10)
         self.assertTrue(np.allclose(traj[0].positions, np.array([
@@ -58,7 +58,7 @@ class BaseHOOMDXMLFileReaderTest(unittest.TestCase):
         self.assertTrue(np.all([frame.box.dimensions == 3 for frame in traj]))
 
     def test_read_2d(self):
-        traj = self.read_trajectory(glotzformats.samples.HOOMD_BLUE_XML_2D)
+        traj = self.read_trajectory(garnett.samples.HOOMD_BLUE_XML_2D)
         self.assertEqual(len(traj), 1)
         self.assertEqual(len(traj[0]), 10)
         self.assertTrue(np.allclose(traj[0].positions, np.array([

@@ -2,8 +2,10 @@
 
 import logging
 import numpy as np
-import glotzformats as gf
-from glotzformats.trajectory import Trajectory
+
+from garnett.reader import PosFileReader
+from garnett.writer import PosFileWriter
+from garnett.trajectory import Trajectory
 
 logger = logging.getLogger(__name__)
 
@@ -14,9 +16,9 @@ def center(frame):
 
 
 def main(args):
-    with gf.read(args.infile) as traj:
+    with garnett.read(args.infile) as traj:
         traj_centered = Trajectory((center(frame) for frame in traj))
-        gf.write(traj_centered, args.outfile)
+        garnett.write(traj_centered, args.outfile)
 
     return 0
 

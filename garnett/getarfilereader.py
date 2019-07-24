@@ -90,7 +90,7 @@ class GetarFrame(Frame):
     def read(self):
         raw_frame = _RawFrameData()
         raw_frame.shapedef = collections.OrderedDict()
-        gf_prop_map = {
+        prop_map = {
             'position': 'positions',
             'orientation': 'orientations',
             'velocity': 'velocities',
@@ -108,7 +108,7 @@ class GetarFrame(Frame):
                 values = None
 
             if values is not None:
-                frame_prop = gf_prop_map.get(name, name)
+                frame_prop = prop_map.get(name, name)
                 setattr(raw_frame, frame_prop, values)
 
         if 'type' in self._records and 'type_names.json' in self._records:

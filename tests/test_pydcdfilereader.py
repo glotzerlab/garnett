@@ -6,34 +6,34 @@ import tempfile
 
 import numpy as np
 
-import glotzformats
+import garnett
 from test_trajectory import TrajectoryTest
 
 PYTHON_2 = sys.version_info[0] == 2
 
 
 class BaseDCDFileReaderTest(TrajectoryTest):
-    reader = glotzformats.reader.PyDCDFileReader
+    reader = garnett.reader.PyDCDFileReader
 
     def setUp(self):
         self.tmpfile = tempfile.NamedTemporaryFile()
         self.addCleanup(self.tmpfile.close)
 
     def get_sample_file(self):
-        return io.BytesIO(base64.b64decode(glotzformats.samples.DCD_BASE64))
+        return io.BytesIO(base64.b64decode(garnett.samples.DCD_BASE64))
 
     def read_top_trajectory(self):
-        top_reader = glotzformats.reader.HOOMDXMLFileReader()
+        top_reader = garnett.reader.HOOMDXMLFileReader()
         if PYTHON_2:
             return top_reader.read(io.StringIO(
-                unicode(glotzformats.samples.HOOMD_BLUE_XML)))  # noqa
+                unicode(garnett.samples.HOOMD_BLUE_XML)))  # noqa
         else:
             return top_reader.read(
-                io.StringIO(glotzformats.samples.HOOMD_BLUE_XML))
+                io.StringIO(garnett.samples.HOOMD_BLUE_XML))
 
     def get_traj(self):
         top_traj = self.read_top_trajectory()
-        dcdfile = io.BytesIO(base64.b64decode(glotzformats.samples.DCD_BASE64))
+        dcdfile = io.BytesIO(base64.b64decode(garnett.samples.DCD_BASE64))
         return self.reader().read(dcdfile, top_traj[0])
 
     def assert_raise_attribute_error(self, frame):

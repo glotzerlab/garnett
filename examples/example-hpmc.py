@@ -5,7 +5,7 @@ import hoomd
 from hoomd import deprecated, hpmc
 
 import numpy as np
-import glotzformats as gf
+import garnett
 
 hoomd.context.initialize()
 
@@ -35,7 +35,7 @@ with hoomd.context.SimulationContext():
 
 with hoomd.context.SimulationContext():
 
-    with gf.read('cube.pos') as traj:
+    with garnett.read('cube.pos') as traj:
         snapshot = traj[-1].make_snapshot()
         system = hoomd.init.read_snapshot(snapshot)
 

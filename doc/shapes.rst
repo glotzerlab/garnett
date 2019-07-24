@@ -6,55 +6,55 @@ Some shapes define a :code:`shape_dict` property, which returns a
 :py:class:`dict` for consumption by visualization tools, in the format of
 :py:meth:`hoomd.hpmc.integrate.mode_hpmc.get_type_shapes`.
 
-.. autoclass:: glotzformats.shapes.FallbackShape
+.. autoclass:: garnett.shapes.FallbackShape
    :members:
 
-.. autoclass:: glotzformats.shapes.Shape
-   :members:
-   :undoc-members:
-   :inherited-members:
-
-.. autoclass:: glotzformats.shapes.SphereShape
+.. autoclass:: garnett.shapes.Shape
    :members:
    :undoc-members:
    :inherited-members:
 
-.. autoclass:: glotzformats.shapes.ArrowShape
+.. autoclass:: garnett.shapes.SphereShape
    :members:
    :undoc-members:
    :inherited-members:
 
-.. autoclass:: glotzformats.shapes.SphereUnionShape
+.. autoclass:: garnett.shapes.ArrowShape
    :members:
    :undoc-members:
    :inherited-members:
 
-.. autoclass:: glotzformats.shapes.PolygonShape
+.. autoclass:: garnett.shapes.SphereUnionShape
    :members:
    :undoc-members:
    :inherited-members:
 
-.. autoclass:: glotzformats.shapes.SpheropolygonShape
+.. autoclass:: garnett.shapes.PolygonShape
    :members:
    :undoc-members:
    :inherited-members:
 
-.. autoclass:: glotzformats.shapes.ConvexPolyhedronShape
+.. autoclass:: garnett.shapes.SpheropolygonShape
    :members:
    :undoc-members:
    :inherited-members:
 
-.. autoclass:: glotzformats.shapes.ConvexPolyhedronUnionShape
+.. autoclass:: garnett.shapes.ConvexPolyhedronShape
    :members:
    :undoc-members:
    :inherited-members:
 
-.. autoclass:: glotzformats.shapes.ConvexSpheropolyhedronShape
+.. autoclass:: garnett.shapes.ConvexPolyhedronUnionShape
    :members:
    :undoc-members:
    :inherited-members:
 
-.. autoclass:: glotzformats.shapes.GeneralPolyhedronShape
+.. autoclass:: garnett.shapes.ConvexSpheropolyhedronShape
+   :members:
+   :undoc-members:
+   :inherited-members:
+
+.. autoclass:: garnett.shapes.GeneralPolyhedronShape
    :members:
    :undoc-members:
    :inherited-members:

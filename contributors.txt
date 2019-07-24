@@ -1,4 +1,4 @@
-Contributors to the glotzformats code base (roughly) in
+Contributors to the garnett code base (roughly) in
 chronological order of contribution:
 
 Carl Simon Adorf

@@ -9,7 +9,7 @@ from itertools import chain
 
 from ddt import ddt, data
 
-import glotzformats
+import garnett
 import numpy as np
 
 PYTHON_2 = sys.version_info[0] == 2
@@ -18,7 +18,7 @@ if PYTHON_2:
 else:
     from tempfile import TemporaryDirectory
 
-PATH = os.path.join(glotzformats.__path__[0], '..')
+PATH = os.path.join(garnett.__path__[0], '..')
 IN_PATH = os.path.abspath(PATH) == os.path.abspath(os.getcwd())
 
 
@@ -54,7 +54,7 @@ else:
 class BasePosFileReaderTest(unittest.TestCase):
 
     def read_trajectory(self, stream, precision=None):
-        reader = glotzformats.reader.PosFileReader(precision=precision)
+        reader = garnett.reader.PosFileReader(precision=precision)
         return reader.read(stream)
 
     def assert_raise_attribute_error(self, frame):
@@ -75,11 +75,11 @@ class BasePosFileReaderTest(unittest.TestCase):
 class BasePosFileWriterTest(BasePosFileReaderTest):
 
     def dump_trajectory(self, trajectory):
-        writer = glotzformats.writer.PosFileWriter()
+        writer = garnett.writer.PosFileWriter()
         return writer.dump(trajectory)
 
     def write_trajectory(self, trajectory, file, rotate=False):
-        writer = glotzformats.writer.PosFileWriter(rotate=rotate)
+        writer = garnett.writer.PosFileWriter(rotate=rotate)
         return writer.write(trajectory, file)
 
     def assert_approximately_equal_frames(self, a, b,
@@ -109,22 +109,22 @@ class PosFileReaderTest(BasePosFileReaderTest):
             empty_sample = io.StringIO(unicode(''))  # noqa
         else:
             empty_sample = io.StringIO("")
-        with self.assertRaises(glotzformats.errors.ParserError):
+        with self.assertRaises(garnett.errors.ParserError):
             self.read_trajectory(empty_sample)
 
     @unittest.skipIf(PYTHON_2, 'requires python 3')
     def test_read_garbage(self):
         garbage_sample = io.StringIO(str(os.urandom(1024 * 100)))
-        with self.assertRaises(glotzformats.errors.ParserError):
+        with self.assertRaises(garnett.errors.ParserError):
             self.read_trajectory(garbage_sample)
 
     def test_hpmc_dialect(self):
         if PYTHON_2:
-            sample = io.StringIO(unicode(glotzformats.samples.POS_HPMC))  # noqa
+            sample = io.StringIO(unicode(garnett.samples.POS_HPMC))  # noqa
         else:
-            sample = io.StringIO(glotzformats.samples.POS_HPMC)
+            sample = io.StringIO(garnett.samples.POS_HPMC)
         traj = self.read_trajectory(sample)
-        box_expected = glotzformats.trajectory.Box(Lx=10, Ly=10, Lz=10)
+        box_expected = garnett.trajectory.Box(Lx=10, Ly=10, Lz=10)
         for frame in traj:
             N = len(frame)
             self.assertEqual(frame.types, ['A'] * N)
@@ -133,11 +133,11 @@ class PosFileReaderTest(BasePosFileReaderTest):
 
     def test_incsim_dialect(self):
         if PYTHON_2:
-            sample = io.StringIO(unicode(glotzformats.samples.POS_INCSIM))  # noqa
+            sample = io.StringIO(unicode(garnett.samples.POS_INCSIM))  # noqa
         else:
-            sample = io.StringIO(glotzformats.samples.POS_INCSIM)
+            sample = io.StringIO(garnett.samples.POS_INCSIM)
         traj = self.read_trajectory(sample)
-        box_expected = glotzformats.trajectory.Box(Lx=10, Ly=10, Lz=10)
+        box_expected = garnett.trajectory.Box(Lx=10, Ly=10, Lz=10)
         for frame in traj:
             N = len(frame)
             self.assertEqual(frame.types, ['A'] * N)
@@ -146,11 +146,11 @@ class PosFileReaderTest(BasePosFileReaderTest):
 
     def test_monotype_dialect(self):
         if PYTHON_2:
-            sample = io.StringIO(unicode(glotzformats.samples.POS_MONOTYPE))  # noqa
+            sample = io.StringIO(unicode(garnett.samples.POS_MONOTYPE))  # noqa
         else:
-            sample = io.StringIO(glotzformats.samples.POS_MONOTYPE)
+            sample = io.StringIO(garnett.samples.POS_MONOTYPE)
         traj = self.read_trajectory(sample)
-        box_expected = glotzformats.trajectory.Box(Lx=10, Ly=10, Lz=10)
+        box_expected = garnett.trajectory.Box(Lx=10, Ly=10, Lz=10)
         for frame in traj:
             N = len(frame)
             self.assertEqual(frame.types, ['A'] * N)
@@ -159,11 +159,11 @@ class PosFileReaderTest(BasePosFileReaderTest):
 
     def test_injavis_dialect(self):
         if PYTHON_2:
-            sample = io.StringIO(unicode(glotzformats.samples.POS_INJAVIS))  # noqa
+            sample = io.StringIO(unicode(garnett.samples.POS_INJAVIS))  # noqa
         else:
-            sample = io.StringIO(glotzformats.samples.POS_INJAVIS)
+            sample = io.StringIO(garnett.samples.POS_INJAVIS)
         traj = self.read_trajectory(sample)
-        box_expected = glotzformats.trajectory.Box(Lx=10, Ly=10, Lz=10)
+        box_expected = garnett.trajectory.Box(Lx=10, Ly=10, Lz=10)
         for frame in traj:
             N = len(frame)
             self.assertEqual(frame.types, ['A'] * N)
@@ -300,9 +300,9 @@ class PosFileWriterTest(BasePosFileWriterTest):
 
     def test_hpmc_dialect(self):
         if PYTHON_2:
-            sample = io.StringIO(unicode(glotzformats.samples.POS_HPMC))  # noqa
+            sample = io.StringIO(unicode(garnett.samples.POS_HPMC))  # noqa
         else:
-            sample = io.StringIO(glotzformats.samples.POS_HPMC)
+            sample = io.StringIO(garnett.samples.POS_HPMC)
         traj = self.read_trajectory(sample)
         dump = io.StringIO()
         self.write_trajectory(traj, dump)
@@ -312,9 +312,9 @@ class PosFileWriterTest(BasePosFileWriterTest):
 
     def test_incsim_dialect(self):
         if PYTHON_2:
-            sample = io.StringIO(unicode(glotzformats.samples.POS_INCSIM))  # noqa
+            sample = io.StringIO(unicode(garnett.samples.POS_INCSIM))  # noqa
         else:
-            sample = io.StringIO(glotzformats.samples.POS_INCSIM)
+            sample = io.StringIO(garnett.samples.POS_INCSIM)
         traj = self.read_trajectory(sample)
         dump = io.StringIO()
         self.write_trajectory(traj, dump)
@@ -324,9 +324,9 @@ class PosFileWriterTest(BasePosFileWriterTest):
 
     def test_monotype_dialect(self):
         if PYTHON_2:
-            sample = io.StringIO(unicode(glotzformats.samples.POS_MONOTYPE))  # noqa
+            sample = io.StringIO(unicode(garnett.samples.POS_MONOTYPE))  # noqa
         else:
-            sample = io.StringIO(glotzformats.samples.POS_MONOTYPE)
+            sample = io.StringIO(garnett.samples.POS_MONOTYPE)
         traj = self.read_trajectory(sample)
         dump = io.StringIO()
         self.write_trajectory(traj, dump)
@@ -336,9 +336,9 @@ class PosFileWriterTest(BasePosFileWriterTest):
 
     def test_injavis_dialect(self):
         if PYTHON_2:
-            sample = io.StringIO(unicode(glotzformats.samples.POS_INJAVIS))  # noqa
+            sample = io.StringIO(unicode(garnett.samples.POS_INJAVIS))  # noqa
         else:
-            sample = io.StringIO(glotzformats.samples.POS_INJAVIS)
+            sample = io.StringIO(garnett.samples.POS_INJAVIS)
         traj = self.read_trajectory(sample)
         dump = io.StringIO()
         self.write_trajectory(traj, dump)
@@ -347,11 +347,11 @@ class PosFileWriterTest(BasePosFileWriterTest):
         self.assertEqual(traj, traj_cmp)
 
     def test_arrows(self):
-        from glotzformats.shapes import ArrowShape
+        from garnett.shapes import ArrowShape
         if PYTHON_2:
-            sample = io.StringIO(unicode(glotzformats.samples.POS_INJAVIS))  # noqa
+            sample = io.StringIO(unicode(garnett.samples.POS_INJAVIS))  # noqa
         else:
-            sample = io.StringIO(glotzformats.samples.POS_INJAVIS)
+            sample = io.StringIO(garnett.samples.POS_INJAVIS)
         traj = self.read_trajectory(sample)
         traj.load()
         for frame in traj:
@@ -367,11 +367,11 @@ class PosFileWriterTest(BasePosFileWriterTest):
                 frame.shapedef['A'], ArrowShape))
 
     def test_ellipsoid(self):
-        from glotzformats.shapes import EllipsoidShape
+        from garnett.shapes import EllipsoidShape
         if PYTHON_2:
-            sample = io.StringIO(unicode(glotzformats.samples.POS_INJAVIS))  # noqa
+            sample = io.StringIO(unicode(garnett.samples.POS_INJAVIS))  # noqa
         else:
-            sample = io.StringIO(glotzformats.samples.POS_INJAVIS)
+            sample = io.StringIO(garnett.samples.POS_INJAVIS)
         traj = self.read_trajectory(sample)
         traj.load()
         a = 0.5
@@ -471,25 +471,25 @@ class InjavisReadWriteTest(BasePosFileWriterTest):
         self.assertEqual(frame0, frame1)
 
     def test_hpmc_dialect(self):
-        self.read_write_injavis(glotzformats.samples.POS_HPMC)
+        self.read_write_injavis(garnett.samples.POS_HPMC)
 
     def test_incsim_dialect(self):
-        self.read_write_injavis(glotzformats.samples.POS_INCSIM)
+        self.read_write_injavis(garnett.samples.POS_INCSIM)
 
     def test_monotype_dialect(self):
-        self.read_write_injavis(glotzformats.samples.POS_MONOTYPE)
+        self.read_write_injavis(garnett.samples.POS_MONOTYPE)
 
     def test_injavis_dialect(self):
-        self.read_write_injavis(glotzformats.samples.POS_INJAVIS)
+        self.read_write_injavis(garnett.samples.POS_INJAVIS)
 
     def test_hpmc_dialect_2d(self):
-        self.read_write_injavis(glotzformats.samples.POS_HPMC_2D)
+        self.read_write_injavis(garnett.samples.POS_HPMC_2D)
 
     def test_incsim_dialect_2d(self):
-        self.read_write_injavis(glotzformats.samples.POS_INCSIM_2D)
+        self.read_write_injavis(garnett.samples.POS_INCSIM_2D)
 
     def test_monotype_dialect_2d(self):
-        self.read_write_injavis(glotzformats.samples.POS_MONOTYPE_2D)
+        self.read_write_injavis(garnett.samples.POS_MONOTYPE_2D)
 
 
 if __name__ == '__main__':

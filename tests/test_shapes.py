@@ -4,7 +4,7 @@ import numpy.testing as npt
 import os
 import unittest
 
-import glotzformats
+import garnett
 
 try:
     import gtar  # noqa: F401
@@ -36,7 +36,7 @@ def annotate_shape_test(test_class, shape_classes):
 
 @ddt
 class ShapeTest(unittest.TestCase):
-    reader = glotzformats.reader.GSDHOOMDFileReader
+    reader = garnett.reader.GSDHOOMDFileReader
     extension = 'gsd'
     mode = 'rb'
 
@@ -98,7 +98,7 @@ class ShapeTest(unittest.TestCase):
 
 @ddt
 class GSDShapeTest(ShapeTest):
-    reader = glotzformats.reader.GSDHOOMDFileReader
+    reader = garnett.reader.GSDHOOMDFileReader
     extension = 'gsd'
     mode = 'rb'
 
@@ -110,7 +110,7 @@ class GSDShapeTest(ShapeTest):
 @unittest.skipIf(not GTAR, 'GetarFileReader requires the gtar module.')
 @ddt
 class GetarShapeTest(ShapeTest):
-    reader = glotzformats.reader.GetarFileReader
+    reader = garnett.reader.GetarFileReader
     extension = 'zip'
     mode = 'r'
 
@@ -121,7 +121,7 @@ class GetarShapeTest(ShapeTest):
 
 @ddt
 class POSShapeTest(ShapeTest):
-    reader = glotzformats.reader.PosFileReader
+    reader = garnett.reader.PosFileReader
     extension = 'pos'
     mode = 'r'
 
