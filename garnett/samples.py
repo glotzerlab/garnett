@@ -1,3 +1,6 @@
+# Copyright (c) 2019 The Regents of the University of Michigan
+# All rights reserved.
+# This software is licensed under the BSD 3-Clause License.
 POS_HPMC = """boxMatrix 10 0 0 0 10 0 0 0 10
 def A "poly3d 4 1.0 0.0 -0.707106 -1.0 0.0 -0.707106 0.0 1.0 0.707106 0.0 -1.0 0.707106"
 A 1.82294440269 15.4535045624 14.8948659897 1 0 0 0

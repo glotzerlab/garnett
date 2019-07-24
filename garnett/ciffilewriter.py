@@ -1,3 +1,6 @@
+# Copyright (c) 2019 The Regents of the University of Michigan
+# All rights reserved.
+# This software is licensed under the BSD 3-Clause License.
 """cif-file writer for the Glotzer Group, University of Michigan.
 
 Authors: Julia Dshemuchadse, Carl Simon Adorf

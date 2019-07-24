@@ -1,3 +1,6 @@
+# Copyright (c) 2019 The Regents of the University of Michigan
+# All rights reserved.
+# This software is licensed under the BSD 3-Clause License.
 """Hoomd-blue XML-file reader for the Glotzer Group, University of Michigan.
 
 Authors: Carl Simon Adorf
