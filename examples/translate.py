@@ -9,21 +9,25 @@ logger = logging.getLogger(__name__)
 
 
 def main(args):
-    pos_reader = PosFileReader()
-    pos_writer = PosFileWriter()
-    with open(args.posfile) as posfile:
-        pos_writer.write(pos_reader.read(posfile))
+    with garnett.read(args.infile) as traj:
+        garnett.write(traj, args.outfile)
     return 0
 
+
 if __name__ == '__main__':
+
     import argparse
     import sys
     parser = argparse.ArgumentParser(
-        description="Read a pos-file.")
+        description="Translate between supported formats")
     parser.add_argument(
-        'posfile',
+        'infile',
         type=str,
-        help="Filename of a pos-file.")
+        help="Name of input file")
+    parser.add_argument(
+        'outfile',
+        type=str,
+        help="Name of a output file")
     args = parser.parse_args()
     logging.basicConfig(level=logging.INFO)
     sys.exit(main(args))

@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 
 import logging
-
 import numpy as np
 
 from garnett.reader import PosFileReader
@@ -17,27 +16,26 @@ def center(frame):
 
 
 def main(args):
-    pos_reader = PosFileReader()
-    pos_writer = PosFileWriter()
-    with open(args.posfile) as posfile:
-        traj = pos_reader.read(posfile)
+    with garnett.read(args.infile) as traj:
         traj_centered = Trajectory((center(frame) for frame in traj))
-        pos_writer.write(traj_centered)
+        garnett.write(traj_centered, args.outfile)
 
-        # or short:
-        # pos_writer.write(
-        #    Trajectory((center(f) for f in pos_.read.read(posfile))))
     return 0
+
 
 if __name__ == '__main__':
     import argparse
     import sys
     parser = argparse.ArgumentParser(
-        description="Read a pos-file.")
+        description="Read a file.")
     parser.add_argument(
-        'posfile',
+        'infile',
         type=str,
-        help="Filename of a pos-file.")
+        help="Filename of the file to read.")
+    parser.add_argument(
+        'outfile',
+        type=str,
+        help="Filename of the file to write to.")
     args = parser.parse_args()
     logging.basicConfig(level=logging.INFO)
     sys.exit(main(args))

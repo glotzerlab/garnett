@@ -14,7 +14,11 @@ You need to install HOOMD-blue and signac to run these examples.
 
 You can install these packages for example with:
 ```
+<<<<<<< HEAD
 conda install -c conda-forge hoomd signac
+=======
+ conda install -c conda-forge hoomd signac
+>>>>>>> master
 ```
 
 ## How to run the example

@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 import os
 import numpy as np
-import warnings
 from contextlib import contextmanager
 
 import signac
@@ -10,6 +9,7 @@ import hoomd.deprecated
 from hoomd import md
 
 hoomd.context.initialize()
+
 
 @contextmanager
 def restart_pos(filename):
@@ -22,34 +22,28 @@ def restart_pos(filename):
             tmp.write(file.read())
     os.rename(fn_tmp, filename)
 
+
 project = signac.get_project()
 
 
-for job in project.find_jobs():
+for job in project:
     with job:
         sp = job.statepoint()
-        if not os.path.isfile('init.gsd'):
+        if not job.isfile('init.gsd'):
             print("Initialize system.")
             with hoomd.context.SimulationContext():
-                system = hoomd.init.create_lattice(
-                    unitcell=hoomd.lattice.sc(a=2.0), n=[4,5,5])
+                system = hoomd.init.create_lattice(unitcell=hoomd.lattice.sc(a=2.0), n=5)
                 snapshot = system.take_snapshot()
                 np.copyto(
                     snapshot.particles.velocity,
                     np.random.random(snapshot.particles.velocity.shape))
-
-            with hoomd.context.SimulationContext():
-                hoomd.init.read_snapshot(snapshot)
+                system.restore_snapshot(snapshot)
                 hoomd.dump.gsd(filename='init.gsd', period=None, group=hoomd.group.all())
                 hoomd.deprecated.dump.xml(hoomd.group.all(), filename='init.xml', vis=True)
 
         with hoomd.context.SimulationContext():
-            warnings.warn("Using HOOMD GSD-restart work-around!")
-            if os.path.isfile('restart.gsd'):
-                hoomd.init.read_gsd('restart.gsd')
-            else:
-                hoomd.init.read_gsd('init.gsd')
-            # hoomd.init.read_gsd(filename='init.gsd', restart='restart.gsd')
+
+            hoomd.init.read_gsd(filename='init.gsd', restart='restart.gsd')
 
             print("tstep", hoomd.get_step())
 
