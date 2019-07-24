@@ -57,6 +57,7 @@ master_doc = 'index'
 # General information about the project.
 project = 'garnett'
 copyright = '2015-2019, The Regents of the University of Michigan'
+author = 'The Regents of the University of Michigan'
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
