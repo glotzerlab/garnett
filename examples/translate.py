@@ -12,7 +12,9 @@ def main(args):
         gf.write(traj, args.outfile)
     return 0
 
+
 if __name__ == '__main__':
+
     import argparse
     import sys
     parser = argparse.ArgumentParser(

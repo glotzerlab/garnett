@@ -10,6 +10,7 @@ from hoomd import md
 
 hoomd.context.initialize()
 
+
 @contextmanager
 def restart_pos(filename):
     fn_tmp = filename + '.tmp'
@@ -20,6 +21,7 @@ def restart_pos(filename):
         with open(filename) as file:
             tmp.write(file.read())
     os.rename(fn_tmp, filename)
+
 
 project = signac.get_project()
 

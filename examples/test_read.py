@@ -25,6 +25,7 @@ def test_read(file, template=None):
             frame.load()
             print(frame)
 
+
 def main():
     if GTAR:
         for fn in glob.glob('../samples/*.tar'):
@@ -44,6 +45,7 @@ def main():
         test_read(fn)
 
     return 0
+
 
 if __name__ == '__main__':
     logging.basicConfig(level=logging.INFO)

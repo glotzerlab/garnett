@@ -6,13 +6,12 @@ from hoomd import deprecated, hpmc
 
 import numpy as np
 import glotzformats as gf
-import os
 
 hoomd.context.initialize()
 
 # vertices of a cube
-verts = [[-1,-1,-1],[-1,-1,1],[-1,1,1],[-1,1,-1],
-         [1,-1,-1],[1,-1,1],[1,1,1],[1,1,-1]]
+verts = [[-1, -1, -1], [-1, -1, 1], [-1, 1, 1], [-1, 1, -1],
+         [1, -1, -1], [1, -1, 1], [1, 1, 1], [1, 1, -1]]
 
 with hoomd.context.SimulationContext():
     try:
