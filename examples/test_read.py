@@ -2,21 +2,12 @@
 import sys
 import glob
 import logging
+from importlib.util import find_spec
 
 import glotzformats as gf
 
-try:
-    import gtar
-except ImportError:
-    GTAR = False
-else:
-    GTAR = True
-try:
-    import gsd
-except ImportError:
-    GSD = False
-else:
-    GSD = True
+GTAR = find_spec('gtar')
+GSD = find_spec('gsd')
 
 
 def test_read(file, template=None):
