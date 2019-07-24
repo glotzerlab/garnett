@@ -4,27 +4,22 @@
 
 This is a collection of samples, parsers and writers for formats used in the Glotzer Group at the University of Michigan, Ann Arbor.
 
-## Authors
-
-* Carl Simon Adorf, csadorf@umich.edu
-* Richmond Newmann, newmanrs@umich.edu
-
 ## Maintainers
 
-* Sophie Youjung Lee, syjlee@umich.edu
+* Luis Y. Rivera-Rivera, lyrivera@umich.edu
+* Kelly Wang, kelwang@umich.edu
 * Carl Simon Adorf, csadorf@umich.edu
 * Bradley Dice, bdice@umich.edu
-
 
 ## Setup
 
 To install this package with pip, execute:
 
-    pip install git+https://github.com/glotzerlab/glotzformats.git#egg=glotzformats --user
+    pip install git+https://github.com/glotzerlab/garnett.git#egg=garnett --user
 
 ## Documentation
 
-**The package's documentation is available at:** [http://glotzerlab.engin.umich.edu/glotzformats/](http://glotzerlab.engin.umich.edu/glotzformats/)
+**The package's documentation is available at:** [http://glotzerlab.engin.umich.edu/garnett/](http://glotzerlab.engin.umich.edu/garnett/)
 
 To build the documentation yourself using sphinx, execute within the repository:
 
@@ -36,25 +31,23 @@ To build the documentation yourself using sphinx, execute within the repository:
 
 ### Reading and writing
 
-```
-#!python
-from glotzformats.reader import PosFileReader
-from glotzformats.writer import PosFileWriter
+``` python
+import garnett
 
-pos_reader = PosFileReader()
-with open('posfile.pos') as posfile:
-    traj = pos_reader.read(posfile)
+# Autodetects file format for a uniform trajectory API
+with garnett.read('gsdfile.gsd') as traj:
+    for frame in traj:
+        pos = frame.positions
 
-pos_writer = PosFileWriter()
-with open('posfile2.pos', 'w') as posfile:
-    pos_writer.write(traj, posfile)
+# Simple conversion of trajectory formats
+with garnett.read('posfile.pos') as traj:
+    garnett.write(traj, 'gsdfile.gsd')
 ```
 
 ### Data access
 
 Access individual frames by indexing or create sub trajectories with slicing:
-```
-#!python
+```python
 first_frame = traj[0]
 last_frame = traj[-1]
 n_th_frame = traj[n]
@@ -100,7 +93,7 @@ All matrices are `numpy` arrays.
 
 ## Example use with HOOMD-blue
 
-See the [examples directory](https://github.com/glotzerlab/glotzformats/tree/master/examples) for additional examples.
+See the [examples directory](https://github.com/glotzerlab/garnett/tree/master/examples) for additional examples.
 
 ```
 #!python
@@ -120,9 +113,8 @@ traj[-1].copyto_snapshot(snapshot)
 
 ## Testing
 
-To run all glotzformats tests, `ddt`, HOOMD-blue (`hoomd`), and `pycifrw` must be installed in the testing environments.
+To run all garnett tests, `ddt`, HOOMD-blue (`hoomd`), and `pycifrw` must be installed in the testing environments.
 
 Execute the tests with
 
     python -m unittest discover tests
-

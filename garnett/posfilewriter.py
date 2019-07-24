@@ -1,3 +1,6 @@
+# Copyright (c) 2019 The Regents of the University of Michigan
+# All rights reserved.
+# This software is licensed under the BSD 3-Clause License.
 """POS-file writer for the Glotzer Group, University of Michigan.
 
 Author: Carl Simon Adorf
@@ -60,7 +63,7 @@ class PosFileWriter(object):
         """Serialize a trajectory into pos-format and write it to file.
 
         :param trajectory: The trajectory to serialize
-        :type trajectory: :class:`~glotzformats.trajectory.Trajectory`
+        :type trajectory: :class:`~garnett.trajectory.Trajectory`
         :param file: A file-like object."""
         def _write(msg, end='\n'):
             if PYTHON_2:
@@ -154,7 +157,7 @@ class PosFileWriter(object):
         """Serialize trajectory into pos-format.
 
         :param trajectory: The trajectory to serialize.
-        :type trajectory: :class:`~glotzformats.trajectory.Trajectory`
+        :type trajectory: :class:`~garnett.trajectory.Trajectory`
         :rtype: str"""
         f = io.StringIO()
         self.write(trajectory, f)

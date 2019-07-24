@@ -6,9 +6,9 @@ Issue reports and feature proposals are welcome. Please use the repository issue
 
 ## Contributing code
 
-Code contributions to the glotzformats project are welcomed via pull requests.
-Contact the glotzformats developers before you begin **major** work to ensure that the planned development meshes well with the directions and standards of the project.
-All contributors must agree to the Contributor Agreement ([ContributorAgreement.md](ContributorAgreement.md)) before their pull request can be merged as the glotzformats project may be made open-source in the future.
+Code contributions to the garnett project are welcomed via pull requests.
+Contact the garnett developers before you begin **major** work to ensure that the planned development meshes well with the directions and standards of the project.
+All contributors must agree to the Contributor Agreement ([ContributorAgreement.md](ContributorAgreement.md)) before their pull request can be merged as the garnett project may be made open-source in the future.
 
 General guidelines:
 

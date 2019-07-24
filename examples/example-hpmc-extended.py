@@ -1,3 +1,6 @@
+# Copyright (c) 2019 The Regents of the University of Michigan
+# All rights reserved.
+# This software is licensed under the BSD 3-Clause License.
 # Demonstration with the cube example
 from __future__ import print_function
 from __future__ import division
@@ -6,8 +9,8 @@ from hoomd_plugins import hpmc
 
 import numpy as np
 
-from glotzformats.reader import PosFileReader
-from glotzformats.writer import PosFileWriter
+from garnett.reader import PosFileReader
+from garnett.writer import PosFileWriter
 
 context.initialize()
 

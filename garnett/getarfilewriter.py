@@ -1,3 +1,6 @@
+# Copyright (c) 2019 The Regents of the University of Michigan
+# All rights reserved.
+# This software is licensed under the BSD 3-Clause License.
 """getar-file writer for the Glotzer Group, University of Michigan.
 
 Authors: Bradley Dice
@@ -46,6 +49,7 @@ class GetarFileWriter(object):
         'diameter': 'diameter.f32.ind',
         'moment_inertia': 'moment_inertia.f32.ind',
         'angmom': 'angular_momentum_quat.f32.ind',
+        'image': 'image.i32.ind',
         }
 
     def makeRecord(self, name, index=None, prefix=None):
@@ -104,7 +108,7 @@ class GetarFileWriter(object):
         """Serialize a trajectory into gtar-format and write it to a file.
 
         :param trajectory: The trajectory to serialize
-        :type trajectory: :class:`~glotzformats.trajectory.Trajectory`
+        :type trajectory: :class:`~garnett.trajectory.Trajectory`
         :param filename: The file to write to."""
 
         try:

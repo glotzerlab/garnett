@@ -1,3 +1,6 @@
+# Copyright (c) 2019 The Regents of the University of Michigan
+# All rights reserved.
+# This software is licensed under the BSD 3-Clause License.
 import os
 import sys
 import io
@@ -5,7 +8,7 @@ import unittest
 import base64
 import numpy as np
 
-import glotzformats
+import garnett
 from test_trajectory import TrajectoryTest
 
 PYTHON_2 = sys.version_info[0] == 2
@@ -31,7 +34,7 @@ else:
 
 
 class BaseGSDHOOMDFileReaderTest(TrajectoryTest):
-    reader = glotzformats.reader.GSDHOOMDFileReader
+    reader = garnett.reader.GSDHOOMDFileReader
 
     def setUp(self):
         self.tmp_dir = TemporaryDirectory()
@@ -39,36 +42,36 @@ class BaseGSDHOOMDFileReaderTest(TrajectoryTest):
         self.fn_gsd = os.path.join(self.tmp_dir.name, 'test.gsd')
 
     def get_sample_file(self):
-        return io.BytesIO(base64.b64decode(glotzformats.samples.GSD_BASE64))
+        return io.BytesIO(base64.b64decode(garnett.samples.GSD_BASE64))
 
     def read_top_trajectory(self):
-        top_reader = glotzformats.reader.HOOMDXMLFileReader()
+        top_reader = garnett.reader.HOOMDXMLFileReader()
         if PYTHON_2:
             return top_reader.read(io.StringIO(
-                unicode(glotzformats.samples.HOOMD_BLUE_XML)))  # noqa
+                unicode(garnett.samples.HOOMD_BLUE_XML)))  # noqa
         else:
             return top_reader.read(
-                io.StringIO(glotzformats.samples.HOOMD_BLUE_XML))
+                io.StringIO(garnett.samples.HOOMD_BLUE_XML))
 
     def get_traj(self):
         top_traj = self.read_top_trajectory()
         gsd_reader = self.reader()
-        gsdfile = io.BytesIO(base64.b64decode(glotzformats.samples.GSD_BASE64))
+        gsdfile = io.BytesIO(base64.b64decode(garnett.samples.GSD_BASE64))
         return gsd_reader.read(gsdfile, top_traj[0])
 
     def get_gsd_traj_with_pos_frame(self, read_pos):
         if read_pos:
-            pos_reader = glotzformats.reader.PosFileReader()
+            pos_reader = garnett.reader.PosFileReader()
             if PYTHON_2:
                 frame = pos_reader.read(io.StringIO(
-                        unicode(glotzformats.samples.POS_HPMC)))[0]  # noqa
+                        unicode(garnett.samples.POS_HPMC)))[0]  # noqa
             else:
                 frame = pos_reader.read(
-                        io.StringIO(glotzformats.samples.POS_HPMC))[0]
+                        io.StringIO(garnett.samples.POS_HPMC))[0]
         else:
             frame = None
         gsd_reader = self.reader()
-        gsdfile = io.BytesIO(base64.b64decode(glotzformats.samples.GSD_BASE64))
+        gsdfile = io.BytesIO(base64.b64decode(garnett.samples.GSD_BASE64))
         return frame, gsd_reader.read(gsdfile, frame)
 
     def del_system(self):
@@ -196,6 +199,7 @@ class BaseGSDHOOMDFileReaderTest(TrajectoryTest):
          [3.,  4.,  0.],
          [3.,  4.,  2.],
          [3.,  4.,  4.]])))
+        assert np.array_equal(traj[0].image, np.zeros([100, 3]))
 
     @unittest.skipIf(not HOOMD or not HPMC, 'requires HOOMD and HPMC')
     def test_sphere(self):
@@ -217,7 +221,7 @@ class BaseGSDHOOMDFileReaderTest(TrajectoryTest):
         gsd_writer.dump_state(self.mc)
         hoomd.run(1, quiet=True)
         with open(self.fn_gsd, 'rb') as gsdfile:
-            gsd_reader = glotzformats.gsdhoomdfilereader.GSDHOOMDFileReader()
+            gsd_reader = garnett.gsdhoomdfilereader.GSDHOOMDFileReader()
             traj = gsd_reader.read(gsdfile)
             shape = traj[0].shapedef['A']
             assert shape.shape_class == 'sphere'
@@ -244,7 +248,7 @@ class BaseGSDHOOMDFileReaderTest(TrajectoryTest):
         gsd_writer.dump_state(self.mc)
         hoomd.run(1, quiet=True)
         with open(self.fn_gsd, 'rb') as gsdfile:
-            gsd_reader = glotzformats.gsdhoomdfilereader.GSDHOOMDFileReader()
+            gsd_reader = garnett.gsdhoomdfilereader.GSDHOOMDFileReader()
             traj = gsd_reader.read(gsdfile)
             shape = traj[0].shapedef['A']
             assert shape.shape_class == 'sphere'
@@ -277,7 +281,7 @@ class BaseGSDHOOMDFileReaderTest(TrajectoryTest):
         gsd_writer.dump_state(self.mc)
         hoomd.run(1, quiet=True)
         with open(self.fn_gsd, 'rb') as gsdfile:
-            gsd_reader = glotzformats.gsdhoomdfilereader.GSDHOOMDFileReader()
+            gsd_reader = garnett.gsdhoomdfilereader.GSDHOOMDFileReader()
             traj = gsd_reader.read(gsdfile)
             shape = traj[0].shapedef['A']
             assert shape.shape_class == 'poly3d'
@@ -307,7 +311,7 @@ class BaseGSDHOOMDFileReaderTest(TrajectoryTest):
         gsd_writer.dump_state(self.mc)
         hoomd.run(1, quiet=True)
         with open(self.fn_gsd, 'rb') as gsdfile:
-            gsd_reader = glotzformats.gsdhoomdfilereader.GSDHOOMDFileReader()
+            gsd_reader = garnett.gsdhoomdfilereader.GSDHOOMDFileReader()
             traj = gsd_reader.read(gsdfile)
             shape = traj[0].shapedef['A']
             assert shape.shape_class == 'ellipsoid'
@@ -344,7 +348,7 @@ class BaseGSDHOOMDFileReaderTest(TrajectoryTest):
         gsd_writer.dump_state(self.mc)
         hoomd.run(1, quiet=True)
         with open(self.fn_gsd, 'rb') as gsdfile:
-            gsd_reader = glotzformats.gsdhoomdfilereader.GSDHOOMDFileReader()
+            gsd_reader = garnett.gsdhoomdfilereader.GSDHOOMDFileReader()
             traj = gsd_reader.read(gsdfile)
             shape = traj[0].shapedef['A']
             assert shape.shape_class == 'poly3d'
@@ -381,7 +385,7 @@ class BaseGSDHOOMDFileReaderTest(TrajectoryTest):
         gsd_writer.dump_state(self.mc)
         hoomd.run(1, quiet=True)
         with open(self.fn_gsd, 'rb') as gsdfile:
-            gsd_reader = glotzformats.gsdhoomdfilereader.GSDHOOMDFileReader()
+            gsd_reader = garnett.gsdhoomdfilereader.GSDHOOMDFileReader()
             traj = gsd_reader.read(gsdfile)
             shape = traj[0].shapedef['A']
             assert shape.shape_class == 'spoly3d'
@@ -413,7 +417,8 @@ class BaseGSDHOOMDFileReaderTest(TrajectoryTest):
             charge=1,
             diameter=2,
             moment_inertia=(2, 0.5, 1),
-            angular_momentum=(1, 2, 3, 4))
+            angular_momentum=(1, 2, 3, 4),
+            image=(3, 5, 1))
         self.mc.shape_param.set("A", vertices=shape_vertices)
         for i in range(len(self.system.particles)):
             for prop in particle_props:
@@ -423,20 +428,20 @@ class BaseGSDHOOMDFileReaderTest(TrajectoryTest):
                                     period=None,
                                     dynamic=['attribute', 'property', 'momentum'])
         gsd_writer.dump_state(self.mc)
-        gf_prop_map = dict(
+        prop_map = dict(
             position='positions',
             orientation='orientations',
             velocity='velocities',
             angular_momentum='angmom')
         with open(self.fn_gsd, 'rb') as gsdfile:
-            gsd_reader = glotzformats.gsdhoomdfilereader.GSDHOOMDFileReader()
+            gsd_reader = garnett.gsdhoomdfilereader.GSDHOOMDFileReader()
             traj = gsd_reader.read(gsdfile)
             traj.load_arrays()
             for i in range(traj.N[0]):
-                for prop in particle_props:
-                    gf_prop = gf_prop_map.get(prop, prop)
+                for prop_name in particle_props:
+                    prop = prop_map.get(prop_name, prop_name)
                     self.assertTrue(
-                        (getattr(traj, gf_prop)[0][i] == particle_props[prop]).all())
+                        (getattr(traj, prop)[0][i] == particle_props[prop_name]).all())
 
 
 if __name__ == '__main__':

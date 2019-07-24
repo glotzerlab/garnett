@@ -1,10 +1,13 @@
+# Copyright (c) 2019 The Regents of the University of Michigan
+# All rights reserved.
+# This software is licensed under the BSD 3-Clause License.
 import io
 import unittest
 import base64
 import tempfile
 import numpy as np
 
-import glotzformats
+import garnett
 
 try:
     import gtar  # noqa: F401
@@ -16,8 +19,8 @@ else:
 
 @unittest.skipIf(not GTAR, 'GetarFileWriter requires the gtar module.')
 class BaseGetarFileWriterTest(unittest.TestCase):
-    reader_class = glotzformats.reader.GetarFileReader
-    writer_class = glotzformats.writer.GetarFileWriter
+    reader_class = garnett.reader.GetarFileReader
+    writer_class = garnett.writer.GetarFileWriter
 
     def setUp(self):
         self.reader = type(self).reader_class()
@@ -26,15 +29,15 @@ class BaseGetarFileWriterTest(unittest.TestCase):
     def test_write(self):
         # Note that this test assumes that the reader is working, and therefore
         # could fail if the reader is broken even if the writer is fine.
-        gsdfile = io.BytesIO(base64.b64decode(glotzformats.samples.GSD_BASE64))
+        gsdfile = io.BytesIO(base64.b64decode(garnett.samples.GSD_BASE64))
 
-        traj = glotzformats.reader.GSDHOOMDFileReader().read(gsdfile)
+        traj = garnett.reader.GSDHOOMDFileReader().read(gsdfile)
         traj.load_arrays()
         len_orig = len(traj)
         readwrite_props = ['N', 'types', 'type_ids',
                            'positions', 'orientations', 'velocities',
                            'mass', 'charge', 'diameter',
-                           'moment_inertia', 'angmom']
+                           'moment_inertia', 'angmom', 'image']
         original_data = {}
         for prop in readwrite_props:
             original_data[prop] = getattr(traj, prop)

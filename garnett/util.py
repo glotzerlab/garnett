@@ -1,4 +1,4 @@
-# Copyright (c) 2018 The Regents of the University of Michigan
+# Copyright (c) 2019 The Regents of the University of Michigan
 # All rights reserved.
 # This software is licensed under the BSD 3-Clause License.
 
@@ -84,7 +84,7 @@ def read(filename_or_fileobj, template=None, fmt=None):
         (default: None, autodetected from filename_or_fileobj)
     :type fmt: string
     :returns: Trajectory read from the file.
-    :rtype: :class:`~glotzformats.trajectory.Trajectory`
+    :rtype: :class:`~garnett.trajectory.Trajectory`
     """
     if isinstance(filename_or_fileobj, six.string_types):
         is_fileobj = False
@@ -119,7 +119,7 @@ def write(traj, filename_or_fileobj, fmt=None):
     """This function writes a trajectory to a file, autodetecting the file format unless ``fmt`` is specified.
 
     :param traj: Trajectory to write.
-    :type traj: :class:`~glotzformats.trajectory.Trajectory`
+    :type traj: :class:`~garnett.trajectory.Trajectory`
     :param filename_or_fileobj: Filename to write.
     :type filename_or_fileobj: string or file object
     :param fmt: File format, one of 'gsd', 'gtar', 'pos', 'cif'

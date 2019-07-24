@@ -1,3 +1,6 @@
+# Copyright (c) 2019 The Regents of the University of Michigan
+# All rights reserved.
+# This software is licensed under the BSD 3-Clause License.
 """GSD file writer for the Glotzer Group, University of Michigan.
 
 Author: Vyas Ramasubramani
@@ -95,7 +98,7 @@ class GSDHOOMDFileWriter(object):
         """Serialize a trajectory into gsd-format and write it to a file.
 
         :param trajectory: The trajectory to serialize
-        :type trajectory: :class:`~glotzformats.trajectory.Trajectory`
+        :type trajectory: :class:`~garnett.trajectory.Trajectory`
         :param stream: The file to write to.
         :type stream: File stream
         """
@@ -154,6 +157,10 @@ class GSDHOOMDFileWriter(object):
                     pass
                 try:
                     snap.particles.angmom = frame.angmom
+                except AttributeError:
+                    pass
+                try:
+                    snap.particles.image = frame.image
                 except AttributeError:
                     pass
                 snap.configuration.box = frame.box.get_box_array()

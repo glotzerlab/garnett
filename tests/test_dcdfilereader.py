@@ -1,3 +1,6 @@
+# Copyright (c) 2019 The Regents of the University of Michigan
+# All rights reserved.
+# This software is licensed under the BSD 3-Clause License.
 import sys
 import io
 import unittest
@@ -6,14 +9,14 @@ import tempfile
 
 import numpy as np
 
-import glotzformats
+import garnett
 from test_trajectory import TrajectoryTest
 
 PYTHON_2 = sys.version_info[0] == 2
 
 
 class BaseDCDFileReaderTest(TrajectoryTest):
-    reader = glotzformats.reader.DCDFileReader
+    reader = garnett.reader.DCDFileReader
 
     def setUp(self):
         self.tmpfiles = []
@@ -25,19 +28,19 @@ class BaseDCDFileReaderTest(TrajectoryTest):
         tmp = tempfile.TemporaryFile()
         self.tmpfiles.append(tmp)
         self.addCleanup(self.close_tmp)
-        tmp.write(base64.b64decode(glotzformats.samples.DCD_BASE64))
+        tmp.write(base64.b64decode(garnett.samples.DCD_BASE64))
         tmp.flush()
         tmp.seek(0)
         return tmp
 
     def read_top_trajectory(self):
-        top_reader = glotzformats.reader.HOOMDXMLFileReader()
+        top_reader = garnett.reader.HOOMDXMLFileReader()
         if PYTHON_2:
             return top_reader.read(io.StringIO(
-                unicode(glotzformats.samples.HOOMD_BLUE_XML)))  # noqa
+                unicode(garnett.samples.HOOMD_BLUE_XML)))  # noqa
         else:
             return top_reader.read(
-                io.StringIO(glotzformats.samples.HOOMD_BLUE_XML))
+                io.StringIO(garnett.samples.HOOMD_BLUE_XML))
 
     def get_traj(self):
         top_traj = self.read_top_trajectory()

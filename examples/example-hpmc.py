@@ -1,34 +1,48 @@
+# Copyright (c) 2019 The Regents of the University of Michigan
+# All rights reserved.
+# This software is licensed under the BSD 3-Clause License.
 # Demonstration with the cube example
 from __future__ import print_function
 from __future__ import division
-from hoomd_script import *
-from hoomd_plugins import hpmc
+import hoomd
+from hoomd import deprecated, hpmc
 
 import numpy as np
+import garnett
 
-from glotzformats.reader import PosFileReader
-from glotzformats.writer import PosFileWriter
+hoomd.context.initialize()
 
-context.initialize()
-system = init.read_xml('cube.xml')
+# vertices of a cube
+verts = [[-1, -1, -1], [-1, -1, 1], [-1, 1, 1], [-1, 1, -1],
+         [1, -1, -1], [1, -1, 1], [1, 1, 1], [1, 1, -1]]
 
-mc = hpmc.integrate.convex_polyhedron(seed=452784, d=0.2, a=0.4)
-mc.shape_param.set('A', vertices=[(0.5, 0.5, 0.5), (0.5, -0.5, -0.5), (-0.5, 0.5, -0.5), (-0.5, -0.5, 0.5)])
-pos = dump.pos(filename='cube.pos', period=10)
-mc.setup_pos_writer(pos)
-run(1000)
+with hoomd.context.SimulationContext():
+    try:
+        system = deprecated.init.read_xml('cube.xml')
+    except RuntimeError:
+        snapshot = hoomd.data.make_snapshot(N=4, box=hoomd.data.boxdim(L=10, dimensions=3))
+        np.copyto(snapshot.particles.position, np.array([
+                [2, 0, 0],
+                [4, 0, 0],
+                [0, 4, 0],
+                [0, 0, 4],
+            ]))
+        system = hoomd.init.read_snapshot(snapshot)
+        deprecated.dump.xml(hoomd.group.all(), 'cube.xml', all=True)
 
-pos_reader = PosFileReader()
-with open('cube.pos') as posfile:
-    traj = pos_reader.read(posfile)
+    mc = hpmc.integrate.convex_polyhedron(seed=452784, d=0.2, a=0.4)
+    mc.shape_param.set('A', vertices=verts)
+    pos = deprecated.dump.pos(filename='cube.pos', period=10)
+    mc.setup_pos_writer(pos)
+    hoomd.run(1000)
 
-# Restore the snapshot
-sn2 = system.take_snapshot()
-traj[-1].copyto_snapshot(sn2)
+with hoomd.context.SimulationContext():
 
-# Initializing from pos-file
-init.reset()
-with open('cube.pos') as posfile:
-    traj = pos_reader.read(posfile)
-snapshot = traj[-1].make_snapshot()
-system = init.read_snapshot(snapshot)
+    with garnett.read('cube.pos') as traj:
+        snapshot = traj[-1].make_snapshot()
+        system = hoomd.init.read_snapshot(snapshot)
+
+    mc = hpmc.integrate.convex_polyhedron(seed=452784, d=0.2, a=0.4)
+    mc.shape_param.set('A', vertices=verts)
+    hoomd.dump.gsd(filename='cube.gsd', group=hoomd.group.all(), period=10)
+    hoomd.run(1000)

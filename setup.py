@@ -1,7 +1,10 @@
+# Copyright (c) 2019 The Regents of the University of Michigan
+# All rights reserved.
+# This software is licensed under the BSD 3-Clause License.
 from __future__ import print_function
+from setuptools import setup, find_packages
 import sys
 
-from setuptools import setup, find_packages
 try:
     from Cython.Build import cythonize
     import numpy as np
@@ -11,32 +14,33 @@ except ImportError:
 else:
     CYTHON = True
 
-if not sys.version_info >= (2, 7):
-    print("This package requires python version >= 2.7.")
-    sys.exit(1)
-
 setup(
-    name='glotzformats',
+    name='garnett',
     version='0.4.1',
     packages=find_packages(),
 
-    ext_modules=cythonize('glotzformats/*.pyx') if CYTHON else [],
+    ext_modules=cythonize('garnett/*.pyx') if CYTHON else [],
     include_dirs=[np.get_include()] if CYTHON else [],
 
     author='Carl Simon Adorf',
     author_email='csadorf@umich.edu',
     description="Samples, parsers, and writers for formats used in the Glotzer Group",
-    keywords=['glotzer formats'],
+    keywords='simulation trajectory formats particle',
 
     classifiers=[
         "Intended Audience :: Science/Research",
-        "License :: OSI Approved :: MIT License",
+        "License :: OSI Approved :: BSD License",
         "Topic :: Scientific/Engineering :: Physics",
     ],
+
+    python_requires='>=2.7, !=3.0.*, !=3.1.*, !=3.2.*, <4',
 
     install_requires=[
         'rowan>=0.5'
     ],
 
-    tests_require=['nose', 'ddt'],
+    tests_require=[
+        'nose',
+        'ddt'
+    ],
 )

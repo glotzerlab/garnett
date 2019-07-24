@@ -1,3 +1,6 @@
+# Copyright (c) 2019 The Regents of the University of Michigan
+# All rights reserved.
+# This software is licensed under the BSD 3-Clause License.
 """getar-file reader for the Glotzer Group, University of Michigan.
 
 Authors: Matthew Spellings, Carl Simon Adorf
@@ -90,14 +93,16 @@ class GetarFrame(Frame):
     def read(self):
         raw_frame = _RawFrameData()
         raw_frame.shapedef = collections.OrderedDict()
-        gf_prop_map = {
+        prop_map = {
             'position': 'positions',
             'orientation': 'orientations',
             'velocity': 'velocities',
-            'angular_momentum_quat': 'angmom'}
+            'angular_momentum_quat': 'angmom',
+            'image': 'image'}
         supported_records = ['position', 'orientation', 'velocity',
                              'mass', 'charge', 'diameter',
-                             'moment_inertia', 'angular_momentum_quat']
+                             'moment_inertia', 'angular_momentum_quat',
+                             'image']
         for name in supported_records:
             try:
                 values = self._trajectory.getRecord(
@@ -106,7 +111,7 @@ class GetarFrame(Frame):
                 values = None
 
             if values is not None:
-                frame_prop = gf_prop_map.get(name, name)
+                frame_prop = prop_map.get(name, name)
                 setattr(raw_frame, frame_prop, values)
 
         if 'type' in self._records and 'type_names.json' in self._records:

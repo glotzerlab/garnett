@@ -1,6 +1,9 @@
+# Copyright (c) 2019 The Regents of the University of Michigan
+# All rights reserved.
+# This software is licensed under the BSD 3-Clause License.
 import signac
 
-project = signac.get_project()
+project = signac.init_project('lj-signac-example')
 
 sps = [{
     'epsilon': 1.0,

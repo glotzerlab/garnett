@@ -1,6 +1,9 @@
+# Copyright (c) 2019 The Regents of the University of Michigan
+# All rights reserved.
+# This software is licensed under the BSD 3-Clause License.
 import signac
 
-import glotzformats as gf
+import garnett
 import gsd
 import gsd.fl
 import gsd.hoomd
@@ -8,42 +11,17 @@ import gsd.hoomd
 
 project = signac.get_project()
 
-for job in project.find_jobs():
+for job in project:
     print(job)
     with job:
-        with open('dump.gsd', 'rb') as file:
-            traj = gf.reader.GSDHOOMDFileReader().read(file)
+        with garnett.read('dump.gsd') as traj:
             print(traj)
 
-        f = gsd.fl.GSDFile('dump.gsd', 'rb')
-        t = gsd.hoomd.HOOMDTrajectory(f)
+        with garnett.read('dump.dcd') as traj:
+            print(traj)
 
+        with garnett.read("dump.gsd", template='dump.pos') as traj:
+            print(traj)
 
-        with open('dump.pos') as posfile:
-            top_traj = gf.reader.PosFileReader().read(posfile)
-            print(top_traj)
-
-            with open('dump.dcd', 'rb') as dcdfile:
-                traj = gf.reader.DCDFileReader().read(dcdfile, top_traj[0])
-                traj.load()
-                print(traj)
-
-            with open('dump.gsd', 'rb') as gsdfile:
-                traj = gf.reader.GSDHOOMDFileReader().read(gsdfile, top_traj[0])
-                traj.load()
-                print(traj)
-                
-
-        with open('init.xml') as xmlfile:
-            top_traj = gf.reader.HOOMDXMLFileReader().read(xmlfile)
-            print(top_traj)
-
-            with open('dump.dcd', 'rb') as dcdfile:
-                traj = gf.reader.DCDFileReader().read(dcdfile, top_traj[0])
-                traj.load()
-                print(traj)
-
-            with open('dump.gsd', 'rb') as gsdfile:
-                traj = gf.reader.GSDHOOMDFileReader().read(gsdfile, top_traj[0])
-                traj.load()
-                print(traj)
+        with garnett.read("dump.gsd", template='init.xml') as traj:
+            print(traj)
