@@ -864,7 +864,7 @@ class Trajectory(BaseTrajectory):
         for prop in prop_list:
             # This is a quick hack to convert to NumPy arrays only the
             # arrays that have no missing values (e.g None)
-            if None in props[prop]:
+            if any(p is None for p in props[prop]):
                 # If the list contains a None values, set property to None
                 # in order for AttributeError to be raised properly
                 props[prop] = None
