@@ -862,14 +862,21 @@ class Trajectory(BaseTrajectory):
                     props[prop][i] = frame_prop
 
         for prop in prop_list:
-            if prop == 'image':
-                dtype_ = np.int32
+            # This is a quick hack to convert to NumPy arrays only the
+            # arrays that have no missing values (e.g None)
+            if None in props[prop]:
+                # If the list contains a None values, set property to None
+                # in order for AttributeError to be raised properly 
+                props[prop] = None
             else:
-                dtype_ = DEFAULT_DTYPE
-            try:
-                props[prop] = np.asarray(props[prop], dtype=dtype_)
-            except (TypeError, ValueError):
-                props[prop] = np.asarray(props[prop])
+                if prop == 'image':
+                    dtype_ = np.int32
+                else:
+                    dtype_ = DEFAULT_DTYPE
+                try:
+                    props[prop] = np.asarray(props[prop], dtype=dtype_)
+                except (TypeError, ValueError):
+                    props[prop] = np.asarray(props[prop])
 
         try:
             # Perform swap
