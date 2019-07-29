@@ -307,7 +307,7 @@ class TrajectoryTest(unittest.TestCase):
             if None not in traj.angmom:
                 if len(traj.angmom.shape) > 1:
                     self.assertTrue(np.issubdtype(
-                        traj.angmom.dtype, glotzformats.trajectory.DEFAULT_DTYPE))
+                        traj.angmom.dtype, garnett.trajectory.DEFAULT_DTYPE))
                     self.assertEqual(traj.angmom.shape,
                                      (len(traj), len(traj[0]), 4))
                     self.assertTrue((traj.angmom[0] == traj[0].angmom).all())
