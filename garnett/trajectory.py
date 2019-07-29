@@ -755,18 +755,18 @@ class Trajectory(BaseTrajectory):
         """Returns true if arrays are loaded into memory.
 
         See also: :meth:`~.load_arrays`"""
-        return not (self._N is None or
-                    self._type is None or
-                    self._types is None or
-                    self._type_ids is None or
-                    self._positions is None or
-                    self._orientations is None or
-                    self._velocities is None or
-                    self._mass is None or
-                    self._charge is None or
-                    self._diameter is None or
-                    self._moment_inertia is None or
-                    self._angmom is None or
+        return not (self._N is None and
+                    self._type is None and
+                    self._types is None and
+                    self._type_ids is None and
+                    self._positions is None and
+                    self._orientations is None and
+                    self._velocities is None and
+                    self._mass is None and
+                    self._charge is None and
+                    self._diameter is None and
+                    self._moment_inertia is None and
+                    self._angmom is None and
                     self._image is None)
 
     def _assert_loaded(self):
