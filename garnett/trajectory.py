@@ -866,13 +866,10 @@ class Trajectory(BaseTrajectory):
             # arrays that have no missing values (e.g None)
             if None in props[prop]:
                 # If the list contains a None values, set property to None
-                # in order for AttributeError to be raised properly 
+                # in order for AttributeError to be raised properly
                 props[prop] = None
             else:
-                if prop == 'image':
-                    dtype_ = np.int32
-                else:
-                    dtype_ = DEFAULT_DTYPE
+                dtype_ = np.int32 if prop == 'image' else DEFAULT_DTYPE
                 try:
                     props[prop] = np.asarray(props[prop], dtype=dtype_)
                 except (TypeError, ValueError):
