@@ -66,7 +66,7 @@ class UtilReaderTest(unittest.TestCase):
 
     def test_read_gsd_template(self):
         with garnett.read(get_filename('template-missing-shape.gsd'),
-                               template=get_filename('template-missing-shape.pos')) as traj:
+                          template=get_filename('template-missing-shape.pos')) as traj:
             self.assertGreater(len(traj), 0)
 
             # Make sure a shape definition was parsed from the POS file
@@ -75,7 +75,7 @@ class UtilReaderTest(unittest.TestCase):
     def test_read_unsupported_template(self):
         with self.assertRaises(ValueError):
             with garnett.read(get_filename('FeSiUC.pos'),
-                                   template=get_filename('template-missing-shape.pos')):
+                              template=get_filename('template-missing-shape.pos')):
                 pass
 
     @unittest.skipIf(PYTHON_2, 'requires python 3')
