@@ -92,7 +92,7 @@ class TrajectoryTest(unittest.TestCase):
             traj[0].load()
         sample_file = self.get_sample_file()
         traj = self.reader().read(sample_file)
-        traj.load_arrays()
+        traj.load()
         sample_file.close()
         for i, frame in enumerate(traj):
             frame.load()
