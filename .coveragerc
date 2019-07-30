@@ -1,11 +1,11 @@
 # .coveragerc to control coverage.py
 [run]
 branch = True
-source = glotzformats
+source = garnett
 omit =
-    glotzformats/common/six.py
-    glotzformats/gsdhoomd.py
-    glotzformats/pygsd.py
+    garnett/common/six.py
+    garnett/gsdhoomd.py
+    garnett/pygsd.py
 
 [report]
 ignore_errors = True
