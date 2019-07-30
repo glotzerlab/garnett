@@ -783,7 +783,7 @@ class Trajectory(BaseTrajectory):
     def _check_nonempty_property(self, attr):
         value = getattr(self, attr, None)
         if value is None:
-            raise AttributeError('{} not available for this trajectory'.format(attr))
+            raise AttributeError('{} not available for this trajectory'.format(attr[1:]))
         else:
             return value
 
