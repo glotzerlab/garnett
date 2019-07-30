@@ -191,7 +191,7 @@ class TrajectoryTest(unittest.TestCase):
         with self.assertRaises(RuntimeError):
             traj.orientations
         traj.load_arrays()
-        if traj.orientations is not None and None not in traj.orientations:
+        try:
             if len(traj.orientations.shape) > 1:
                 self.assertTrue(np.issubdtype(
                     traj.orientations.dtype, garnett.trajectory.DEFAULT_DTYPE))
@@ -203,6 +203,8 @@ class TrajectoryTest(unittest.TestCase):
             with self.assertRaises(ValueError):
                 # This should fail since it's using 2d positions
                 traj[0].orientations = [[0, 0], [0, 0]]
+        except AttributeError:
+            pass
 
     def test_velocities(self):
         sample_file = self.get_sample_file()
@@ -210,7 +212,7 @@ class TrajectoryTest(unittest.TestCase):
         with self.assertRaises(RuntimeError):
             traj.velocities
         traj.load_arrays()
-        if traj.velocities is not None and None not in traj.velocities:
+        try:
             if len(traj.velocities.shape) > 1:
                 self.assertTrue(np.issubdtype(
                     traj.velocities.dtype, garnett.trajectory.DEFAULT_DTYPE))
@@ -222,6 +224,8 @@ class TrajectoryTest(unittest.TestCase):
             with self.assertRaises(ValueError):
                 # This should fail since it's using 2d velocities
                 traj[0].velocities = [[0, 0], [0, 0]]
+        except AttributeError:
+            pass
 
     def test_mass(self):
         sample_file = self.get_sample_file()
@@ -229,7 +233,7 @@ class TrajectoryTest(unittest.TestCase):
         with self.assertRaises(RuntimeError):
             traj.mass
         traj.load_arrays()
-        if traj.mass is not None and None not in traj.mass:
+        try:
             if len(traj.mass.shape) > 1:
                 self.assertTrue(np.issubdtype(
                     traj.mass.dtype, garnett.trajectory.DEFAULT_DTYPE))
@@ -241,6 +245,8 @@ class TrajectoryTest(unittest.TestCase):
             with self.assertRaises(ValueError):
                 # This should fail since the array is not a 1-D list
                 traj[0].mass = [[1, 1]]
+        except AttributeError:
+            pass
 
     def test_charge(self):
         sample_file = self.get_sample_file()
@@ -248,7 +254,7 @@ class TrajectoryTest(unittest.TestCase):
         with self.assertRaises(RuntimeError):
             traj.charge
         traj.load_arrays()
-        if traj.charge is not None and None not in traj.charge:
+        try:
             if len(traj.charge.shape) > 1:
                 self.assertTrue(np.issubdtype(
                     traj.charge.dtype, garnett.trajectory.DEFAULT_DTYPE))
@@ -260,6 +266,8 @@ class TrajectoryTest(unittest.TestCase):
             with self.assertRaises(ValueError):
                 # This should fail since the array is not a 1-D list
                 traj[0].charge = [[1, 1]]
+        except AttributeError:
+            pass
 
     def test_diameter(self):
         sample_file = self.get_sample_file()
@@ -267,7 +275,7 @@ class TrajectoryTest(unittest.TestCase):
         with self.assertRaises(RuntimeError):
             traj.diameter
         traj.load_arrays()
-        if traj.diameter is not None and None not in traj.diameter:
+        try:
             if len(traj.diameter.shape) > 1:
                 self.assertTrue(np.issubdtype(
                     traj.diameter.dtype, garnett.trajectory.DEFAULT_DTYPE))
@@ -279,6 +287,8 @@ class TrajectoryTest(unittest.TestCase):
             with self.assertRaises(ValueError):
                 # This should fail since the array is not a 1-D list
                 traj[0].diameter = [[1, 1]]
+        except AttributeError:
+            pass
 
     def test_moment_inertia(self):
         sample_file = self.get_sample_file()
@@ -286,7 +296,7 @@ class TrajectoryTest(unittest.TestCase):
         with self.assertRaises(RuntimeError):
             traj.moment_inertia
         traj.load_arrays()
-        if traj.moment_inertia is not None and None not in traj.moment_inertia:
+        try:
             if len(traj.moment_inertia.shape) > 1:
                 self.assertTrue(np.issubdtype(
                     traj.moment_inertia.dtype, garnett.trajectory.DEFAULT_DTYPE))
@@ -295,6 +305,8 @@ class TrajectoryTest(unittest.TestCase):
                 self.assertTrue((traj.moment_inertia[0] == traj[0].moment_inertia).all())
             with self.assertRaises(ValueError):
                 traj[0].moment_inertia = 'hello'
+        except AttributeError:
+            pass
 
     def test_angmom(self):
         sample_file = self.get_sample_file()
@@ -322,7 +334,7 @@ class TrajectoryTest(unittest.TestCase):
         with self.assertRaises(RuntimeError):
             traj.image
         traj.load_arrays()
-        if traj.image is not None and None not in traj.image:
+        try:
             if len(traj.image.shape) > 1:
                 self.assertTrue(np.issubdtype(
                     traj.image.dtype, np.int32))
@@ -331,6 +343,8 @@ class TrajectoryTest(unittest.TestCase):
                 self.assertTrue((traj.image[0] == traj[0].image).all())
             with self.assertRaises(ValueError):
                 traj[0].image = 'hello'
+        except AttributeError:
+            pass
 
 
 @unittest.skipIf(not HOOMD, 'requires hoomd-blue')
