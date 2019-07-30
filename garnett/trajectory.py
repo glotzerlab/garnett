@@ -988,7 +988,7 @@ class Trajectory(BaseTrajectory):
             calling :meth:`~.load_arrays` or
             :meth:`~.Trajectory.load`."""
         self._assertarrays_loaded()
-        return self._positions
+        return self._check_nonempty_property('_positions')
 
     @property
     def orientations(self):
