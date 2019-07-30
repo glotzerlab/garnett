@@ -306,7 +306,7 @@ autodoc_mock_imports = [
     'numpy',
     'numpy.core',
     'numpy.core.numeric',
-    'dcdreader',
+    'garnett.dcdreader',
     'gtar',
     'CifFile',
     'gsd',
