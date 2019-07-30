@@ -780,7 +780,7 @@ class Trajectory(BaseTrajectory):
             raise RuntimeError(
                 "Trajectory arrays not loaded! Use load_arrays() or load().")
 
-    def _raise_attributeerror(self, attr):
+    def _check_nonempty_property(self, attr):
         value = getattr(self, attr, None)
         if value is None:
             raise AttributeError('{} not available for this trajectory'.format(attr))
@@ -1002,7 +1002,7 @@ class Trajectory(BaseTrajectory):
             calling :meth:`~.load_arrays` or
             :meth:`~.Trajectory.load`."""
         self._assertarrays_loaded()
-        return self._raise_attributeerror('_orientations')
+        return self._check_nonempty_property('_orientations')
 
     @property
     def velocities(self):
@@ -1014,7 +1014,7 @@ class Trajectory(BaseTrajectory):
             calling :meth:`~.load_arrays` or
             :meth:`~.Trajectory.load`."""
         self._assertarrays_loaded()
-        return self._raise_attributeerror('_velocities')
+        return self._check_nonempty_property('_velocities')
 
     @property
     def mass(self):
@@ -1026,7 +1026,7 @@ class Trajectory(BaseTrajectory):
             calling :meth:`~.load_arrays` or
             :meth:`~.Trajectory.load`."""
         self._assertarrays_loaded()
-        return self._raise_attributeerror('_mass')
+        return self._check_nonempty_property('_mass')
 
     @property
     def charge(self):
@@ -1038,7 +1038,7 @@ class Trajectory(BaseTrajectory):
             calling :meth:`~.load_arrays` or
             :meth:`~.Trajectory.load`."""
         self._assertarrays_loaded()
-        return self._raise_attributeerror('_charge')
+        return self._check_nonempty_property('_charge')
 
     @property
     def diameter(self):
@@ -1050,7 +1050,7 @@ class Trajectory(BaseTrajectory):
             calling :meth:`~.load_arrays` or
             :meth:`~.Trajectory.load`."""
         self._assertarrays_loaded()
-        return self._raise_attributeerror('_diameter')
+        return self._check_nonempty_property('_diameter')
 
     @property
     def moment_inertia(self):
@@ -1064,7 +1064,7 @@ class Trajectory(BaseTrajectory):
             calling :meth:`~.load_arrays` or
             :meth:`~.Trajectory.load`."""
         self._assertarrays_loaded()
-        return self._raise_attributeerror('_moment_inertia')
+        return self._check_nonempty_property('_moment_inertia')
 
     @property
     def angmom(self):
@@ -1076,7 +1076,7 @@ class Trajectory(BaseTrajectory):
             calling :meth:`~.load_arrays` or
             :meth:`~.Trajectory.load`."""
         self._assertarrays_loaded()
-        return self._raise_attributeerror('_angmom')
+        return self._check_nonempty_property('_angmom')
 
     @property
     def image(self):
@@ -1088,7 +1088,7 @@ class Trajectory(BaseTrajectory):
             calling :meth:`~.load_arrays` or
             :meth:`~.Trajectory.load`."""
         self._assertarrays_loaded()
-        return self._raise_attributeerror('_image')
+        return self._check_nonempty_property('_image')
 
 
 def _regularize_box(positions, velocities,
