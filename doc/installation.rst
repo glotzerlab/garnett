@@ -19,9 +19,9 @@ To upgrade, execute
 
 .. code:: bash
 
-    $ conda update garnett
+    $ conda install -c conda-forge garnett
 
-.. _conda: http://conda.pydata.org
+.. _conda: https://conda.io/
 
 .. note::
 
@@ -37,9 +37,6 @@ To install the package with the package manager pip_, execute
 .. code:: bash
 
     $ pip install git+https://github.com/glotzerlab/garnett.git#egg=garnett --user
-
-.. note::
-    It is highly recommended to install the package into the user space and not as superuser!
 
 To upgrade the package, simply execute the same command with the `--upgrade` option.
 
