@@ -10,17 +10,23 @@ Version 0.5
 Highlights
 ----------
 
-[0.5.0] -- 201x-xx-xx
+[0.5.0] -- 2019-07-2x
 ---------------------
 Added
 +++++
 
-	- Add GETAR file reader/writer
-	- Rowan is now a dependency
+	- Add GETAR file reader/writer.
+	- Rowan is now a dependency.
 	- Add shape_dict representation to Shape classes.
-	- Add support for particle properties: mass, charge, diameter, image, moment of inertia and angular momentum
-	- Add support for reading/writing shapes in GSD via hpmc state
-	- Add universal reader/writer with format detection
+	- Add support for particle properties: 
+		- mass 
+		- charge 
+		- diameter
+		- image
+		- moment of inertia 
+		- angular momentum
+	- Add support for reading/writing shapes in GSD via hpmc state.
+	- Add universal reader/writer with format detection.
 	- Extend list of supported shape classes: 
 		- Ellipsoid 
 		- orientable spheres
@@ -31,20 +37,21 @@ Added
 
 Changed
 +++++++
-	- Improve unit test coverage
-	- Revise documentation
-	- Move shape definitions to separate module
-	- Raise AttributeError if accessing an invalid property
-	- Rename several existing shape classes
+	- Improve unit test coverage.
+	- Revise documentation.
+	- Move shape definitions to separate module.
+	- Raise AttributeError if accessing an invalid property.
+	- Rename several existing shape classes.
 
 Deprecated
 ++++++++++
-	- Tests for Python 2 are no longer updated (Python 2 support will be entirely dropped in a future release)
+	- Tests for Python 2 are no longer updated (Python 2 support will be
+	entirely dropped in a future release).
 
 Removed
 +++++++
-	- Remove acceleration as supported property
-	- Remove the  read_gsd_shape_data flag from GSD reader
+	- Remove acceleration as supported property.
+	- Remove the  read_gsd_shape_data flag from GSD reader.
 
 
 Version 0.4
