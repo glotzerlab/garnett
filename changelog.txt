@@ -50,27 +50,32 @@ Removed
 [0.4.1] -- 201x-xx-xx
 ---------------------
 
-
+Fixed
++++++
 	- Fix minor bug related to QR check for 2d boxes.
 
 [0.4.0] -- 201x-xx-xx
 ---------------------
 
-
+Added
++++++
 	- Added readers/writers:
 		- cif reader
 		- gsd writer
-	- Improved algorithm for the normalization of frames with non-standard box
 	- New supported shape definitions:
 		- spheropoly
 		- polyunion
 		- convexpolyhedron_union
-	- The GetarFileReader also reads shape definitions.
 	- Add `gf2pos` script - convert to pos-file from any supported format
-	- Other minor updates:
-		- GetarFileReader skips records that have a non-empty group field.
-		- Interpret the pos-file rotation key word.
-		- Various documentation updates
+	- The GetarFileReader also reads shape definitions.
+	- Interpret the pos-file rotation key word.
+
+
+Changed
++++++++
+	- Improved algorithm for the normalization of frames with non-standard box
+	- Various documentation updates
+	- GetarFileReader skips records that have a non-empty group field.
 
 [0.3.9] -- 201x-xx-xx
 ---------------------
