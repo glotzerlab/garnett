@@ -92,7 +92,7 @@ This method will load the complete trajectory into memory and make positions, or
     traj.angmom          # MxNx4
     traj.image           # MxNx4
     traj.types           # MxN
-    traj.type_ids        # MxN array
+    traj.type_ids        # MxN
     traj.type            # list of type names ordered by type_id
 
     # where M=len(traj) is the number of frames and
