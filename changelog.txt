@@ -1,8 +1,24 @@
-0.4.1
+=========
+Changelog
+=========
+
+The **garnett** package follows `semantic versioning <https://semver.org/>`_.
+
+Version 0
+=========
+
+Highlights
+----------
+
+[0.4.1] -- 201x-xx-xx
+---------------------
+
 
 	- Fix minor bug related to QR check for 2d boxes.
 
-0.4.0
+[0.4.0] -- 201x-xx-xx
+---------------------
+
 
 	- Added readers/writers:
 		- cif reader
@@ -19,7 +35,9 @@
 		- Interpret the pos-file rotation key word.
 		- Various documentation updates
 
-0.3.9
+[0.3.9] -- 201x-xx-xx
+---------------------
+
 
 	- Fix bug related to trajectory arrays when slicing the array.
 	- The GSDReader now reads velocities.
@@ -27,97 +45,121 @@
 	- Update documentation concerning the conversion of rotations from
 	  quaternions to euler angles.
 
-0.3.8:
+[0.3.8] -- 201x-xx-xx
+---------------------
+
 
 	- Hot fix: Negative euler angles were not read correctly in skewed
 	  boxes using the DCDFileReader.
 
-0.3.7:
+[0.3.7] -- 201x-xx-xx
+---------------------
+
 
 	- Fix bug in dcdfilereader leading to incorrect box dimensions
 	  to be read for skewed boxes. Cubic or squared boxes are not
 		affected.
 	- Add the 'whence' argument to the file format's seek method.
 
-0.3.6:
+[0.3.6] -- 201x-xx-xx
+---------------------
+
 
 	- Fix quaternion to euler angle conversion example in the
 		dcd file reader documentation.
 
-0.3.5:
+[0.3.5] -- 201x-xx-xx
+---------------------
+
 
 	- GSDHOOMDFileReader uses the native gsd library if installed.
 	- Fix bug that caused the GSDHOOMDFileReader to ignore dimensions
 		specified in the GSD file.
 	- Reduced warning verbosity.
 
-0.3.4:
+[0.3.4] -- 201x-xx-xx
+---------------------
 
-  - Support velocities in HOOMD-blue XML files.
+
+	- Support velocities in HOOMD-blue XML files.
 	- Support SphereUnionShape in PosFileReader
 	- Support Pos-Files using the keyword 'box' instead of boxMatrix
 	- Fix bug in PosFileReader which occured with non-standard
 		pos-file in python 3.5
-  - Fix bug, which occured when constructing frames from
+	- Fix bug, which occured when constructing frames from
 	  raw frames using box instances instead of a box matrix.
 
-0.3.3:
+[0.3.3] -- 201x-xx-xx
+---------------------
+
 
 	- Fix bug related to 2-dimensional systems and a box
 	  z-dimensions not equal to 1.
 
-0.3.2:
+[0.3.2] -- 201x-xx-xx
+---------------------
+
 
 	- Add trajectory.N, trajectory.type and trajectory.type_ids as
 		an alternative mode to access frame length and type information.
 	- Fix bug in GSDHOOMDFileReader when not providing template frame.
 
-0.3.1:
+[0.3.1] -- 201x-xx-xx
+---------------------
+
 
 	- Update the GSD hoomd module.
 
-0.3.0:
+[0.3.0] -- 201x-xx-xx
+---------------------
+
 
 	- Allow trajectory data acess via coherent numpy arrays.
 	- Provide a highly optimized cythonized DCDFileReader.
 	- Fix and optimize the pure-python DCDFileReader.
-	- Make snapshot creation and copying HOOMD-blue 2.0 compatible.
+	- Make snapshot creation and copying HOOMD-blue 2.[0.compatible.
 	- Update the GSD module.
 	- Improve the Box class documentation.
 	- Overall improvement of the documentation.
 
-0.2.1:
+[0.2.1] -- 201x-xx-xx
+---------------------
+
 
 	- Fix an issue with injavis pos-files causing parser errors.
 
-0.2.0:
+[0.2.0] -- 201x-xx-xx
+---------------------
+
 
 	- Fix HOOMD-blue snapshot type issue.
 
-0.1.9
+[0.1.9] -- 201x-xx-xx
+---------------------
+
 
 	- Add GSDHoomdFileReader
 	- Fix type issue in HoomdBlueXMLFileReader
 
-0.1.8
+[0.1.8] -- 201x-xx-xx
+---------------------
 
-	- Fix type issue in DCDFileReader
-	- Fix num issue in HoomdBlueXMLFileReader
-	- Tolerate pos-files without final eof declaration
 
-0.1.7
+	- Fix type issue in DCD
 
 	- Add HoomdBlueXMLFileReader
 	- Add DCDFileReader
 	- Add CifFileWriter
 	- Add GetarFileReader
 
-0.1.6
+[0.1.6] -- 201x-xx-xx
+ --------------------
 
 	- Fix: box_matrix calculation.
 	- Extend FileFormat API to increase file-like compatibility.
 
-0.1.5
+[0.1.5] -- 201x-xx-xx
+---------------------
 
 	- Frames only loaded into memory on demand.
 	- Improved trajectory iteration logic.
