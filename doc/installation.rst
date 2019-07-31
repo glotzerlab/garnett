@@ -9,10 +9,6 @@ Installing the **garnett** package requires python 2.7.x or 3.x, and **numpy**.
 With conda
 ----------
 
-.. sidebar:: Closed-source
-
-    **garnett** is not publicly released, installation via conda therefore requires access to the *private* Glotzer channel.
-
 To install the package with conda_, execute
 
 .. code:: bash
