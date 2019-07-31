@@ -80,12 +80,18 @@ Changed
 [0.3.9] -- 201x-xx-xx
 ---------------------
 
-
-	- Fix bug related to trajectory arrays when slicing the array.
+Added
++++++
 	- The GSDReader now reads velocities.
 	- Support PolyV shape definitions.
+
+Changed
++++++++
 	- Update documentation concerning the conversion of rotations from
 	  quaternions to euler angles.
+Fix
++++
+	- Fix bug related to trajectory arrays when slicing the array.
 
 [0.3.8] -- 201x-xx-xx
 ---------------------
