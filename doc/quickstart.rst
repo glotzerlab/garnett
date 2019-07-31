@@ -141,22 +141,15 @@ This is an example on how to modify frames in-place:
 .. code-block:: python
 
     import numpy as np
-
-    from garnett.reader import PosFileReader
-    from garnett.reader import PosFileWriter
-    from garnett.trajectory import Trajectory
+    import garnett as gt
 
     def center(frame):
         frame.positions -= np.average(frame.positions, axis=0)
         return frame
 
-    pos_reader = PosFileReader()
-    pos_writer = PosFileWriter()
-
-    with open('in.pos') as file:
-        traj = pos_reader.read(file)
+    with gt.read('in.pos') as traj:
         traj_centered = Trajectory((center(frame) for frame in traj))
-        pos_writer.write(traj_centered)
+        gt.write(traj_centered, 'out.pos')
 
 Loading trajectories into memory
 ================================
@@ -201,13 +194,9 @@ The **garnett** frames can be used to initialize HOOMD-blue by creating snapshot
 .. code-block:: python
 
     from hoomd import init
-    # For versions <2.x: from hoomd_script import init
+    import garnett as gt
 
-    from garnett.reader import PosFileReader
-
-    pos_reader = PosFileReader()
-    with open('cube.pos') as posfile:
-        traj = pos_reader.read(posfile)
+    with gt.read('cube.pos') as traj:
 
         # Initialize from last frame
         snapshot = traj[-1].make_snapshot()
