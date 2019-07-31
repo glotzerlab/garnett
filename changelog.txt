@@ -88,6 +88,13 @@ Version 0.3
 
 Highlights
 ----------
+	- Various documentation improvements
+	- Add an optimized cythonized DCDFileReader.
+	- Allow trajectory data acess via coherent numpy arrays.
+	- Make snapshot creation and copying HOOMD-blue 2.0 compatible.
+	- The GSDReader now reads velocities.
+	- Support PolyV shape definitions.
+
 [0.3.9] -- 201x-xx-xx
 ---------------------
 
@@ -237,8 +244,8 @@ Highlights
 ----------
 	- Frames only loaded into memory on demand.
 	- Extend FileFormat API to increase file-like compatibility.
-	- Add GSD, XML, DCD, and GETAR readers
-	- Add CIF writer
+	- Add GSD, XML, DCD, and GETAR readers classes
+	- Add CIF writer class
 
 [0.1.9] -- 201x-xx-xx
 ---------------------
