@@ -106,7 +106,7 @@ Inidividual frame objects can be accessed via indexing of a (sub-)trajectory obj
 .. code-block:: python
 
     frame = traj[i]
-    frame.box              # 3x3 matrix (not required to be upper-triangular)
+    frame.box              # garnett.trajectory.Box object
     frame.types            # N
     frame.positions        # Nx3
     frame.orientations     # Nx4
