@@ -4,8 +4,8 @@ Changelog
 
 The **garnett** package follows `semantic versioning <https://semver.org/>`_.
 
-Version 0
-=========
+Version 0.5
+===========
 
 Highlights
 ----------
@@ -47,7 +47,7 @@ Removed
 	- Removed the  read_gsd_shape_data flag from GSD reader
 
 
-Version 0.1
+Version 0.4
 ===========
 
 Highlights
@@ -83,7 +83,7 @@ Changed
 	- Various documentation updates
 	- GetarFileReader skips records that have a non-empty group field.
 
-Version 0.1
+Version 0.3
 ===========
 
 Highlights
@@ -213,11 +213,8 @@ Fixed
 +++++
 	- Fix and optimize the pure-python DCDFileReader.
 
-Version 0.1
+Version 0.2
 ===========
-
-Highlights
-----------
 
 [0.2.1] -- 201x-xx-xx
 ---------------------
