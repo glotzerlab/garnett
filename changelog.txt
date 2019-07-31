@@ -96,23 +96,29 @@ Fix
 [0.3.8] -- 201x-xx-xx
 ---------------------
 
-
+Fixed
++++++
 	- Hot fix: Negative euler angles were not read correctly in skewed
 	  boxes using the DCDFileReader.
 
 [0.3.7] -- 201x-xx-xx
 ---------------------
 
+Added
++++++
+	- Add the 'whence' argument to the file format's seek method.
 
+Fixed
++++++
 	- Fix bug in dcdfilereader leading to incorrect box dimensions
 	  to be read for skewed boxes. Cubic or squared boxes are not
 		affected.
-	- Add the 'whence' argument to the file format's seek method.
 
 [0.3.6] -- 201x-xx-xx
 ---------------------
 
-
+Fixed
++++++
 	- Fix quaternion to euler angle conversion example in the
 		dcd file reader documentation.
 
