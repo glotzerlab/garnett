@@ -18,7 +18,7 @@ Highlights
 	- Add automatic format detection to reader/writer
 	
 
-[0.5.0] -- 2019-07-2x
+[0.5.0] -- 2019-0x-xx
 ---------------------
 Added
 +++++
@@ -74,14 +74,14 @@ Highlights
 	- Add `gf2pos` script to convert any supported format to POS
 	- Add shape definitions to GetarFileReader.
 
-[0.4.1] -- 201x-xx-xx
+[0.4.1] -- 2017-08-23
 ---------------------
 
 Fixed
 +++++
 	- Fix minor bug related to QR check for 2d boxes.
 
-[0.4.0] -- 201x-xx-xx
+[0.4.0] -- 2017-06-26
 ---------------------
 
 Added
@@ -116,7 +116,7 @@ Highlights
 	- The GSDReader now reads velocities.
 	- Support PolyV shape definitions.
 
-[0.3.9] -- 201x-xx-xx
+[0.3.9] -- 2017-01-30
 ---------------------
 
 Added
@@ -132,7 +132,7 @@ Fix
 +++
 	- Fix bug related to trajectory arrays when slicing the array.
 
-[0.3.8] -- 201x-xx-xx
+[0.3.8] -- 2016-12-21
 ---------------------
 
 Fixed
@@ -140,7 +140,7 @@ Fixed
 	- Hot fix: Negative euler angles were not read correctly in skewed
 	  boxes using the DCDFileReader.
 
-[0.3.7] -- 201x-xx-xx
+[0.3.7] -- 2016-11-07
 ---------------------
 
 Added
@@ -153,7 +153,7 @@ Fixed
 	  to be read for skewed boxes. Cubic or squared boxes are not
 		affected.
 
-[0.3.6] -- 201x-xx-xx
+[0.3.6] -- 2016-10-20
 ---------------------
 
 Fixed
@@ -161,7 +161,7 @@ Fixed
 	- Fix quaternion to euler angle conversion example in the
 		dcd file reader documentation.
 
-[0.3.5] -- 201x-xx-xx
+[0.3.5] -- 2016-09-20
 ---------------------
 
 Changed
@@ -174,7 +174,7 @@ Fixed
 	- Fix bug that caused the GSDHOOMDFileReader to ignore dimensions
 		specified in the GSD file.
 
-[0.3.4] -- 201x-xx-xx
+[0.3.4] -- 2016-09-08
 ---------------------
 
 Added
@@ -193,7 +193,7 @@ Fixed
 	- Fix bug, which occured when constructing frames from
 	  raw frames using box instances instead of a box matrix.
 
-[0.3.3] -- 201x-xx-xx
+[0.3.3] -- 2016-07-19
 ---------------------
 
 Fixed
@@ -201,7 +201,7 @@ Fixed
 	- Fix bug related to 2-dimensional systems and a box
 	  z-dimensions not equal to 1.
 
-[0.3.2] -- 201x-xx-xx
+[0.3.2] -- 2016-07-15
 ---------------------
 
 Added
@@ -213,14 +213,14 @@ Fixed
 +++++
 	- Fix bug in GSDHOOMDFileReader when not providing template frame.
 
-[0.3.1] -- 201x-xx-xx
+[0.3.1] -- 2016-07-08
 ---------------------
 
 Changed
 +++++++
 	- Update the GSD hoomd module.
 
-[0.3.0] -- 201x-xx-xx
+[0.3.0] -- 2016-07-06
 ---------------------
 
 Added
@@ -244,14 +244,14 @@ Fixed
 Version 0.2
 ===========
 
-[0.2.1] -- 201x-xx-xx
+[0.2.1] -- 2016-07-10
 ---------------------
 
 Fixed
 +++++
 	- Fix an issue with injavis pos-files causing parser errors.
 
-[0.2.0] -- 201x-xx-xx
+[0.2.0] -- 2016-04-28
 ---------------------
 
 Fixed
@@ -268,7 +268,7 @@ Highlights
 	- Add GSD, XML, DCD, and GETAR readers classes
 	- Add CIF writer class
 
-[0.1.9] -- 201x-xx-xx
+[0.1.9] -- 2016-04-09
 ---------------------
 
 Added
@@ -279,7 +279,7 @@ Fixed
 +++++
 	- Fix type issue in HoomdBlueXMLFileReader
 
-[0.1.8] -- 201x-xx-xx
+[0.1.8] -- 2016-04-04
 ---------------------
 
 Added
@@ -294,8 +294,8 @@ Fixed
 	- Fix type issue in DCD
 
 
-[0.1.6] -- 201x-xx-xx
- --------------------
+[0.1.6] -- 2016-01-28
+---------------------
 
 Changed
 +++++++
@@ -305,7 +305,7 @@ Fixed
 +++++
 	- Fixed box_matrix calculation.
 
-[0.1.5] -- 201x-xx-xx
+[0.1.5] -- 2016-01-11
 ---------------------
 
 Changed
