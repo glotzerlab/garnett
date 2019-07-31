@@ -81,14 +81,22 @@ This method will load the complete trajectory into memory and make positions, or
 .. code-block:: python
 
     traj.load_arrays()
-    traj.N              # M  -- frame sizes
-    traj.positions      # MxNx3 array
-    traj.orientations   # MxNx4 array
-    traj.types          # MxN array
-    traj.type_ids       # MxN array
-    traj.type           # list of type names ordered by type_id
+    traj.N               # M
+    traj.positions       # MxNx3
+    traj.orientations    # MxNx4
+    traj.velocities      # MxNx3
+    traj.mass            # MxN
+    traj.charge          # MxN
+    traj.diameter        # MxN
+    traj.moment_inertia  # MxNx3
+    traj.angmom          # MxNx4
+    traj.image           # MxNx4
+    traj.types           # MxN
+    traj.type_ids        # MxN array
+    traj.type            # list of type names ordered by type_id
 
-    # where M=len(traj), N=max((len(f) for f in traj))
+    # where M=len(traj) is the number of frames and
+    # N=max((len(f) for f in traj)) is the number of particles
 
 Individual frame access
 -----------------------
@@ -98,13 +106,19 @@ Inidividual frame objects can be accessed via indexing of a (sub-)trajectory obj
 .. code-block:: python
 
     frame = traj[i]
-    frame.box           # Instance of trajectory.box
-    frame.positions     # Nx3 array
-    frame.orientations  # Nx4 array
-    frame.types         # Nx1 array
-    frame.data          # A dictionary of lists for each attribute
-    frame.data_key      # A list of strings
-    frame.shapedef      # A ordered dictionary of instances of ShapeDefinition.
+    frame.box              # 3x3 matrix (not required to be upper-triangular)
+    frame.types            # N
+    frame.positions        # Nx3
+    frame.orientations     # Nx4
+    frame.velocities       # Nx3
+    frame.mass             # N
+    frame.charge           # N
+    frame.diameter         # N
+    frame.moment_inertia   # Nx3
+    frame.angmom           # Nx4
+    frame.data             # A dictionary of lists for each attribute
+    frame.data_key         # A list of strings
+    frame.shapedef         # A ordered dictionary of instances of ShapeDefinition
 
 Iterating over trajectories
 ---------------------------
