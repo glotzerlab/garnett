@@ -238,7 +238,10 @@ Version 0.1
 
 Highlights
 ----------
-
+	- Frames only loaded into memory on demand.
+	- Extend FileFormat API to increase file-like compatibility.
+	- Add GSD, XML, DCD, and GETAR readers
+	- Add CIF writer
 
 [0.1.9] -- 201x-xx-xx
 ---------------------
