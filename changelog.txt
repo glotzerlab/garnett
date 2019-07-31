@@ -9,6 +9,14 @@ Version 0.5
 
 Highlights
 ----------
+	- Remove acceleration as supported property.
+	- Remove the read_gsd_shape_data flag from GSD reader.
+	- Raise AttributeError if accessing an invalid property.
+	- Add GETAR file reader/writer.
+	- Add support for various particle properties
+	- Extend reader/writer shape support
+	- Add automatic format detection to reader/writer
+	
 
 [0.5.0] -- 2019-07-2x
 ---------------------
@@ -51,8 +59,7 @@ Deprecated
 Removed
 +++++++
 	- Remove acceleration as supported property.
-	- Remove the  read_gsd_shape_data flag from GSD reader.
-
+	- Remove the read_gsd_shape_data flag from GSD reader.
 
 Version 0.4
 ===========
