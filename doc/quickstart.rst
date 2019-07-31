@@ -95,8 +95,8 @@ This method will load the complete trajectory into memory and make positions, or
     traj.type_ids        # MxN
     traj.type            # list of type names ordered by type_id
 
-    # where M=len(traj) is the number of frames and
-    # N=max((len(f) for f in traj)) is the number of particles
+    # where M=len(traj) is the number of frames and N=max((len(f) for f in traj))
+    # is the is the maximum number of particles in any frame.
 
 Individual frame access
 -----------------------
