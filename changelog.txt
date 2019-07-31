@@ -190,51 +190,73 @@ Added
 	- Allow trajectory data acess via coherent numpy arrays.
 	- Make snapshot creation and copying HOOMD-blue 2.0 compatible.
 
-Fixed
-+++++
-	- Fix and optimize the pure-python DCDFileReader.
+Changed
++++++++
+
 	- Update the GSD module.
 	- Improve the Box class documentation.
 	- Overall improvement of the documentation.
 
+
+Fixed
++++++
+	- Fix and optimize the pure-python DCDFileReader.
+
 [0.2.1] -- 201x-xx-xx
 ---------------------
 
-
+Fixed
++++++
 	- Fix an issue with injavis pos-files causing parser errors.
 
 [0.2.0] -- 201x-xx-xx
 ---------------------
 
-
+Fixed
++++++
 	- Fix HOOMD-blue snapshot type issue.
 
 [0.1.9] -- 201x-xx-xx
 ---------------------
 
-
+Added
++++++
 	- Add GSDHoomdFileReader
+
+Fixed
++++++
 	- Fix type issue in HoomdBlueXMLFileReader
 
 [0.1.8] -- 201x-xx-xx
 ---------------------
 
-
-	- Fix type issue in DCD
-
+Added
++++++
 	- Add HoomdBlueXMLFileReader
 	- Add DCDFileReader
 	- Add CifFileWriter
 	- Add GetarFileReader
 
+Fixed
++++++
+	- Fix type issue in DCD
+
+
 [0.1.6] -- 201x-xx-xx
  --------------------
 
-	- Fix: box_matrix calculation.
+Changed
++++++++
 	- Extend FileFormat API to increase file-like compatibility.
+
+Fixed
++++++
+	- Fixed box_matrix calculation.
 
 [0.1.5] -- 201x-xx-xx
 ---------------------
 
+Changed
++++++++
 	- Frames only loaded into memory on demand.
 	- Improved trajectory iteration logic.
