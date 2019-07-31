@@ -85,7 +85,7 @@ Added
 
 Changed
 +++++++
-	- Improved algorithm for the normalization of frames with non-standard
+	- Improve algorithm for the normalization of frames with non-standard
 	box.
 	- Various documentation updates.
 	- GetarFileReader skips records that have a non-empty group field.
@@ -95,7 +95,7 @@ Version 0.3
 
 Highlights
 ----------
-	- Various documentation improvements
+	- Various documentation improvements.
 	- Add an optimized cythonized DCDFileReader.
 	- Allow trajectory data acess via coherent numpy arrays.
 	- Make snapshot creation and copying HOOMD-blue 2.0 compatible.
