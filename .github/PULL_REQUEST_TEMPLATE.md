@@ -28,4 +28,4 @@ Resolves: #???
 - [ ] I have updated the documentation (if relevant).
 - [ ] I have added tests that cover my changes (if relevant).
 - [ ] All new and existing tests passed.
-- [ ] I have updated the [Changelog](https://github.com/glotzerlab/garnett/blob/master/ChangeLog.md).
+- [ ] I have updated the [Changelog](https://github.com/glotzerlab/garnett/blob/master/ChangeLog.rst).
