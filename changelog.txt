@@ -52,6 +52,13 @@ Version 0.4
 
 Highlights
 ----------
+	- GetarFileReader skips records that have a non-empty group field.
+	- Add CIF readers
+	- Add GSD writer
+	- Add shape support for shperopoly, polyunion, and convex polyhedron
+	union
+	- Add `gf2pos` script to convert any supported format to POS
+	- Add shape definitions to GetarFileReader.
 
 [0.4.1] -- 201x-xx-xx
 ---------------------
@@ -65,22 +72,22 @@ Fixed
 
 Added
 +++++
-	- Added readers/writers:
-		- cif reader
-		- gsd writer
-	- New supported shape definitions:
+	- Add readers/writers:
+		- CIF reader
+		- GSD writer
+	- Support shape definitions:
 		- spheropoly
 		- polyunion
 		- convexpolyhedron_union
-	- Add `gf2pos` script - convert to pos-file from any supported format
-	- The GetarFileReader also reads shape definitions.
+	- Add `gf2pos` script - convert to pos-file from any supported format.
+	- Add shape definitions to GetarFileReader.
 	- Interpret the pos-file rotation key word.
-
 
 Changed
 +++++++
-	- Improved algorithm for the normalization of frames with non-standard box
-	- Various documentation updates
+	- Improved algorithm for the normalization of frames with non-standard
+	box.
+	- Various documentation updates.
 	- GetarFileReader skips records that have a non-empty group field.
 
 Version 0.3
