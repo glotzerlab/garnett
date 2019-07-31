@@ -122,6 +122,8 @@ GeTAR
 The *GeTAR*-format is a highly versatile, *binary* format for storing and reading trajectory data.
 HOOMD-blue provides a writer for this format.
 
+See also: `<https://libgetar.readthedocs.io>`_
+
 .. autoclass:: garnett.reader.GetarFileReader
     :members:
     :undoc-members:
