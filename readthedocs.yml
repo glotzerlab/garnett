@@ -2,6 +2,6 @@ python:
    version: 3.7
    install:
       - requirements: requirements.txt
-      - method: pip
+      - method: setuptools
         path: .
    system_packages: true
