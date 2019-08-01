@@ -7,9 +7,8 @@ version: 2
 
 # Package installation configuration
 python:
-   version: 3.7
+   version: 3
    install:
       - requirements: requirements.txt
       - method: pip
         path: .
-   system_packages: true
