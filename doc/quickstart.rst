@@ -81,14 +81,22 @@ This method will load the complete trajectory into memory and make positions, or
 .. code-block:: python
 
     traj.load_arrays()
-    traj.N              # M  -- frame sizes
-    traj.positions      # MxNx3 array
-    traj.orientations   # MxNx4 array
-    traj.types          # MxN array
-    traj.type_ids       # MxN array
-    traj.type           # list of type names ordered by type_id
+    traj.N               # M
+    traj.positions       # MxNx3
+    traj.orientations    # MxNx4
+    traj.velocities      # MxNx3
+    traj.mass            # MxN
+    traj.charge          # MxN
+    traj.diameter        # MxN
+    traj.moment_inertia  # MxNx3
+    traj.angmom          # MxNx4
+    traj.image           # MxNx4
+    traj.types           # MxN
+    traj.type_ids        # MxN
+    traj.type            # list of type names ordered by type_id
 
-    # where M=len(traj), N=max((len(f) for f in traj))
+    # where M=len(traj) is the number of frames and N=max((len(f) for f in traj))
+    # is the is the maximum number of particles in any frame.
 
 Individual frame access
 -----------------------
@@ -98,13 +106,19 @@ Inidividual frame objects can be accessed via indexing of a (sub-)trajectory obj
 .. code-block:: python
 
     frame = traj[i]
-    frame.box           # Instance of trajectory.box
-    frame.positions     # Nx3 array
-    frame.orientations  # Nx4 array
-    frame.types         # Nx1 array
-    frame.data          # A dictionary of lists for each attribute
-    frame.data_key      # A list of strings
-    frame.shapedef      # A ordered dictionary of instances of ShapeDefinition.
+    frame.box              # garnett.trajectory.Box object
+    frame.types            # N
+    frame.positions        # Nx3
+    frame.orientations     # Nx4
+    frame.velocities       # Nx3
+    frame.mass             # N
+    frame.charge           # N
+    frame.diameter         # N
+    frame.moment_inertia   # Nx3
+    frame.angmom           # Nx4
+    frame.data             # A dictionary of lists for each attribute
+    frame.data_key         # A list of strings
+    frame.shapedef         # A ordered dictionary of instances of ShapeDefinition
 
 Iterating over trajectories
 ---------------------------
@@ -127,22 +141,15 @@ This is an example on how to modify frames in-place:
 .. code-block:: python
 
     import numpy as np
-
-    from garnett.reader import PosFileReader
-    from garnett.reader import PosFileWriter
-    from garnett.trajectory import Trajectory
+    import garnett as gt
 
     def center(frame):
         frame.positions -= np.average(frame.positions, axis=0)
         return frame
 
-    pos_reader = PosFileReader()
-    pos_writer = PosFileWriter()
-
-    with open('in.pos') as file:
-        traj = pos_reader.read(file)
+    with gt.read('in.pos') as traj:
         traj_centered = Trajectory((center(frame) for frame in traj))
-        pos_writer.write(traj_centered)
+        gt.write(traj_centered, 'out.pos')
 
 Loading trajectories into memory
 ================================
@@ -187,13 +194,9 @@ The **garnett** frames can be used to initialize HOOMD-blue by creating snapshot
 .. code-block:: python
 
     from hoomd import init
-    # For versions <2.x: from hoomd_script import init
+    import garnett as gt
 
-    from garnett.reader import PosFileReader
-
-    pos_reader = PosFileReader()
-    with open('cube.pos') as posfile:
-        traj = pos_reader.read(posfile)
+    with gt.read('cube.pos') as traj:
 
         # Initialize from last frame
         snapshot = traj[-1].make_snapshot()

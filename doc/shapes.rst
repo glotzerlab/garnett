@@ -58,3 +58,8 @@ Some shapes define a :code:`shape_dict` property, which returns a
    :members:
    :undoc-members:
    :inherited-members:
+
+.. autoclass:: garnett.shapes.EllipsoidShape
+   :members:
+   :undoc-members:
+   :inherited-members:
