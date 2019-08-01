@@ -5,6 +5,9 @@
 # Required
 version: 2
 
+# Build docs in additional formats such as PDF and ePub
+formats: all
+
 # Package installation configuration
 python:
    version: 3
