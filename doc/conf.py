@@ -18,10 +18,8 @@
 
 import sys
 import os
-import shlex
-
-
 import sphinx_rtd_theme
+import garnett
 
 
 # If extensions (or modules to document with autodoc) are in another directory,
