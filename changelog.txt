@@ -12,8 +12,8 @@ Version 0.5
 Added
 +++++
 
-	- Add GETAR file reader/writer.
-	- Rowan is now a dependency.
+  - Add GETAR file reader/writer.
+  - Rowan is now a dependency.
 	- Add shape_dict representation to Shape classes.
 	- Add support for particle properties: 
 		- mass 
