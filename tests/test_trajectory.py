@@ -316,15 +316,14 @@ class TrajectoryTest(unittest.TestCase):
         traj.load_arrays()
 
         try:
-            if None not in traj.angmom:
-                if len(traj.angmom.shape) > 1:
-                    self.assertTrue(np.issubdtype(
-                        traj.angmom.dtype, garnett.trajectory.DEFAULT_DTYPE))
-                    self.assertEqual(traj.angmom.shape,
-                                     (len(traj), len(traj[0]), 4))
-                    self.assertTrue((traj.angmom[0] == traj[0].angmom).all())
-                with self.assertRaises(ValueError):
-                    traj[0].angmom = 'hello'
+            if len(traj.angmom.shape) > 1:
+                self.assertTrue(np.issubdtype(
+                    traj.angmom.dtype, garnett.trajectory.DEFAULT_DTYPE))
+                self.assertEqual(traj.angmom.shape,
+                                 (len(traj), len(traj[0]), 4))
+                self.assertTrue((traj.angmom[0] == traj[0].angmom).all())
+            with self.assertRaises(ValueError):
+                traj[0].angmom = 'hello'
         except AttributeError:
             pass
 
