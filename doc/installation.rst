@@ -4,20 +4,16 @@ Installation
 Requirements
 ------------
 
-Installing the **garnett** package requires python 2.7.x or 3.x, and **numpy**.
+Installing the **garnett** package requires Python 2.7 or 3.5+, **numpy**, and **rowan**.
 
 With conda
 ----------
-
-.. sidebar:: Closed-source
-
-    **garnett** is not publicly released, installation via conda therefore requires access to the *private* Glotzer channel.
 
 To install the package with conda_, execute
 
 .. code:: bash
 
-    $ conda install garnett
+    $ conda install -c conda-forge garnett
 
 To upgrade, execute
 
@@ -25,7 +21,7 @@ To upgrade, execute
 
     $ conda update garnett
 
-.. _conda: http://conda.pydata.org
+.. _conda: https://conda.io/
 
 .. note::
 
@@ -41,9 +37,6 @@ To install the package with the package manager pip_, execute
 .. code:: bash
 
     $ pip install git+https://github.com/glotzerlab/garnett.git#egg=garnett --user
-
-.. note::
-    It is highly recommended to install the package into the user space and not as superuser!
 
 To upgrade the package, simply execute the same command with the `--upgrade` option.
 

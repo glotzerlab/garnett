@@ -585,6 +585,7 @@ class Frame(object):
 
     @property
     def view_rotation(self):
+        "A quaternion specifying a rotation that should be applied for visualization."
         self.load()
         return self.frame_data.view_rotation
 
