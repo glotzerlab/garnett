@@ -27,7 +27,7 @@ Added
 	- Add orientable attribute to spheres.
 	- Extend list of supported shape classes: 
 		- ellipsoid 
-		- polygons
+		- polygon
 		- spheropolygon
 		- convex polyhedron
 		- convex spheropolyhedron
@@ -69,7 +69,7 @@ Added
 		- CIF reader
 		- GSD writer
 	- Support shape definitions:
-		- spheropoly
+		- spheropolyhedron
 		- polyunion
 		- convexpolyhedron_union
 	- Add `gf2pos` script - convert to pos-file from any supported format.
