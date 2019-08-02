@@ -11,9 +11,9 @@ Version 0.5
 ---------------------
 Added
 +++++
-  - Add GETAR file reader/writer.
   - Rowan is now a dependency.
-  - Add ``shape_dict`` representation to Shape classes.
+  - Add GETAR file reader/writer.
+  - Add ``shape_dict`` representation to ``Shape`` classes.
   - Add support for particle properties: 
     - mass 
     - charge 
@@ -33,11 +33,11 @@ Added
 
 Changed
 +++++++
+  - Raise ``AttributeError`` if accessing an invalid frame or trajectory property.
+  - Rename several existing shape classes.
   - Improve unit test coverage.
   - Revise documentation.
   - Move shape definitions to separate module.
-  - Raise ``AttributeError`` if accessing an invalid frame or trajectory property.
-  - Rename several existing shape classes.
 
 Deprecated
 ++++++++++
@@ -70,15 +70,15 @@ Added
     - spheropolyhedron
     - polyunion
     - convex polyhedron union
-    - Add ``gf2pos`` script - convert to pos-file from any supported format.
-    - Add shape definitions to ``GetarFileReader``.
-    - Interpret the pos-file rotation key word.
+  - Add ``gf2pos`` script - convert to pos-file from any supported format.
+  - Add shape definitions to ``GetarFileReader``.
+  - Interpret the pos-file rotation key word.
 
 Changed
 +++++++
+  - ``GetarFileReader`` skips records that have a non-empty group field.
   - Improve algorithm for the normalization of frames with non-standard box.
   - Various documentation updates.
-  - ``GetarFileReader`` skips records that have a non-empty group field.
 
 Version 0.3
 ===========
