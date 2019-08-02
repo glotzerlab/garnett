@@ -24,9 +24,9 @@ Added
 		- angular momentum
 	- Add support for reading/writing shapes in GSD via hpmc state.
 	- Add universal reader/writer with format detection.
+	- Add orientable attribute to spheres.
 	- Extend list of supported shape classes: 
-		- Ellipsoid 
-		- orientable spheres
+		- ellipsoid 
 		- polygons
 		- spheropolygon
 		- convex polyhedron
@@ -37,7 +37,7 @@ Changed
 	- Improve unit test coverage.
 	- Revise documentation.
 	- Move shape definitions to separate module.
-	- Raise AttributeError if accessing an invalid property.
+	- Raise AttributeError if accessing an invalid Frame or Trajectory property.
 	- Rename several existing shape classes.
 
 Deprecated
