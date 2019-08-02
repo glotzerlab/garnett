@@ -21,7 +21,7 @@ Added
     - image
     - moment of inertia 
     - angular momentum
-  - Add support for reading/writing shapes in GSD via hpmc state.
+  - Add support for reading/writing shapes in GSD via HOOMD-HPMC state.
   - Add universal reader/writer with format detection.
   - Add orientable attribute to spheres.
   - Extend list of supported shape classes: 
