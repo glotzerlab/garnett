@@ -206,7 +206,6 @@ Changed
 	- Improve the Box class documentation.
 	- Overall improvement of the documentation.
 
-
 Fixed
 +++++
 	- Fix and optimize the pure-python DCDFileReader.
