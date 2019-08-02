@@ -5,18 +5,7 @@ Changelog
 The **garnett** package follows `semantic versioning <https://semver.org/>`_.
 
 Version 0.5
-===========
-
-Highlights
-----------
-	- Remove acceleration as supported property.
-	- Remove the read_gsd_shape_data flag from GSD reader.
-	- Raise AttributeError if accessing an invalid property.
-	- Add GETAR file reader/writer.
-	- Add support for various particle properties
-	- Extend reader/writer shape support
-	- Add automatic format detection to reader/writer
-	
+===========	
 
 [0.5.0] -- 2019-0x-xx
 ---------------------
@@ -64,16 +53,6 @@ Removed
 Version 0.4
 ===========
 
-Highlights
-----------
-	- GetarFileReader skips records that have a non-empty group field.
-	- Add CIF readers
-	- Add GSD writer
-	- Add shape support for shperopoly, polyunion, and convex polyhedron
-	union
-	- Add `gf2pos` script to convert any supported format to POS
-	- Add shape definitions to GetarFileReader.
-
 [0.4.1] -- 2017-08-23
 ---------------------
 
@@ -106,15 +85,6 @@ Changed
 
 Version 0.3
 ===========
-
-Highlights
-----------
-	- Various documentation improvements.
-	- Add an optimized cythonized DCDFileReader.
-	- Allow trajectory data acess via coherent numpy arrays.
-	- Make snapshot creation and copying HOOMD-blue 2.0 compatible.
-	- The GSDReader now reads velocities.
-	- Support PolyV shape definitions.
 
 [0.3.9] -- 2017-01-30
 ---------------------
@@ -260,13 +230,6 @@ Fixed
 
 Version 0.1
 ===========
-
-Highlights
-----------
-	- Frames only loaded into memory on demand.
-	- Extend FileFormat API to increase file-like compatibility.
-	- Add GSD, XML, DCD, and GETAR readers classes
-	- Add CIF writer class
 
 [0.1.9] -- 2016-04-09
 ---------------------
