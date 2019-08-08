@@ -707,6 +707,10 @@ class Trajectory(BaseTrajectory):
     :param dtype: The default data type for trajectory data.
     """
 
+    TRAJ_ATTRIBUTES = ['N', 'type', 'types', 'type_ids', 'positions',
+                       'orientations', 'velocities', 'mass', 'charge',
+                       'diameter', 'moment_inertia', 'angmom', 'image']
+
     def __init__(self, frames=None, dtype=None):
         super(Trajectory, self).__init__(frames=frames)
         if dtype is None:
@@ -756,19 +760,7 @@ class Trajectory(BaseTrajectory):
         """Returns true if arrays are loaded into memory.
 
         See also: :meth:`~.load_arrays`"""
-        return not (self._N is None and
-                    self._type is None and
-                    self._types is None and
-                    self._type_ids is None and
-                    self._positions is None and
-                    self._orientations is None and
-                    self._velocities is None and
-                    self._mass is None and
-                    self._charge is None and
-                    self._diameter is None and
-                    self._moment_inertia is None and
-                    self._angmom is None and
-                    self._image is None)
+        return any(getattr(self, '_' + key) is not None for key in self.TRAJ_ATTRIBUTES)
 
     def _assert_loaded(self):
         "Raises a RuntimeError if trajectory is not loaded."
@@ -837,10 +829,6 @@ class Trajectory(BaseTrajectory):
         type_ids = np.zeros((M, N), dtype=np.uint32)
         _type = _generate_type_id_array(types, type_ids)
 
-        # Properties
-        prop_list = ['positions', 'orientations', 'velocities',
-                     'mass', 'charge', 'diameter',
-                     'moment_inertia', 'angmom', 'image']
         props = dict(
             positions=[None] * M,
             orientations=[None] * M,
@@ -854,7 +842,8 @@ class Trajectory(BaseTrajectory):
         )
 
         for i, frame in enumerate(self.frames):
-            for prop in prop_list:
+            # loop over desired properties
+            for prop in self.TRAJ_ATTRIBUTES[4:]:
                 try:
                     frame_prop = frame._raise_attributeerror(prop)
                 except AttributeError:
@@ -862,7 +851,7 @@ class Trajectory(BaseTrajectory):
                 if frame_prop is not None:
                     props[prop][i] = frame_prop
 
-        for prop in prop_list:
+        for prop in self.TRAJ_ATTRIBUTES[4:]:
             # This builds NumPy arrays for properties with
             # no missing values (i.e. None).
             if any(p is None for p in props[prop]):
