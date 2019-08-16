@@ -261,3 +261,8 @@ Changed
 +++++++
   - Frames only loaded into memory on demand.
   - Improved trajectory iteration logic.
+  
+No change logs prior to v0.1.5
+------------------------------
+  
+ 
