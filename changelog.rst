@@ -5,7 +5,7 @@ Changelog
 The **garnett** package follows `semantic versioning <https://semver.org/>`_.
 
 Version 0.5
-===========	
+===========
 
 [0.5.0] -- 2019-0x-xx
 ---------------------
@@ -14,18 +14,18 @@ Added
   - Rowan is now a dependency.
   - Add GETAR file reader/writer.
   - Add ``shape_dict`` representation to ``Shape`` classes.
-  - Add support for particle properties: 
-    - mass 
-    - charge 
+  - Add support for particle properties:
+    - mass
+    - charge
     - diameter
     - image
-    - moment of inertia 
+    - moment of inertia
     - angular momentum
   - Add support for reading/writing shapes in GSD via HOOMD-HPMC state.
   - Add universal reader/writer with format detection.
   - Add orientable attribute to spheres.
-  - Extend list of supported shape classes: 
-    - ellipsoid 
+  - Extend list of supported shape classes:
+    - ellipsoid
     - polygon
     - spheropolygon
     - convex polyhedron
@@ -264,5 +264,3 @@ Changed
   
 No change logs prior to v0.1.5
 ------------------------------
-  
- 
