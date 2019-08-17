@@ -35,7 +35,7 @@ jobs:
             python --version
             pip --version
             pip install --user -r .circleci/requirements.txt
-            pip install --user gsd gtar
+            pip install --user gsd==1.7.0 gtar
             pip install --user -U coverage
             python -c "import numpy; print('numpy', numpy.__version__)"
             python -c "import cython; print('cython', cython.__version__)"
