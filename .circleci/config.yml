@@ -35,18 +35,7 @@ jobs:
             python --version
             pip --version
             pip install --user -r .circleci/requirements.txt
-            wget https://github.com/glotzerlab/gsd/archive/master.tar.gz -O gsd.tar.gz
-            tar -xvzf gsd.tar.gz
-            cd gsd-master
-            python setup.py install --user
-            cd ..
-            rm -r gsd-master
-            wget https://github.com/glotzerlab/libgetar/archive/master.tar.gz -O libgetar.tar.gz
-            tar -xvzf libgetar.tar.gz
-            cd libgetar-master
-            python setup.py install --user
-            cd ..
-            rm -r libgetar-master
+            pip install --user gsd libgetar
             pip install --user -U coverage
             python -c "import numpy; print('numpy', numpy.__version__)"
             python -c "import cython; print('cython', cython.__version__)"
