@@ -11,7 +11,7 @@ Version 0.5
 ---------------------
 Added
 +++++
-  - Rowan is now a dependency.
+  - Added [rowan](https://rowan.readthedocs.io/en/latest/) as a dependency.
   - Add GETAR file reader/writer.
   - Add ``shape_dict`` representation to ``Shape`` classes.
   - Add support for particle properties:
@@ -33,7 +33,7 @@ Added
 
 Changed
 +++++++
-  - Raise ``AttributeError`` if accessing an invalid frame or trajectory property.
+  - Raise ``AttributeError`` if accessing a frame or trajectory property not defined in the file.
   - Rename several existing shape classes.
   - Improve unit test coverage.
   - Revise documentation.
@@ -41,7 +41,7 @@ Changed
 
 Deprecated
 ++++++++++
-  - Tests for Python 2 are no longer updated (Python 2 support will be entirely dropped in a future release).
+  - Tests for Python 2 are no longer updated (Python 2 support will be dropped in the next minor release).
 
 Removed
 +++++++
@@ -261,6 +261,6 @@ Changed
 +++++++
   - Frames only loaded into memory on demand.
   - Improved trajectory iteration logic.
-  
+
 No change logs prior to v0.1.5
 ------------------------------
