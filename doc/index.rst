@@ -39,6 +39,7 @@ garnett
    :maxdepth: 2
    :caption: Reference
 
+   changes
    development
    credits
 

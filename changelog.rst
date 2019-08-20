@@ -11,20 +11,23 @@ Version 0.5
 ---------------------
 Added
 +++++
-  - Added [rowan](https://rowan.readthedocs.io/en/latest/) as a dependency.
+  - Added `rowan <https://rowan.readthedocs.io/en/latest/>`_ as a dependency.
   - Add GETAR file reader/writer.
   - Add ``shape_dict`` representation to ``Shape`` classes.
   - Add support for particle properties:
+
     - mass
     - charge
     - diameter
     - image
     - moment of inertia
     - angular momentum
+
   - Add support for reading/writing shapes in GSD via HOOMD-HPMC state.
   - Add universal reader/writer with format detection.
   - Add orientable attribute to spheres.
   - Extend list of supported shape classes:
+
     - ellipsoid
     - polygon
     - spheropolygon
@@ -64,12 +67,16 @@ Fixed
 Added
 +++++
   - Add readers/writers:
+
     - CIF reader
     - GSD writer
+
   - Support shape definitions:
+
     - spheropolyhedron
     - polyunion
     - convex polyhedron union
+
   - Add ``gf2pos`` script - convert to pos-file from any supported format.
   - Add shape definitions to ``GetarFileReader``.
   - Interpret the pos-file rotation key word.
@@ -94,8 +101,9 @@ Added
 Changed
 +++++++
   - Update documentation concerning the conversion of rotations from quaternions to euler angles.
-Fix
-+++
+
+Fixed
++++++
   - Fix bug related to trajectory arrays when slicing the array.
 
 [0.3.8] -- 2016-12-21
