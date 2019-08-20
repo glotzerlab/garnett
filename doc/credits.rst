@@ -2,7 +2,7 @@ Credits
 =======
 
 Garnett Developers
------------------------
+------------------
 
 The following people have contributed to the :py:mod:`garnett` package.
 

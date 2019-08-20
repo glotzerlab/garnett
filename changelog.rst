@@ -7,8 +7,9 @@ The **garnett** package follows `semantic versioning <https://semver.org/>`_.
 Version 0.5
 ===========
 
-[0.5.0] -- 2019-0x-xx
+[0.5.0] -- 2019-08-20
 ---------------------
+
 Added
 +++++
   - Added `rowan <https://rowan.readthedocs.io/en/latest/>`_ as a dependency.
