@@ -1,4 +1,9 @@
-# README
+# garnett
+
+[![CircleCI](https://img.shields.io/circleci/project/github/glotzerlab/garnett/master.svg)](https://circleci.com/gh/glotzerlab/garnett)
+[![RTD](https://img.shields.io/readthedocs/garnett.svg?style=flat)](https://garnett.readthedocs.io/)
+[![Contributors](https://img.shields.io/github/contributors-anon/glotzerlab/garnett.svg?style=flat)](https://garnett.readthedocs.io/en/latest/credits.html)
+[![License](https://img.shields.io/github/license/glotzerlab/garnett.svg)](https://github.com/glotzerlab/garnett/blob/master/LICENSE.txt)
 
 ## About
 

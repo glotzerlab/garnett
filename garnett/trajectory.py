@@ -585,6 +585,7 @@ class Frame(object):
 
     @property
     def view_rotation(self):
+        "A quaternion specifying a rotation that should be applied for visualization."
         self.load()
         return self.frame_data.view_rotation
 
@@ -706,6 +707,10 @@ class Trajectory(BaseTrajectory):
     :param dtype: The default data type for trajectory data.
     """
 
+    TRAJ_ATTRIBUTES = ['N', 'type', 'types', 'type_ids', 'positions',
+                       'orientations', 'velocities', 'mass', 'charge',
+                       'diameter', 'moment_inertia', 'angmom', 'image']
+
     def __init__(self, frames=None, dtype=None):
         super(Trajectory, self).__init__(frames=frames)
         if dtype is None:
@@ -755,19 +760,7 @@ class Trajectory(BaseTrajectory):
         """Returns true if arrays are loaded into memory.
 
         See also: :meth:`~.load_arrays`"""
-        return not (self._N is None or
-                    self._type is None or
-                    self._types is None or
-                    self._type_ids is None or
-                    self._positions is None or
-                    self._orientations is None or
-                    self._velocities is None or
-                    self._mass is None or
-                    self._charge is None or
-                    self._diameter is None or
-                    self._moment_inertia is None or
-                    self._angmom is None or
-                    self._image is None)
+        return any(getattr(self, '_' + key) is not None for key in self.TRAJ_ATTRIBUTES)
 
     def _assert_loaded(self):
         "Raises a RuntimeError if trajectory is not loaded."
@@ -779,6 +772,13 @@ class Trajectory(BaseTrajectory):
         if not self.arrays_loaded():
             raise RuntimeError(
                 "Trajectory arrays not loaded! Use load_arrays() or load().")
+
+    def _check_nonempty_property(self, attr):
+        value = getattr(self, attr, None)
+        if value is None:
+            raise AttributeError('{} not available for this trajectory'.format(attr[1:]))
+        else:
+            return value
 
     def _max_N(self):
         "Returns the size of the largest frame within this trajectory."
@@ -829,10 +829,6 @@ class Trajectory(BaseTrajectory):
         type_ids = np.zeros((M, N), dtype=np.uint32)
         _type = _generate_type_id_array(types, type_ids)
 
-        # Properties
-        prop_list = ['positions', 'orientations', 'velocities',
-                     'mass', 'charge', 'diameter',
-                     'moment_inertia', 'angmom', 'image']
         props = dict(
             positions=[None] * M,
             orientations=[None] * M,
@@ -846,7 +842,8 @@ class Trajectory(BaseTrajectory):
         )
 
         for i, frame in enumerate(self.frames):
-            for prop in prop_list:
+            # loop over desired properties
+            for prop in self.TRAJ_ATTRIBUTES[4:]:
                 try:
                     frame_prop = frame._raise_attributeerror(prop)
                 except AttributeError:
@@ -854,15 +851,19 @@ class Trajectory(BaseTrajectory):
                 if frame_prop is not None:
                     props[prop][i] = frame_prop
 
-        for prop in prop_list:
-            if prop == 'image':
-                dtype_ = np.int32
+        for prop in self.TRAJ_ATTRIBUTES[4:]:
+            # This builds NumPy arrays for properties with
+            # no missing values (i.e. None).
+            if any(p is None for p in props[prop]):
+                # If the list contains a None value, set property to None
+                # in order for AttributeError to be raised properly
+                props[prop] = None
             else:
-                dtype_ = DEFAULT_DTYPE
-            try:
-                props[prop] = np.asarray(props[prop], dtype=dtype_)
-            except (TypeError, ValueError):
-                props[prop] = np.asarray(props[prop])
+                dtype_ = np.int32 if prop == 'image' else DEFAULT_DTYPE
+                try:
+                    props[prop] = np.asarray(props[prop], dtype=dtype_)
+                except (TypeError, ValueError):
+                    props[prop] = np.asarray(props[prop])
 
         try:
             # Perform swap
@@ -977,7 +978,7 @@ class Trajectory(BaseTrajectory):
             calling :meth:`~.load_arrays` or
             :meth:`~.Trajectory.load`."""
         self._assertarrays_loaded()
-        return self._positions
+        return self._check_nonempty_property('_positions')
 
     @property
     def orientations(self):
@@ -991,7 +992,7 @@ class Trajectory(BaseTrajectory):
             calling :meth:`~.load_arrays` or
             :meth:`~.Trajectory.load`."""
         self._assertarrays_loaded()
-        return self._orientations
+        return self._check_nonempty_property('_orientations')
 
     @property
     def velocities(self):
@@ -1003,7 +1004,7 @@ class Trajectory(BaseTrajectory):
             calling :meth:`~.load_arrays` or
             :meth:`~.Trajectory.load`."""
         self._assertarrays_loaded()
-        return self._velocities
+        return self._check_nonempty_property('_velocities')
 
     @property
     def mass(self):
@@ -1015,7 +1016,7 @@ class Trajectory(BaseTrajectory):
             calling :meth:`~.load_arrays` or
             :meth:`~.Trajectory.load`."""
         self._assertarrays_loaded()
-        return self._mass
+        return self._check_nonempty_property('_mass')
 
     @property
     def charge(self):
@@ -1027,7 +1028,7 @@ class Trajectory(BaseTrajectory):
             calling :meth:`~.load_arrays` or
             :meth:`~.Trajectory.load`."""
         self._assertarrays_loaded()
-        return self._charge
+        return self._check_nonempty_property('_charge')
 
     @property
     def diameter(self):
@@ -1039,7 +1040,7 @@ class Trajectory(BaseTrajectory):
             calling :meth:`~.load_arrays` or
             :meth:`~.Trajectory.load`."""
         self._assertarrays_loaded()
-        return self._diameter
+        return self._check_nonempty_property('_diameter')
 
     @property
     def moment_inertia(self):
@@ -1053,7 +1054,7 @@ class Trajectory(BaseTrajectory):
             calling :meth:`~.load_arrays` or
             :meth:`~.Trajectory.load`."""
         self._assertarrays_loaded()
-        return self._moment_inertia
+        return self._check_nonempty_property('_moment_inertia')
 
     @property
     def angmom(self):
@@ -1065,7 +1066,7 @@ class Trajectory(BaseTrajectory):
             calling :meth:`~.load_arrays` or
             :meth:`~.Trajectory.load`."""
         self._assertarrays_loaded()
-        return self._angmom
+        return self._check_nonempty_property('_angmom')
 
     @property
     def image(self):
@@ -1077,7 +1078,7 @@ class Trajectory(BaseTrajectory):
             calling :meth:`~.load_arrays` or
             :meth:`~.Trajectory.load`."""
         self._assertarrays_loaded()
-        return self._image
+        return self._check_nonempty_property('_image')
 
 
 def _regularize_box(positions, velocities,

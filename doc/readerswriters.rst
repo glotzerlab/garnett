@@ -55,26 +55,29 @@ This table outlines the supported properties of each format reader and writer.
 +--------+-----------+-----+--------------+------------+-------+-----------------------------------+
 | Format | Positions | Box | Orientations | Velocities | Shape | Additional Properties (See below) |
 +--------+-----------+-----+--------------+------------+-------+-----------------------------------+
-|    POS |     RW    |  RW |      RW      |    N/A+    |  RW++ |                N/A                |
+|    POS |     RW    |  RW |      RW      |    N/A+    |   RW  |                N/A                |
 +--------+-----------+-----+--------------+------------+-------+-----------------------------------+
-|    GSD |     RW    |  RW |      RW      |     RW     |  RW++ |                RW                 |
+|    GSD |     RW    |  RW |      RW      |     RW     |   RW  |                RW                 |
 +--------+-----------+-----+--------------+------------+-------+-----------------------------------+
-|   GTAR |     RW    |  RW |      RW      |     RW     |  RW++ |                RW                 |
+|   GTAR |     RW    |  RW |      RW      |     RW     |   RW  |                RW                 |
 +--------+-----------+-----+--------------+------------+-------+-----------------------------------+
 |    CIF |     RW    |  RW |      N/A     |     N/A    |  N/A  |                N/A                |
 +--------+-----------+-----+--------------+------------+-------+-----------------------------------+
-|    DCD |     R     |  R  |       R      |     R++    |  N/A  |                N/A                |
+|    DCD |     R     |  R  |       R      |      R     |  N/A  |                N/A                |
 +--------+-----------+-----+--------------+------------+-------+-----------------------------------+
 |    XML |     R     |  R  |       R      |      R     |  N/A  |                N/A                |
 +--------+-----------+-----+--------------+------------+-------+-----------------------------------+
 
-RW indicates garnett can read and write on this format.
-R indicates garnett can only read.
-N/A indicates the format does not support storing this property.
-Additional Properties: Mass, Charge, Diameter, Angular momentum, Moment of inertia
-+ None
-++ Incomplete
-
+* RW indicates garnett can read and write on this format.
+* R indicates garnett can only read.
+* N/A indicates the format does not support storing this property.
+* Additional Properties:
+    - Mass
+    - Charge
+    - Diameter
+    - Angular momentum
+    - Moment of inertia
+    - Image
 
 The following collection of readers and writers is ordered by different file formats.
 
@@ -118,6 +121,8 @@ GeTAR
 
 The *GeTAR*-format is a highly versatile, *binary* format for storing and reading trajectory data.
 HOOMD-blue provides a writer for this format.
+
+See also: `<https://libgetar.readthedocs.io>`_
 
 .. autoclass:: garnett.reader.GetarFileReader
     :members:
