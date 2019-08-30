@@ -35,8 +35,8 @@ class Box(object):
         # etc.
 
         # Setting
-        box.lx = 10.0
-        box.ly = box.lz = 5.0
+        box.Lx = 10.0
+        box.Ly = box.Lz = 5.0
         box.xy = box.xz = box.yz = 0.01
         # etc.
 
