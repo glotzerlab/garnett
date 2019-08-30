@@ -365,7 +365,7 @@ class Frame(object):
         """
         try:
             import importlib
-            import plato
+            import plato  # noqa: F401
             backend = importlib.import_module('plato.draw.{}'.format(backend))
         except ImportError:
             raise
@@ -386,13 +386,30 @@ class Frame(object):
                     prim = backend.Spheres(
                         positions=self.positions[subset],
                         colors=make_default_colors(N_prim),
-                        radii=[0.5*shape_dict['diameter']]*N_prim,
+                        radii=[0.5 * shape_dict['diameter']] * N_prim,
                     )
                 else:
                     prim = backend.Disks(
                         positions=self.positions[subset, :2],
                         colors=make_default_colors(N_prim),
-                        radii=[0.5*shape_dict['diameter']]*N_prim,
+                        radii=[0.5 * shape_dict['diameter']] * N_prim,
+                    )
+            elif isinstance(type_shape, SphereUnionShape):
+                if dimensions == 3:
+                    prim = backend.SphereUnions(
+                        positions=self.positions[subset],
+                        orientations=self.orientations[subset],
+                        colors=make_default_colors(len(shape_dict['centers'])),
+                        points=shape_dict['centers'],
+                        radii=[0.5 * d for d in shape_dict['diameters']],
+                    )
+                else:
+                    prim = backend.DiskUnions(
+                        positions=self.positions[subset, :2],
+                        orientations=self.orientations[subset],
+                        colors=make_default_colors(len(shape_dict['centers'])),
+                        points=[c[:2] for c in shape_dict['centers']],
+                        radii=[0.5 * d for d in shape_dict['diameters']],
                     )
             elif isinstance(type_shape, ConvexPolyhedronShape):
                 prim = backend.ConvexPolyhedra(
