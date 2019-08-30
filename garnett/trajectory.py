@@ -355,7 +355,14 @@ class Frame(object):
         return copyto_hoomd_blue_snapshot(self.frame_data, snapshot)
 
     def to_plato_scene(self, backend='pythreejs', scene=None):
-        """Create a plato scene from this frame."""
+        """Create a plato scene from this frame.
+
+        :param backend: Backend name to use with plato.
+        :type backend: str
+        :param scene: Scene object to render into. By default, a new scene is
+                      created.
+        :type scene: :class:`plato.draw.Scene`
+        """
         try:
             import importlib
             import plato

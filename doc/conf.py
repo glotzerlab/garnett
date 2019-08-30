@@ -300,6 +300,7 @@ texinfo_documents = [
 intersphinx_mapping = {
     'python': ('https://docs.python.org/', None),
     'hoomd': ('https://hoomd-blue.readthedocs.io/en/stable/', None),
+    'plato': ('https://plato-draw.readthedocs.io/en/stable/', None),
 }
 
 autodoc_mock_imports = [
