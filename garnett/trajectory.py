@@ -375,6 +375,10 @@ class Frame(object):
         def make_default_colors(size):
             return np.array([[0.5, 0.5, 0.5, 1]] * size)
 
+        # Create box primitive
+        prims.append(backend.Box(box=self.box))
+
+        # Create a shape primitive for each shape definition
         for type_name, type_shape in self.shapedef.items():
             subset = np.where(np.asarray(self.types) == type_name)[0]
             N_prim = len(subset)
