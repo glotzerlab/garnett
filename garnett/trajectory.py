@@ -1113,7 +1113,7 @@ def _regularize_box(positions, velocities,
     # check upper triangular
     upper_triang = np.allclose(Q[:dimensions, :dimensions], np.eye(dimensions))
 
-    if not (right_handed or upper_triang):
+    if not (right_handed and upper_triang):
         # if input box is not right-handed, flip one axis
         sign = 1 if right_handed else -1
         box_matrix[:, 1] = sign*box_matrix[:, 1]
