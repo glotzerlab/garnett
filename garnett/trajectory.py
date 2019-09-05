@@ -12,7 +12,6 @@ import logging
 import numpy as np
 
 import rowan
-import math
 
 logger = logging.getLogger(__name__)
 
@@ -1100,9 +1099,9 @@ def _regularize_box(positions, velocities,
     #    Source: https://lammps.sandia.gov/doc/Howto_triclinic.html
 
     # input basis vectors
-    A = box_matrix[:,0]
-    B = box_matrix[:,1]
-    C = box_matrix[:,2]
+    A = box_matrix[:, 0]
+    B = box_matrix[:, 1]
+    C = box_matrix[:, 2]
 
     # Compute QR to check if matrix is upper triangular
     Q, R = np.linalg.qr(box_matrix)
