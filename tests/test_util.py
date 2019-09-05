@@ -4,14 +4,8 @@
 import os
 import sys
 import unittest
-
 import garnett
-
-PYTHON_2 = sys.version_info[0] == 2
-if PYTHON_2:
-    from tempdir import TemporaryDirectory
-else:
-    from tempfile import TemporaryDirectory
+from tempfile import TemporaryDirectory
 
 try:
     import CifFile  # noqa: F401
@@ -27,7 +21,6 @@ except ImportError:
 else:
     GTAR = True
 
-PYTHON_2 = sys.version_info[0] == 2
 TESTDATA_PATH = os.path.join(os.path.dirname(__file__), 'files/')
 
 
@@ -80,7 +73,6 @@ class UtilReaderTest(unittest.TestCase):
                     template=get_filename('template-missing-shape.pos')):
                 pass
 
-    @unittest.skipIf(PYTHON_2, 'requires python 3')
     def test_read_nonexistent(self):
         with self.assertRaises(FileNotFoundError):
             with garnett.read(get_filename('does_not_exist.pos')):

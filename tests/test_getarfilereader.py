@@ -5,9 +5,9 @@ import unittest
 import os
 import sys
 import json
-
 import numpy as np
 import garnett
+from tempfile import TemporaryDirectory
 
 try:
     import gtar
@@ -15,12 +15,6 @@ except ImportError:
     GTAR = False
 else:
     GTAR = True
-
-PYTHON_2 = sys.version_info[0] == 2
-if PYTHON_2:
-    from tempdir import TemporaryDirectory
-else:
-    from tempfile import TemporaryDirectory
 
 
 @unittest.skipIf(not GTAR, 'GetarFileReader requires the gtar module.')

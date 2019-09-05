@@ -6,14 +6,9 @@ import io
 import unittest
 import base64
 import tempfile
-
 import numpy as np
-
 import garnett
 from test_trajectory import TrajectoryTest
-
-PYTHON_2 = sys.version_info[0] == 2
-
 
 class BaseDCDFileReaderTest(TrajectoryTest):
     reader = garnett.reader.DCDFileReader
@@ -35,12 +30,8 @@ class BaseDCDFileReaderTest(TrajectoryTest):
 
     def read_top_trajectory(self):
         top_reader = garnett.reader.HOOMDXMLFileReader()
-        if PYTHON_2:
-            return top_reader.read(io.StringIO(
-                unicode(garnett.samples.HOOMD_BLUE_XML)))  # noqa
-        else:
-            return top_reader.read(
-                io.StringIO(garnett.samples.HOOMD_BLUE_XML))
+        return top_reader.read(
+            io.StringIO(garnett.samples.HOOMD_BLUE_XML))
 
     def get_traj(self):
         top_traj = self.read_top_trajectory()
