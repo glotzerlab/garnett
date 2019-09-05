@@ -74,9 +74,9 @@ class Box(object):
         return [self.Lx, self.Ly, self.Lz, self.xy, self.xz, self.yz]
 
     def __str__(self):
-        return "Box(Lx={Lx}, Ly={Ly}, Lz={Lz},"\
+        return "Box(Lx={Lx}, Ly={Ly}, Lz={Lz}, "\
             "xy={xy}, xz={xz}, yz={yz}, dimensions={dimensions})".format(
-                ** self.__dict__)
+                **self.__dict__)
 
     def __repr__(self):
         return str(self)
