@@ -12,6 +12,7 @@ import logging
 import numpy as np
 
 import rowan
+import math
 
 logger = logging.getLogger(__name__)
 
@@ -1087,63 +1088,79 @@ def _regularize_box(positions, velocities,
     """ Convert box into a right-handed coordinate frame with
     only upper triangular entries. Also convert corresponding
     positions and orientations."""
-    # First use QR decomposition to compute the new basis
+
+    # Here we convert the box into a right-handed coordinate
+    # system with upper triangular matrix by starting wit the
+    # three vectors A, B & C of a general parallelepiped without
+    # any restriction on A, B & C. If the input box matrix is
+    # not right-handed, then it is sufficient to perform an inversion
+    # before making the computations. This can be achieved by interchanging
+    # two basis vectors or by changing the sign of one of them. Here
+    # we do the latter operation.
+    #    Source: https://lammps.sandia.gov/doc/Howto_triclinic.html
+
+    # input basis vectors
+    A = box_matrix[:,0]
+    B = box_matrix[:,1]
+    C = box_matrix[:,2]
+
+    # Compute QR to check if matrix is upper triangular
     Q, R = np.linalg.qr(box_matrix)
     Q = Q.astype(dtype)
     R = R.astype(dtype)
 
-    if not np.allclose(Q[:dimensions, :dimensions], np.eye(dimensions)):
-        # If Q is not the identity matrix, then we will be
-        # changing data, so we have to copy. This only causes
-        # actual failures for non-writeable GSD frames, but could
-        # cause unexpected data corruption for other cases
-        positions = np.copy(positions)
+    # check handedness
+    right_handed = np.cross(A, B).dot(C) > 0.0
+    # check upper triangular
+    upper_triang = np.allclose(Q[:dimensions, :dimensions], np.eye(dimensions))
+
+    if not (right_handed or upper_triang):
+        # if input box is not right-handed, flip one axis
+        sign = 1 if right_handed else -1
+        box_matrix[:, 1] = sign*box_matrix[:, 1]
+
+        # calculate box parameters (LAMMPS format)
+        ax = np.sqrt(np.dot(A, A))
+        bx = np.dot(A, B) / ax
+        by = np.sqrt(np.dot(B, B) - bx * bx)
+        cx = np.dot(A, C) / ax
+        cy = (np.dot(B, C) - bx * cx) / by
+        cz = np.sqrt(np.dot(C, C) - cx * cx - cy * cy)
+        # calculate box parameters (HOOMD format)
+        lx = ax
+        ly = by
+        lz = cz
+        xy = bx / by
+        xz = cx / cz
+        yz = cy / cz
+
+        regularized_box = np.asarray([[lx, xy*ly, xz*lz], [0, ly, yz*lz], [0, 0, lz]])
+
+        transformationMatrix = regularized_box.dot(np.linalg.inv(box_matrix))
+
+        transformationQuat = rowan.from_matrix(transformationMatrix, require_orthogonal=False)
+
+        # Transform vector quantities. Note: transpose is required here
+        # since the order of the product is swapped in order to make the
+        # dimensions of the arrays match.
+        positions = positions @ transformationMatrix.T
+        if velocities is not None:
+            velocities = velocities @ transformationMatrix.T
+
         if orientations is not None:
-            orientations = np.copy(orientations)
-        if velocities is not None:
-            velocities = np.copy(velocities)
+            orientations = rowan.multiply(transformationQuat, orientations)
+
         if angmom is not None:
-            angmom = np.copy(angmom)
+            angmom = rowan.multiply(transformationQuat, angmom)
 
-        # Since we'll be performing a quaternion operation,
-        # we have to ensure that Q is a pure rotation
-        sign = np.linalg.det(Q)
-        Q = Q*sign
-        R = R*sign
-
-        # First rotate positions, velocities.
-        # Since they are vectors, we can use the matrix directly.
-        # Conveniently, instead of transposing Q we can just reverse
-        # the order of multiplication here
-        positions = positions.dot(Q)
-        if velocities is not None:
-            velocities = velocities.dot(Q)
-
-        # For orientations and angular momenta, we use the quaternion
-        quat = rowan.from_matrix(Q.T)
-        if orientations is not None:
-            for i in range(orientations.shape[0]):
-                orientations[i, :] = rowan.multiply(quat, orientations[i, :])
-        if angmom is not None:
-            for i in range(angmom.shape[0]):
-                angmom[i, :] = rowan.multiply(quat, angmom[i, :])
-
-        # Now we have to ensure that the box is right-handed. We
-        # do this as a second step to avoid introducing reflections
-        # into the rotation matrix before making the quaternion
-        signs = np.diag(np.diag(np.where(R < 0, -np.ones(R.shape), np.ones(R.shape))))
-        box = R.dot(signs)
-        positions = positions.dot(signs)
-        if velocities is not None:
-            velocities = velocities.dot(signs)
     else:
-        box = box_matrix
+        regularized_box = box_matrix
 
-    # Construct the box
-    Lx, Ly, Lz = np.diag(box).flatten().tolist()
-    xy = box[0, 1]/Ly
-    xz = box[0, 2]/Lz
-    yz = box[1, 2]/Lz
+    # Construct the final box
+    Lx, Ly, Lz = np.diag(regularized_box).flatten().tolist()
+    xy = regularized_box[0, 1]/Ly
+    xz = regularized_box[0, 2]/Lz
+    yz = regularized_box[1, 2]/Lz
     box = Box(Lx=Lx, Ly=Ly, Lz=Lz, xy=xy, xz=xz, yz=yz, dimensions=dimensions)
     return positions, velocities, orientations, angmom, box
 
