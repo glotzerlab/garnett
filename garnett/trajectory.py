@@ -377,7 +377,10 @@ class Frame(object):
             return np.array([[0.5, 0.5, 0.5, 1]] * size)
 
         # Create box primitive
-        prims.append(backend.Box(box=self.box))
+        box = self.box
+        if self.box.dimensions == 2:
+            box.Lz = 0
+        prims.append(backend.Box(box=box))
 
         # Create a shape primitive for each shape definition
         for type_name, type_shape in self.shapedef.items():
