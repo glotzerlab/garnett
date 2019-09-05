@@ -4,7 +4,7 @@ Installation
 Requirements
 ------------
 
-Installing the **garnett** package requires Python 2.7 or 3.5+, **numpy**, and **rowan**.
+Installing the **garnett** package requires Python 3.5+, **numpy**, and **rowan**.
 
 With conda
 ----------
