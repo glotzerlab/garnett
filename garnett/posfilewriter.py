@@ -66,10 +66,7 @@ class PosFileWriter(object):
         :type trajectory: :class:`~garnett.trajectory.Trajectory`
         :param file: A file-like object."""
         def _write(msg, end='\n'):
-            if PYTHON_2:
-                file.write(unicode(msg + end))  # noqa
-            else:
-                file.write(msg + end)
+            file.write(msg + end)
         for i, frame in enumerate(trajectory):
             # data section
             if frame.data is not None:
