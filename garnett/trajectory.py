@@ -1142,9 +1142,9 @@ def _regularize_box(positions, velocities,
         # Transform vector quantities. Note: transpose is required here
         # since the order of the product is swapped in order to make the
         # dimensions of the arrays match.
-        positions = positions @ transformationMatrix.T
+        positions = positions.dot(transformationMatrix.T)
         if velocities is not None:
-            velocities = velocities @ transformationMatrix.T
+            velocities = velocities.dot(transformationMatrix.T)
 
         if orientations is not None:
             orientations = rowan.multiply(transformationQuat, orientations)
