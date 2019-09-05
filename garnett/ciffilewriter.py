@@ -27,7 +27,6 @@ from collections import defaultdict
 import numpy as np
 
 logger = logging.getLogger(__name__)
-PYTHON_2 = sys.version_info[0] == 2
 
 
 def _determine_unitcell(box):
@@ -71,10 +70,7 @@ class CifFileWriter(object):
             occupancies = np.ones(frame.positions.shape[0])
 
         def _write(msg='', end='\n'):
-            if PYTHON_2:
-                file.write(unicode(msg + end))  # noqa
-            else:
-                file.write(msg + end)
+            file.write(msg + end)
         unitcell_lengths, unitcell_angles = _determine_unitcell(frame.box)
         # write title
         _write("data_" + data)
