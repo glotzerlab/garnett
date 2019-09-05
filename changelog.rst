@@ -4,6 +4,16 @@ Changelog
 
 The **garnett** package follows `semantic versioning <https://semver.org/>`_.
 
+next
+====
+
+next
+----
+
+Added
++++++
+  - Added ``to_plato_scene()`` method to quickly visualize ``Frame`` objects.
+
 Version 0.5
 ===========
 
