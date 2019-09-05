@@ -354,10 +354,12 @@ class Frame(object):
         self.load()
         return copyto_hoomd_blue_snapshot(self.frame_data, snapshot)
 
-    def to_plato_scene(self, backend='pythreejs', scene=None):
+    def to_plato_scene(self, backend, scene=None):
         """Create a plato scene from this frame.
 
-        :param backend: Backend name to use with plato.
+        :param backend: Backend name to use with plato. The backend must
+                        support all primitives corresponding to shapes defined
+                        in this frame.
         :type backend: str
         :param scene: Scene object to render into. By default, a new scene is
                       created.
@@ -365,7 +367,6 @@ class Frame(object):
         """
         try:
             import importlib
-            import plato  # noqa: F401
             backend = importlib.import_module('plato.draw.{}'.format(backend))
         except ImportError:
             raise
