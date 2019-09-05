@@ -1,7 +1,6 @@
 # Copyright (c) 2019 The Regents of the University of Michigan
 # All rights reserved.
 # This software is licensed under the BSD 3-Clause License.
-import sys
 import io
 import unittest
 import base64
@@ -9,6 +8,7 @@ import tempfile
 import numpy as np
 import garnett
 from test_trajectory import TrajectoryTest
+
 
 class BaseDCDFileReaderTest(TrajectoryTest):
     reader = garnett.reader.DCDFileReader

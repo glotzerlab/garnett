@@ -3,7 +3,6 @@
 # This software is licensed under the BSD 3-Clause License.
 import io
 import logging
-import sys
 import unittest
 import numpy as np
 import garnett
