@@ -33,7 +33,7 @@ setup(
         "Topic :: Scientific/Engineering :: Physics",
     ],
 
-    python_requires='!=3.0.*, !=3.1.*, !=3.2.*, <4',
+    python_requires='>=3.5, <4',
 
     install_requires=[
         'rowan>=0.5'
