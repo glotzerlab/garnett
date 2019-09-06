@@ -27,7 +27,6 @@ import rowan
 
 
 logger = logging.getLogger(__name__)
-PYTHON_2 = sys.version_info[0] == 2
 
 DEFAULT_SHAPE_DEFINITION = SphereShape(1.0, color='005984FF')
 
