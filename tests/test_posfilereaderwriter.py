@@ -134,6 +134,9 @@ class PosFileReaderTest(BasePosFileReaderTest):
             self.assertEqual(frame.box, box_expected)
             self.assert_raise_attribute_error(frame)
 
+        traj.load_arrays()
+        self.assert_raise_attribute_error(traj)
+
     def test_incsim_dialect(self):
         if PYTHON_2:
             sample = io.StringIO(unicode(garnett.samples.POS_INCSIM))  # noqa
@@ -146,6 +149,9 @@ class PosFileReaderTest(BasePosFileReaderTest):
             self.assertEqual(frame.types, ['A'] * N)
             self.assertEqual(frame.box, box_expected)
             self.assert_raise_attribute_error(frame)
+
+        traj.load_arrays()
+        self.assert_raise_attribute_error(traj)
 
     def test_monotype_dialect(self):
         if PYTHON_2:
@@ -160,6 +166,9 @@ class PosFileReaderTest(BasePosFileReaderTest):
             self.assertEqual(frame.box, box_expected)
             self.assert_raise_attribute_error(frame)
 
+        traj.load_arrays()
+        self.assert_raise_attribute_error(traj)
+
     def test_injavis_dialect(self):
         if PYTHON_2:
             sample = io.StringIO(unicode(garnett.samples.POS_INJAVIS))  # noqa
@@ -172,6 +181,9 @@ class PosFileReaderTest(BasePosFileReaderTest):
             self.assertEqual(frame.types, ['A'] * N)
             self.assertEqual(frame.box, box_expected)
             self.assert_raise_attribute_error(frame)
+
+        traj.load_arrays()
+        self.assert_raise_attribute_error(traj)
 
 
 @unittest.skipIf(not HPMC, 'requires HPMC')
@@ -356,7 +368,7 @@ class PosFileWriterTest(BasePosFileWriterTest):
         else:
             sample = io.StringIO(garnett.samples.POS_INJAVIS)
         traj = self.read_trajectory(sample)
-        traj.load()
+        traj.load_arrays()
         for frame in traj:
             frame.shapedef['A'] = ArrowShape()
             frame.orientations.T[3] = 0
@@ -376,7 +388,7 @@ class PosFileWriterTest(BasePosFileWriterTest):
         else:
             sample = io.StringIO(garnett.samples.POS_INJAVIS)
         traj = self.read_trajectory(sample)
-        traj.load()
+        traj.load_arrays()
         a = 0.5
         b = 0.25
         c = 0.125
