@@ -23,6 +23,7 @@ def test_read(file, template=None):
 def main():
     if GTAR:
         for fn in glob.glob('../samples/*.tar'):
+            test_read(fn)
 
     if GSD:
         for fn in glob.glob('../samples/*.gsd'):
