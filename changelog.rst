@@ -4,6 +4,16 @@ Changelog
 
 The **garnett** package follows `semantic versioning <https://semver.org/>`_.
 
+next
+====
+
+next
+----
+
+Added
++++++
+  - Added ``showEdges`` to skipped fields when reading POS files.
+
 Version 0.5
 ===========
 
