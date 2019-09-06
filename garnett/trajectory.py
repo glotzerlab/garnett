@@ -1087,7 +1087,13 @@ def _regularize_box(positions, velocities,
     """ Convert box into a right-handed coordinate frame with
     only upper triangular entries. Also convert corresponding
     positions and orientations."""
-    # First use QR decomposition to compute the new basis
+
+    # Ensure right-handedness of the box.
+    left_handed = np.linalg.det(box_matrix) < 0
+    if left_handed:
+        box_matrix[:, 0] *= -1
+
+    # Use QR decomposition to compute the new basis
     Q, R = np.linalg.qr(box_matrix)
     Q = Q.astype(dtype)
     R = R.astype(dtype)
@@ -1104,12 +1110,6 @@ def _regularize_box(positions, velocities,
             velocities = np.copy(velocities)
         if angmom is not None:
             angmom = np.copy(angmom)
-
-        # Since we'll be performing a quaternion operation,
-        # we have to ensure that Q is a pure rotation
-        sign = np.linalg.det(Q)
-        Q = Q*sign
-        R = R*sign
 
         # First rotate positions, velocities.
         # Since they are vectors, we can use the matrix directly.
@@ -1128,14 +1128,7 @@ def _regularize_box(positions, velocities,
             for i in range(angmom.shape[0]):
                 angmom[i, :] = rowan.multiply(quat, angmom[i, :])
 
-        # Now we have to ensure that the box is right-handed. We
-        # do this as a second step to avoid introducing reflections
-        # into the rotation matrix before making the quaternion
-        signs = np.diag(np.diag(np.where(R < 0, -np.ones(R.shape), np.ones(R.shape))))
-        box = R.dot(signs)
-        positions = positions.dot(signs)
-        if velocities is not None:
-            velocities = velocities.dot(signs)
+        box = R
     else:
         box = box_matrix
 
