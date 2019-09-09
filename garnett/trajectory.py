@@ -1088,15 +1088,23 @@ def _regularize_box(positions, velocities,
     only upper triangular entries. Also convert corresponding
     positions and orientations."""
 
-    # Ensure right-handedness of the box.
-    left_handed = np.linalg.det(box_matrix) < 0
-    if left_handed:
-        box_matrix[:, 0] *= -1
-
-    # Use QR decomposition to compute the new basis
+    # Use QR decomposition to compute the new basis.
     Q, R = np.linalg.qr(box_matrix)
     Q = Q.astype(dtype)
     R = R.astype(dtype)
+
+    # We need Q to be a pure rotation to avoid changing system chirality The Q
+    # matrix will contain a reflection if the original box was left-handed, but
+    # the QR decomposition could produce introduce reflections in both Q and R
+    # given a right-handed box. Since we need a right-handed coordinate system,
+    # we simply remove any reflection from Q and then manually enforce the
+    # handedness of the coordinate system in R.
+    sign = np.linalg.det(Q)
+    Q = Q*sign
+
+    if np.linalg.det(box_matrix) < 0:
+        R[:, 0] *= -1
+
 
     if not np.allclose(Q[:dimensions, :dimensions], np.eye(dimensions)):
         # If Q is not the identity matrix, then we will be
@@ -1122,11 +1130,9 @@ def _regularize_box(positions, velocities,
         # For orientations and angular momenta, we use the quaternion
         quat = rowan.from_matrix(Q.T)
         if orientations is not None:
-            for i in range(orientations.shape[0]):
-                orientations[i, :] = rowan.multiply(quat, orientations[i, :])
+            orientations = rowan.multiply(quat, orientations)
         if angmom is not None:
-            for i in range(angmom.shape[0]):
-                angmom[i, :] = rowan.multiply(quat, angmom[i, :])
+            angmom = rowan.multiply(quat, angmom)
 
         box = R
     else:
