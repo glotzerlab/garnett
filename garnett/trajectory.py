@@ -1105,7 +1105,6 @@ def _regularize_box(positions, velocities,
     if np.linalg.det(box_matrix) < 0:
         R[:, 0] *= -1
 
-
     if not np.allclose(Q[:dimensions, :dimensions], np.eye(dimensions)):
         # If Q is not the identity matrix, then we will be
         # changing data, so we have to copy. This only causes
