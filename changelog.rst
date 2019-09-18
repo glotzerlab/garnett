@@ -14,7 +14,7 @@ Added
 +++++
   - Added ``showEdges`` to skipped fields when reading POS files.
 
-Deprecated
+Removed
 ++++++++++
   - Dropped Python 2 support.
 
