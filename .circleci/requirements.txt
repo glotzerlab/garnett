@@ -2,7 +2,7 @@ Cython==0.29.5
 PyCifRW==4.4
 coverage==4.5.4
 ddt==1.2.0
-gsd==1.8.1
+gsd==1.9.0
 gtar==1.0.1
 numpy==1.16.1
 rowan==1.2.0
