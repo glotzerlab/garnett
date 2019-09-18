@@ -3,7 +3,6 @@
 # This software is licensed under the BSD 3-Clause License.
 import io
 import logging
-import sys
 import unittest
 import numpy as np
 import garnett
@@ -16,8 +15,6 @@ else:
     PYCIFRW = True
 
 logger = logging.getLogger(__name__)
-
-PYTHON_2 = sys.version_info[0] == 2
 
 
 @unittest.skipIf(not PYCIFRW,
@@ -47,40 +44,28 @@ class BaseCifFileWriterTest(BaseCifFileReaderTest):
 class CifFileWriterTest(BaseCifFileWriterTest):
 
     def test_hpmc_dialect(self):
-        if PYTHON_2:
-            sample = io.StringIO(unicode(garnett.samples.POS_HPMC))  # noqa
-        else:
-            sample = io.StringIO(garnett.samples.POS_HPMC)
+        sample = io.StringIO(garnett.samples.POS_HPMC)
         traj = self.read_pos_trajectory(sample)
         dump = io.StringIO()
         self.write_trajectory(traj, dump)
         return (traj[-1].positions, dump)
 
     def test_incsim_dialect(self):
-        if PYTHON_2:
-            sample = io.StringIO(unicode(garnett.samples.POS_INCSIM))  # noqa
-        else:
-            sample = io.StringIO(garnett.samples.POS_INCSIM)
+        sample = io.StringIO(garnett.samples.POS_INCSIM)
         traj = self.read_pos_trajectory(sample)
         dump = io.StringIO()
         self.write_trajectory(traj, dump)
         return (traj[-1].positions, dump)
 
     def test_monotype_dialect(self):
-        if PYTHON_2:
-            sample = io.StringIO(unicode(garnett.samples.POS_MONOTYPE))  # noqa
-        else:
-            sample = io.StringIO(garnett.samples.POS_MONOTYPE)
+        sample = io.StringIO(garnett.samples.POS_MONOTYPE)
         traj = self.read_pos_trajectory(sample)
         dump = io.StringIO()
         self.write_trajectory(traj, dump)
         return (traj[-1].positions, dump)
 
     def test_injavis_dialect(self):
-        if PYTHON_2:
-            sample = io.StringIO(unicode(garnett.samples.POS_INJAVIS))  # noqa
-        else:
-            sample = io.StringIO(garnett.samples.POS_INJAVIS)
+        sample = io.StringIO(garnett.samples.POS_INJAVIS)
         traj = self.read_pos_trajectory(sample)
         dump = io.StringIO()
         self.write_trajectory(traj, dump)
@@ -94,10 +79,7 @@ class CifFileReaderTest(CifFileWriterTest):
 
     def test_hpmc_dialect(self):
         (ref_positions, sample) = super(CifFileReaderTest, self).test_hpmc_dialect()
-        if PYTHON_2:
-            sample = io.StringIO(unicode(sample.getvalue()))  # noqa
-        else:
-            sample = io.StringIO(sample.getvalue())
+        sample = io.StringIO(sample.getvalue())
         traj = self.read_cif_trajectory(sample)
         logger.debug('Cif-read positions:')
         logger.debug(traj[-1].positions)
@@ -107,10 +89,7 @@ class CifFileReaderTest(CifFileWriterTest):
 
     def test_incsim_dialect(self):
         (ref_positions, sample) = super(CifFileReaderTest, self).test_incsim_dialect()
-        if PYTHON_2:
-            sample = io.StringIO(unicode(sample.getvalue()))  # noqa
-        else:
-            sample = io.StringIO(sample.getvalue())
+        sample = io.StringIO(sample.getvalue())
         traj = self.read_cif_trajectory(sample)
         logger.debug('Cif-read positions:')
         logger.debug(traj[-1].positions)
@@ -120,10 +99,7 @@ class CifFileReaderTest(CifFileWriterTest):
 
     def test_monotype_dialect(self):
         (ref_positions, sample) = super(CifFileReaderTest, self).test_monotype_dialect()
-        if PYTHON_2:
-            sample = io.StringIO(unicode(sample.getvalue()))  # noqa
-        else:
-            sample = io.StringIO(sample.getvalue())
+        sample = io.StringIO(sample.getvalue())
         traj = self.read_cif_trajectory(sample)
         logger.debug('Cif-read positions:')
         logger.debug(traj[-1].positions)
@@ -133,10 +109,7 @@ class CifFileReaderTest(CifFileWriterTest):
 
     def test_injavis_dialect(self):
         (ref_positions, sample) = super(CifFileReaderTest, self).test_injavis_dialect()
-        if PYTHON_2:
-            sample = io.StringIO(unicode(sample.getvalue()))  # noqa
-        else:
-            sample = io.StringIO(sample.getvalue())
+        sample = io.StringIO(sample.getvalue())
         traj = self.read_cif_trajectory(sample)
         logger.debug('Cif-read positions:')
         logger.debug(traj[-1].positions)
@@ -145,20 +118,12 @@ class CifFileReaderTest(CifFileWriterTest):
         self.assertTrue(np.allclose(traj[-1].positions, ref_positions))
 
     def test_cif_read_write(self):
-        if PYTHON_2:
-            sample = io.StringIO(unicode(garnett.samples.CIF))  # noqa
-        else:
-            sample = io.StringIO(garnett.samples.CIF)
+        sample = io.StringIO(garnett.samples.CIF)
         traj = self.read_cif_trajectory(sample)
         ref_positions = traj[-1].positions
-
         dump = io.StringIO()
         self.write_trajectory(traj, dump)
-
-        if PYTHON_2:
-            sample = io.StringIO(unicode(dump.getvalue()))  # noqa
-        else:
-            sample = io.StringIO(dump.getvalue())
+        sample = io.StringIO(dump.getvalue())
         traj = self.read_cif_trajectory(sample)
         logger.debug('Cif-read positions:')
         logger.debug(traj[-1].positions)

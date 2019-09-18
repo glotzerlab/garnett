@@ -3,23 +3,15 @@
 # This software is licensed under the BSD 3-Clause License.
 import unittest
 import os
-import sys
 import io
 import warnings
 import tempfile
 import subprocess
 from itertools import chain
-
 from ddt import ddt, data
-
 import garnett
 import numpy as np
-
-PYTHON_2 = sys.version_info[0] == 2
-if PYTHON_2:
-    from tempdir import TemporaryDirectory
-else:
-    from tempfile import TemporaryDirectory
+from tempfile import TemporaryDirectory
 
 PATH = os.path.join(garnett.__path__[0], '..')
 IN_PATH = os.path.abspath(PATH) == os.path.abspath(os.getcwd())
@@ -108,24 +100,17 @@ class BasePosFileWriterTest(BasePosFileReaderTest):
 class PosFileReaderTest(BasePosFileReaderTest):
 
     def test_read_empty(self):
-        if PYTHON_2:
-            empty_sample = io.StringIO(unicode(''))  # noqa
-        else:
-            empty_sample = io.StringIO("")
+        empty_sample = io.StringIO("")
         with self.assertRaises(garnett.errors.ParserError):
             self.read_trajectory(empty_sample)
 
-    @unittest.skipIf(PYTHON_2, 'requires python 3')
     def test_read_garbage(self):
         garbage_sample = io.StringIO(str(os.urandom(1024 * 100)))
         with self.assertRaises(garnett.errors.ParserError):
             self.read_trajectory(garbage_sample)
 
     def test_hpmc_dialect(self):
-        if PYTHON_2:
-            sample = io.StringIO(unicode(garnett.samples.POS_HPMC))  # noqa
-        else:
-            sample = io.StringIO(garnett.samples.POS_HPMC)
+        sample = io.StringIO(garnett.samples.POS_HPMC)
         traj = self.read_trajectory(sample)
         box_expected = garnett.trajectory.Box(Lx=10, Ly=10, Lz=10)
         for frame in traj:
@@ -138,10 +123,7 @@ class PosFileReaderTest(BasePosFileReaderTest):
         self.assert_raise_attribute_error(traj)
 
     def test_incsim_dialect(self):
-        if PYTHON_2:
-            sample = io.StringIO(unicode(garnett.samples.POS_INCSIM))  # noqa
-        else:
-            sample = io.StringIO(garnett.samples.POS_INCSIM)
+        sample = io.StringIO(garnett.samples.POS_INCSIM)
         traj = self.read_trajectory(sample)
         box_expected = garnett.trajectory.Box(Lx=10, Ly=10, Lz=10)
         for frame in traj:
@@ -154,10 +136,7 @@ class PosFileReaderTest(BasePosFileReaderTest):
         self.assert_raise_attribute_error(traj)
 
     def test_monotype_dialect(self):
-        if PYTHON_2:
-            sample = io.StringIO(unicode(garnett.samples.POS_MONOTYPE))  # noqa
-        else:
-            sample = io.StringIO(garnett.samples.POS_MONOTYPE)
+        sample = io.StringIO(garnett.samples.POS_MONOTYPE)
         traj = self.read_trajectory(sample)
         box_expected = garnett.trajectory.Box(Lx=10, Ly=10, Lz=10)
         for frame in traj:
@@ -170,10 +149,7 @@ class PosFileReaderTest(BasePosFileReaderTest):
         self.assert_raise_attribute_error(traj)
 
     def test_injavis_dialect(self):
-        if PYTHON_2:
-            sample = io.StringIO(unicode(garnett.samples.POS_INJAVIS))  # noqa
-        else:
-            sample = io.StringIO(garnett.samples.POS_INJAVIS)
+        sample = io.StringIO(garnett.samples.POS_INJAVIS)
         traj = self.read_trajectory(sample)
         box_expected = garnett.trajectory.Box(Lx=10, Ly=10, Lz=10)
         for frame in traj:
@@ -314,10 +290,7 @@ class HPMCPosFileReaderTest(BasePosFileReaderTest):
 class PosFileWriterTest(BasePosFileWriterTest):
 
     def test_hpmc_dialect(self):
-        if PYTHON_2:
-            sample = io.StringIO(unicode(garnett.samples.POS_HPMC))  # noqa
-        else:
-            sample = io.StringIO(garnett.samples.POS_HPMC)
+        sample = io.StringIO(garnett.samples.POS_HPMC)
         traj = self.read_trajectory(sample)
         dump = io.StringIO()
         self.write_trajectory(traj, dump)
@@ -326,10 +299,7 @@ class PosFileWriterTest(BasePosFileWriterTest):
         self.assertEqual(traj, traj_cmp)
 
     def test_incsim_dialect(self):
-        if PYTHON_2:
-            sample = io.StringIO(unicode(garnett.samples.POS_INCSIM))  # noqa
-        else:
-            sample = io.StringIO(garnett.samples.POS_INCSIM)
+        sample = io.StringIO(garnett.samples.POS_INCSIM)
         traj = self.read_trajectory(sample)
         dump = io.StringIO()
         self.write_trajectory(traj, dump)
@@ -338,10 +308,7 @@ class PosFileWriterTest(BasePosFileWriterTest):
         self.assertEqual(traj, traj_cmp)
 
     def test_monotype_dialect(self):
-        if PYTHON_2:
-            sample = io.StringIO(unicode(garnett.samples.POS_MONOTYPE))  # noqa
-        else:
-            sample = io.StringIO(garnett.samples.POS_MONOTYPE)
+        sample = io.StringIO(garnett.samples.POS_MONOTYPE)
         traj = self.read_trajectory(sample)
         dump = io.StringIO()
         self.write_trajectory(traj, dump)
@@ -350,10 +317,7 @@ class PosFileWriterTest(BasePosFileWriterTest):
         self.assertEqual(traj, traj_cmp)
 
     def test_injavis_dialect(self):
-        if PYTHON_2:
-            sample = io.StringIO(unicode(garnett.samples.POS_INJAVIS))  # noqa
-        else:
-            sample = io.StringIO(garnett.samples.POS_INJAVIS)
+        sample = io.StringIO(garnett.samples.POS_INJAVIS)
         traj = self.read_trajectory(sample)
         dump = io.StringIO()
         self.write_trajectory(traj, dump)
@@ -363,10 +327,7 @@ class PosFileWriterTest(BasePosFileWriterTest):
 
     def test_arrows(self):
         from garnett.shapes import ArrowShape
-        if PYTHON_2:
-            sample = io.StringIO(unicode(garnett.samples.POS_INJAVIS))  # noqa
-        else:
-            sample = io.StringIO(garnett.samples.POS_INJAVIS)
+        sample = io.StringIO(garnett.samples.POS_INJAVIS)
         traj = self.read_trajectory(sample)
         traj.load_arrays()
         for frame in traj:
@@ -383,10 +344,7 @@ class PosFileWriterTest(BasePosFileWriterTest):
 
     def test_ellipsoid(self):
         from garnett.shapes import EllipsoidShape
-        if PYTHON_2:
-            sample = io.StringIO(unicode(garnett.samples.POS_INJAVIS))  # noqa
-        else:
-            sample = io.StringIO(garnett.samples.POS_INJAVIS)
+        sample = io.StringIO(garnett.samples.POS_INJAVIS)
         traj = self.read_trajectory(sample)
         traj.load_arrays()
         a = 0.5
@@ -463,10 +421,7 @@ class PosFileWriterTest(BasePosFileWriterTest):
 class InjavisReadWriteTest(BasePosFileWriterTest):
 
     def read_write_injavis(self, sample_file):
-        if PYTHON_2:
-            sample_file = io.StringIO(unicode(sample_file))  # noqa
-        else:
-            sample_file = io.StringIO(sample_file)
+        sample_file = io.StringIO(sample_file)
         # account for low injavis precision
         traj0 = self.read_trajectory(sample_file, precision=7)
         with tempfile.NamedTemporaryFile('w', suffix='.pos') as tmpfile0:
