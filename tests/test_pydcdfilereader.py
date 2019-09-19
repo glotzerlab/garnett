@@ -1,7 +1,6 @@
 # Copyright (c) 2019 The Regents of the University of Michigan
 # All rights reserved.
 # This software is licensed under the BSD 3-Clause License.
-import sys
 import io
 import unittest
 import base64
@@ -11,8 +10,6 @@ import numpy as np
 
 import garnett
 from test_trajectory import TrajectoryTest
-
-PYTHON_2 = sys.version_info[0] == 2
 
 
 class BaseDCDFileReaderTest(TrajectoryTest):
@@ -27,12 +24,8 @@ class BaseDCDFileReaderTest(TrajectoryTest):
 
     def read_top_trajectory(self):
         top_reader = garnett.reader.HOOMDXMLFileReader()
-        if PYTHON_2:
-            return top_reader.read(io.StringIO(
-                unicode(garnett.samples.HOOMD_BLUE_XML)))  # noqa
-        else:
-            return top_reader.read(
-                io.StringIO(garnett.samples.HOOMD_BLUE_XML))
+        return top_reader.read(
+            io.StringIO(garnett.samples.HOOMD_BLUE_XML))
 
     def get_traj(self):
         top_traj = self.read_top_trajectory()

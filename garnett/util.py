@@ -5,7 +5,6 @@
 """Utility functions for format detection and simple reading/writing."""
 import os
 import logging
-from .common import six
 from contextlib import contextmanager
 from . import reader, writer
 
@@ -86,7 +85,7 @@ def read(filename_or_fileobj, template=None, fmt=None):
     :returns: Trajectory read from the file.
     :rtype: :class:`~garnett.trajectory.Trajectory`
     """
-    if isinstance(filename_or_fileobj, six.string_types):
+    if isinstance(filename_or_fileobj, str):
         is_fileobj = False
         filename = filename_or_fileobj
     else:
@@ -126,7 +125,7 @@ def write(traj, filename_or_fileobj, fmt=None):
         (default: None, autodetected from filename_or_fileobj)
     :type fmt: string
     """
-    if isinstance(filename_or_fileobj, six.string_types):
+    if isinstance(filename_or_fileobj, str):
         is_fileobj = False
         filename = filename_or_fileobj
     else:
