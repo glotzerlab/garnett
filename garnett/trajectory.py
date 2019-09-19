@@ -369,7 +369,8 @@ class Frame(object):
             import importlib
             backend = importlib.import_module('plato.draw.{}'.format(backend))
         except ImportError:
-            raise
+            raise ImportError(
+                'Backend plato.draw.{} could not be imported.'.format(backend))
 
         prims = []
 
