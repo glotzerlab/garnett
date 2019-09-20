@@ -13,6 +13,7 @@ next
 Added
 +++++
   - Added ``showEdges`` to skipped fields when reading POS files.
+  - Added ``to_plato_scene()`` method to quickly visualize ``Frame`` objects.
 
 Removed
 +++++++

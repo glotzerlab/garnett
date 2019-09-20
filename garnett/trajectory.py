@@ -10,8 +10,12 @@ trajectories."""
 import logging
 
 import numpy as np
-
 import rowan
+
+from .shapes import SphereShape, ConvexPolyhedronShape, \
+    ConvexSpheropolyhedronShape, GeneralPolyhedronShape, PolygonShape, \
+    SpheropolygonShape, SphereUnionShape
+
 
 logger = logging.getLogger(__name__)
 
@@ -31,8 +35,8 @@ class Box(object):
         # etc.
 
         # Setting
-        box.lx = 10.0
-        box.ly = box.lz = 5.0
+        box.Lx = 10.0
+        box.Ly = box.Lz = 5.0
         box.xy = box.xz = box.yz = 0.01
         # etc.
 
@@ -70,9 +74,9 @@ class Box(object):
         return [self.Lx, self.Ly, self.Lz, self.xy, self.xz, self.yz]
 
     def __str__(self):
-        return "Box(Lx={Lx}, Ly={Ly}, Lz={Lz},"\
+        return "Box(Lx={Lx}, Ly={Ly}, Lz={Lz}, "\
             "xy={xy}, xz={xz}, yz={yz}, dimensions={dimensions})".format(
-                ** self.__dict__)
+                **self.__dict__)
 
     def __repr__(self):
         return str(self)
@@ -349,6 +353,124 @@ class Frame(object):
         "Copy this frame to a HOOMD-blue snapshot."
         self.load()
         return copyto_hoomd_blue_snapshot(self.frame_data, snapshot)
+
+    def to_plato_scene(self, backend, scene=None):
+        """Create a plato scene from this frame.
+
+        :param backend: Backend name to use with plato. The backend must
+                        support all primitives corresponding to shapes defined
+                        in this frame.
+        :type backend: str
+        :param scene: Scene object to render into. By default, a new scene is
+                      created.
+        :type scene: :class:`plato.draw.Scene`
+        """
+        try:
+            import importlib
+            backend = importlib.import_module('plato.draw.{}'.format(backend))
+        except ImportError:
+            raise ImportError(
+                'Backend plato.draw.{} could not be imported.'.format(backend))
+
+        prims = []
+
+        def make_default_colors(size):
+            return np.array([[0.5, 0.5, 0.5, 1]] * size)
+
+        # Create box primitive
+        box = self.box
+        if self.box.dimensions == 2:
+            box.Lz = 0
+        prims.append(backend.Box(box=box))
+
+        # Create a shape primitive for each shape definition
+        for type_name, type_shape in self.shapedef.items():
+            subset = np.where(np.asarray(self.types) == type_name)[0]
+            N_prim = len(subset)
+            dimensions = self.box.dimensions
+            shape_dict = type_shape.shape_dict
+
+            if isinstance(type_shape, SphereShape):
+                if dimensions == 3:
+                    prim = backend.Spheres(
+                        positions=self.positions[subset],
+                        colors=make_default_colors(N_prim),
+                        radii=[0.5 * shape_dict['diameter']] * N_prim,
+                    )
+                else:
+                    prim = backend.Disks(
+                        positions=self.positions[subset, :2],
+                        colors=make_default_colors(N_prim),
+                        radii=[0.5 * shape_dict['diameter']] * N_prim,
+                    )
+            elif isinstance(type_shape, SphereUnionShape):
+                if dimensions == 3:
+                    prim = backend.SphereUnions(
+                        positions=self.positions[subset],
+                        orientations=self.orientations[subset],
+                        colors=make_default_colors(len(shape_dict['centers'])),
+                        points=shape_dict['centers'],
+                        radii=[0.5 * d for d in shape_dict['diameters']],
+                    )
+                else:
+                    prim = backend.DiskUnions(
+                        positions=self.positions[subset, :2],
+                        orientations=self.orientations[subset],
+                        colors=make_default_colors(len(shape_dict['centers'])),
+                        points=[c[:2] for c in shape_dict['centers']],
+                        radii=[0.5 * d for d in shape_dict['diameters']],
+                    )
+            elif isinstance(type_shape, ConvexPolyhedronShape):
+                prim = backend.ConvexPolyhedra(
+                    positions=self.positions[subset],
+                    orientations=self.orientations[subset],
+                    colors=make_default_colors(N_prim),
+                    vertices=shape_dict['vertices'],
+                )
+            elif isinstance(type_shape, ConvexSpheropolyhedronShape):
+                prim = backend.ConvexSpheropolyhedra(
+                    positions=self.positions[subset],
+                    orientations=self.orientations[subset],
+                    colors=make_default_colors(N_prim),
+                    vertices=shape_dict['vertices'],
+                    radius=shape_dict['rounding_radius'],
+                )
+            elif isinstance(type_shape, GeneralPolyhedronShape):
+                prim = backend.Mesh(
+                    positions=self.positions[subset],
+                    orientations=self.orientations[subset],
+                    colors=make_default_colors(len(shape_dict['vertices'])),
+                    vertices=shape_dict['vertices'],
+                    indices=shape_dict['faces'],
+                    shape_colors=make_default_colors(N_prim),
+                )
+            elif isinstance(type_shape, PolygonShape):
+                prim = backend.Polygons(
+                    positions=self.positions[subset, :2],
+                    orientations=self.orientations[subset],
+                    colors=make_default_colors(N_prim),
+                    vertices=shape_dict['vertices'],
+                )
+            elif isinstance(type_shape, SpheropolygonShape):
+                prim = backend.Spheropolygons(
+                    positions=self.positions[subset, :2],
+                    orientations=self.orientations[subset],
+                    colors=make_default_colors(N_prim),
+                    vertices=shape_dict['vertices'],
+                    radius=shape_dict['rounding_radius'],
+                )
+            else:
+                print('Unsupported shape:', shape_dict)
+                continue
+            prims.append(prim)
+
+        if scene is None:
+            scene = backend.Scene(prims)
+        else:
+            for prim in prims:
+                scene.add_primitive(prim)
+
+        return scene
 
     @property
     def box(self):
