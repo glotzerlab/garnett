@@ -381,7 +381,7 @@ class Frame(object):
         box = self.box
         if self.box.dimensions == 2:
             box.Lz = 0
-        prims.append(backend.Box(box=box))
+        prims.append(backend.Box.from_box(box, color=(0, 0, 0, 1)))
 
         # Create a shape primitive for each shape definition
         for type_name, type_shape in self.shapedef.items():
