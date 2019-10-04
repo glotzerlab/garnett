@@ -19,54 +19,9 @@ import numpy as np
 import gtar
 
 from .trajectory import _RawFrameData, Box, Frame, Trajectory
-from .shapes import FallbackShape, SphereShape, ConvexPolyhedronShape, \
-    ConvexSpheropolyhedronShape, GeneralPolyhedronShape, PolygonShape, \
-    SpheropolygonShape, EllipsoidShape
+from .shapes import _parse_type_shape
 
 logger = logging.getLogger(__name__)
-
-
-def _parse_shape_definition(shape):
-    if not shape:
-        return FallbackShape('')
-
-    rounding_radius = shape.get('rounding_radius', 0)
-    shape_type = shape['type'].lower()
-
-    shapedef = None
-
-    if shape_type in ('sphere', 'disk'):
-        diameter = shape.get('diameter', 2*shape.get('rounding_radius', 0.5))
-        orientable = shape.get('orientable', False)
-        shapedef = SphereShape(diameter=diameter, orientable=orientable, color=None)
-    elif shape_type == 'convexpolyhedron':
-        if rounding_radius == 0:
-            shapedef = ConvexPolyhedronShape(vertices=shape['vertices'], color=None)
-        else:
-            shapedef = ConvexSpheropolyhedronShape(vertices=shape['vertices'],
-                                                   rounding_radius=rounding_radius,
-                                                   color=None)
-    elif shape_type == 'polyhedron':
-        shapedef = GeneralPolyhedronShape(vertices=shape['vertices'],
-                                          faces=shape['faces'],
-                                          facet_colors=shape['colors'],
-                                          color=None)
-    elif shape_type == 'polygon':
-        if rounding_radius == 0:
-            shapedef = PolygonShape(vertices=shape['vertices'], color=None)
-        else:
-            shapedef = SpheropolygonShape(vertices=shape['vertices'],
-                                          rounding_radius=rounding_radius,
-                                          color=None)
-    elif shape_type == 'ellipsoid':
-        shapedef = EllipsoidShape(a=shape['a'], b=shape['b'], c=shape['c'], color=None)
-
-    if shapedef is None:
-        logger.warning("Failed to parse shape definition: shape {} not supported. "
-                       "Using fallback mode.".format(shape_type))
-        shapedef = FallbackShape(json.dumps(shape))
-
-    return shapedef
 
 
 class GetarFrame(Frame):
@@ -150,7 +105,7 @@ class GetarFrame(Frame):
             shapes = json.loads(self._trajectory.getRecord(
                 self._records['type_shapes.json'], self._frame))
             for name, shape in zip(names, shapes):
-                shape_def = _parse_shape_definition(shape)
+                shape_def = _parse_type_shape(shape)
                 raw_frame.shapedef.update({name: shape_def})
 
         return raw_frame

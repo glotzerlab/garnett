@@ -4,6 +4,8 @@
 
 """Abstract shape definitions used to read/write particle shapes."""
 
+import logging
+import json
 
 __all__ = [
     'FallbackShape',
@@ -19,6 +21,7 @@ __all__ = [
     'GeneralPolyhedronShape',
 ]
 
+logger = logging.getLogger(__name__)
 
 SHAPE_DEFAULT_COLOR = '005984FF'
 
@@ -467,3 +470,60 @@ class EllipsoidShape(Shape):
                 'a': self.a,
                 'b': self.b,
                 'c': self.c}
+
+
+def _parse_type_shape(shape):
+    """Parses a shape object from a dictionary.
+
+    This method parses the `GSD Shape Visualization Specification
+    <https://gsd.readthedocs.io/en/stable/shapes.html>`_, while including
+    backwards compatibility with shape definitions that do not adhere to that
+    specification but were previously supported by HOOMD's
+    :code:`get_type_shapes()` methods.
+    """
+
+    if not shape:
+        return FallbackShape('')
+
+    rounding_radius = shape.get('rounding_radius', 0)
+    shape_type = shape['type'].lower()
+
+    shapedef = None
+
+    if shape_type in ('sphere', 'disk'):
+        diameter = shape.get('diameter', 2*shape.get('rounding_radius', 0.5))
+        orientable = shape.get('orientable', False)
+        shapedef = SphereShape(diameter=diameter, orientable=orientable, color=None)
+    elif shape_type == 'ellipsoid':
+        shapedef = EllipsoidShape(a=shape['a'], b=shape['b'], c=shape['c'], color=None)
+    elif shape_type == 'polygon':
+        if rounding_radius == 0:
+            shapedef = PolygonShape(vertices=shape['vertices'], color=None)
+        else:
+            shapedef = SpheropolygonShape(vertices=shape['vertices'],
+                                          rounding_radius=rounding_radius,
+                                          color=None)
+    elif shape_type == 'convexpolyhedron':
+        if rounding_radius == 0:
+            shapedef = ConvexPolyhedronShape(vertices=shape['vertices'], color=None)
+        else:
+            shapedef = ConvexSpheropolyhedronShape(vertices=shape['vertices'],
+                                                   rounding_radius=rounding_radius,
+                                                   color=None)
+    elif shape_type == 'mesh':
+        shapedef = GeneralPolyhedronShape(vertices=shape['vertices'],
+                                          faces=shape['indices'],
+                                          facet_colors=shape['colors'],
+                                          color=None)
+    elif shape_type == 'polyhedron':
+        shapedef = GeneralPolyhedronShape(vertices=shape['vertices'],
+                                          faces=shape['faces'],
+                                          facet_colors=shape['colors'],
+                                          color=None)
+
+    if shapedef is None:
+        logger.warning("Failed to parse shape definition: shape {} not supported. "
+                       "Using fallback mode.".format(shape_type))
+        shapedef = FallbackShape(json.dumps(shape))
+
+    return shapedef

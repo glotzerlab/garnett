@@ -35,7 +35,7 @@ import numpy as np
 
 from .trajectory import _RawFrameData, Frame, Trajectory
 from .shapes import SphereShape, ConvexPolyhedronShape, ConvexSpheropolyhedronShape, \
-    PolygonShape, SpheropolygonShape, EllipsoidShape
+    PolygonShape, SpheropolygonShape, EllipsoidShape, _parse_type_shape
 
 try:
     from gsd.fl import GSDFile
@@ -70,8 +70,21 @@ def _parse_shape_definitions(frame, gsdfile, frame_index):
     shapedefs = collections.OrderedDict()
     types = frame.particles.types
 
+    # --------------------------------------------------
+    # Parsing from GSD Shape Visualization Specification
+    # --------------------------------------------------
+
+    if get_chunk(frame_index, 'particles/type_shapes') is not None:
+        type_shapes = get_chunk(frame_index, 'particles/type_shapes')
+        for typename, type_shape in zip(types, type_shapes):
+            shapedefs[typename] = _parse_type_shape(type_shape)
+
+    # -----------------------
+    # Parsing from HPMC State
+    # -----------------------
+
     # Spheres
-    if get_chunk(frame_index, 'state/hpmc/sphere/radius') is not None:
+    elif get_chunk(frame_index, 'state/hpmc/sphere/radius') is not None:
         radii = get_chunk(frame_index, 'state/hpmc/sphere/radius')
         orientables = get_chunk(frame_index, 'state/hpmc/sphere/orientable')
         # Since the orientable chunk was only added in HOOMD Schema version 1.3,
