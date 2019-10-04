@@ -100,7 +100,7 @@ class PosFileWriter(object):
                 not_defined = set(frame.types).difference(
                     set(frame.shapedef.keys()))
                 for name in required:
-                    _write('def {} "{}"'.format(name, frame.shapedef[name]))
+                    _write('def {} "{}"'.format(name, frame.shapedef[name].pos_string))
                 for name in not_defined:
                     logger.info(
                         "No shape defined for '{}'. "

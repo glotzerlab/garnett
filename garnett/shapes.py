@@ -4,8 +4,9 @@
 
 """Abstract shape definitions used to read/write particle shapes."""
 
-import logging
 import json
+import logging
+import numpy as np
 
 __all__ = [
     'FallbackShape',
@@ -24,6 +25,13 @@ __all__ = [
 logger = logging.getLogger(__name__)
 
 SHAPE_DEFAULT_COLOR = '005984FF'
+
+
+class NumpyEncoder(json.JSONEncoder):
+    def default(self, obj):
+        if isinstance(obj, np.ndarray):
+            return obj.tolist()
+        return json.JSONEncoder.default(self, obj)
 
 
 class FallbackShape(str):
@@ -50,14 +58,28 @@ class Shape(object):
         self.shape_class = shape_class
         self.color = color if color else SHAPE_DEFAULT_COLOR
 
-    def __str__(self):
+    def __getitem__(self, key):
+        if hasattr(self, key):
+            return getattr(self, key)
+
+    @property
+    def pos_string(self):
         return "{} {}".format(self.shape_class, self.color)
+
+    @property
+    def type_shape(self):
+        return {"type": self.shape_class}
+
+    def __str__(self):
+        return json.dumps(self.type_shape)
 
     def __repr__(self):
         return str(self)
 
     def __eq__(self, other):
-        return str(self) == str(other)
+        self_json = json.loads(json.dumps(self.type_shape, cls=NumpyEncoder))
+        other_json = json.loads(json.dumps(other.type_shape, cls=NumpyEncoder))
+        return self_json == other_json
 
 
 class SphereShape(Shape):
@@ -83,14 +105,15 @@ class SphereShape(Shape):
         self.diameter = diameter
         self.orientable = orientable
 
-    def __str__(self):
+    @property
+    def pos_string(self):
         return "{} {} {}".format(self.shape_class, self.diameter, self.color)
 
     @property
-    def shape_dict(self):
+    def type_shape(self):
         """Shape as dictionary. Example:
 
-            >>> SphereShape(2.0).shape_dict
+            >>> SphereShape(2.0).type_shape
             {'type': 'Sphere', 'diameter': 2.0, 'orientable': False}
         """
         return {'type': 'Sphere',
@@ -116,7 +139,8 @@ class ArrowShape(Shape):
             shape_class='arrow', color=color)
         self.thickness = thickness
 
-    def __str__(self):
+    @property
+    def pos_string(self):
         return "{} {} {}".format(self.shape_class, self.thickness, self.color)
 
 
@@ -144,7 +168,8 @@ class SphereUnionShape(Shape):
         self.centers = centers
         self.colors = colors
 
-    def __str__(self):
+    @property
+    def pos_string(self):
         shape_def = '{} {} '.format(self.shape_class, len(self.centers))
         for d, p, c in zip(self.diameters, self.centers, self.colors):
             shape_def += '{0} '.format(d)
@@ -172,7 +197,8 @@ class PolygonShape(Shape):
             shape_class='poly3d', color=color)
         self.vertices = vertices
 
-    def __str__(self):
+    @property
+    def pos_string(self):
         return "{} {} {} {}".format(
             self.shape_class,
             len(self.vertices),
@@ -180,10 +206,10 @@ class PolygonShape(Shape):
             self.color)
 
     @property
-    def shape_dict(self):
+    def type_shape(self):
         """Shape as dictionary. Example:
 
-            >>> PolygonShape([[-0.5, -0.5], [0.5, -0.5], [0.5, 0.5]]).shape_dict
+            >>> PolygonShape([[-0.5, -0.5], [0.5, -0.5], [0.5, 0.5]]).type_shape
             {'type': 'Polygon', 'rounding_radius': 0,
              'vertices': [[-0.5, -0.5], [0.5, -0.5], [0.5, 0.5]]}
         """
@@ -215,7 +241,8 @@ class SpheropolygonShape(Shape):
         self.vertices = vertices
         self.rounding_radius = rounding_radius
 
-    def __str__(self):
+    @property
+    def pos_string(self):
         return "{} {} {} {} {}".format(
             self.shape_class,
             self.rounding_radius,
@@ -224,10 +251,10 @@ class SpheropolygonShape(Shape):
             self.color)
 
     @property
-    def shape_dict(self):
+    def type_shape(self):
         """Shape as dictionary. Example:
 
-            >>> SpheropolygonShape([[-0.5, -0.5], [0.5, -0.5], [0.5, 0.5]], 0.1).shape_dict
+            >>> SpheropolygonShape([[-0.5, -0.5], [0.5, -0.5], [0.5, 0.5]], 0.1).type_shape
             {'type': 'Polygon', 'rounding_radius': 0.1,
              'vertices': [[-0.5, -0.5], [0.5, -0.5], [0.5, 0.5]]}
         """
@@ -254,7 +281,8 @@ class ConvexPolyhedronShape(Shape):
             shape_class='poly3d', color=color)
         self.vertices = vertices
 
-    def __str__(self):
+    @property
+    def pos_string(self):
         return "{} {} {} {}".format(
             self.shape_class,
             len(self.vertices),
@@ -262,11 +290,11 @@ class ConvexPolyhedronShape(Shape):
             self.color)
 
     @property
-    def shape_dict(self):
+    def type_shape(self):
         """Shape as dictionary. Example:
 
             >>> ConvexPolyhedronShape([[0.5, 0.5, 0.5], [0.5, -0.5, -0.5],
-                                       [-0.5, 0.5, -0.5], [-0.5, -0.5, 0.5]]).shape_dict
+                                       [-0.5, 0.5, -0.5], [-0.5, -0.5, 0.5]]).type_shape
             {'type': 'ConvexPolyhedron', 'rounding_radius': 0,
              'vertices': [[0.5, 0.5, 0.5], [0.5, -0.5, -0.5],
                           [-0.5, 0.5, -0.5], [-0.5, -0.5, 0.5]]}
@@ -306,7 +334,8 @@ class ConvexPolyhedronUnionShape(Shape):
         self.orientations = orientations
         self.colors = colors
 
-    def __str__(self):
+    @property
+    def pos_string(self):
         shape_def = '{} {} '.format(self.shape_class, len(self.centers))
         for verts, p, q, c in zip(self.vertices, self.centers, self.orientations, self.colors):
             shape_def += '{0} '.format(len(verts))
@@ -342,7 +371,8 @@ class ConvexSpheropolyhedronShape(Shape):
         self.vertices = vertices
         self.rounding_radius = rounding_radius
 
-    def __str__(self):
+    @property
+    def pos_string(self):
         return "{} {} {} {} {}".format(
             self.shape_class,
             self.rounding_radius,
@@ -351,11 +381,11 @@ class ConvexSpheropolyhedronShape(Shape):
             self.color)
 
     @property
-    def shape_dict(self):
+    def type_shape(self):
         """Shape as dictionary. Example:
 
             >>> ConvexSpheropolyhedronShape([[0.5, 0.5, 0.5], [0.5, -0.5, -0.5],
-                                             [-0.5, 0.5, -0.5], [-0.5, -0.5, 0.5]], 0.1).shape_dict
+                                             [-0.5, 0.5, -0.5], [-0.5, -0.5, 0.5]], 0.1).type_shape
             {'type': 'ConvexPolyhedron', 'rounding_radius': 0.1,
              'vertices': [[0.5, 0.5, 0.5], [0.5, -0.5, -0.5],
                           [-0.5, 0.5, -0.5], [-0.5, -0.5, 0.5]]}
@@ -393,7 +423,8 @@ class GeneralPolyhedronShape(Shape):
         self.faces = faces
         self.facet_colors = facet_colors
 
-    def __str__(self):
+    @property
+    def pos_string(self):
         return "{} {} {} {} {} {}".format(
             self.shape_class,
             len(self.vertices),
@@ -403,11 +434,11 @@ class GeneralPolyhedronShape(Shape):
             self.color)
 
     @property
-    def shape_dict(self):
+    def type_shape(self):
         """Shape as dictionary. Example:
 
             >>> GeneralPolyhedronShape([[0.5, 0.5, 0.5], [0.5, -0.5, -0.5],
-                                        [-0.5, 0.5, -0.5], [-0.5, -0.5, 0.5]]).shape_dict
+                                        [-0.5, 0.5, -0.5], [-0.5, -0.5, 0.5]]).type_shape
             {'type': 'Mesh',
              'vertices': [[0.5, 0.5, 0.5], [0.5, -0.5, -0.5],
                           [-0.5, 0.5, -0.5], [-0.5, -0.5, 0.5]],
@@ -446,7 +477,8 @@ class EllipsoidShape(Shape):
         self.b = b
         self.c = c
 
-    def __str__(self):
+    @property
+    def pos_string(self):
         return "{} {} {} {} {}".format(
             self.shape_class,
             self.a,
@@ -456,10 +488,10 @@ class EllipsoidShape(Shape):
         )
 
     @property
-    def shape_dict(self):
+    def type_shape(self):
         """Shape as dictionary. Example:
 
-            >>> EllipsoidShape(7.0, 5.0, 3.0).shape_dict
+            >>> EllipsoidShape(7.0, 5.0, 3.0).type_shape
             {'type': 'Ellipsoid',
             'a': 7.0,
             'b': 5.0,

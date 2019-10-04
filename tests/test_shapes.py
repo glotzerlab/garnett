@@ -52,23 +52,23 @@ class ShapeTest(unittest.TestCase):
         with open(self.get_filename(shape_name), self.mode) as f:
             traj = self.reader().read(f)
             shapedef = traj[-1].shapedef
-        shape_dict = shapedef['A'].shape_dict
+        type_shape = shapedef['A'].type_shape
 
         # Check each field of the shape parameters and JSON shape definition
         if 'vertices' in shape_class['params']:
             npt.assert_allclose(shapedef['A'].vertices,
                                 shape_class['params']['vertices'])
-            npt.assert_allclose(shape_dict['vertices'],
+            npt.assert_allclose(type_shape['vertices'],
                                 shape_class['params']['vertices'])
         if 'diameter' in shape_class['params']:
             npt.assert_almost_equal(shapedef['A'].diameter,
                                     shape_class['params']['diameter'])
-            npt.assert_almost_equal(shape_dict['diameter'],
+            npt.assert_almost_equal(type_shape['diameter'],
                                     shape_class['params']['diameter'])
         if 'sweep_radius' in shape_class['params']:
             npt.assert_almost_equal(shapedef['A'].rounding_radius,
                                     shape_class['params']['sweep_radius'])
-            npt.assert_almost_equal(shape_dict['rounding_radius'],
+            npt.assert_almost_equal(type_shape['rounding_radius'],
                                     shape_class['params']['sweep_radius'])
         if 'orientable' in shape_class['params']:
             # Of the three shape supporting formats, only POS files do
@@ -77,25 +77,25 @@ class ShapeTest(unittest.TestCase):
             if not self.__class__.__name__ == "POSShapeTest":
                 self.assertEqual(shapedef['A'].orientable,
                                  shape_class['params']['orientable'])
-                self.assertEqual(shape_dict['orientable'],
+                self.assertEqual(type_shape['orientable'],
                                  shape_class['params']['orientable'])
             else:
                 self.assertEqual(shapedef['A'].orientable, False)
-                self.assertEqual(shape_dict['orientable'], False)
+                self.assertEqual(type_shape['orientable'], False)
         if 'a' in shape_class['params']:
             npt.assert_almost_equal(shapedef['A'].a,
                                     shape_class['params']['a'])
-            npt.assert_almost_equal(shape_dict['a'],
+            npt.assert_almost_equal(type_shape['a'],
                                     shape_class['params']['a'])
         if 'b' in shape_class['params']:
             npt.assert_almost_equal(shapedef['A'].b,
                                     shape_class['params']['b'])
-            npt.assert_almost_equal(shape_dict['b'],
+            npt.assert_almost_equal(type_shape['b'],
                                     shape_class['params']['b'])
         if 'c' in shape_class['params']:
             npt.assert_almost_equal(shapedef['A'].c,
                                     shape_class['params']['c'])
-            npt.assert_almost_equal(shape_dict['c'],
+            npt.assert_almost_equal(type_shape['c'],
                                     shape_class['params']['c'])
 
 

@@ -388,60 +388,59 @@ class Frame(object):
             subset = np.where(np.asarray(self.types) == type_name)[0]
             N_prim = len(subset)
             dimensions = self.box.dimensions
-            shape_dict = type_shape.shape_dict
 
             if isinstance(type_shape, SphereShape):
                 if dimensions == 3:
                     prim = backend.Spheres(
                         positions=self.positions[subset],
                         colors=make_default_colors(N_prim),
-                        radii=[0.5 * shape_dict['diameter']] * N_prim,
+                        radii=[0.5 * type_shape['diameter']] * N_prim,
                     )
                 else:
                     prim = backend.Disks(
                         positions=self.positions[subset, :2],
                         colors=make_default_colors(N_prim),
-                        radii=[0.5 * shape_dict['diameter']] * N_prim,
+                        radii=[0.5 * type_shape['diameter']] * N_prim,
                     )
             elif isinstance(type_shape, SphereUnionShape):
                 if dimensions == 3:
                     prim = backend.SphereUnions(
                         positions=self.positions[subset],
                         orientations=self.orientations[subset],
-                        colors=make_default_colors(len(shape_dict['centers'])),
-                        points=shape_dict['centers'],
-                        radii=[0.5 * d for d in shape_dict['diameters']],
+                        colors=make_default_colors(len(type_shape['centers'])),
+                        points=type_shape['centers'],
+                        radii=[0.5 * d for d in type_shape['diameters']],
                     )
                 else:
                     prim = backend.DiskUnions(
                         positions=self.positions[subset, :2],
                         orientations=self.orientations[subset],
-                        colors=make_default_colors(len(shape_dict['centers'])),
-                        points=[c[:2] for c in shape_dict['centers']],
-                        radii=[0.5 * d for d in shape_dict['diameters']],
+                        colors=make_default_colors(len(type_shape['centers'])),
+                        points=[c[:2] for c in type_shape['centers']],
+                        radii=[0.5 * d for d in type_shape['diameters']],
                     )
             elif isinstance(type_shape, ConvexPolyhedronShape):
                 prim = backend.ConvexPolyhedra(
                     positions=self.positions[subset],
                     orientations=self.orientations[subset],
                     colors=make_default_colors(N_prim),
-                    vertices=shape_dict['vertices'],
+                    vertices=type_shape['vertices'],
                 )
             elif isinstance(type_shape, ConvexSpheropolyhedronShape):
                 prim = backend.ConvexSpheropolyhedra(
                     positions=self.positions[subset],
                     orientations=self.orientations[subset],
                     colors=make_default_colors(N_prim),
-                    vertices=shape_dict['vertices'],
-                    radius=shape_dict['rounding_radius'],
+                    vertices=type_shape['vertices'],
+                    radius=type_shape['rounding_radius'],
                 )
             elif isinstance(type_shape, GeneralPolyhedronShape):
                 prim = backend.Mesh(
                     positions=self.positions[subset],
                     orientations=self.orientations[subset],
-                    colors=make_default_colors(len(shape_dict['vertices'])),
-                    vertices=shape_dict['vertices'],
-                    indices=shape_dict['faces'],
+                    colors=make_default_colors(len(type_shape['vertices'])),
+                    vertices=type_shape['vertices'],
+                    indices=type_shape['faces'],
                     shape_colors=make_default_colors(N_prim),
                 )
             elif isinstance(type_shape, PolygonShape):
@@ -449,18 +448,18 @@ class Frame(object):
                     positions=self.positions[subset, :2],
                     orientations=self.orientations[subset],
                     colors=make_default_colors(N_prim),
-                    vertices=shape_dict['vertices'],
+                    vertices=type_shape['vertices'],
                 )
             elif isinstance(type_shape, SpheropolygonShape):
                 prim = backend.Spheropolygons(
                     positions=self.positions[subset, :2],
                     orientations=self.orientations[subset],
                     colors=make_default_colors(N_prim),
-                    vertices=shape_dict['vertices'],
-                    radius=shape_dict['rounding_radius'],
+                    vertices=type_shape['vertices'],
+                    radius=type_shape['rounding_radius'],
                 )
             else:
-                print('Unsupported shape:', shape_dict)
+                print('Unsupported shape:', type_shape)
                 continue
             prims.append(prim)
 
