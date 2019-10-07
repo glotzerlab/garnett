@@ -59,9 +59,10 @@ class Shape(object):
         self.color = color if color else SHAPE_DEFAULT_COLOR
 
     def __getitem__(self, key):
-        if hasattr(self, key):
+        try:
             return getattr(self, key)
-        raise KeyError('{key} not found in {cls}'.format(key=key, cls=self.__class__.__name__))
+        except AttributeError as e:
+            raise KeyError(*e.args)
 
     @property
     def pos_string(self):
