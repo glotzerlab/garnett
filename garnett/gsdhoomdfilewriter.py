@@ -166,10 +166,10 @@ class GSDHOOMDFileWriter(object):
                 snap.configuration.box = frame.box.get_box_array()
                 snap.configuration.dimensions = frame.box.dimensions
                 try:
-                    type_shapes = frame.shapedef
+                    snap.particles.type_shapes = [getattr(s, 'type_shape', {}) for s in frame.shapedef.values()]
                 except AttributeError:
-                    type_shapes = {t: {} for t in types}
-                snap.particles.type_shapes = [getattr(s, 'type_shape', {}) for s in type_shapes.values()]
+                    # The frame lacks shapedefs so no type_shape can be written
+                    pass
                 traj_outfile.append(snap)
                 logger.debug("Wrote frame {}.".format(i + 1))
         logger.info("Wrote {} frames.".format(i + 1))
