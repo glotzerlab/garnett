@@ -70,109 +70,112 @@ def _parse_shape_definitions(frame, gsdfile, frame_index):
     shapedefs = collections.OrderedDict()
     types = frame.particles.types
 
-    # --------------------------------------------------
-    # Parsing from GSD Shape Visualization Specification
-    # --------------------------------------------------
-
     if get_chunk(frame_index, 'particles/type_shapes') is not None:
-        type_shapes = get_chunk(frame_index, 'particles/type_shapes')
+        # --------------------------------------------------
+        # Parsing from GSD Shape Visualization Specification
+        # --------------------------------------------------
+
+        type_shapes = frame.particles.type_shapes
         for typename, type_shape in zip(types, type_shapes):
             shapedefs[typename] = _parse_type_shape(type_shape)
-
-    # -----------------------
-    # Parsing from HPMC State
-    # -----------------------
-
-    # Spheres
-    elif get_chunk(frame_index, 'state/hpmc/sphere/radius') is not None:
-        radii = get_chunk(frame_index, 'state/hpmc/sphere/radius')
-        orientables = get_chunk(frame_index, 'state/hpmc/sphere/orientable')
-        # Since the orientable chunk was only added in HOOMD Schema version 1.3,
-        # not all GSD files may have it. Thus, it is set to False in such cases.
-        if orientables is None:
-            orientables = [False]*len(radii)
-        for typename, radius, orientable in zip(types, radii, orientables):
-            shapedefs[typename] = SphereShape(
-                diameter=radius*2, orientable=orientable, color=None)
         return shapedefs
-
-    # Convex Polyhedra
-    elif get_chunk(frame_index, 'state/hpmc/convex_polyhedron/N') is not None:
-        N = get_chunk(frame_index, 'state/hpmc/convex_polyhedron/N')
-        N_start = [sum(N[:i]) for i in range(len(N))]
-        N_end = [sum(N[:i+1]) for i in range(len(N))]
-        verts = get_chunk(frame_index, 'state/hpmc/convex_polyhedron/vertices')
-        verts_split = [verts[start:end] for start, end in zip(N_start, N_end)]
-        for typename, typeverts in zip(types, verts_split):
-            shapedefs[typename] = ConvexPolyhedronShape(
-                vertices=typeverts, color=None)
-        return shapedefs
-
-    # Convex Spheropolyhedra
-    elif get_chunk(frame_index, 'state/hpmc/convex_spheropolyhedron/N') is not None:
-        N = get_chunk(frame_index, 'state/hpmc/convex_spheropolyhedron/N')
-        N_start = [sum(N[:i]) for i in range(len(N))]
-        N_end = [sum(N[:i+1]) for i in range(len(N))]
-        verts = get_chunk(frame_index,
-                          'state/hpmc/convex_spheropolyhedron/vertices')
-        verts_split = [verts[start:end] for start, end in zip(N_start, N_end)]
-        sweep_radii = get_chunk(frame_index,
-                                'state/hpmc/convex_spheropolyhedron/sweep_radius')
-        for typename, typeverts, radius in zip(types, verts_split, sweep_radii):
-            shapedefs[typename] = ConvexSpheropolyhedronShape(
-                vertices=typeverts, rounding_radius=radius, color=None)
-        return shapedefs
-
-    # Ellipsoid
-    elif get_chunk(frame_index, 'state/hpmc/ellipsoid/a') is not None:
-        a_all = get_chunk(frame_index, 'state/hpmc/ellipsoid/a')
-        b_all = get_chunk(frame_index, 'state/hpmc/ellipsoid/b')
-        c_all = get_chunk(frame_index, 'state/hpmc/ellipsoid/c')
-        for typename, a, b, c in zip(types, a_all, b_all, c_all):
-            shapedefs[typename] = EllipsoidShape(
-                a=a, b=b, c=c, color=None)
-        return shapedefs
-
-    # Convex Polygons
-    elif get_chunk(frame_index, 'state/hpmc/convex_polygon/N') is not None:
-        N = get_chunk(frame_index, 'state/hpmc/convex_polygon/N')
-        N_start = [sum(N[:i]) for i in range(len(N))]
-        N_end = [sum(N[:i+1]) for i in range(len(N))]
-        verts = get_chunk(frame_index, 'state/hpmc/convex_polygon/vertices')
-        verts_split = [verts[start:end] for start, end in zip(N_start, N_end)]
-        for typename, typeverts in zip(types, verts_split):
-            shapedefs[typename] = PolygonShape(
-                vertices=typeverts, color=None)
-        return shapedefs
-
-    # Convex Spheropolygons
-    elif get_chunk(frame_index, 'state/hpmc/convex_spheropolygon/N') is not None:
-        N = get_chunk(frame_index, 'state/hpmc/convex_spheropolygon/N')
-        N_start = [sum(N[:i]) for i in range(len(N))]
-        N_end = [sum(N[:i+1]) for i in range(len(N))]
-        verts = get_chunk(frame_index, 'state/hpmc/convex_spheropolygon/vertices')
-        verts_split = [verts[start:end] for start, end in zip(N_start, N_end)]
-        sweep_radii = get_chunk(frame_index,
-                                'state/hpmc/convex_spheropolygon/sweep_radius')
-        for typename, typeverts, radius in zip(types, verts_split, sweep_radii):
-            shapedefs[typename] = SpheropolygonShape(
-                vertices=typeverts, rounding_radius=radius, color=None)
-        return shapedefs
-
-    # Simple Polygons
-    elif get_chunk(frame_index, 'state/hpmc/simple_polygon/N') is not None:
-        N = get_chunk(frame_index, 'state/hpmc/simple_polygon/N')
-        N_start = [sum(N[:i]) for i in range(len(N))]
-        N_end = [sum(N[:i+1]) for i in range(len(N))]
-        verts = get_chunk(frame_index, 'state/hpmc/simple_polygon/vertices')
-        verts_split = [verts[start:end] for start, end in zip(N_start, N_end)]
-        for typename, typeverts in zip(types, verts_split):
-            shapedefs[typename] = PolygonShape(
-                vertices=typeverts, color=None)
-        return shapedefs
-    # If no shapes were detected, return None
     else:
-        return None
+
+        # -----------------------
+        # Parsing from HPMC State
+        # -----------------------
+
+        # Spheres
+        if get_chunk(frame_index, 'state/hpmc/sphere/radius') is not None:
+            radii = get_chunk(frame_index, 'state/hpmc/sphere/radius')
+            orientables = get_chunk(frame_index, 'state/hpmc/sphere/orientable')
+            # Since the orientable chunk was only added in HOOMD Schema version 1.3,
+            # not all GSD files may have it. Thus, it is set to False in such cases.
+            if orientables is None:
+                orientables = [False]*len(radii)
+            for typename, radius, orientable in zip(types, radii, orientables):
+                shapedefs[typename] = SphereShape(
+                    diameter=radius*2, orientable=orientable, color=None)
+            return shapedefs
+
+        # Convex Polyhedra
+        elif get_chunk(frame_index, 'state/hpmc/convex_polyhedron/N') is not None:
+            N = get_chunk(frame_index, 'state/hpmc/convex_polyhedron/N')
+            N_start = [sum(N[:i]) for i in range(len(N))]
+            N_end = [sum(N[:i+1]) for i in range(len(N))]
+            verts = get_chunk(frame_index, 'state/hpmc/convex_polyhedron/vertices')
+            verts_split = [verts[start:end] for start, end in zip(N_start, N_end)]
+            for typename, typeverts in zip(types, verts_split):
+                shapedefs[typename] = ConvexPolyhedronShape(
+                    vertices=typeverts, color=None)
+            return shapedefs
+
+        # Convex Spheropolyhedra
+        elif get_chunk(frame_index, 'state/hpmc/convex_spheropolyhedron/N') is not None:
+            N = get_chunk(frame_index, 'state/hpmc/convex_spheropolyhedron/N')
+            N_start = [sum(N[:i]) for i in range(len(N))]
+            N_end = [sum(N[:i+1]) for i in range(len(N))]
+            verts = get_chunk(frame_index,
+                              'state/hpmc/convex_spheropolyhedron/vertices')
+            verts_split = [verts[start:end] for start, end in zip(N_start, N_end)]
+            sweep_radii = get_chunk(frame_index,
+                                    'state/hpmc/convex_spheropolyhedron/sweep_radius')
+            for typename, typeverts, radius in zip(types, verts_split, sweep_radii):
+                shapedefs[typename] = ConvexSpheropolyhedronShape(
+                    vertices=typeverts, rounding_radius=radius, color=None)
+            return shapedefs
+
+        # Ellipsoid
+        elif get_chunk(frame_index, 'state/hpmc/ellipsoid/a') is not None:
+            a_all = get_chunk(frame_index, 'state/hpmc/ellipsoid/a')
+            b_all = get_chunk(frame_index, 'state/hpmc/ellipsoid/b')
+            c_all = get_chunk(frame_index, 'state/hpmc/ellipsoid/c')
+            for typename, a, b, c in zip(types, a_all, b_all, c_all):
+                shapedefs[typename] = EllipsoidShape(
+                    a=a, b=b, c=c, color=None)
+            return shapedefs
+
+        # Convex Polygons
+        elif get_chunk(frame_index, 'state/hpmc/convex_polygon/N') is not None:
+            N = get_chunk(frame_index, 'state/hpmc/convex_polygon/N')
+            N_start = [sum(N[:i]) for i in range(len(N))]
+            N_end = [sum(N[:i+1]) for i in range(len(N))]
+            verts = get_chunk(frame_index, 'state/hpmc/convex_polygon/vertices')
+            verts_split = [verts[start:end] for start, end in zip(N_start, N_end)]
+            for typename, typeverts in zip(types, verts_split):
+                shapedefs[typename] = PolygonShape(
+                    vertices=typeverts, color=None)
+            return shapedefs
+
+        # Convex Spheropolygons
+        elif get_chunk(frame_index, 'state/hpmc/convex_spheropolygon/N') is not None:
+            N = get_chunk(frame_index, 'state/hpmc/convex_spheropolygon/N')
+            N_start = [sum(N[:i]) for i in range(len(N))]
+            N_end = [sum(N[:i+1]) for i in range(len(N))]
+            verts = get_chunk(frame_index, 'state/hpmc/convex_spheropolygon/vertices')
+            verts_split = [verts[start:end] for start, end in zip(N_start, N_end)]
+            sweep_radii = get_chunk(frame_index,
+                                    'state/hpmc/convex_spheropolygon/sweep_radius')
+            for typename, typeverts, radius in zip(types, verts_split, sweep_radii):
+                shapedefs[typename] = SpheropolygonShape(
+                    vertices=typeverts, rounding_radius=radius, color=None)
+            return shapedefs
+
+        # Simple Polygons
+        elif get_chunk(frame_index, 'state/hpmc/simple_polygon/N') is not None:
+            N = get_chunk(frame_index, 'state/hpmc/simple_polygon/N')
+            N_start = [sum(N[:i]) for i in range(len(N))]
+            N_end = [sum(N[:i+1]) for i in range(len(N))]
+            verts = get_chunk(frame_index, 'state/hpmc/simple_polygon/vertices')
+            verts_split = [verts[start:end] for start, end in zip(N_start, N_end)]
+            for typename, typeverts in zip(types, verts_split):
+                shapedefs[typename] = PolygonShape(
+                    vertices=typeverts, color=None)
+            return shapedefs
+
+        # If no shapes were detected, return None
+        else:
+            return None
 
 
 class GSDHoomdFrame(Frame):
