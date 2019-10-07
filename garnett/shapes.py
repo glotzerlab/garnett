@@ -27,11 +27,22 @@ logger = logging.getLogger(__name__)
 SHAPE_DEFAULT_COLOR = '005984FF'
 
 
-class NumpyEncoder(json.JSONEncoder):
+class _NumpyEncoder(json.JSONEncoder):
+    """JSONEncoder class converting NumPy arrays to lists."""
     def default(self, obj):
-        if isinstance(obj, np.ndarray):
+        if isinstance(obj, np.number):
+            return obj.item()
+        elif isinstance(obj, np.ndarray):
             return obj.tolist()
         return json.JSONEncoder.default(self, obj)
+
+
+def _json_sanitize(func):
+    """Decorator ensuring that returned data is JSON-encodable."""
+    def wrapper(*args, **kwargs):
+        data = func(*args, **kwargs)
+        return json.loads(json.dumps(data, cls=_NumpyEncoder))
+    return wrapper
 
 
 class FallbackShape(str):
@@ -69,6 +80,7 @@ class Shape(object):
         return "{} {}".format(self.shape_class, self.color)
 
     @property
+    @_json_sanitize
     def type_shape(self):
         return {"type": self.shape_class}
 
@@ -79,9 +91,7 @@ class Shape(object):
         return str(self)
 
     def __eq__(self, other):
-        self_json = json.loads(json.dumps(self.type_shape, cls=NumpyEncoder))
-        other_json = json.loads(json.dumps(other.type_shape, cls=NumpyEncoder))
-        return self_json == other_json
+        return self.type_shape == other.type_shape
 
 
 class SphereShape(Shape):
@@ -112,6 +122,7 @@ class SphereShape(Shape):
         return "{} {} {}".format(self.shape_class, self.diameter, self.color)
 
     @property
+    @_json_sanitize
     def type_shape(self):
         """Shape as dictionary. Example:
 
@@ -208,6 +219,7 @@ class PolygonShape(Shape):
             self.color)
 
     @property
+    @_json_sanitize
     def type_shape(self):
         """Shape as dictionary. Example:
 
@@ -253,6 +265,7 @@ class SpheropolygonShape(Shape):
             self.color)
 
     @property
+    @_json_sanitize
     def type_shape(self):
         """Shape as dictionary. Example:
 
@@ -292,6 +305,7 @@ class ConvexPolyhedronShape(Shape):
             self.color)
 
     @property
+    @_json_sanitize
     def type_shape(self):
         """Shape as dictionary. Example:
 
@@ -383,6 +397,7 @@ class ConvexSpheropolyhedronShape(Shape):
             self.color)
 
     @property
+    @_json_sanitize
     def type_shape(self):
         """Shape as dictionary. Example:
 
@@ -436,6 +451,7 @@ class GeneralPolyhedronShape(Shape):
             self.color)
 
     @property
+    @_json_sanitize
     def type_shape(self):
         """Shape as dictionary. Example:
 
@@ -490,6 +506,7 @@ class EllipsoidShape(Shape):
         )
 
     @property
+    @_json_sanitize
     def type_shape(self):
         """Shape as dictionary. Example:
 
