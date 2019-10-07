@@ -1,4 +1,4 @@
-# Copyright (c) 2016-2018 The Regents of the University of Michigan
+# Copyright (c) 2016-2019 The Regents of the University of Michigan
 # This file is part of the General Simulation Data (GSD) project, released under the BSD 2-Clause License.
 
 """ hoomd schema reference implementation
@@ -21,6 +21,8 @@ for full examples.
 import numpy
 from collections import OrderedDict
 import logging
+import json
+
 try:
     from gsd import fl
 except ImportError:
@@ -43,7 +45,7 @@ class ConfigurationData(object):
     Attributes:
         step (int): Time step of this frame (:chunk:`configuration/step`).
         dimensions (int): Number of dimensions (:chunk:`configuration/dimensions`).
-        box (numpy.ndarray[float, ndim=1, mode='c']): Box dimensions (:chunk:`configuration/box`)
+        box (`numpy.ndarray` or `array_like` [float, ndim=1, mode='c']): Box dimensions (:chunk:`configuration/box`)
                                                       - [lx, ly, lz, xy, xz, yz].
     """
 
@@ -92,17 +94,18 @@ class ParticleData(object):
     Attributes:
         N (int): Number of particles in the snapshot (:chunk:`particles/N`).
         types (list[str]): Names of the particle types (:chunk:`particles/types`).
-        position (numpy.ndarray[float, ndim=2, mode='c']): Nx3 array defining particle position (:chunk:`particles/position`).
-        orientation (numpy.ndarray[float, ndim=2, mode='c']): Nx4 array defining particle position (:chunk:`particles/orientation`).
-        typeid (numpy.ndarray[uint32, ndim=1, mode='c']): N length array defining particle type ids (:chunk:`particles/typeid`).
-        mass (numpy.ndarray[float, ndim=1, mode='c']): N length array defining particle masses (:chunk:`particles/mass`).
-        charge (numpy.ndarray[float, ndim=1, mode='c']): N length array defining particle charges (:chunk:`particles/charge`).
-        diameter (numpy.ndarray[float, ndim=1, mode='c']): N length array defining particle diameters (:chunk:`particles/diameter`).
-        body (numpy.ndarray[int32, ndim=1, mode='c']): N length array defining particle bodies (:chunk:`particles/body`).
-        moment_inertia (numpy.ndarray[float, ndim=2, mode='c']): Nx3 array defining particle moments of inertia (:chunk:`particles/moment_inertia`).
-        velocity (numpy.ndarray[float, ndim=2, mode='c']): Nx3 array defining particle velocities (:chunk:`particles/velocity`).
-        angmom (numpy.ndarray[float, ndim=2, mode='c']): Nx4 array defining particle angular momenta (:chunk:`particles/angmom`).
-        image (numpy.ndarray[int32, ndim=2, mode='c']): Nx3 array defining particle images (:chunk:`particles/image`).
+        position (`numpy.ndarray` or `array_like` [float, ndim=2, mode='c']): Nx3 array defining particle position (:chunk:`particles/position`).
+        orientation (`numpy.ndarray` or `array_like` [float, ndim=2, mode='c']): Nx4 array defining particle position (:chunk:`particles/orientation`).
+        typeid (`numpy.ndarray` or `array_like` [uint32, ndim=1, mode='c']): N length array defining particle type ids (:chunk:`particles/typeid`).
+        mass (`numpy.ndarray` or `array_like` [float, ndim=1, mode='c']): N length array defining particle masses (:chunk:`particles/mass`).
+        charge (`numpy.ndarray` or `array_like` [float, ndim=1, mode='c']): N length array defining particle charges (:chunk:`particles/charge`).
+        diameter (`numpy.ndarray` or `array_like` [float, ndim=1, mode='c']): N length array defining particle diameters (:chunk:`particles/diameter`).
+        body (`numpy.ndarray` or `array_like` [int32, ndim=1, mode='c']): N length array defining particle bodies (:chunk:`particles/body`).
+        moment_inertia (`numpy.ndarray` or `array_like` [float, ndim=2, mode='c']): Nx3 array defining particle moments of inertia (:chunk:`particles/moment_inertia`).
+        velocity (`numpy.ndarray` or `array_like` [float, ndim=2, mode='c']): Nx3 array defining particle velocities (:chunk:`particles/velocity`).
+        angmom (`numpy.ndarray` or `array_like` [float, ndim=2, mode='c']): Nx4 array defining particle angular momenta (:chunk:`particles/angmom`).
+        image (`numpy.ndarray` or `array_like` [int32, ndim=2, mode='c']): Nx3 array defining particle images (:chunk:`particles/image`).
+        type_shapes (list[dict]): Shape specifications for visualizing particle types (:chunk:`particles/type_shapes`).
     """
 
     _default_value = OrderedDict();
@@ -119,6 +122,7 @@ class ParticleData(object):
     _default_value['velocity'] = numpy.array([0,0,0], dtype=numpy.float32);
     _default_value['angmom'] = numpy.array([0,0,0,0], dtype=numpy.float32);
     _default_value['image'] = numpy.array([0,0,0], dtype=numpy.int32);
+    _default_value['type_shapes'] = [{}];
 
     def __init__(self):
         self.N = 0;
@@ -134,6 +138,7 @@ class ParticleData(object):
         self.velocity = None;
         self.angmom = None;
         self.image = None;
+        self.type_shapes = None;
 
     def validate(self):
         """ Validate all attributes.
@@ -212,8 +217,8 @@ class BondData(object):
     Attributes:
         N (int): Number of particles in the snapshot (:chunk:`bonds/N`, :chunk:`angles/N`, :chunk:`dihedrals/N`, :chunk:`impropers/N`, :chunk:`pairs/N`).
         types (list[str]): Names of the particle types (:chunk:`bonds/types`, :chunk:`angles/types`, :chunk:`dihedrals/types`, :chunk:`impropers/types`, :chunk:`pairs/types`).
-        typeid (numpy.ndarray[uint32, ndim=1, mode='c']): N length array defining bond type ids (:chunk:`bonds/typeid`, :chunk:`angles/typeid`, :chunk:`dihedrals/typeid`, :chunk:`impropers/typeid`, :chunk:`pairs/types`).
-        group (numpy.ndarray[uint32, ndim=2, mode='c']): NxM array defining tags in the particle bonds (:chunk:`bonds/group`, :chunk:`angles/group`, :chunk:`dihedrals/group`, :chunk:`impropers/group`, :chunk:`pairs/group`).
+        typeid (`numpy.ndarray` or `array_like` [uint32, ndim=1, mode='c']): - N length array defining bond type ids (:chunk:`bonds/typeid`, :chunk:`angles/typeid`, :chunk:`dihedrals/typeid`, :chunk:`impropers/typeid`, :chunk:`pairs/types`).
+        group (`numpy.ndarray` or `array_like` [uint32, ndim=2, mode='c']): - NxM array defining tags in the particle bonds (:chunk:`bonds/group`, :chunk:`angles/group`, :chunk:`dihedrals/group`, :chunk:`impropers/group`, :chunk:`pairs/group`).
     """
 
     def __init__(self, M):
@@ -266,8 +271,8 @@ class ConstraintData(object):
 
     Attributes:
         N (int): Number of particles in the snapshot (:chunk:`constraints/N`).
-        value (numpy.ndarray[float32, ndim=1, mode='c']): N length array defining constraint lengths (:chunk:`constraints/value`).
-        group (numpy.ndarray[uint32, ndim=2, mode='c']): Nx2 array defining tags in the particle constraints (:chunk:`constraints/group`).
+        value (`numpy.ndarray` or `array_like` [float32, ndim=1, mode='c']): N length array defining constraint lengths (:chunk:`constraints/value`).
+        group (`numpy.ndarray` or `array_like` [int32, ndim=2, mode='c']): Nx2 array defining tags in the particle constraints (:chunk:`constraints/group`).
     """
 
     def __init__(self):
@@ -314,8 +319,9 @@ class Snapshot(object):
         angles (:py:class:`BondData`): Angle data snapshot.
         dihedrals (:py:class:`BondData`): Dihedral data snapshot.
         impropers (:py:class:`BondData`): Improper data snapshot.
-        pairs (:py:class: `BondData`): Special pair interactions snapshot
+        pairs (:py:class:`BondData`): Special pair interactions snapshot
         state (dict): Dictionary containing state data
+        log (dict): Dictionary containing logged data (values must be `numpy.ndarray` or `array_like`)
 
     See the HOOMD schema specification for details on entries in the state dictionary. Entries in this dict are the
     chunk name without the state prefix. For example, :chunk:`state/hpmc/sphere/radius` is stored in the dictionary
@@ -332,10 +338,12 @@ class Snapshot(object):
         self.constraints = ConstraintData();
         self.pairs = BondData(2);
         self.state = {}
+        self.log = {};
 
         self._valid_state = ['hpmc/integrate/d',
                              'hpmc/integrate/a',
                              'hpmc/sphere/radius',
+                             'hpmc/sphere/orientable',
                              'hpmc/ellipsoid/a',
                              'hpmc/ellipsoid/b',
                              'hpmc/ellipsoid/c',
@@ -384,6 +392,10 @@ class Snapshot(object):
         if 'hpmc/sphere/radius' in self.state:
             self.state['hpmc/sphere/radius'] = numpy.ascontiguousarray(self.state['hpmc/sphere/radius'], dtype=numpy.float32);
             self.state['hpmc/sphere/radius'] = self.state['hpmc/sphere/radius'].reshape([NT])
+
+        if 'hpmc/sphere/orientable' in self.state:
+            self.state['hpmc/sphere/orientable'] = numpy.ascontiguousarray(self.state['hpmc/sphere/orientable'], dtype=numpy.uint8);
+            self.state['hpmc/sphere/orientable'] = self.state['hpmc/sphere/orientable'].reshape([NT])
 
         if 'hpmc/ellipsoid/a' in self.state:
             self.state['hpmc/ellipsoid/a'] = numpy.ascontiguousarray(self.state['hpmc/ellipsoid/a'], dtype=numpy.float32);
@@ -443,13 +455,57 @@ class Snapshot(object):
             if k not in self._valid_state:
                 raise RuntimeError('Not a valid state: ' + k)
 
+class _HOOMDTrajectoryIterable(object):
+    """Iterable over a HOOMDTrajectory object."""
+
+    def __init__(self, trajectory, indices):
+        self._trajectory = trajectory
+        self._indices = indices
+        self._indices_iterator = iter(indices)
+
+    def __next__(self):
+        return self._trajectory[next(self._indices_iterator)]
+
+    next = __next__     # Python 2.7 compatibility
+
+    def __iter__(self):
+        return type(self)(self._trajectory, self._indices)
+
+    def __len__(self):
+        return len(self._indices)
+
+
+class _HOOMDTrajectoryView(object):
+    """A view of a HOOMDTrajectory object.
+
+    Enables the slicing and iteration over a subset of a trajectory
+    instance.
+    """
+
+    def __init__(self, trajectory, indices):
+        self._trajectory = trajectory
+        self._indices = indices
+
+    def __iter__(self):
+        return _HOOMDTrajectoryIterable(self._trajectory, self._indices)
+
+    def __len__(self):
+        return len(self._indices)
+
+    def __getitem__(self, key):
+        if isinstance(key, slice):
+            return type(self)(self._trajectory, self._indices[key])
+        else:
+            return self._trajectory[self._indices[key]]
+
+
 class HOOMDTrajectory(object):
     """ Read and write hoomd gsd files.
 
     Args:
         file (:py:class:`gsd.fl.GSDFile`): File to access.
 
-    Create hoomd GSD files with :py:func:`create`.
+    Open hoomd GSD files with :py:func:`open`.
     """
 
     def __init__(self, file):
@@ -510,7 +566,9 @@ class HOOMDTrajectory(object):
                         data = numpy.array([data], dtype=numpy.uint64);
                     if name == 'dimensions':
                         data = numpy.array([data], dtype=numpy.uint8);
-                    if name == 'types':
+                    if name in ('types', 'type_shapes'):
+                        if name == 'type_shapes':
+                            data = [json.dumps(shape_dict) for shape_dict in data]
                         wid = max(len(w) for w in data)+1;
                         b = numpy.array(data, dtype=numpy.dtype((bytes, wid)));
                         data = b.view(dtype=numpy.int8).reshape(len(b), wid);
@@ -520,6 +578,10 @@ class HOOMDTrajectory(object):
         # write state data
         for state,data in snapshot.state.items():
             self.file.write_chunk('state/' + state, data)
+
+        # write log data
+        for log,data in snapshot.log.items():
+            self.file.write_chunk('log/' + log, data)
 
         self.file.end_frame();
 
@@ -649,8 +711,22 @@ class HOOMDTrajectory(object):
                     else:
                         container.types = container._default_value['types'];
 
+            # type shapes
+            if 'type_shapes' in container._default_value and path == 'particles':
+                if self.file.chunk_exists(frame=idx, name=path + '/type_shapes'):
+                    tmp = self.file.read_chunk(frame=idx, name=path + '/type_shapes');
+                    tmp = tmp.view(dtype=numpy.dtype((bytes, tmp.shape[1])));
+                    tmp = tmp.reshape([tmp.shape[0]]);
+                    container.type_shapes = list(json.loads(json_string.decode('UTF-8')) for json_string in tmp)
+                else:
+                    if self._initial_frame is not None:
+                        container.type_shapes = initial_frame_container.type_shapes;
+                    else:
+                        container.type_shapes = container._default_value['type_shapes'];
+
+
             for name in container._default_value:
-                if name == 'N' or name == 'types':
+                if name in ('N', 'types', 'type_shapes'):
                     continue;
 
                 # per particle/bond quantities
@@ -675,6 +751,15 @@ class HOOMDTrajectory(object):
             if self.file.chunk_exists(frame=idx, name='state/' + state):
                 snap.state[state] = self.file.read_chunk(frame=idx, name='state/' + state);
 
+        # read log data
+        logged_data_names = self.file.find_matching_chunk_names('log/')
+        for log in logged_data_names:
+            if self.file.chunk_exists(frame=idx, name=log):
+                snap.log[log[4:]] = self.file.read_chunk(frame=idx, name=log);
+            else:
+                if self._initial_frame is not None:
+                    snap.log[log[4:]] = self._initial_frame.log[log[4:]]
+
         # store initial frame
         if self._initial_frame is None and idx == 0:
             self._initial_frame = snap;
@@ -694,15 +779,18 @@ class HOOMDTrajectory(object):
         """
 
         if isinstance(key, slice) :
-            return (self.read_frame(i) for i in range(*key.indices(len(self))));
+            return _HOOMDTrajectoryView(self, range(*key.indices(len(self))))
         elif isinstance(key, int) :
             if key < 0:
                 key += len(self)
-            if key >= len(self):
+            if key >= len(self) or key < 0:
                 raise IndexError();
             return self.read_frame(key);
         else:
             raise TypeError;
+
+    def __iter__(self):
+        return _HOOMDTrajectoryIterable(self, range(len(self)))
 
     def __enter__(self):
         return self;
@@ -732,7 +820,7 @@ def create(name, snapshot=None):
 
     logger.info('creating hoomd gsd file: ' + name);
 
-    gsd.fl.create(name=name, application='gsd.hoomd ' + gsd.__version__, schema='hoomd', schema_version=[1,2]);
+    gsd.fl.create(name=str(name), application='gsd.hoomd ' + gsd.__version__, schema='hoomd', schema_version=[1,4]);
     with gsd.fl.GSDFile(name, 'wb') as f:
         traj = HOOMDTrajectory(f);
         if snapshot is not None:
@@ -792,9 +880,9 @@ def open(name, mode='rb'):
     if gsd is None:
         raise RuntimeError("gsd module is not available");
 
-    gsdfileobj = fl.open(name=name,
+    gsdfileobj = fl.open(name=str(name),
                          mode=mode,
                          application='gsd.hoomd ' + gsd.__version__,
                          schema='hoomd',
-                         schema_version=[1,2]);
+                         schema_version=[1,4]);
     return HOOMDTrajectory(gsdfileobj);
