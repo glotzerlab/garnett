@@ -695,7 +695,7 @@ class Frame(object):
 
     @property
     def shapedef(self):
-        "A ordered dictionary of instances of :class:`~.shapes.ShapeDefinition`."
+        "An ordered dictionary of instances of :class:`~.shapes.Shape`."
         self.load()
         return self._raise_attributeerror('shapedef')
 
