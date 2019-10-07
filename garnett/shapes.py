@@ -61,6 +61,7 @@ class Shape(object):
     def __getitem__(self, key):
         if hasattr(self, key):
             return getattr(self, key)
+        raise KeyError('{key} not found in {cls}'.format(key=key, cls=self.__class__.__name__))
 
     @property
     def pos_string(self):
@@ -498,7 +499,7 @@ class EllipsoidShape(Shape):
             'c': 3.0}
 
         """
-        return {'type:': 'Ellipsoid',
+        return {'type': 'Ellipsoid',
                 'a': self.a,
                 'b': self.b,
                 'c': self.c}
