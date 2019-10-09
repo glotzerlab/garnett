@@ -541,6 +541,8 @@ def _parse_type_shape(shape):
     shapedef = None
 
     if shape_type in ('sphere', 'disk'):
+        # disk support is for backwards compatibility with get_type_shapes()
+        # from HOOMD-blue < 2.7
         diameter = shape.get('diameter', 2*shape.get('rounding_radius', 0.5))
         orientable = shape.get('orientable', False)
         shapedef = SphereShape(diameter=diameter, orientable=orientable, color=None)
@@ -566,6 +568,8 @@ def _parse_type_shape(shape):
                                           facet_colors=shape['colors'],
                                           color=None)
     elif shape_type == 'polyhedron':
+        # polyhedron support is for backwards compatibility with
+        # get_type_shapes() from HOOMD-blue < 2.7
         shapedef = GeneralPolyhedronShape(vertices=shape['vertices'],
                                           faces=shape['faces'],
                                           facet_colors=shape['colors'],
