@@ -14,6 +14,11 @@ Added
 +++++
   - Added ``showEdges`` to skipped fields when reading POS files.
   - Added ``to_plato_scene()`` method to quickly visualize ``Frame`` objects.
+  - Added support for the `GSD shape visualization specification <https://gsd.readthedocs.io/en/stable/shapes.html>`_.
+
+Changed
++++++++
+  - GSD and GTAR writers now output shape information that adheres to the GSD shape visualization specification
 
 Removed
 +++++++

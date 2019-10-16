@@ -1,4 +1,4 @@
-# Copyright (c) 2016-2018 The Regents of the University of Michigan
+# Copyright (c) 2016-2019 The Regents of the University of Michigan
 # This file is part of the General Simulation Data (GSD) project, released under the BSD 2-Clause License.
 
 """ GSD reader written in pure python
@@ -15,8 +15,8 @@ for files up to a few thousand frames.
     * :file:`hoomd.py`
 
 
-The reader reads from file-like python objects, which may be useful for reading from in memory buffers, in-database
-grid files, etc... For regular files on the filesystem, and for writing gsd files, use :py:mod:`gsd.fl`.
+The reader reads from file-like python objects, which may be useful for reading from in memory buffers, and in-database
+grid files, For regular files on the filesystem, and for writing gsd files, use :py:mod:`gsd.fl`.
 
 The :py:class:`GSDFile` in this module can be used with the :py:class:`gsd.hoomd.HOOMDTrajectory` hoomd reader:
 
@@ -34,7 +34,7 @@ import struct
 from collections import namedtuple
 import sys
 
-__version__ = "1.5.4";
+__version__ = "1.9.3";
 
 logger = logging.getLogger('gsd.pygsd')
 
@@ -97,7 +97,7 @@ class GSDFile(object):
 
     Attributes:
 
-        file (file-like): File-like object opened **(read only)**.
+        file: File-like object opened **(read only)**.
         name (str): file.name **(read only)**.
         mode (str): Mode of the open file **(read only)**.
         gsd_version (tuple[int]): GSD file layer version number [major, minor] **(read only)**.
@@ -136,21 +136,6 @@ class GSDFile(object):
         # determine the file size (only works in python 3)
         self.__file.seek(0, 2);
 
-        # read the index block. Since this is a read-only implementation, only read in the used entries
-        self.__index = [];
-        self.__file.seek(self.__header.index_location, 0);
-        for i in range(self.__header.index_allocated_entries):
-            index_entry_raw = self.__file.read(gsd_index_entry_struct.size);
-            if len(index_entry_raw) != gsd_index_entry_struct.size:
-                raise IOError
-
-            idx = gsd_index_entry._make(gsd_index_entry_struct.unpack(index_entry_raw));
-
-            # 0 location signifies end of index
-            if idx.location == 0:
-                break
-            self.__index.append(idx);
-
         # read the namelist block into a dict for easy lookup
         self.__namelist = {};
         c = 0;
@@ -167,7 +152,50 @@ class GSDFile(object):
             self.__namelist[sname] = c;
             c = c + 1;
 
+        # read the index block. Since this is a read-only implementation, only read in the used entries
+        self.__index = [];
+        self.__file.seek(self.__header.index_location, 0);
+        for i in range(self.__header.index_allocated_entries):
+            index_entry_raw = self.__file.read(gsd_index_entry_struct.size);
+            if len(index_entry_raw) != gsd_index_entry_struct.size:
+                raise IOError
+
+            idx = gsd_index_entry._make(gsd_index_entry_struct.unpack(index_entry_raw));
+
+            # 0 location signifies end of index
+            if idx.location == 0:
+                break
+
+            if not self.__is_entry_valid(idx):
+                raise RuntimeError("Corrupt GSD file: " + str(self.__file));
+
+            if i > 0 and idx.frame < self.__index[i-1].frame:
+                raise RuntimeError("Corrupt GSD file: " + str(self.__file));
+
+            self.__index.append(idx);
+
         self.__is_open = True;
+
+    def __is_entry_valid(self, entry):
+        """ Return True if an entry is valid
+        """
+        if entry.type not in gsd_type_mapping:
+            return False;
+
+        size = entry.N * entry.M * gsd_type_mapping[entry.type].itemsize;
+        if size == 0:
+            return False;
+
+        if entry.frame >= self.__header.index_allocated_entries:
+            return False;
+
+        if entry.id >= len(self.__namelist):
+            return False;
+
+        if entry.flags != 0:
+            return False;
+
+        return True;
 
     def close(self):
         """ close()
@@ -295,7 +323,7 @@ class GSDFile(object):
                     data3 = f.read_chunk(frame=3, name='chunk');
 
         .. tip::
-            Each call to invokes a disk read and allocation of a
+            Each call invokes a disk read and allocation of a
             new numpy array for storage. To avoid overhead, don't call
             :py:meth:`read_chunk()` on the same chunk repeatedly. Cache the
             arrays instead.
@@ -327,6 +355,24 @@ class GSDFile(object):
             return data_npy;
         else:
             return data_npy.reshape([chunk.N, chunk.M]);
+
+    def find_matching_chunk_names(self, match):
+        """ find_matching_chunk_names(match)
+
+        Find all the chunk names in the file that start with the string *match*.
+
+        Args:
+            match (str): Start of the chunk name to match
+
+        Returns:
+            list[str]: Matching chunk names
+        """
+        result = []
+        for key in self.__namelist.keys():
+            if key.startswith(match):
+                result.append(key);
+
+        return result;
 
     def __enter__(self):
         return self;
