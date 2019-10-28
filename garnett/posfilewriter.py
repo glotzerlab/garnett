@@ -27,7 +27,6 @@ import rowan
 
 
 logger = logging.getLogger(__name__)
-PYTHON_2 = sys.version_info[0] == 2
 
 DEFAULT_SHAPE_DEFINITION = SphereShape(1.0, color='005984FF')
 
@@ -66,10 +65,7 @@ class PosFileWriter(object):
         :type trajectory: :class:`~garnett.trajectory.Trajectory`
         :param file: A file-like object."""
         def _write(msg, end='\n'):
-            if PYTHON_2:
-                file.write(unicode(msg + end))  # noqa
-            else:
-                file.write(msg + end)
+            file.write(msg + end)
         for i, frame in enumerate(trajectory):
             # data section
             if frame.data is not None:
@@ -104,7 +100,7 @@ class PosFileWriter(object):
                 not_defined = set(frame.types).difference(
                     set(frame.shapedef.keys()))
                 for name in required:
-                    _write('def {} "{}"'.format(name, frame.shapedef[name]))
+                    _write('def {} "{}"'.format(name, frame.shapedef[name].pos_string))
                 for name in not_defined:
                     logger.info(
                         "No shape defined for '{}'. "

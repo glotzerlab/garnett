@@ -1,27 +1,18 @@
 # Copyright (c) 2019 The Regents of the University of Michigan
 # All rights reserved.
 # This software is licensed under the BSD 3-Clause License.
-import sys
 import io
 import unittest
-
 import numpy as np
-
 import garnett
-
-
-PYTHON_2 = sys.version_info[0] == 2
 
 
 class BaseHOOMDXMLFileReaderTest(unittest.TestCase):
 
     def read_trajectory(self, sample_file):
         reader = garnett.reader.HOOMDXMLFileReader()
-        if PYTHON_2:
-            return reader.read(io.StringIO(unicode(sample_file)))  # noqa
-        else:
-            return reader.read(
-                io.StringIO(sample_file))
+        return reader.read(
+            io.StringIO(sample_file))
 
     def test_read_3d(self):
         traj = self.read_trajectory(garnett.samples.HOOMD_BLUE_XML)

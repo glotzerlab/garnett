@@ -94,7 +94,7 @@ class GetarFileWriter(object):
         shape_contents = []
         for typename in types:
             try:
-                shape_contents.append(frame.shapedef[typename].shape_dict)
+                shape_contents.append(frame.shapedef[typename].type_shape)
             except AttributeError:
                 shape_contents.append(None)
             except KeyError:

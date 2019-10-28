@@ -4,6 +4,9 @@
 
 """Abstract shape definitions used to read/write particle shapes."""
 
+import json
+import logging
+import numpy as np
 
 __all__ = [
     'FallbackShape',
@@ -19,8 +22,27 @@ __all__ = [
     'GeneralPolyhedronShape',
 ]
 
+logger = logging.getLogger(__name__)
 
 SHAPE_DEFAULT_COLOR = '005984FF'
+
+
+class _NumpyEncoder(json.JSONEncoder):
+    """JSONEncoder class converting NumPy arrays to lists."""
+    def default(self, obj):
+        if isinstance(obj, np.number):
+            return obj.item()
+        elif isinstance(obj, np.ndarray):
+            return obj.tolist()
+        return json.JSONEncoder.default(self, obj)
+
+
+def _json_sanitize(func):
+    """Decorator ensuring that returned data is JSON-encodable."""
+    def wrapper(*args, **kwargs):
+        data = func(*args, **kwargs)
+        return json.loads(json.dumps(data, cls=_NumpyEncoder))
+    return wrapper
 
 
 class FallbackShape(str):
@@ -47,14 +69,29 @@ class Shape(object):
         self.shape_class = shape_class
         self.color = color if color else SHAPE_DEFAULT_COLOR
 
-    def __str__(self):
+    def __getitem__(self, key):
+        try:
+            return getattr(self, key)
+        except AttributeError as e:
+            raise KeyError(*e.args)
+
+    @property
+    def pos_string(self):
         return "{} {}".format(self.shape_class, self.color)
+
+    @property
+    @_json_sanitize
+    def type_shape(self):
+        return {"type": self.shape_class}
+
+    def __str__(self):
+        return json.dumps(self.type_shape)
 
     def __repr__(self):
         return str(self)
 
     def __eq__(self, other):
-        return str(self) == str(other)
+        return self.type_shape == other.type_shape
 
 
 class SphereShape(Shape):
@@ -80,19 +117,20 @@ class SphereShape(Shape):
         self.diameter = diameter
         self.orientable = orientable
 
-    def __str__(self):
+    @property
+    def pos_string(self):
         return "{} {} {}".format(self.shape_class, self.diameter, self.color)
 
     @property
-    def shape_dict(self):
+    @_json_sanitize
+    def type_shape(self):
         """Shape as dictionary. Example:
 
-            >>> SphereShape(2.0).shape_dict
-            {'type': 'Sphere', 'diameter': 2.0, 'orientable': False}
+            >>> SphereShape(2.0).type_shape
+            {'type': 'Sphere', 'diameter': 2.0}
         """
         return {'type': 'Sphere',
-                'diameter': self.diameter,
-                'orientable': self.orientable}
+                'diameter': self.diameter}
 
 
 class ArrowShape(Shape):
@@ -113,7 +151,8 @@ class ArrowShape(Shape):
             shape_class='arrow', color=color)
         self.thickness = thickness
 
-    def __str__(self):
+    @property
+    def pos_string(self):
         return "{} {} {}".format(self.shape_class, self.thickness, self.color)
 
 
@@ -141,7 +180,8 @@ class SphereUnionShape(Shape):
         self.centers = centers
         self.colors = colors
 
-    def __str__(self):
+    @property
+    def pos_string(self):
         shape_def = '{} {} '.format(self.shape_class, len(self.centers))
         for d, p, c in zip(self.diameters, self.centers, self.colors):
             shape_def += '{0} '.format(d)
@@ -169,7 +209,8 @@ class PolygonShape(Shape):
             shape_class='poly3d', color=color)
         self.vertices = vertices
 
-    def __str__(self):
+    @property
+    def pos_string(self):
         return "{} {} {} {}".format(
             self.shape_class,
             len(self.vertices),
@@ -177,10 +218,11 @@ class PolygonShape(Shape):
             self.color)
 
     @property
-    def shape_dict(self):
+    @_json_sanitize
+    def type_shape(self):
         """Shape as dictionary. Example:
 
-            >>> PolygonShape([[-0.5, -0.5], [0.5, -0.5], [0.5, 0.5]]).shape_dict
+            >>> PolygonShape([[-0.5, -0.5], [0.5, -0.5], [0.5, 0.5]]).type_shape
             {'type': 'Polygon', 'rounding_radius': 0,
              'vertices': [[-0.5, -0.5], [0.5, -0.5], [0.5, 0.5]]}
         """
@@ -212,7 +254,8 @@ class SpheropolygonShape(Shape):
         self.vertices = vertices
         self.rounding_radius = rounding_radius
 
-    def __str__(self):
+    @property
+    def pos_string(self):
         return "{} {} {} {} {}".format(
             self.shape_class,
             self.rounding_radius,
@@ -221,10 +264,11 @@ class SpheropolygonShape(Shape):
             self.color)
 
     @property
-    def shape_dict(self):
+    @_json_sanitize
+    def type_shape(self):
         """Shape as dictionary. Example:
 
-            >>> SpheropolygonShape([[-0.5, -0.5], [0.5, -0.5], [0.5, 0.5]], 0.1).shape_dict
+            >>> SpheropolygonShape([[-0.5, -0.5], [0.5, -0.5], [0.5, 0.5]], 0.1).type_shape
             {'type': 'Polygon', 'rounding_radius': 0.1,
              'vertices': [[-0.5, -0.5], [0.5, -0.5], [0.5, 0.5]]}
         """
@@ -251,7 +295,8 @@ class ConvexPolyhedronShape(Shape):
             shape_class='poly3d', color=color)
         self.vertices = vertices
 
-    def __str__(self):
+    @property
+    def pos_string(self):
         return "{} {} {} {}".format(
             self.shape_class,
             len(self.vertices),
@@ -259,11 +304,12 @@ class ConvexPolyhedronShape(Shape):
             self.color)
 
     @property
-    def shape_dict(self):
+    @_json_sanitize
+    def type_shape(self):
         """Shape as dictionary. Example:
 
             >>> ConvexPolyhedronShape([[0.5, 0.5, 0.5], [0.5, -0.5, -0.5],
-                                       [-0.5, 0.5, -0.5], [-0.5, -0.5, 0.5]]).shape_dict
+                                       [-0.5, 0.5, -0.5], [-0.5, -0.5, 0.5]]).type_shape
             {'type': 'ConvexPolyhedron', 'rounding_radius': 0,
              'vertices': [[0.5, 0.5, 0.5], [0.5, -0.5, -0.5],
                           [-0.5, 0.5, -0.5], [-0.5, -0.5, 0.5]]}
@@ -303,7 +349,8 @@ class ConvexPolyhedronUnionShape(Shape):
         self.orientations = orientations
         self.colors = colors
 
-    def __str__(self):
+    @property
+    def pos_string(self):
         shape_def = '{} {} '.format(self.shape_class, len(self.centers))
         for verts, p, q, c in zip(self.vertices, self.centers, self.orientations, self.colors):
             shape_def += '{0} '.format(len(verts))
@@ -339,7 +386,8 @@ class ConvexSpheropolyhedronShape(Shape):
         self.vertices = vertices
         self.rounding_radius = rounding_radius
 
-    def __str__(self):
+    @property
+    def pos_string(self):
         return "{} {} {} {} {}".format(
             self.shape_class,
             self.rounding_radius,
@@ -348,11 +396,12 @@ class ConvexSpheropolyhedronShape(Shape):
             self.color)
 
     @property
-    def shape_dict(self):
+    @_json_sanitize
+    def type_shape(self):
         """Shape as dictionary. Example:
 
             >>> ConvexSpheropolyhedronShape([[0.5, 0.5, 0.5], [0.5, -0.5, -0.5],
-                                             [-0.5, 0.5, -0.5], [-0.5, -0.5, 0.5]], 0.1).shape_dict
+                                             [-0.5, 0.5, -0.5], [-0.5, -0.5, 0.5]], 0.1).type_shape
             {'type': 'ConvexPolyhedron', 'rounding_radius': 0.1,
              'vertices': [[0.5, 0.5, 0.5], [0.5, -0.5, -0.5],
                           [-0.5, 0.5, -0.5], [-0.5, -0.5, 0.5]]}
@@ -390,7 +439,8 @@ class GeneralPolyhedronShape(Shape):
         self.faces = faces
         self.facet_colors = facet_colors
 
-    def __str__(self):
+    @property
+    def pos_string(self):
         return "{} {} {} {} {} {}".format(
             self.shape_class,
             len(self.vertices),
@@ -400,15 +450,16 @@ class GeneralPolyhedronShape(Shape):
             self.color)
 
     @property
-    def shape_dict(self):
+    @_json_sanitize
+    def type_shape(self):
         """Shape as dictionary. Example:
 
             >>> GeneralPolyhedronShape([[0.5, 0.5, 0.5], [0.5, -0.5, -0.5],
-                                        [-0.5, 0.5, -0.5], [-0.5, -0.5, 0.5]]).shape_dict
+                                        [-0.5, 0.5, -0.5], [-0.5, -0.5, 0.5]]).type_shape
             {'type': 'Mesh',
              'vertices': [[0.5, 0.5, 0.5], [0.5, -0.5, -0.5],
                           [-0.5, 0.5, -0.5], [-0.5, -0.5, 0.5]],
-             'indices': [[1, 2, 3], [1, 2, 4], [1, 3, 4], [2, 3, 4]]}
+             'indices': [[0, 1, 2], [0, 1, 3], [0, 2, 3], [1, 2, 3]]}
         """
         return {'type': 'Mesh',
                 'vertices': self.vertices,
@@ -443,7 +494,8 @@ class EllipsoidShape(Shape):
         self.b = b
         self.c = c
 
-    def __str__(self):
+    @property
+    def pos_string(self):
         return "{} {} {} {} {}".format(
             self.shape_class,
             self.a,
@@ -453,17 +505,79 @@ class EllipsoidShape(Shape):
         )
 
     @property
-    def shape_dict(self):
+    @_json_sanitize
+    def type_shape(self):
         """Shape as dictionary. Example:
 
-            >>> EllipsoidShape(7.0, 5.0, 3.0).shape_dict
+            >>> EllipsoidShape(7.0, 5.0, 3.0).type_shape
             {'type': 'Ellipsoid',
             'a': 7.0,
             'b': 5.0,
             'c': 3.0}
 
         """
-        return {'type:': 'Ellipsoid',
+        return {'type': 'Ellipsoid',
                 'a': self.a,
                 'b': self.b,
                 'c': self.c}
+
+
+def _parse_type_shape(shape):
+    """Parses a shape object from a dictionary.
+
+    This method parses the `GSD Shape Visualization Specification
+    <https://gsd.readthedocs.io/en/stable/shapes.html>`_, while including
+    backwards compatibility with shape definitions that do not adhere to that
+    specification but were previously supported by HOOMD's
+    :code:`get_type_shapes()` methods.
+    """
+
+    if not shape:
+        return FallbackShape('')
+
+    rounding_radius = shape.get('rounding_radius', 0)
+    shape_type = shape['type'].lower()
+
+    shapedef = None
+
+    if shape_type in ('sphere', 'disk'):
+        # disk support is for backwards compatibility with get_type_shapes()
+        # from HOOMD-blue < 2.7
+        diameter = shape.get('diameter', 2*shape.get('rounding_radius', 0.5))
+        orientable = shape.get('orientable', False)
+        shapedef = SphereShape(diameter=diameter, orientable=orientable, color=None)
+    elif shape_type == 'ellipsoid':
+        shapedef = EllipsoidShape(a=shape['a'], b=shape['b'], c=shape['c'], color=None)
+    elif shape_type == 'polygon':
+        if rounding_radius == 0:
+            shapedef = PolygonShape(vertices=shape['vertices'], color=None)
+        else:
+            shapedef = SpheropolygonShape(vertices=shape['vertices'],
+                                          rounding_radius=rounding_radius,
+                                          color=None)
+    elif shape_type == 'convexpolyhedron':
+        if rounding_radius == 0:
+            shapedef = ConvexPolyhedronShape(vertices=shape['vertices'], color=None)
+        else:
+            shapedef = ConvexSpheropolyhedronShape(vertices=shape['vertices'],
+                                                   rounding_radius=rounding_radius,
+                                                   color=None)
+    elif shape_type == 'mesh':
+        shapedef = GeneralPolyhedronShape(vertices=shape['vertices'],
+                                          faces=shape['indices'],
+                                          facet_colors=shape['colors'],
+                                          color=None)
+    elif shape_type == 'polyhedron':
+        # polyhedron support is for backwards compatibility with
+        # get_type_shapes() from HOOMD-blue < 2.7
+        shapedef = GeneralPolyhedronShape(vertices=shape['vertices'],
+                                          faces=shape['faces'],
+                                          facet_colors=shape['colors'],
+                                          color=None)
+
+    if shapedef is None:
+        logger.warning("Failed to parse shape definition: shape {} not supported. "
+                       "Using fallback mode.".format(shape_type))
+        shapedef = FallbackShape(json.dumps(shape))
+
+    return shapedef

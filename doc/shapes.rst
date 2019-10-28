@@ -2,7 +2,7 @@ Shape Definitions
 =================
 
 Shape definitions contain information about the shape of individual particles.
-Some shapes define a :code:`shape_dict` property, which returns a
+Some shapes define a :code:`type_shape` property, which returns a
 :py:class:`dict` for consumption by visualization tools, in the format of
 :py:meth:`hoomd.hpmc.integrate.mode_hpmc.get_type_shapes`.
 

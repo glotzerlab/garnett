@@ -48,11 +48,6 @@ jobs:
           path: test-reports
           destination: test-reports
 
-  test-2.7:
-    <<: *test-template
-    docker:
-      - image: circleci/python:2.7
-
   test-3.5:
     <<: *test-template
     docker:
@@ -92,9 +87,6 @@ workflows:
   style-check-and-tests:
     jobs:
       - style-check
-      - test-2.7:
-          requires:
-            - style-check
       - test-3.5:
           requires:
             - style-check
@@ -109,7 +101,6 @@ workflows:
             branches:
               only: /release\/.*/
           requires:
-            - test-2.7
             - test-3.5
             - test-3.6
             - test-3.7

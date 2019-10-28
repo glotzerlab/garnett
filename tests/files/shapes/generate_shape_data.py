@@ -7,6 +7,7 @@ import hoomd
 import hoomd.hpmc
 import hoomd.deprecated
 import json
+import os
 
 point_2d_vert = [(0, 0)]
 point_3d_vert = [(0, 0, 0)]
@@ -57,7 +58,6 @@ shape_classes = [
         'dimensions': 2,
         'params': {
             'diameter': 1,
-            'orientable': True
         },
     },
     {
@@ -66,7 +66,6 @@ shape_classes = [
         'dimensions': 3,
         'params': {
             'diameter': 1,
-            'orientable': True
         },
     },
     {
@@ -88,24 +87,6 @@ shape_classes = [
         },
     },
     {
-        'name': 'spherocylinder_2d',
-        'cls': 'convex_spheropolygon',
-        'dimensions': 2,
-        'params': {
-            'vertices': line_2d_verts,
-            'sweep_radius': 0.2,
-        },
-    },
-    {
-        'name': 'spherocylinder_3d',
-        'cls': 'convex_spheropolyhedron',
-        'dimensions': 3,
-        'params': {
-            'vertices': line_3d_verts,
-            'sweep_radius': 0.2,
-        },
-    },
-    {
         'name': 'ellipsoid_3d',
         'cls': 'ellipsoid',
         'dimensions': 3,
@@ -116,6 +97,9 @@ shape_classes = [
         },
     },
 ]
+
+def script_path(filename):
+    return os.path.join(os.path.dirname(__file__), filename)
 
 if __name__ == '__main__':
     for shape_class in shape_classes:
@@ -130,22 +114,27 @@ if __name__ == '__main__':
             mc = getattr(hoomd.hpmc.integrate, shape_class['cls'])(seed=42)
             mc.shape_param.set('A', **shape_class['params'])
 
-            gsd_dump = hoomd.dump.gsd(
-                '{}.gsd'.format(shape_name), period=1,
-                group=hoomd.group.all(), overwrite=True)
-            gsd_dump.dump_state(mc)
+            gsd_state_dump = hoomd.dump.gsd(
+                script_path('{}_state.gsd'.format(shape_name)),
+                period=1, group=hoomd.group.all(), overwrite=True)
+            gsd_state_dump.dump_state(mc)
+
+            gsd_shape_dump = hoomd.dump.gsd(
+                script_path('{}_shape.gsd'.format(shape_name)),
+                period=1, group=hoomd.group.all(), overwrite=True)
+            gsd_shape_dump.dump_shape(mc)
 
             getar_dump = hoomd.dump.getar(
-                '{}.zip'.format(shape_name), mode='w',
+                script_path('{}.zip'.format(shape_name)), mode='w',
                 static=['viz_static'], dynamic={'viz_aniso_dynamic': 1})
             getar_dump.writeJSON('type_shapes.json', mc.get_type_shapes(),
                                  dynamic=False)
 
             pos_dump = hoomd.deprecated.dump.pos(
-                '{}.pos'.format(shape_name), period=1)
+                script_path('{}.pos'.format(shape_name)), period=1)
             mc.setup_pos_writer(pos_dump)
 
             hoomd.run(10)
 
-    with open('shape_data.json', 'w') as jsonfile:
+    with open(script_path('shape_data.json'), 'w') as jsonfile:
         json.dump(shape_classes, jsonfile)

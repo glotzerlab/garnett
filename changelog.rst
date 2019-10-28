@@ -4,6 +4,26 @@ Changelog
 
 The **garnett** package follows `semantic versioning <https://semver.org/>`_.
 
+next
+====
+
+next
+----
+
+Added
++++++
+  - Added ``showEdges`` to skipped fields when reading POS files.
+  - Added ``to_plato_scene()`` method to quickly visualize ``Frame`` objects.
+  - Added support for the `GSD shape visualization specification <https://gsd.readthedocs.io/en/stable/shapes.html>`_.
+
+Changed
++++++++
+  - GSD and GTAR writers now output shape information that adheres to the GSD shape visualization specification
+
+Removed
++++++++
+  - Dropped Python 2 support.
+
 Version 0.5
 ===========
 

@@ -1,15 +1,12 @@
 # Copyright (c) 2019 The Regents of the University of Michigan
 # All rights reserved.
 # This software is licensed under the BSD 3-Clause License.
-import sys
 import io
 import unittest
 import tempfile
 
 import garnett
 import numpy as np
-
-PYTHON_2 = sys.version_info[0] == 2
 
 
 try:
@@ -54,18 +51,12 @@ class TrajectoryTest(unittest.TestCase):
         return reader.read(stream)
 
     def get_trajectory(self, sample=garnett.samples.POS_HPMC):
-        if PYTHON_2:
-            sample_file = io.StringIO(unicode(sample))  # noqa
-        else:
-            sample_file = io.StringIO(sample)
+        sample_file = io.StringIO(sample)
         # account for low injavis precision
         return self.read_trajectory(sample_file)
 
     def get_sample_file(self):
-        if PYTHON_2:
-            return io.StringIO(unicode(self.sample))  # noqa
-        else:
-            return io.StringIO(self.sample)
+        return io.StringIO(self.sample)
 
     def test_str(self):
         sample_file = self.get_sample_file()

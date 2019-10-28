@@ -45,64 +45,46 @@ class ShapeTest(unittest.TestCase):
 
     def get_filename(self, shape_name):
         return os.path.join(SHAPE_DATA_PATH,
-                            '{}.{}'.format(shape_name, self.extension))
+                            '{}{}'.format(shape_name, self.extension))
 
     def check_shape_class(self, shape_class):
         shape_name = shape_class['name']
         with open(self.get_filename(shape_name), self.mode) as f:
             traj = self.reader().read(f)
             shapedef = traj[-1].shapedef
-        shape_dict = shapedef['A'].shape_dict
+        shape_A = shapedef['A']
+        type_shape = shape_A.type_shape
 
         # Check each field of the shape parameters and JSON shape definition
-        if 'vertices' in shape_class['params']:
-            npt.assert_allclose(shapedef['A'].vertices,
-                                shape_class['params']['vertices'])
-            npt.assert_allclose(shape_dict['vertices'],
-                                shape_class['params']['vertices'])
-        if 'diameter' in shape_class['params']:
-            npt.assert_almost_equal(shapedef['A'].diameter,
-                                    shape_class['params']['diameter'])
-            npt.assert_almost_equal(shape_dict['diameter'],
-                                    shape_class['params']['diameter'])
-        if 'sweep_radius' in shape_class['params']:
-            npt.assert_almost_equal(shapedef['A'].rounding_radius,
-                                    shape_class['params']['sweep_radius'])
-            npt.assert_almost_equal(shape_dict['rounding_radius'],
-                                    shape_class['params']['sweep_radius'])
-        if 'orientable' in shape_class['params']:
-            # Of the three shape supporting formats, only POS files do
-            # not support the orientable flag and should be set to the
-            # default False.
-            if not self.__class__.__name__ == "POSShapeTest":
-                self.assertEqual(shapedef['A'].orientable,
-                                 shape_class['params']['orientable'])
-                self.assertEqual(shape_dict['orientable'],
-                                 shape_class['params']['orientable'])
-            else:
-                self.assertEqual(shapedef['A'].orientable, False)
-                self.assertEqual(shape_dict['orientable'], False)
-        if 'a' in shape_class['params']:
-            npt.assert_almost_equal(shapedef['A'].a,
-                                    shape_class['params']['a'])
-            npt.assert_almost_equal(shape_dict['a'],
-                                    shape_class['params']['a'])
-        if 'b' in shape_class['params']:
-            npt.assert_almost_equal(shapedef['A'].b,
-                                    shape_class['params']['b'])
-            npt.assert_almost_equal(shape_dict['b'],
-                                    shape_class['params']['b'])
-        if 'c' in shape_class['params']:
-            npt.assert_almost_equal(shapedef['A'].c,
-                                    shape_class['params']['c'])
-            npt.assert_almost_equal(shape_dict['c'],
-                                    shape_class['params']['c'])
-
+        vertices = shape_class['params'].get('vertices', None)
+        if vertices is not None and len(vertices) > 1:
+            npt.assert_allclose(shape_A.vertices, vertices)
+            npt.assert_allclose(type_shape['vertices'], vertices)
+            sweep_radius = shape_class['params'].get('sweep_radius', None)
+            if sweep_radius is not None:
+                npt.assert_allclose(shape_A.rounding_radius, sweep_radius)
+                npt.assert_allclose(type_shape['rounding_radius'], sweep_radius)
+        for key in ('diameter', 'a', 'b', 'c'):
+            value = shape_class['params'].get(key, None)
+            if value is not None:
+                npt.assert_almost_equal(getattr(shape_A, key), value)
+                npt.assert_almost_equal(type_shape[key], value)
 
 @ddt
 class GSDShapeTest(ShapeTest):
     reader = garnett.reader.GSDHOOMDFileReader
-    extension = 'gsd'
+    extension = '_shape.gsd'
+    mode = 'rb'
+
+    @data(*annotate_shape_test('GSDHOOMDFileReader', get_shape_classes()))
+    def test_shapes(self, shape_class):
+        self.check_shape_class(shape_class)
+
+
+@ddt
+class GSDStateTest(ShapeTest):
+    reader = garnett.reader.GSDHOOMDFileReader
+    extension = '_state.gsd'
     mode = 'rb'
 
     @data(*annotate_shape_test('GSDHOOMDFileReader', get_shape_classes()))
@@ -114,7 +96,7 @@ class GSDShapeTest(ShapeTest):
 @ddt
 class GetarShapeTest(ShapeTest):
     reader = garnett.reader.GetarFileReader
-    extension = 'zip'
+    extension = '.zip'
     mode = 'r'
 
     @data(*annotate_shape_test('GetarFileReader', get_shape_classes()))
@@ -125,7 +107,7 @@ class GetarShapeTest(ShapeTest):
 @ddt
 class POSShapeTest(ShapeTest):
     reader = garnett.reader.PosFileReader
-    extension = 'pos'
+    extension = '.pos'
     mode = 'r'
 
     @data(*annotate_shape_test('PosFileReader', get_shape_classes()))
