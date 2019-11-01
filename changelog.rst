@@ -10,6 +10,12 @@ next
 next
 ----
 
+Version 0.6
+===========
+
+[0.6.0] -- 2019-11-01
+---------------------
+
 Added
 +++++
   - Added ``showEdges`` to skipped fields when reading POS files.
