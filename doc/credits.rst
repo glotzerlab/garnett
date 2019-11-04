@@ -7,6 +7,7 @@ Garnett Developers
 The following people have contributed to the :py:mod:`garnett` package.
 
 Carl Simon Adorf, University of Michigan
+
     * Original Author
     * Former Maintainer
     * Trajectory classes
@@ -20,34 +21,62 @@ Carl Simon Adorf, University of Michigan
     * POS file writer
 
 Richmond Newman, University of Michigan
+
     * Original Author
     * POS file reader
 
 Matthew Spellings, University of Michigan
+
     * CIF file reader
     * GETAR file reader
 
 Julia Dshemuchadse, University of Michigan
+
     * CIF file writer
 
 Vyas Ramasubramani, University of Michigan
+
     * GSD file writer
 
 Bradley Dice, University of Michigan
+
     * Maintainer
     * GETAR file writer
     * Support for additional frame properties
     * Improved support for parsing and writing particle shapes
 
 Sophie Youjung Lee, University of Michigan
+
     * Former Maintainer
     * Universal read and write functions
 
 Luis Y. Rivera-Rivera, University of Michigan
+
     * Maintainer
 
 Kelly Wang, University of Michigan
+
     * Maintainer
+
+Paul Dodd, University of Michigan
+
+Erin Teich, University of Michigan
+
+Pablo Damasceno, University of Michigan
+
+James Proctor, University of Michigan
+
+Jens Glaser, University of Michigan
+
+Mayank Agrawal, University of Michigan
+
+Eric Harper, University of Michigan
+
+Rose Cersonsky, University of Michigan
+
+James Antonaglia, University of Michigan
+
+Chengyu Dai, University of Michigan
 
 Source code
 -----------
