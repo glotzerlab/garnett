@@ -4,14 +4,15 @@ Changelog
 
 The **garnett** package follows `semantic versioning <https://semver.org/>`_.
 
-next
-====
-
-next
-----
-
 Version 0.6
 ===========
+
+[0.6.1] -- 2019-11-05
+---------------------
+
+Fixed
++++++
+  - Fix installation instructions with `pip`
 
 [0.6.0] -- 2019-11-04
 ---------------------
