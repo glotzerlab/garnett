@@ -49,6 +49,26 @@ Luis Y. Rivera-Rivera, University of Michigan
 Kelly Wang, University of Michigan
     * Maintainer
 
+Paul Dodd, University of Michigan
+
+Erin Teich, University of Michigan
+
+Pablo Damasceno, University of Michigan
+
+James Proctor, University of Michigan
+
+Jens Glaser, University of Michigan
+
+Mayank Agrawal, University of Michigan
+
+Eric Harper, University of Michigan
+
+Rose Cersonsky, University of Michigan
+
+James Antonaglia, University of Michigan
+
+Chengyu Dai, University of Michigan
+
 Source code
 -----------
 
