@@ -10,6 +10,12 @@ next
 next
 ----
 
+Version 0.6
+===========
+
+[0.6.0] -- 2019-11-04
+---------------------
+
 Added
 +++++
   - Added ``showEdges`` to skipped fields when reading POS files.
@@ -23,6 +29,10 @@ Changed
 Removed
 +++++++
   - Dropped Python 2 support.
+
+Fixed
++++++
+  - Fix minor bug in ``PosFileWriter`` where default shape definition was incorrectly written.
 
 Version 0.5
 ===========

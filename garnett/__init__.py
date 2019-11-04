@@ -13,7 +13,7 @@ from . import shapes
 from . import trajectory
 from .util import read, write
 
-__version__ = '0.5.0'
+__version__ = '0.6.0'
 
 __all__ = [
     'reader',

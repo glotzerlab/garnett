@@ -16,7 +16,7 @@ else:
 
 setup(
     name='garnett',
-    version='0.5.0',
+    version='0.6.0',
     packages=find_packages(),
 
     ext_modules=cythonize('garnett/*.pyx') if CYTHON else [],
