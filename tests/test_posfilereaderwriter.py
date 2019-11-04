@@ -12,6 +12,8 @@ from ddt import ddt, data
 import garnett
 import numpy as np
 from tempfile import TemporaryDirectory
+import base64
+from garnett.posfilewriter import DEFAULT_SHAPE_DEFINITION
 
 PATH = os.path.join(garnett.__path__[0], '..')
 IN_PATH = os.path.abspath(PATH) == os.path.abspath(os.getcwd())
@@ -161,6 +163,21 @@ class PosFileReaderTest(BasePosFileReaderTest):
         traj.load_arrays()
         self.assert_raise_attribute_error(traj)
 
+    def test_default(self):
+        with TemporaryDirectory() as tmp_dir:
+            gsdfile = 'testfile.gsd'
+            posfile = 'testfile.pos'
+            with open(gsdfile, "wb") as f:
+                f.write(base64.b64decode(garnett.samples.GSD_BASE64))
+            with garnett.read(gsdfile) as traj:
+                with self.assertRaises(AttributeError):
+                    traj[-1].shapedef
+                garnett.write(traj, posfile)
+            with garnett.read(posfile) as traj:
+                for frame in traj:
+                    for name in frame.shapedef.keys():
+                        self.assertEqual(frame.shapedef[name], \
+                                         DEFAULT_SHAPE_DEFINITION)
 
 @unittest.skipIf(not HPMC, 'requires HPMC')
 class HPMCPosFileReaderTest(BasePosFileReaderTest):
