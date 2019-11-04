@@ -30,6 +30,10 @@ Removed
 +++++++
   - Dropped Python 2 support.
 
+Fixed
++++++
+  - Fix minor bug in ``PosFileWriter`` where default shape definition was incorrectly written.
+
 Version 0.5
 ===========
 
