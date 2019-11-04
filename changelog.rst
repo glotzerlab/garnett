@@ -12,7 +12,8 @@ Version 0.6
 
 Fixed
 +++++
-  - Fix installation instructions with `pip`
+  - Fix installation instructions with `pip`.
+  - Removed unnecessary extra headers from changelog.
 
 [0.6.0] -- 2019-11-04
 ---------------------
