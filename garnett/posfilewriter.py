@@ -105,7 +105,7 @@ class PosFileWriter(object):
                     logger.info(
                         "No shape defined for '{}'. "
                         "Using fallback definition.".format(name))
-                    _write('def {} "{}"'.format(name, DEFAULT_SHAPE_DEFINITION))
+                    _write('def {} "{}"'.format(name, DEFAULT_SHAPE_DEFINITION.pos_string))
             except AttributeError:
                 # If AttributeError is raised because the frame does not contain
                 # shape information, fill them all with the default shape
@@ -113,7 +113,7 @@ class PosFileWriter(object):
                     logger.info(
                         "No shape defined for '{}'. "
                         "Using fallback definition.".format(name))
-                    _write('def {} "{}"'.format(name, DEFAULT_SHAPE_DEFINITION))
+                    _write('def {} "{}"'.format(name, DEFAULT_SHAPE_DEFINITION.pos_string))
 
             # Orientations must be provided for all particles
             # If the frame does not have orientations, identity quaternions are used
