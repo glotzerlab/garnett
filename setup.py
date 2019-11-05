@@ -5,6 +5,9 @@ from __future__ import print_function
 from setuptools import setup, find_packages
 import sys
 
+description = "Samples, parsers, and writers for formats used in the Glotzer Group."
+
+# Import Cython if available
 try:
     from Cython.Build import cythonize
     import numpy as np
@@ -13,6 +16,16 @@ except ImportError:
     CYTHON = False
 else:
     CYTHON = True
+
+# Get long description from README.md
+try:
+    this_path = os.path.dirname(os.path.abspath(__file__))
+    fn_readme = os.path.join(this_path, 'README.md')
+    with open(fn_readme) as fh:
+        long_description = fh.read()
+except (IOError, OSError):
+    long_description = description
+
 
 setup(
     name='garnett',
@@ -24,7 +37,8 @@ setup(
 
     author='Carl Simon Adorf',
     author_email='csadorf@umich.edu',
-    description="Samples, parsers, and writers for formats used in the Glotzer Group",
+    description=description,
+    long_description=long_description,
     keywords='simulation trajectory formats particle',
 
     classifiers=[
