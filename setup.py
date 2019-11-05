@@ -1,8 +1,8 @@
 # Copyright (c) 2019 The Regents of the University of Michigan
 # All rights reserved.
 # This software is licensed under the BSD 3-Clause License.
-from __future__ import print_function
 from setuptools import setup, find_packages
+import os
 import sys
 
 description = "Samples, parsers, and writers for formats used in the Glotzer Group."
@@ -39,6 +39,7 @@ setup(
     author_email='csadorf@umich.edu',
     description=description,
     long_description=long_description,
+    long_description_content_type="text/markdown",
     keywords='simulation trajectory formats particle',
 
     classifiers=[
