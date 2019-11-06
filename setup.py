@@ -1,10 +1,13 @@
 # Copyright (c) 2019 The Regents of the University of Michigan
 # All rights reserved.
 # This software is licensed under the BSD 3-Clause License.
-from __future__ import print_function
 from setuptools import setup, find_packages
+import os
 import sys
 
+description = "Samples, parsers, and writers for formats used in the Glotzer Group."
+
+# Import Cython if available
 try:
     from Cython.Build import cythonize
     import numpy as np
@@ -14,9 +17,19 @@ except ImportError:
 else:
     CYTHON = True
 
+# Get long description from README.md
+try:
+    this_path = os.path.dirname(os.path.abspath(__file__))
+    fn_readme = os.path.join(this_path, 'README.md')
+    with open(fn_readme) as fh:
+        long_description = fh.read()
+except (IOError, OSError):
+    long_description = description
+
+
 setup(
     name='garnett',
-    version='0.6.0',
+    version='0.6.1',
     packages=find_packages(),
 
     ext_modules=cythonize('garnett/*.pyx') if CYTHON else [],
@@ -24,7 +37,9 @@ setup(
 
     author='Carl Simon Adorf',
     author_email='csadorf@umich.edu',
-    description="Samples, parsers, and writers for formats used in the Glotzer Group",
+    description=description,
+    long_description=long_description,
+    long_description_content_type="text/markdown",
     keywords='simulation trajectory formats particle',
 
     classifiers=[

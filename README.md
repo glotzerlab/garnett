@@ -20,7 +20,7 @@ This is a collection of samples, parsers and writers for formats used in the Glo
 
 To install this package with pip, execute:
 
-    pip install git+https://github.com/glotzerlab/garnett.git#egg=garnett --user
+    pip install garnett --user
 
 ## Documentation
 
