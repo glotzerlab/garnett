@@ -8,6 +8,7 @@ The trajectory module provides classes to store discretized
 trajectories."""
 
 import logging
+import warnings
 
 import numpy as np
 import rowan
@@ -215,6 +216,13 @@ class Frame(object):
             raise AttributeError('{} not available for this frame'.format(attr))
         else:
             return value
+
+    def _deprecation_warning(self, old_attr, new_attr):
+        warnings.warn(
+            "This property was renamed to %s. %s will be removed in version 0.6.3" %
+            (new_attr, old_attr),
+            DeprecationWarning
+        )
 
     def _raw_frame_to_frame(self, raw_frame, dtype=None):
         """Generate a frame object from a raw frame object."""
@@ -499,6 +507,15 @@ class Frame(object):
         self.load()
         return self._raise_attributeerror('position')
 
+    @property
+    def positions(self):
+        """
+        Nx3 array of coordinated for N particles in 3 dimensions.
+        Deprecated alias for position.
+        """
+        self._deprecation_warning('positions', 'position')
+        return self.position(self)
+
     @position.setter
     def position(self, value):
         # Various sanity checks
@@ -521,6 +538,15 @@ class Frame(object):
         self.load()
         return self._raise_attributeerror('orientation')
 
+    @property
+    def orientations(self):
+        """
+        Nx4 array of rotational coordinates for N particles represented as quaternions.
+        Deprecated alias for orientation.
+        """
+        self._deprecation_warning('orientations', 'orientation')
+        return self.orientation(self)
+
     @orientation.setter
     def orientation(self, value):
         try:
@@ -540,6 +566,15 @@ class Frame(object):
         "Nx3 array of velocities for N particles in 3 dimensions."
         self.load()
         return self._raise_attributeerror('velocity')
+
+    @property
+    def velocities(self):
+        """
+        Nx3 array of velocities for N particles in 3 dimensions.
+        Deprecated alias for velocity.
+        """
+        self._deprecation_warning('velocities', 'velocity')
+        return self.velocity(self)
 
     @velocity.setter
     def velocity(self, value):
@@ -905,6 +940,13 @@ class Trajectory(BaseTrajectory):
         "Returns the size of the largest frame within this trajectory."
         return max((len(f) for f in self.frames))
 
+    def _deprecation_warning(self, old_attr, new_attr):
+        warnings.warn(
+            "This property was renamed to %s. %s will be removed in version 0.6.3" %
+            (new_attr, old_attr),
+            DeprecationWarning
+        )
+
     def load_arrays(self):
         """Load positions, orientations and types into memory.
 
@@ -1102,6 +1144,14 @@ class Trajectory(BaseTrajectory):
         return self._check_nonempty_property('_position')
 
     @property
+    def positions(self):
+        """
+        Deprecated alias for position.
+        """
+        self._deprecation_warning('positions', 'position')
+        return self.position(self)
+
+    @property
     def orientation(self):
         """Access the particle orientations as a numpy array.
 
@@ -1116,6 +1166,12 @@ class Trajectory(BaseTrajectory):
         return self._check_nonempty_property('_orientation')
 
     @property
+    def orientations(self):
+        """Deprecated alias for orientation."""
+        self._deprecation_warning('orientations', 'orientation')
+        return self.orientation(self)
+
+    @property
     def velocity(self):
         """Access the particle velocities as a numpy array.
 
@@ -1126,6 +1182,12 @@ class Trajectory(BaseTrajectory):
             :meth:`~.Trajectory.load`."""
         self._assertarrays_loaded()
         return self._check_nonempty_property('_velocity')
+
+    @property
+    def velocities(self):
+        """Deprecated alias for velocity."""
+        self._deprecation_warning('velocities', 'velocity')
+        return self.velocity(self)
 
     @property
     def mass(self):
