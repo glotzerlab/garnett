@@ -66,16 +66,16 @@ def center_ld(frame):
     b = frame.box
     box = freud.box.Box(Lx=b.Lx, Ly=b.Ly, Lz=b.Lz, xy=b.xy,
                         xz=b.xz, yz=b.yz, is2D=b.dimensions == 2)
-    ld.compute(box, np.asarray(frame.positions, dtype=np.float32))
+    ld.compute(box, np.asarray(frame.position, dtype=np.float32))
     density = ld.getDensity()
     i_max = np.argmax(density)
-    frame.positions -= frame.positions[i_max]
+    frame.position -= frame.position[i_max]
     return frame
 
 
 def center(frame):
     import numpy as np
-    frame.positions -= np.mean(frame.positions, axis=0)
+    frame.position -= np.mean(frame.position, axis=0)
     return frame
 
 
@@ -83,10 +83,10 @@ def select_center(frame, s):
     import numpy as np
     b = np.diag(frame.box.get_box_matrix())
     b_ = b * s
-    select = (np.abs(frame.positions) < b_ / 2).all(axis=1)
+    select = (np.abs(frame.position) < b_ / 2).all(axis=1)
     frame.types = [t for i, t in enumerate(frame.types) if select[i]]
-    frame.positions = frame.positions[select]
-    frame.orientations = frame.orientations[select]
+    frame.position = frame.position[select]
+    frame.orientation = frame.orientation[select]
     frame.box.Lx = b_[0]
     frame.box.Ly = b_[1]
     frame.box.Lz = b_[2]
@@ -96,8 +96,8 @@ def select_center(frame, s):
 def wrap_into_box(frame):
     import numpy as np
     b = np.diag(frame.box.get_box_matrix())
-    images = np.round(frame.positions / b)
-    frame.positions -= images * b
+    images = np.round(frame.position / b)
+    frame.position -= images * b
     return frame
 
 
@@ -210,7 +210,7 @@ if __name__ == '__main__':
     parser.add_argument(
         '-c', '--center',
         action='store_true',
-        help="Center particle positions.")
+        help="Center particle position.")
     parser.add_argument(
         '-d', '--center-by-density',
         action='store_true',

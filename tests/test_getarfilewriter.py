@@ -35,7 +35,7 @@ class BaseGetarFileWriterTest(unittest.TestCase):
         traj.load_arrays()
         len_orig = len(traj)
         readwrite_props = ['N', 'types', 'type_ids',
-                           'positions', 'orientations', 'velocities',
+                           'position', 'orientation', 'velocity',
                            'mass', 'charge', 'diameter',
                            'moment_inertia', 'angmom', 'image']
         original_data = {}

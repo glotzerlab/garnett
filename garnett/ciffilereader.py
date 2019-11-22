@@ -121,7 +121,7 @@ class CifFileFrame(Frame):
         """Extend parent function to also incorporate cif_coordinates"""
         ret = super(CifFileFrame, self)._raw_frame_to_frame(raw_frame, dtype)
         ret.cif_coordinates = np.asarray(raw_frame.cif_coordinates, dtype=dtype)
-        assert len(ret.positions) == len(ret.cif_coordinates)
+        assert len(ret.position) == len(ret.cif_coordinates)
         return ret
 
     def read(self):
@@ -202,7 +202,7 @@ class CifFileFrame(Frame):
         raw_frame = _RawFrameData()
         raw_frame.box = box_matrix
         raw_frame.types = unique_types
-        raw_frame.positions = coordinates
+        raw_frame.position = coordinates
         raw_frame.cif_coordinates = cif_coordinates
         return raw_frame
 

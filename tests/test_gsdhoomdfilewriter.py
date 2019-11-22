@@ -67,7 +67,7 @@ class BaseGSDHOOMDFileWriterTest(unittest.TestCase):
         traj.load_arrays()
         len_orig = len(traj)
         readwrite_props = ['N', 'types', 'type_ids',
-                           'positions', 'orientations', 'velocities',
+                           'position', 'orientation', 'velocity',
                            'mass', 'charge', 'diameter',
                            'moment_inertia', 'angmom', 'image']
         original_data = {}
@@ -116,7 +116,7 @@ class BaseGSDHOOMDFileWriterTest(unittest.TestCase):
                 self.writer.write(traj, tmpfile)
                 written_traj = self.reader.read(tmpfile)
                 assert np.array_equal(written_traj[0].mass, np.ones(27).astype(float))
-                assert np.array_equal(written_traj[0].velocities, np.zeros([27, 3]).astype(float))
+                assert np.array_equal(written_traj[0].velocity, np.zeros([27, 3]).astype(float))
                 assert np.array_equal(written_traj[0].diameter, np.ones(27).astype(float))
                 assert np.array_equal(written_traj[0].moment_inertia, np.zeros([27, 3]).astype(float))
                 assert np.array_equal(written_traj[0].angmom, np.zeros([27, 4]).astype(float))

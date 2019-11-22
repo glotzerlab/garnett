@@ -75,16 +75,16 @@ The actual trajectory data is then either accessed on a *per trajectory* or *per
 Trajectory array access
 -----------------------
 
-Access positions, orientations and types as coherent numpy arrays, by calling the :py:meth:`~.trajectory.Trajectory.load_arrays` method.
-This method will load the complete trajectory into memory and make positions, orientations and types available via properties:
+Access position, orientation and types as coherent numpy arrays, by calling the :py:meth:`~.trajectory.Trajectory.load_arrays` method.
+This method will load the complete trajectory into memory and make position, orientation and types available via properties:
 
 .. code-block:: python
 
     traj.load_arrays()
     traj.N               # M
-    traj.positions       # MxNx3
-    traj.orientations    # MxNx4
-    traj.velocities      # MxNx3
+    traj.position       # MxNx3
+    traj.orientation    # MxNx4
+    traj.velocity      # MxNx3
     traj.mass            # MxN
     traj.charge          # MxN
     traj.diameter        # MxN
@@ -108,9 +108,9 @@ Inidividual frame objects can be accessed via indexing of a (sub-)trajectory obj
     frame = traj[i]
     frame.box              # garnett.trajectory.Box object
     frame.types            # N
-    frame.positions        # Nx3
-    frame.orientations     # Nx4
-    frame.velocities       # Nx3
+    frame.position        # Nx3
+    frame.orientation     # Nx4
+    frame.velocity       # Nx3
     frame.mass             # N
     frame.charge           # N
     frame.diameter         # N
@@ -130,7 +130,7 @@ Each frame will be loaded *prior* to access and unloaded *post* access, such tha
 
     # Iterate over a trajectory directly for read-only data access
     for frame in traj:
-        print(frame.positions)
+        print(frame.position)
 
 Efficient modification of trajectories
 ======================================
@@ -144,7 +144,7 @@ This is an example on how to modify frames in-place:
     import garnett as gt
 
     def center(frame):
-        frame.positions -= np.average(frame.positions, axis=0)
+        frame.position -= np.average(frame.position, axis=0)
         return frame
 
     with gt.read('in.pos') as traj:
@@ -161,12 +161,12 @@ This means that loading all trajectory data into memory requires an explicit cal
 
     # Make trajectory data accessible via arrays:
     traj.load_arrays()
-    traj.positions
+    traj.position
 
     # Load all frames:
     traj.load()
     frame = traj[i]
-    traj.positions    # load() also loads arrays
+    traj.position    # load() also loads arrays
 
 .. note::
 
@@ -179,7 +179,7 @@ Sub-trajectories inherit already loaded data:
 
     traj.load_arrays()
     sub_traj = traj[i:j]
-    sub_traj.positions
+    sub_traj.position
 
 .. tip::
 

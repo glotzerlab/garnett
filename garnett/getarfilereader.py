@@ -49,9 +49,9 @@ class GetarFrame(Frame):
         raw_frame = _RawFrameData()
         raw_frame.shapedef = collections.OrderedDict()
         prop_map = {
-            'position': 'positions',
-            'orientation': 'orientations',
-            'velocity': 'velocities',
+            'position': 'position',
+            'orientation': 'orientation',
+            'velocity': 'velocity',
             'angular_momentum_quat': 'angmom',
             'image': 'image'}
         supported_records = ['position', 'orientation', 'velocity',
@@ -76,7 +76,7 @@ class GetarFrame(Frame):
                 self._records['type'], self._frame)
             raw_frame.types = [names[t] for t in types]
         else:
-            raw_frame.types = len(raw_frame.positions) * [self._default_type]
+            raw_frame.types = len(raw_frame.position) * [self._default_type]
 
         if 'box' in self._records:
             # Read dimension if stored
@@ -85,7 +85,7 @@ class GetarFrame(Frame):
                              self._records['dimensions'], self._frame)[0]
             # Fallback to detection based on z coordinates
             else:
-                zs = raw_frame.positions[:, 2]
+                zs = raw_frame.position[:, 2]
                 dimensions = 2 if np.allclose(zs, 0.0, atol=1e-7) else 3
 
             box = self._trajectory.getRecord(self._records['box'], self._frame)
@@ -158,7 +158,7 @@ class GetarFileReader(object):
             self._frames = _trajectory.queryFrames(_records['position'])
         except KeyError:
             raise RuntimeError("Given trajectory '{}' contained no "
-                               "positions.".format(stream))
+                               "position.".format(stream))
         frames = [GetarFrame(_trajectory, _records, idx, default_type, default_box)
                   for idx in self._frames]
         logger.info("Read {} frames.".format(len(frames)))

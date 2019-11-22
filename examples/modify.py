@@ -14,7 +14,7 @@ logger = logging.getLogger(__name__)
 
 
 def center(frame):
-    frame.positions -= np.average(frame.positions, axis=0)
+    frame.position -= np.average(frame.position, axis=0)
     return frame
 
 

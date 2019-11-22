@@ -128,15 +128,15 @@ class GSDHOOMDFileWriter(object):
                 except AttributeError:
                     pass
                 try:
-                    snap.particles.position = frame.positions
+                    snap.particles.position = frame.position
                 except AttributeError:
                     pass
                 try:
-                    snap.particles.orientation = frame.orientations
+                    snap.particles.orientation = frame.orientation
                 except AttributeError:
                     pass
                 try:
-                    snap.particles.velocity = frame.velocities
+                    snap.particles.velocity = frame.velocity
                 except AttributeError:
                     pass
                 try:

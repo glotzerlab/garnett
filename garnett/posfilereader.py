@@ -109,7 +109,7 @@ class PosFileFrame(Frame):
             num_centers = int(next(tokens))
             vertices = [[] for p in range(num_centers)]
             centers = []
-            orientations = []
+            orientation = []
             colors = []
             for i in range(num_centers):
                 num_vertices = int(next(tokens))
@@ -119,11 +119,11 @@ class PosFileFrame(Frame):
                 xyz = next(tokens), next(tokens), next(tokens)
                 centers.append([self._num(v) for v in xyz])
                 quat = next(tokens), next(tokens), next(tokens), next(tokens)
-                orientations.append([self._num(q) for q in quat])
+                orientation.append([self._num(q) for q in quat])
                 colors.append(next(tokens))
             return ConvexPolyhedronUnionShape(vertices=vertices,
                                               centers=centers,
-                                              orientations=orientations,
+                                              orientation=orientation,
                                               colors=colors)
         elif shape_class.lower() == 'polyv':  # Officially polyV
             num_vertices = int(next(tokens))
@@ -296,29 +296,29 @@ class PosFileFrame(Frame):
                     else:
                         raise ParserError(line)
                     raw_frame.types.append(name)
-                    raw_frame.positions.append([self._num(v) for v in xyz])
+                    raw_frame.position.append([self._num(v) for v in xyz])
                     if quat is None:
-                        raw_frame.orientations.append(quat)
+                        raw_frame.orientation.append(quat)
                     else:
-                        raw_frame.orientations.append([self._num(v) for v in quat])
+                        raw_frame.orientation.append([self._num(v) for v in quat])
 
         # Perform inverse rotation to recover original coordinates
         if raw_frame.view_rotation is not None:
-            pos = rowan.rotate(rowan.inverse(raw_frame.view_rotation), raw_frame.positions)
+            pos = rowan.rotate(rowan.inverse(raw_frame.view_rotation), raw_frame.position)
         else:
-            pos = np.asarray(raw_frame.positions)
+            pos = np.asarray(raw_frame.position)
         # If all the z coordinates are close to zero, set box dimension to 2
         if np.allclose(pos[:, 2], 0.0, atol=1e-7):
             raw_frame.box_dimensions = 2
 
         # If no valid orientations have been added, the array should be empty
-        if all([quat is None for quat in raw_frame.orientations]):
-            raw_frame.orientations = []
+        if all([quat is None for quat in raw_frame.orientation]):
+            raw_frame.orientation = []
         else:
             # Replace values of None with an identity quaternion
-            for i in range(len(raw_frame.orientations)):
-                if raw_frame.orientations[i] is None:
-                    raw_frame.orientations[i] = [1, 0, 0, 0]
+            for i in range(len(raw_frame.orientation)):
+                if raw_frame.orientation[i] is None:
+                    raw_frame.orientation[i] = [1, 0, 0, 0]
         return raw_frame
 
     def __str__(self):

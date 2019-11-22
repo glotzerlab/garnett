@@ -48,28 +48,28 @@ class CifFileWriterTest(BaseCifFileWriterTest):
         traj = self.read_pos_trajectory(sample)
         dump = io.StringIO()
         self.write_trajectory(traj, dump)
-        return (traj[-1].positions, dump)
+        return (traj[-1].position, dump)
 
     def test_incsim_dialect(self):
         sample = io.StringIO(garnett.samples.POS_INCSIM)
         traj = self.read_pos_trajectory(sample)
         dump = io.StringIO()
         self.write_trajectory(traj, dump)
-        return (traj[-1].positions, dump)
+        return (traj[-1].position, dump)
 
     def test_monotype_dialect(self):
         sample = io.StringIO(garnett.samples.POS_MONOTYPE)
         traj = self.read_pos_trajectory(sample)
         dump = io.StringIO()
         self.write_trajectory(traj, dump)
-        return (traj[-1].positions, dump)
+        return (traj[-1].position, dump)
 
     def test_injavis_dialect(self):
         sample = io.StringIO(garnett.samples.POS_INJAVIS)
         traj = self.read_pos_trajectory(sample)
         dump = io.StringIO()
         self.write_trajectory(traj, dump)
-        return (traj[-1].positions, dump)
+        return (traj[-1].position, dump)
 
 
 class CifFileReaderTest(CifFileWriterTest):
@@ -78,62 +78,62 @@ class CifFileReaderTest(CifFileWriterTest):
     # fail because particles in the pos file examples lie outside the box
 
     def test_hpmc_dialect(self):
-        (ref_positions, sample) = super(CifFileReaderTest, self).test_hpmc_dialect()
+        (ref_position, sample) = super(CifFileReaderTest, self).test_hpmc_dialect()
         sample = io.StringIO(sample.getvalue())
         traj = self.read_cif_trajectory(sample)
-        logger.debug('Cif-read positions:')
-        logger.debug(traj[-1].positions)
-        logger.debug('Pos-read positions:')
-        logger.debug(ref_positions)
-        self.assertTrue(np.allclose(traj[-1].positions, ref_positions))
+        logger.debug('Cif-read position:')
+        logger.debug(traj[-1].position)
+        logger.debug('Pos-read position:')
+        logger.debug(ref_position)
+        self.assertTrue(np.allclose(traj[-1].position, ref_position))
 
     def test_incsim_dialect(self):
-        (ref_positions, sample) = super(CifFileReaderTest, self).test_incsim_dialect()
+        (ref_position, sample) = super(CifFileReaderTest, self).test_incsim_dialect()
         sample = io.StringIO(sample.getvalue())
         traj = self.read_cif_trajectory(sample)
-        logger.debug('Cif-read positions:')
-        logger.debug(traj[-1].positions)
-        logger.debug('Pos-read positions:')
-        logger.debug(ref_positions)
-        self.assertTrue(np.allclose(traj[-1].positions, ref_positions))
+        logger.debug('Cif-read position:')
+        logger.debug(traj[-1].position)
+        logger.debug('Pos-read position:')
+        logger.debug(ref_position)
+        self.assertTrue(np.allclose(traj[-1].position, ref_position))
 
     def test_monotype_dialect(self):
-        (ref_positions, sample) = super(CifFileReaderTest, self).test_monotype_dialect()
+        (ref_position, sample) = super(CifFileReaderTest, self).test_monotype_dialect()
         sample = io.StringIO(sample.getvalue())
         traj = self.read_cif_trajectory(sample)
-        logger.debug('Cif-read positions:')
-        logger.debug(traj[-1].positions)
-        logger.debug('Pos-read positions:')
-        logger.debug(ref_positions)
-        self.assertTrue(np.allclose(traj[-1].positions, ref_positions))
+        logger.debug('Cif-read position:')
+        logger.debug(traj[-1].position)
+        logger.debug('Pos-read position:')
+        logger.debug(ref_position)
+        self.assertTrue(np.allclose(traj[-1].position, ref_position))
 
     def test_injavis_dialect(self):
-        (ref_positions, sample) = super(CifFileReaderTest, self).test_injavis_dialect()
+        (ref_position, sample) = super(CifFileReaderTest, self).test_injavis_dialect()
         sample = io.StringIO(sample.getvalue())
         traj = self.read_cif_trajectory(sample)
-        logger.debug('Cif-read positions:')
-        logger.debug(traj[-1].positions)
-        logger.debug('Pos-read positions:')
-        logger.debug(ref_positions)
-        self.assertTrue(np.allclose(traj[-1].positions, ref_positions))
+        logger.debug('Cif-read position:')
+        logger.debug(traj[-1].position)
+        logger.debug('Pos-read position:')
+        logger.debug(ref_position)
+        self.assertTrue(np.allclose(traj[-1].position, ref_position))
 
     def test_cif_read_write(self):
         sample = io.StringIO(garnett.samples.CIF)
         traj = self.read_cif_trajectory(sample)
-        ref_positions = traj[-1].positions
+        ref_position = traj[-1].position
         dump = io.StringIO()
         self.write_trajectory(traj, dump)
         sample = io.StringIO(dump.getvalue())
         traj = self.read_cif_trajectory(sample)
-        logger.debug('Cif-read positions:')
-        logger.debug(traj[-1].positions)
-        logger.debug('original positions:')
-        logger.debug(ref_positions)
+        logger.debug('Cif-read position:')
+        logger.debug(traj[-1].position)
+        logger.debug('original position:')
+        logger.debug(ref_position)
         cif_coordinates = np.array(
                 [[0.333333333, 0.6666666667, 0.25],
                  [0.6666666667, 0.333333333, 0.75]])
 
-        self.assertTrue(np.allclose(traj[-1].positions, ref_positions))
+        self.assertTrue(np.allclose(traj[-1].position, ref_position))
         self.assertTrue(np.allclose(traj[-1].cif_coordinates, cif_coordinates))
 
         with self.assertRaises(ValueError):
