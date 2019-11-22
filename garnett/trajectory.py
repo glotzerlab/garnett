@@ -953,7 +953,8 @@ class Trajectory(BaseTrajectory):
         warnings.warn(
             "This property was renamed to %s. %s will be removed in version 0.6.3" %
             (new_attr, old_attr),
-            DeprecationWarning
+            DeprecationWarning,
+            stacklevel=1
         )
 
     def load_arrays(self):
