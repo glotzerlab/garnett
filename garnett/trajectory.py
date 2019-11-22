@@ -514,7 +514,10 @@ class Frame(object):
         Deprecated alias for position.
         """
         self._deprecation_warning('positions', 'position')
-        return self.position(self)
+        try:
+            return self.position(self)
+        except TypeError:
+            return self.position
 
     @position.setter
     def position(self, value):
@@ -545,7 +548,10 @@ class Frame(object):
         Deprecated alias for orientation.
         """
         self._deprecation_warning('orientations', 'orientation')
-        return self.orientation(self)
+        try:
+            return self.orientation(self)
+        except TypeError:
+            return self.orientation
 
     @orientation.setter
     def orientation(self, value):
@@ -574,7 +580,10 @@ class Frame(object):
         Deprecated alias for velocity.
         """
         self._deprecation_warning('velocities', 'velocity')
-        return self.velocity(self)
+        try:
+            return self.velocity(self)
+        except TypeError:
+            return self.velocity
 
     @velocity.setter
     def velocity(self, value):
@@ -1149,7 +1158,10 @@ class Trajectory(BaseTrajectory):
         Deprecated alias for position.
         """
         self._deprecation_warning('positions', 'position')
-        return self.position(self)
+        try:
+            return self.position(self)
+        except TypeError:
+            return self.position
 
     @property
     def orientation(self):
@@ -1169,7 +1181,10 @@ class Trajectory(BaseTrajectory):
     def orientations(self):
         """Deprecated alias for orientation."""
         self._deprecation_warning('orientations', 'orientation')
-        return self.orientation(self)
+        try:
+            return self.orientation(self)
+        except TypeError:
+            return self.orientation
 
     @property
     def velocity(self):
@@ -1187,7 +1202,10 @@ class Trajectory(BaseTrajectory):
     def velocities(self):
         """Deprecated alias for velocity."""
         self._deprecation_warning('velocities', 'velocity')
-        return self.velocity(self)
+        try:
+            return self.velocity(self)
+        except TypeError:
+            return self.velocity
 
     @property
     def mass(self):
