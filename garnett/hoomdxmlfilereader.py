@@ -89,22 +89,22 @@ def _get_box_matrix(box):
 
 
 def _parse_position(position):
-    for i, position in enumerate(position.text.splitlines()[1:]):
-        yield [float(x) for x in position.split()]
+    for i, position_str in enumerate(position.text.splitlines()[1:]):
+        yield [float(x) for x in position_str.split()]
     if i + 1 != int(position.attrib.get('num', i + 1)):
         warnings.warn("Number of position inconsistent.")
 
 
 def _parse_velocity(velocity):
-    for i, velocity in enumerate(velocity.text.splitlines()[1:]):
-        yield [float(x) for x in velocity.split()]
+    for i, velocity_str in enumerate(velocity.text.splitlines()[1:]):
+        yield [float(x) for x in velocity_str.split()]
     if i + 1 != int(velocity.attrib.get('num', i + 1)):
         warnings.warn("Number of velocity inconsistent.")
 
 
 def _parse_orientation(orientation):
-    for i, orientation in enumerate(orientation.text.splitlines()[1:]):
-        yield [float(x) for x in orientation.split()]
+    for i, orientation_str in enumerate(orientation.text.splitlines()[1:]):
+        yield [float(x) for x in orientation_str.split()]
     if i + 1 != int(orientation.attrib.get('num', i + 1)):
         warnings.warn("Number of orientation inconsistent.")
 
