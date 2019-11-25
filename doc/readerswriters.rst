@@ -144,7 +144,7 @@ DCD
 ---
 
 The *DCD*-format is a very storage efficient *binary* format for storing simple trajectory data.
-The format contains only data about xyz-position and the boxes of individual frames.
+The format contains only data about particle positions and the simulation boxes of individual frames.
 
 HOOMD-blue provides a writer for this format with a special dialect for 2-dimensional systems.
 The *garnett* dcd-reader is capable of reading both the standard and the 2-dim. dialect.
