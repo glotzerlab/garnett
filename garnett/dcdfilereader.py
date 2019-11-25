@@ -5,7 +5,7 @@
 
 Authors: Carl Simon Adorf
 
-A dcd file conists only of position.
+A dcd file consists only of positions.
 To provide additional information it is possible
 to provide a frame object, whose properties
 are copied into each frame of the dcd trajectory.
