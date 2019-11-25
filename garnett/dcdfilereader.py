@@ -25,7 +25,7 @@ The example is given for a hoomd-blue xml frame:
 .. note::
 
     If the topology frame is 2-dimensional, the dcd
-    trajectory position are interpreted such that
+    trajectory positions are interpreted such that
     the first two values contain the xy-coordinates,
     the third value is an euler angle.
 
