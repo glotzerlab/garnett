@@ -210,7 +210,7 @@ if __name__ == '__main__':
     parser.add_argument(
         '-c', '--center',
         action='store_true',
-        help="Center particle position.")
+        help="Center particle positions.")
     parser.add_argument(
         '-d', '--center-by-density',
         action='store_true',
