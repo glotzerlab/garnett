@@ -99,7 +99,7 @@ def _parse_velocity(velocity):
     for i, velocity_str in enumerate(velocity.text.splitlines()[1:]):
         yield [float(x) for x in velocity_str.split()]
     if i + 1 != int(velocity.attrib.get('num', i + 1)):
-        warnings.warn("Number of velocity inconsistent.")
+        warnings.warn("Number of velocities is inconsistent.")
 
 
 def _parse_orientation(orientation):
