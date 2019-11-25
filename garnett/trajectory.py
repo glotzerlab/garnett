@@ -951,7 +951,7 @@ class Trajectory(BaseTrajectory):
 
     def _deprecation_warning(self, old_attr, new_attr):
         warnings.warn(
-            "This property was renamed to %s. %s will be removed in version 0.6.3" %
+            "This property was renamed to %s. %s will be removed in version 0.8.0" %
             (new_attr, old_attr),
             DeprecationWarning,
             stacklevel=1
