@@ -92,7 +92,7 @@ def _parse_position(position):
     for i, position_str in enumerate(position.text.splitlines()[1:]):
         yield [float(x) for x in position_str.split()]
     if i + 1 != int(position.attrib.get('num', i + 1)):
-        warnings.warn("Number of position inconsistent.")
+        warnings.warn("Number of positions is inconsistent.")
 
 
 def _parse_velocity(velocity):
