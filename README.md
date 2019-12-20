@@ -24,7 +24,7 @@ To install this package with pip, execute:
 
 ## Documentation
 
-**The package's documentation is available at:** [http://glotzerlab.engin.umich.edu/garnett/](http://glotzerlab.engin.umich.edu/garnett/)
+**The package's documentation is available at:** [https://garnett.readthedocs.io/](https://garnett.readthedocs.io/)
 
 To build the documentation yourself using sphinx, execute within the repository:
 
