@@ -105,7 +105,7 @@ def read(filename_or_fileobj, template=None, fmt=None):
         if template is None:
             traj = file_reader.read(read_file)
             yield traj
-        elif file_format == 'gsd':
+        elif file_format in ['gsd', 'dcd']:
             file_reader = READ_CLASS_MODES[file_format]['reader']()
             with read(template) as templatetraj:
                 traj = file_reader.read(read_file, templatetraj[0])
