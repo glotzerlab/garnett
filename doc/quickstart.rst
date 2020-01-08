@@ -75,7 +75,7 @@ The actual trajectory data is then either accessed on a *per trajectory* or *per
 Trajectory array access
 -----------------------
 
-Access position, orientation and types as coherent numpy arrays, by calling the :py:meth:`~.trajectory.Trajectory.load_arrays` method.
+Access to fields like position, orientation, and types as coherent numpy arrays, by calling the :py:meth:`~.trajectory.Trajectory.load_arrays` method.
 This method will load the complete trajectory into memory and make position, orientation and types available via properties:
 
 .. code-block:: python
