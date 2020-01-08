@@ -329,7 +329,7 @@ class Frame(object):
     def copyto_snapshot(self, snapshot):
         "Copy this frame to a HOOMD-blue snapshot."
         self.load()
-        return copyto_hoomd_blue_snapshot(self.frame_data, snapshot)
+        return to_hoomd_snapshot(self.frame_data, snapshot)
 
     def to_plato_scene(self, backend, scene=None):
         """Create a plato scene from this frame.
