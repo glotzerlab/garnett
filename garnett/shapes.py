@@ -341,18 +341,18 @@ class ConvexPolyhedronUnionShape(Shape):
         list
     """
 
-    def __init__(self, vertices, centers, orientation, colors=None):
+    def __init__(self, vertices, centers, orientations, colors=None):
         super(ConvexPolyhedronUnionShape, self).__init__(
             shape_class='poly3d_union', color='')
         self.vertices = vertices
         self.centers = centers
-        self.orientation = orientation
+        self.orientations = orientations
         self.colors = colors
 
     @property
     def pos_string(self):
         shape_def = '{} {} '.format(self.shape_class, len(self.centers))
-        for verts, p, q, c in zip(self.vertices, self.centers, self.orientation, self.colors):
+        for verts, p, q, c in zip(self.vertices, self.centers, self.orientations, self.colors):
             shape_def += '{0} '.format(len(verts))
             for v in verts:
                 shape_def += '{0} {1} {2} '.format(*v)
