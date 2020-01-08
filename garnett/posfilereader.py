@@ -109,7 +109,7 @@ class PosFileFrame(Frame):
             num_centers = int(next(tokens))
             vertices = [[] for p in range(num_centers)]
             centers = []
-            orientation = []
+            orientations = []
             colors = []
             for i in range(num_centers):
                 num_vertices = int(next(tokens))
@@ -119,11 +119,11 @@ class PosFileFrame(Frame):
                 xyz = next(tokens), next(tokens), next(tokens)
                 centers.append([self._num(v) for v in xyz])
                 quat = next(tokens), next(tokens), next(tokens), next(tokens)
-                orientation.append([self._num(q) for q in quat])
+                orientations.append([self._num(q) for q in quat])
                 colors.append(next(tokens))
             return ConvexPolyhedronUnionShape(vertices=vertices,
                                               centers=centers,
-                                              orientation=orientation,
+                                              orientations=orientations,
                                               colors=colors)
         elif shape_class.lower() == 'polyv':  # Officially polyV
             num_vertices = int(next(tokens))
