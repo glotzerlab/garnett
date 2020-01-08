@@ -82,9 +82,9 @@ This method will load the complete trajectory into memory and make position, ori
 
     traj.load_arrays()
     traj.N               # M
-    traj.position       # MxNx3
-    traj.orientation    # MxNx4
-    traj.velocity      # MxNx3
+    traj.position        # MxNx3
+    traj.orientation     # MxNx4
+    traj.velocity        # MxNx3
     traj.mass            # MxN
     traj.charge          # MxN
     traj.diameter        # MxN
@@ -108,9 +108,9 @@ Inidividual frame objects can be accessed via indexing of a (sub-)trajectory obj
     frame = traj[i]
     frame.box              # garnett.trajectory.Box object
     frame.types            # N
-    frame.position        # Nx3
-    frame.orientation     # Nx4
-    frame.velocity       # Nx3
+    frame.position         # Nx3
+    frame.orientation      # Nx4
+    frame.velocity         # Nx3
     frame.mass             # N
     frame.charge           # N
     frame.diameter         # N
