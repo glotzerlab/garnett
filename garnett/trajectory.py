@@ -1380,6 +1380,14 @@ def to_hoomd_snapshot(frame, snapshot=None):
     return snapshot
 
 
+def copy_to_hoomd_blue_snapshot(frame, snapshot=None):
+    warnings.warn(
+            "This function was renamed to {}. {} will be removed in version 0.8.0.".format("to_hoomd_snapshot(frame, snapshot)", "copy_to_hoomd_blue_snapshot(frame, snapshot)"),
+            DeprecationWarning
+            )
+    return to_hoomd_snapshot(frame, snapshot)
+
+
 def copyfrom_hoomd_blue_snapshot(frame, snapshot):
     """"Copy the HOOMD-blue snapshot into the frame.
 
