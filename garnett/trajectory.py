@@ -107,7 +107,7 @@ class FrameData(object):
         self.orientation = None
         "Nx4 array of rotational coordinates for N particles represented as quaternions."
         self.velocity = None
-        "Nx3 array of velocity for N particles in 3 dimensions."
+        "Nx3 array of velocities for N particles in 3 dimensions."
         self.mass = None
         "Nx1 array of masses for N particles."
         self.charge = None
@@ -178,9 +178,9 @@ class _RawFrameData(object):
         self.box = None
         self.box_dimensions = 3
         self.types = list()                         # Nx1
-        self.position = list()                     # Nx3
-        self.orientation = list()                  # Nx4
-        self.velocity = list()                    # Nx3
+        self.position = list()                      # Nx3
+        self.orientation = list()                   # Nx4
+        self.velocity = list()                      # Nx3
         self.mass = list()                          # Nx1
         self.charge = list()                        # Nx1
         self.diameter = list()                      # Nx1
