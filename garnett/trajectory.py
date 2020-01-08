@@ -1387,7 +1387,7 @@ def _generate_type_id_array(types, type_ids):
     return _type
 
 
-def copyto_hoomd_blue_snapshot(frame, snapshot):
+def to_hoomd_snapshot(frame, snapshot=None):
     "Copy the frame into a HOOMD-blue snapshot."
     if frame.position is not None:
         np.copyto(snapshot.particles.position, frame.position)
