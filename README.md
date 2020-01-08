@@ -42,7 +42,7 @@ import garnett
 # Autodetects file format for a uniform trajectory API
 with garnett.read('gsdfile.gsd') as traj:
     for frame in traj:
-        pos = frame.positions
+        pos = frame.position
 
 # Simple conversion of trajectory formats
 with garnett.read('posfile.pos') as traj:
@@ -64,9 +64,9 @@ sub_trajectory = traj[i:j]
 Access properties of trajectories:
 ```
 traj.load_arrays()
-traj.positions       # MxNx3
-traj.orientations    # MxNx4
-traj.velocities      # MxNx3
+traj.position        # MxNx3
+traj.orientation     # MxNx4
+traj.velocity        # MxNx3
 traj.mass            # MxN
 traj.charge          # MxN
 traj.diameter        # MxN
@@ -82,9 +82,9 @@ Access properties of individual frames:
 frame = traj[i]
 frame.box              # 3x3 matrix (not required to be upper-triangular)
 frame.types            # N
-frame.positions        # Nx3
-frame.orientations     # Nx4
-frame.velocities       # Nx3
+frame.position         # Nx3
+frame.orientation      # Nx4
+frame.velocity         # Nx3
 frame.mass             # N
 frame.charge           # N
 frame.diameter         # N
