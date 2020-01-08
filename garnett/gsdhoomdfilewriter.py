@@ -123,46 +123,21 @@ class GSDHOOMDFileWriter(object):
                 except AttributeError:
                     types = ['A']
                 snap.particles.types = types
-                try:
-                    snap.particles.typeid = [types.index(typeid) for typeid in frame.types]
-                except AttributeError:
-                    pass
-                try:
-                    snap.particles.position = frame.position
-                except AttributeError:
-                    pass
-                try:
-                    snap.particles.orientation = frame.orientation
-                except AttributeError:
-                    pass
-                try:
-                    snap.particles.velocity = frame.velocity
-                except AttributeError:
-                    pass
-                try:
-                    snap.particles.mass = frame.mass
-                except AttributeError:
-                    pass
-                try:
-                    snap.particles.charge = frame.charge
-                except AttributeError:
-                    pass
-                try:
-                    snap.particles.diameter = frame.diameter
-                except AttributeError:
-                    pass
-                try:
-                    snap.particles.moment_inertia = frame.moment_inertia
-                except AttributeError:
-                    pass
-                try:
-                    snap.particles.angmom = frame.angmom
-                except AttributeError:
-                    pass
-                try:
-                    snap.particles.image = frame.image
-                except AttributeError:
-                    pass
+                for prop in [
+                        'position',
+                        'orientation',
+                        'velocity',
+                        'mass',
+                        'charge',
+                        'diameter',
+                        'moment_intertia',
+                        'angmom',
+                        'image'
+                        ]:
+                    try:
+                        setattr(snap.particles, prop, getattr(frame, prop))
+                    except AttributeError:
+                        pass
                 snap.configuration.box = frame.box.get_box_array()
                 snap.configuration.dimensions = frame.box.dimensions
                 try:
