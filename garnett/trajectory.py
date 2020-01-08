@@ -165,7 +165,7 @@ class FrameData(object):
 
     def copyto_snapshot(self, snapshot):
         "Copy this frame to a HOOMD-blue snapshot."
-        return copyto_hoomd_blue_snapshot(self, snapshot)
+        return to_hoomd_snapshot(self, snapshot)
 
 
 class _RawFrameData(object):
@@ -1420,4 +1420,4 @@ def make_hoomd_blue_snapshot(frame):
     np.copyto(
         snapshot.particles.typeid,
         np.array(type_ids, dtype=snapshot.particles.typeid.dtype))
-    return copyto_hoomd_blue_snapshot(frame, snapshot)
+    return to_hoomd_snapshot(frame, snapshot)
