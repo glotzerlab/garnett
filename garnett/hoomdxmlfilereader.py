@@ -106,11 +106,11 @@ def _parse_orientation(orientation):
     for i, orientation_str in enumerate(orientation.text.splitlines()[1:]):
         yield [float(x) for x in orientation_str.split()]
     if i + 1 != int(orientation.attrib.get('num', i + 1)):
-        warnings.warn("Number of orientation inconsistent.")
+        warnings.warn("Number of orientations is inconsistent.")
 
 
 def _parse_types(types):
     for i, type in enumerate(types.text.splitlines()[1:]):
         yield str(type)
     if i + 1 != int(types.attrib.get('num', i)):
-        warnings.warn("Number of types inconsistent.")
+        warnings.warn("Number of types is inconsistent.")
