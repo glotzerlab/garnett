@@ -53,7 +53,7 @@ File Formats
 This table outlines the supported properties of each format reader and writer.
 
 +--------+-----------+-----+--------------+------------+-------+-----------------------------------+
-| Format | Position | Box | Orientation | Velocity | Shape | Additional Properties (See below) |
+| Format |  Position | Box |  Orientation |  Velocity  | Shape | Additional Properties (See below) |
 +--------+-----------+-----+--------------+------------+-------+-----------------------------------+
 |    POS |     RW    |  RW |      RW      |    N/A+    |   RW  |                N/A                |
 +--------+-----------+-----+--------------+------------+-------+-----------------------------------+
