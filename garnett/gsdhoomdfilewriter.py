@@ -123,17 +123,7 @@ class GSDHOOMDFileWriter(object):
                 except AttributeError:
                     types = ['A']
                 snap.particles.types = types
-                for prop in [
-                        'position',
-                        'orientation',
-                        'velocity',
-                        'mass',
-                        'charge',
-                        'diameter',
-                        'moment_intertia',
-                        'angmom',
-                        'image'
-                        ]:
+                for prop in trajectory.TRAJ_ATTRIBUTES[4:]:
                     try:
                         setattr(snap.particles, prop, getattr(frame, prop))
                     except AttributeError:
@@ -147,4 +137,3 @@ class GSDHOOMDFileWriter(object):
                     pass
                 traj_outfile.append(snap)
                 logger.debug("Wrote frame {}.".format(i + 1))
-        logger.info("Wrote {} frames.".format(i + 1))
