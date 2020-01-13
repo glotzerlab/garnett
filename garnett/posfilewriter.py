@@ -116,12 +116,9 @@ class PosFileWriter(object):
                     _write('def {} "{}"'.format(name, DEFAULT_SHAPE_DEFINITION.pos_string))
 
             # Orientations must be provided for all particles
-            # If the frame does not have orientations, identity quaternions are used
-            try:
-                orientation = frame.orientation
-            except AttributeError:
-                orientation = np.array([[1, 0, 0, 0]] * len(frame.types))
-
+            # If the frame does not have orientations, identity quaternions are use
+            orientation = getattr(frame, 'orientation', np.array([[1, 0, 0, 0]] * len(frame.types)))
+            
             for name, pos, rot in zip(frame.types, frame.position,
                                       orientation):
 
