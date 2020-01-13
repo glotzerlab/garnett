@@ -313,6 +313,17 @@ class Frame(object):
             raise ValueError("Input array must be of shape (N,{}) where N is the number of particles.".format(size))
         return value
 
+    def _validate_input_scalar(self, value):
+        try:
+            value = np.asarray(value, dtype=self._dtype)
+        except ValueError:
+            raise ValueError("This property can only be set to numeric arrays.")
+        if not np.all(np.isfinite(value)):
+            raise ValueError("Property being set must all be finite numbers.")
+        elif not len(value.shape) == 1:
+            raise ValueError("Input array must be of shape (N) where N is the number of particles.")
+        return value
+
     def loaded(self):
         "Returns True if the frame is loaded into memory."
         return self.frame_data is not None
@@ -605,14 +616,7 @@ class Frame(object):
 
     @mass.setter
     def mass(self, value):
-        try:
-            value = np.asarray(value, dtype=self._dtype)
-        except ValueError:
-            raise ValueError("Masses can only be set to numeric arrays.")
-        if not np.all(np.isfinite(value)):
-            raise ValueError("Masses being set must all be finite numbers.")
-        elif not len(value.shape) == 1:
-            raise ValueError("Input array must be of shape (N) where N is the number of particles.")
+        self._validate_input_scalar(value)
         self.load()
         self.frame_data.mass = value
 
@@ -624,14 +628,7 @@ class Frame(object):
 
     @charge.setter
     def charge(self, value):
-        try:
-            value = np.asarray(value, dtype=self._dtype)
-        except ValueError:
-            raise ValueError("Charges can only be set to numeric arrays.")
-        if not np.all(np.isfinite(value)):
-            raise ValueError("Charges being set must all be finite numbers.")
-        elif not len(value.shape) == 1:
-            raise ValueError("Input array must be of shape (N) where N is the number of particles.")
+        self._validate_input_scalar(value)
         self.load()
         self.frame_data.charge = value
 
@@ -643,14 +640,7 @@ class Frame(object):
 
     @diameter.setter
     def diameter(self, value):
-        try:
-            value = np.asarray(value, dtype=self._dtype)
-        except ValueError:
-            raise ValueError("Diameters can only be set to numeric arrays.")
-        if not np.all(np.isfinite(value)):
-            raise ValueError("Diameters being set must all be finite numbers.")
-        elif not len(value.shape) == 1:
-            raise ValueError("Input array must be of shape (N) where N is the number of particles.")
+        self._validate_input_scalar(value)
         self.load()
         self.frame_data.diameter = value
 
@@ -663,14 +653,7 @@ class Frame(object):
     @moment_inertia.setter
     def moment_inertia(self, value):
         ndof = self.box.dimensions * (self.box.dimensions - 1) / 2
-        try:
-            value = np.asarray(value, dtype=self._dtype)
-        except ValueError:
-            raise ValueError("Moments of inertia can only be set to numeric arrays.")
-        if not np.all(np.isfinite(value)):
-            raise ValueError("Moments of inertia being set must all be finite numbers.")
-        elif not len(value.shape) == 2 or value.shape[1] != ndof:
-            raise ValueError("Input array must be of shape (N,{}) where N is the number of particles.".format(ndof))
+        self._validate_input_array(value, ndof)
         self.load()
         self.frame_data.moment_inertia = value
 
@@ -682,15 +665,7 @@ class Frame(object):
 
     @angmom.setter
     def angmom(self, value):
-        try:
-            value = np.asarray(value, dtype=self._dtype)
-        except ValueError:
-            raise ValueError("Angular momenta can only be set to numeric arrays.")
-        if not np.all(np.isfinite(value)):
-            raise ValueError("Angular momenta being set must all be finite numbers.")
-        elif not len(value.shape) == 2 or value.shape[1] != 4:
-            raise ValueError("Input array must be of shape (N,4) where N is the number of particles.")
-
+        self._validate_input_array(value, 4)
         self.load()
         self.frame_data.angmom = value
 
@@ -702,14 +677,7 @@ class Frame(object):
 
     @image.setter
     def image(self, value):
-        try:
-            value = np.asarray(value, dtype=np.int32)
-        except ValueError:
-            raise ValueError("Images can only be set to numeric arrays.")
-        if not np.all(np.isfinite(value)):
-            raise ValueError("Images being set must all be finite numbers.")
-        elif not len(value.shape) == 2 or value.shape[1] != 3:
-            raise ValueError("Input array must be of shape (N,3) where N is the number of particles.")
+        self._validate_input_array(value, 3)
         self.load()
         self.frame_data.image = value
 
