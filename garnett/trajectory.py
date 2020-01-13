@@ -1445,8 +1445,8 @@ def from_hoomd_snapshot(frame, snapshot):
 def copyfrom_hoomd_blue_snapshot(frame, snapshot):
     warnings.warn(
         "This function was renamed to {}. {} will be removed in version 0.8.0.".format(
-            "to_hoomd_snapshot(frame, snapshot)",
-            "copy_to_hoomd_blue_snapshot(frame, snapshot)"
+            "from_hoomd_snapshot(frame, snapshot)",
+            "copyfrom_hoomd_blue_snapshot(frame, snapshot)"
         ),
         DeprecationWarning
     )
