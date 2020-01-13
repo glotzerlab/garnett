@@ -1421,7 +1421,7 @@ def copy_to_hoomd_blue_snapshot(frame, snapshot=None):
     return to_hoomd_snapshot(frame, snapshot)
 
 
-def copyfrom_hoomd_blue_snapshot(frame, snapshot):
+def from_hoomd_snapshot(frame, snapshot):
     """"Copy the HOOMD-blue snapshot into the frame.
 
     Note that only the properties listed below will be copied.
@@ -1440,6 +1440,17 @@ def copyfrom_hoomd_blue_snapshot(frame, snapshot):
     frame.angmom = snapshot.particles.angmom
     frame.image = snapshot.particles.image
     return frame
+
+
+def copyfrom_hoomd_blue_snapshot(frame, snapshot):
+    warnings.warn(
+        "This function was renamed to {}. {} will be removed in version 0.8.0.".format(
+            "to_hoomd_snapshot(frame, snapshot)",
+            "copy_to_hoomd_blue_snapshot(frame, snapshot)"
+        ),
+        DeprecationWarning
+    )
+    return from_hoomd_snapshot(frame, snapshot)
 
 
 def make_hoomd_blue_snapshot(frame):
