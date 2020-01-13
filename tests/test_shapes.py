@@ -70,7 +70,6 @@ class ShapeTest(unittest.TestCase):
                 npt.assert_almost_equal(getattr(shape_A, key), value)
                 npt.assert_almost_equal(type_shape[key], value)
 
-
 @ddt
 class GSDShapeTest(ShapeTest):
     reader = garnett.reader.GSDHOOMDFileReader

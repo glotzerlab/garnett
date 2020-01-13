@@ -164,7 +164,7 @@ class PosFileReaderTest(BasePosFileReaderTest):
         self.assert_raise_attribute_error(traj)
 
     def test_default(self):
-        with TemporaryDirectory() as _:
+        with TemporaryDirectory() as tmp_dir:
             gsdfile = 'testfile.gsd'
             posfile = 'testfile.pos'
             with open(gsdfile, "wb") as f:
@@ -176,9 +176,8 @@ class PosFileReaderTest(BasePosFileReaderTest):
             with garnett.read(posfile) as traj:
                 for frame in traj:
                     for name in frame.shapedef.keys():
-                        self.assertEqual(frame.shapedef[name],
+                        self.assertEqual(frame.shapedef[name], \
                                          DEFAULT_SHAPE_DEFINITION)
-
 
 @unittest.skipIf(not HPMC, 'requires HPMC')
 class HPMCPosFileReaderTest(BasePosFileReaderTest):
