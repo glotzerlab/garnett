@@ -526,14 +526,14 @@ class Frame(object):
     @position.setter
     def position(self, value):
         # Various sanity checks
-        value = self._validate_input_array(value, self.box.dimensions)
+        value = self._validate_input_array(value, 3)
         self.load()
         self.frame_data.position = value
 
     @positions.setter
     def positions(self, value):
         # Various sanity checks
-        value = self._validate_input_array(value, self.box.dimensions)
+        value = self._validate_input_array(value, 3)
         self.load()
         self.frame_data.position = value
 
@@ -584,13 +584,13 @@ class Frame(object):
 
     @velocity.setter
     def velocity(self, value):
-        self._validate_input_array(value, self.box.dimensions)
+        self._validate_input_array(value, 3)
         self.load()
         self.frame_data.velocity = value
 
     @velocities.setter
     def velocities(self, value):
-        self._validate_input_array(value, self.box.dimensions)
+        self._validate_input_array(value, 3)
         self.load()
         self.frame_data.velocity = value
 
