@@ -283,7 +283,7 @@ class Frame(object):
         ret.data_keys = raw_frame.data_keys
         ret.view_rotation = raw_frame.view_rotation
         # validate data
-        for prop in FRAME_ATTRIBUTES:
+        for prop in self.FRAME_ATTRIBUTES:
             if getattr(ret, prop) is not None:
                 assert N == len(getattr(ret, prop))
         return ret
