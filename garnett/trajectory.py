@@ -282,24 +282,10 @@ class Frame(object):
         ret.data = raw_frame.data
         ret.data_keys = raw_frame.data_keys
         ret.view_rotation = raw_frame.view_rotation
-        assert N == len(ret.types)
-        assert N == len(ret.position)
-        if ret.orientation is not None:
-            assert N == len(ret.orientation)
-        if ret.velocity is not None:
-            assert N == len(ret.velocity)
-        if ret.mass is not None:
-            assert N == len(ret.mass)
-        if ret.charge is not None:
-            assert N == len(ret.charge)
-        if ret.diameter is not None:
-            assert N == len(ret.diameter)
-        if ret.moment_inertia is not None:
-            assert N == len(ret.moment_inertia)
-        if ret.angmom is not None:
-            assert N == len(ret.angmom)
-        if ret.image is not None:
-            assert N == len(ret.image)
+        # validate data
+        for prop in FRAME_ATTRIBUTES:
+            if getattr(ret, prop) is not None:
+                assert N == len(getattr(ret, prop))
         return ret
 
     def _validate_input_array(self, value, size):
