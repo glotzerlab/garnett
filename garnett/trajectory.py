@@ -228,7 +228,7 @@ class Frame(object):
         else:
             return value
 
-    def _validate_input_array(self, value, dim=None, nelem=None):
+    def _validate_input_array(self, value, dim, nelem=None):
         try:
             value = np.asarray(value, dtype=self._dtype)
         except ValueError:
@@ -237,7 +237,7 @@ class Frame(object):
             raise ValueError("Property being set must all be finite numbers.")
         elif len(value.shape) != dim:
             raise ValueError("Input array must be {}-dimensional".format(dim))
-        elif dim == 2 and value.shape[0] != nelem:
+        elif dim == 2 and value.shape[1] != nelem:
             raise ValueError("Input array must be of shape (N,{}) where N is the number of particles.".format(nelem))
         return value
 
@@ -251,7 +251,7 @@ class Frame(object):
         """Generate a frame object from a raw frame object."""
         N = len(raw_frame.types)
         ret = FrameData()
-        
+
         mapping = dict()
         for prop in self.FRAME_ATTRIBUTES:
             mapping[prop] = np.asarray(getattr(raw_frame, prop), dtype=dtype)
