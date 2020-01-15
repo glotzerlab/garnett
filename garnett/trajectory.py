@@ -228,6 +228,19 @@ class Frame(object):
         else:
             return value
 
+    def _validate_input_array(self, value, dim=None, nelem=None):
+        try:
+            value = np.asarray(value, dtype=self._dtype)
+        except ValueError:
+            raise ValueError("This property can only be set to numeric arrays.")
+        if not np.all(np.isfinite(value)):
+            raise ValueError("Property being set must all be finite numbers.")
+        elif len(value.shape) != dim:
+            raise ValueError("Input array must be {}-dimensional".format(dim))
+        elif dim == 2 and value.shape[0] != nelem:
+            raise ValueError("Input array must be of shape (N,{}) where N is the number of particles.".format(nelem))
+        return value
+
     def _deprecation_warning(self, old_attr, new_attr):
         warnings.warn(
             "This property was renamed to {}. {} will be removed in version 0.8.0.".format(new_attr, old_attr),
@@ -287,28 +300,6 @@ class Frame(object):
             if getattr(ret, prop) is not None:
                 assert N == len(getattr(ret, prop))
         return ret
-
-    def _validate_input_array(self, value, size):
-        try:
-            value = np.asarray(value, dtype=self._dtype)
-        except ValueError:
-            raise ValueError("This property can only be set to numeric arrays.")
-        if not np.all(np.isfinite(value)):
-            raise ValueError("Property being set must all be finite numbers.")
-        elif not len(value.shape) == 2 or value.shape[1] != size:
-            raise ValueError("Input array must be of shape (N,{}) where N is the number of particles.".format(size))
-        return value
-
-    def _validate_input_scalar(self, value):
-        try:
-            value = np.asarray(value, dtype=self._dtype)
-        except ValueError:
-            raise ValueError("This property can only be set to numeric arrays.")
-        if not np.all(np.isfinite(value)):
-            raise ValueError("Property being set must all be finite numbers.")
-        elif not len(value.shape) == 1:
-            raise ValueError("Input array must be of shape (N) where N is the number of particles.")
-        return value
 
     def loaded(self):
         "Returns True if the frame is loaded into memory."
@@ -514,6 +505,13 @@ class Frame(object):
         self.load()
         return self._raise_attributeerror('position')
 
+    @position.setter
+    def position(self, value):
+        # Various sanity checks
+        value = self._validate_input_array(value, dim=2, nelem=3)
+        self.load()
+        self.frame_data.position = value
+
     @property
     def positions(self):
         """
@@ -523,17 +521,10 @@ class Frame(object):
         self._deprecation_warning('positions', 'position')
         return self.position
 
-    @position.setter
-    def position(self, value):
-        # Various sanity checks
-        value = self._validate_input_array(value, 3)
-        self.load()
-        self.frame_data.position = value
-
     @positions.setter
     def positions(self, value):
         # Various sanity checks
-        value = self._validate_input_array(value, 3)
+        value = self._validate_input_array(value, dim=2, nelem=3)
         self.load()
         self.frame_data.position = value
 
@@ -543,6 +534,12 @@ class Frame(object):
         self.load()
         return self._raise_attributeerror('orientation')
 
+    @orientation.setter
+    def orientation(self, value):
+        value = self._validate_input_array(value, dim=2, nelem=4)
+        self.load()
+        self.frame_data.orientation = value
+
     @property
     def orientations(self):
         """
@@ -550,20 +547,11 @@ class Frame(object):
         Deprecated alias for orientation.
         """
         self._deprecation_warning('orientations', 'orientation')
-        try:
-            return self.orientation(self)
-        except TypeError:
-            return self.orientation
-
-    @orientation.setter
-    def orientation(self, value):
-        self._validate_input_array(value, 4)
-        self.load()
-        self.frame_data.orientation = value
+        return self.orientation
 
     @orientations.setter
     def orientations(self, value):
-        self._validate_input_array(value, 4)
+        value = self._validate_input_array(value, dim=2, nelem=4)
         self.load()
         self.frame_data.orientation = value
 
@@ -572,6 +560,12 @@ class Frame(object):
         "Nx3 array of velocities for N particles in 3 dimensions."
         self.load()
         return self._raise_attributeerror('velocity')
+
+    @velocity.setter
+    def velocity(self, value):
+        value = self._validate_input_array(value, dim=2, nelem=3)
+        self.load()
+        self.frame_data.velocity = value
 
     @property
     def velocities(self):
@@ -582,15 +576,9 @@ class Frame(object):
         self._deprecation_warning('velocities', 'velocity')
         return self.velocity
 
-    @velocity.setter
-    def velocity(self, value):
-        self._validate_input_array(value, 3)
-        self.load()
-        self.frame_data.velocity = value
-
     @velocities.setter
     def velocities(self, value):
-        self._validate_input_array(value, 3)
+        value = self._validate_input_array(value, dim=2, nelem=3)
         self.load()
         self.frame_data.velocity = value
 
@@ -602,7 +590,7 @@ class Frame(object):
 
     @mass.setter
     def mass(self, value):
-        self._validate_input_scalar(value)
+        value = self._validate_input_array(value, dim=1)
         self.load()
         self.frame_data.mass = value
 
@@ -614,7 +602,7 @@ class Frame(object):
 
     @charge.setter
     def charge(self, value):
-        self._validate_input_scalar(value)
+        value = self._validate_input_array(value, dim=1)
         self.load()
         self.frame_data.charge = value
 
@@ -626,7 +614,7 @@ class Frame(object):
 
     @diameter.setter
     def diameter(self, value):
-        self._validate_input_scalar(value)
+        value = self._validate_input_array(value, dim=1)
         self.load()
         self.frame_data.diameter = value
 
@@ -639,7 +627,7 @@ class Frame(object):
     @moment_inertia.setter
     def moment_inertia(self, value):
         ndof = self.box.dimensions * (self.box.dimensions - 1) / 2
-        self._validate_input_array(value, ndof)
+        self._validate_input_array(value, dim=2, nelem=ndof)
         self.load()
         self.frame_data.moment_inertia = value
 
@@ -651,7 +639,7 @@ class Frame(object):
 
     @angmom.setter
     def angmom(self, value):
-        self._validate_input_array(value, 4)
+        value = self._validate_input_array(value, dim=2, nelem=4)
         self.load()
         self.frame_data.angmom = value
 
@@ -663,7 +651,7 @@ class Frame(object):
 
     @image.setter
     def image(self, value):
-        self._validate_input_array(value, 3)
+        value = self._validate_input_array(value, dim=2, nelem=3)
         self.load()
         self.frame_data.image = value
 
