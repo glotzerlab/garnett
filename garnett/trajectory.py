@@ -251,45 +251,28 @@ class Frame(object):
         """Generate a frame object from a raw frame object."""
         N = len(raw_frame.types)
         ret = FrameData()
-        position = np.asarray(raw_frame.position, dtype=dtype)
-        if len(position) == 0:
-            position = None
-        orientation = np.asarray(raw_frame.orientation, dtype=dtype)
-        if len(orientation) == 0:
-            orientation = None
-        velocity = np.asarray(raw_frame.velocity, dtype=dtype)
-        if len(velocity) == 0:
-            velocity = None
-        mass = np.asarray(raw_frame.mass, dtype=dtype)
-        if len(mass) == 0:
-            mass = None
-        charge = np.asarray(raw_frame.charge, dtype=dtype)
-        if len(charge) == 0:
-            charge = None
-        diameter = np.asarray(raw_frame.diameter, dtype=dtype)
-        if len(diameter) == 0:
-            diameter = None
-        moment_inertia = np.asarray(raw_frame.moment_inertia, dtype=dtype)
-        if len(moment_inertia) == 0:
-            moment_inertia = None
-        angmom = np.asarray(raw_frame.angmom, dtype=dtype)
-        if len(angmom) == 0:
-            angmom = None
-        image = np.asarray(raw_frame.image, dtype=np.int32)
-        if len(image) == 0:
-            image = None
+        
+        mapping = dict()
+        for prop in self.FRAME_ATTRIBUTES:
+            mapping[prop] = np.asarray(getattr(raw_frame, prop), dtype=dtype)
+            if len(mapping[prop]) == 0:
+                mapping[prop] = None
+
         assert raw_frame.box is not None
         if isinstance(raw_frame.box, Box):
             raw_frame.box_dimensions = raw_frame.box.dimensions
             raw_frame.box = np.asarray(raw_frame.box.get_box_matrix(), dtype=dtype)
         box_dimensions = getattr(raw_frame, 'box_dimensions', 3)
-        ret.position, ret.velocity, ret.orientation, ret.angmom, ret.box = _regularize_box(
-            position, velocity, orientation, angmom, raw_frame.box, dtype, box_dimensions)
-        ret.mass = mass
-        ret.charge = charge
-        ret.diameter = diameter
-        ret.moment_inertia = moment_inertia
-        ret.image = image
+        mapping["position"], mapping["velocity"], mapping["orientation"],\
+            mapping["angmom"], ret.box = _regularize_box(mapping["position"],
+                                                         mapping["velocity"],
+                                                         mapping["orientation"],
+                                                         mapping["angmom"],
+                                                         raw_frame.box,
+                                                         dtype,
+                                                         box_dimensions)
+        for prop in self.FRAME_ATTRIBUTES:
+            setattr(ret, prop, mapping[prop])
         ret.shapedef = raw_frame.shapedef
         ret.types = raw_frame.types
         ret.data = raw_frame.data
