@@ -381,52 +381,52 @@ class Frame(object):
             if isinstance(type_shape, SphereShape):
                 if dimensions == 3:
                     prim = backend.Spheres(
-                        position=self.position[subset],
+                        positions=self.position[subset],
                         colors=make_default_colors(N_prim),
                         radii=[0.5 * type_shape['diameter']] * N_prim,
                     )
                 else:
                     prim = backend.Disks(
-                        position=self.position[subset, :2],
+                        positions=self.position[subset, :2],
                         colors=make_default_colors(N_prim),
                         radii=[0.5 * type_shape['diameter']] * N_prim,
                     )
             elif isinstance(type_shape, SphereUnionShape):
                 if dimensions == 3:
                     prim = backend.SphereUnions(
-                        position=self.position[subset],
-                        orientation=self.orientation[subset],
+                        positions=self.position[subset],
+                        orientations=self.orientation[subset],
                         colors=make_default_colors(len(type_shape['centers'])),
                         points=type_shape['centers'],
                         radii=[0.5 * d for d in type_shape['diameters']],
                     )
                 else:
                     prim = backend.DiskUnions(
-                        position=self.position[subset, :2],
-                        orientation=self.orientation[subset],
+                        positions=self.position[subset, :2],
+                        orientations=self.orientation[subset],
                         colors=make_default_colors(len(type_shape['centers'])),
                         points=[c[:2] for c in type_shape['centers']],
                         radii=[0.5 * d for d in type_shape['diameters']],
                     )
             elif isinstance(type_shape, ConvexPolyhedronShape):
                 prim = backend.ConvexPolyhedra(
-                    position=self.position[subset],
-                    orientation=self.orientation[subset],
+                    positions=self.position[subset],
+                    orientations=self.orientation[subset],
                     colors=make_default_colors(N_prim),
                     vertices=type_shape['vertices'],
                 )
             elif isinstance(type_shape, ConvexSpheropolyhedronShape):
                 prim = backend.ConvexSpheropolyhedra(
-                    position=self.position[subset],
-                    orientation=self.orientation[subset],
+                    positions=self.position[subset],
+                    orientations=self.orientation[subset],
                     colors=make_default_colors(N_prim),
                     vertices=type_shape['vertices'],
                     radius=type_shape['rounding_radius'],
                 )
             elif isinstance(type_shape, GeneralPolyhedronShape):
                 prim = backend.Mesh(
-                    position=self.position[subset],
-                    orientation=self.orientation[subset],
+                    positions=self.position[subset],
+                    orientations=self.orientation[subset],
                     colors=make_default_colors(len(type_shape['vertices'])),
                     vertices=type_shape['vertices'],
                     indices=type_shape['faces'],
@@ -434,15 +434,15 @@ class Frame(object):
                 )
             elif isinstance(type_shape, PolygonShape):
                 prim = backend.Polygons(
-                    position=self.position[subset, :2],
-                    orientation=self.orientation[subset],
+                    positions=self.position[subset, :2],
+                    orientations=self.orientation[subset],
                     colors=make_default_colors(N_prim),
                     vertices=type_shape['vertices'],
                 )
             elif isinstance(type_shape, SpheropolygonShape):
                 prim = backend.Spheropolygons(
-                    position=self.position[subset, :2],
-                    orientation=self.orientation[subset],
+                    positions=self.position[subset, :2],
+                    orientations=self.orientation[subset],
                     colors=make_default_colors(N_prim),
                     vertices=type_shape['vertices'],
                     radius=type_shape['rounding_radius'],
