@@ -263,11 +263,11 @@ class Frame(object):
             raw_frame.box_dimensions = raw_frame.box.dimensions
             raw_frame.box = np.asarray(raw_frame.box.get_box_matrix(), dtype=dtype)
         box_dimensions = getattr(raw_frame, 'box_dimensions', 3)
-        mapping["position"], mapping["velocity"], mapping["orientation"],\
-            mapping["angmom"], ret.box = _regularize_box(mapping["position"],
-                                                         mapping["velocity"],
-                                                         mapping["orientation"],
-                                                         mapping["angmom"],
+        mapping['position'], mapping['velocity'], mapping['orientation'],\
+            mapping['angmom'], ret.box = _regularize_box(mapping['position'],
+                                                         mapping['velocity'],
+                                                         mapping['orientation'],
+                                                         mapping['angmom'],
                                                          raw_frame.box,
                                                          dtype,
                                                          box_dimensions)
