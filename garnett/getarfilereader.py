@@ -153,7 +153,7 @@ class GetarFileReader(object):
             self._frames = _trajectory.queryFrames(_records['position'])
         except KeyError:
             raise RuntimeError("Given trajectory '{}' contained no "
-                               "positions".format(stream))
+                               "positions.".format(stream))
         frames = [GetarFrame(_trajectory, _records, idx, default_type, default_box)
                   for idx in self._frames]
         logger.info("Read {} frames.".format(len(frames)))
