@@ -228,17 +228,19 @@ class Frame(object):
         else:
             return value
 
-    def _validate_input_array(self, value, dim, nelem=None):
+    def _validate_input_array(self, value, dim, nelem=None, dtype=None):
+        if dtype is None:
+            dtype = self._dtype
         try:
-            value = np.asarray(value, dtype=self._dtype)
+            value = np.asarray(value, dtype=dtype)
         except ValueError:
             raise ValueError("This property can only be set to numeric arrays.")
         if not np.all(np.isfinite(value)):
             raise ValueError("Property being set must all be finite numbers.")
         elif len(value.shape) != dim:
-            raise ValueError("Input array must be {}-dimensional".format(dim))
+            raise ValueError("Input array must be {}-dimensional.".format(dim))
         elif dim == 2 and value.shape[1] != nelem:
-            raise ValueError("Input array must be of shape (N,{}) where N is the number of particles.".format(nelem))
+            raise ValueError("Input array must be of shape (N, {}) where N is the number of particles.".format(nelem))
         return value
 
     def _deprecation_warning(self, old_attr, new_attr):
@@ -634,7 +636,7 @@ class Frame(object):
 
     @image.setter
     def image(self, value):
-        value = self._validate_input_array(value, dim=2, nelem=3)
+        value = self._validate_input_array(value, dim=2, nelem=3, dtype=np.int32)
         self.load()
         self.frame_data.image = value
 
