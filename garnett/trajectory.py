@@ -500,7 +500,7 @@ class Frame(object):
     @property
     def positions(self):
         """
-        Nx3 array of coordinated for N particles in 3 dimensions.
+        Nx3 array of coordinates for N particles in 3 dimensions.
         Deprecated alias for position.
         """
         self._deprecation_warning('positions', 'position')
