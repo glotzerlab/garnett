@@ -879,7 +879,7 @@ class Trajectory(BaseTrajectory):
             "This property was renamed to {}. {} will be removed in "
             "version 0.8.0.".format(new_attr, old_attr),
             DeprecationWarning,
-            stacklevel=1
+            stacklevel=2
         )
 
     def load_arrays(self):
