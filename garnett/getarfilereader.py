@@ -48,9 +48,7 @@ class GetarFrame(Frame):
     def read(self):
         raw_frame = _RawFrameData()
         raw_frame.shapedef = collections.OrderedDict()
-        prop_map = {
-            'angular_momentum_quat': 'angmom',
-                    }
+        prop_map = {'angular_momentum_quat': 'angmom'}
         supported_records = ['position', 'orientation', 'velocity',
                              'mass', 'charge', 'diameter',
                              'moment_inertia', 'angular_momentum_quat',
