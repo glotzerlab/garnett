@@ -4,6 +4,16 @@ Changelog
 
 The **garnett** package follows `semantic versioning <https://semver.org/>`_.
 
+Version 0.7
+===========
+
+[0.7.0]
+-------
+
+Added
++++++
+  - Added ability to read ``_space_group_symop_operation_xyz`` keys in CIF files.
+
 Version 0.6
 ===========
 
