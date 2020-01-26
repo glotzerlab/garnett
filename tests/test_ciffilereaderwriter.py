@@ -117,6 +117,26 @@ class CifFileReaderTest(CifFileWriterTest):
         logger.debug(ref_positions)
         self.assertTrue(np.allclose(traj[-1].positions, ref_positions))
 
+    def test_aflow_dialect(self):
+        sample = io.StringIO(garnett.samples.CIF)
+        traj = self.read_cif_trajectory(sample)
+
+        aflow_dialect_cif = garnett.samples.CIF.replace(
+            '_symmetry_equiv_pos_as_xyz',
+            '_space_group_symop_operation_xyz')
+        aflow_sample = io.StringIO(aflow_dialect_cif)
+        aflow_traj = self.read_cif_trajectory(aflow_sample)
+
+        logger.debug('AFLOW cif-read positions:')
+        logger.debug(aflow_traj[-1].positions)
+        logger.debug('Cif-read positions:')
+        logger.debug(traj[-1].positions)
+
+        # confirm that the string was modified
+        self.assertNotEqual(garnett.samples.CIF, aflow_dialect_cif)
+        # confirm that positions are the same
+        self.assertTrue(np.allclose(aflow_traj[-1].positions, traj[-1].positions))
+
     def test_cif_read_write(self):
         sample = io.StringIO(garnett.samples.CIF)
         traj = self.read_cif_trajectory(sample)
