@@ -1275,7 +1275,7 @@ def _generate_type_id_array(types, type_ids):
     return _type
 
 
-def to_hoomd_snapshot(frame, snapshot=None):
+def copy_to_hoomd_blue_snapshot(frame, snapshot=None):
     "Copy the frame into a HOOMD-blue snapshot."
     if frame.position is not None:
         np.copyto(snapshot.particles.position, frame.position)
@@ -1298,18 +1298,7 @@ def to_hoomd_snapshot(frame, snapshot=None):
     return snapshot
 
 
-def copy_to_hoomd_blue_snapshot(frame, snapshot=None):
-    warnings.warn(
-            "This function was renamed to {}. {} will be removed in version 0.8.0.".format(
-                "to_hoomd_snapshot(frame, snapshot)",
-                "copy_to_hoomd_blue_snapshot(frame, snapshot)"
-                ),
-            DeprecationWarning
-            )
-    return to_hoomd_snapshot(frame, snapshot)
-
-
-def from_hoomd_snapshot(frame, snapshot):
+def copyfrom_hoomd_blue_snapshot(frame, snapshot):
     """"Copy the HOOMD-blue snapshot into the frame.
 
     Note that only the properties listed below will be copied.
@@ -1328,17 +1317,6 @@ def from_hoomd_snapshot(frame, snapshot):
     frame.angmom = snapshot.particles.angmom
     frame.image = snapshot.particles.image
     return frame
-
-
-def copyfrom_hoomd_blue_snapshot(frame, snapshot):
-    warnings.warn(
-        "This function was renamed to {}. {} will be removed in version 0.8.0.".format(
-            "from_hoomd_snapshot(frame, snapshot)",
-            "copyfrom_hoomd_blue_snapshot(frame, snapshot)"
-        ),
-        DeprecationWarning
-    )
-    return from_hoomd_snapshot(frame, snapshot)
 
 
 def make_hoomd_blue_snapshot(frame):
@@ -1360,4 +1338,4 @@ def make_hoomd_blue_snapshot(frame):
     np.copyto(
         snapshot.particles.typeid,
         np.array(type_ids, dtype=snapshot.particles.typeid.dtype))
-    return to_hoomd_snapshot(frame, snapshot)
+    return copy_to_hoomd_blue_snapshot(frame, snapshot)
