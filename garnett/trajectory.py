@@ -246,7 +246,8 @@ class Frame(object):
     def _deprecation_warning(self, old_attr, new_attr):
         warnings.warn(
             "This property was renamed to {}. {} will be removed in version 0.8.0.".format(new_attr, old_attr),
-            DeprecationWarning
+            DeprecationWarning,
+            stacklevel=2
         )
 
     def _raw_frame_to_frame(self, raw_frame, dtype=None):
