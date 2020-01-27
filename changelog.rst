@@ -14,6 +14,10 @@ Added
 +++++
   - Added ability to read ``_space_group_symop_operation_xyz`` keys in CIF files.
 
+Fixed
++++++
+  - Fixed finding nearest image when applying space group operations to CIF files. The meaning of the ``tolerance`` parameter is also adjusted to be absolute (in units of fractional coordinates), rather than relative.
+
 Version 0.6
 ===========
 
