@@ -174,8 +174,7 @@ class CifFileFrame(Frame):
                 for index in list(replicated_fractions):
                     # find nearest periodic image
                     delta = replicated_fractions[index] - ref_point
-                    delta[delta > 0.5] -= 1
-                    delta[delta < -0.5] += 1
+                    delta = ((delta + 0.5) % 1.0) - 0.5
 
                     if np.allclose(delta, 0, atol=self.tolerance):
                         del replicated_fractions[index]
