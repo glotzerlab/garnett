@@ -237,7 +237,7 @@ class CifFileReader(object):
         :type precision: int
         :param tolerance: Floating-point tolerance (in fractional
                           coordinates) of particle identity as symmetry
-                          operations are applied
+                          operations are applied.
         :type tolerance: float
     """
 

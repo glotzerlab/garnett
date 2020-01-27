@@ -28,8 +28,8 @@ class BaseCifFileReaderTest(unittest.TestCase):
         reader = garnett.reader.PosFileReader(precision=precision)
         return reader.read(stream)
 
-    def read_cif_trajectory(self, stream, precision=None, **kwargs):
-        reader = garnett.reader.CifFileReader(precision=precision, **kwargs)
+    def read_cif_trajectory(self, stream, **kwargs):
+        reader = garnett.reader.CifFileReader(**kwargs)
         return reader.read(stream)
 
 
