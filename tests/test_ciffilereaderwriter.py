@@ -3,6 +3,7 @@
 # This software is licensed under the BSD 3-Clause License.
 import io
 import logging
+import os
 import unittest
 import numpy as np
 import garnett
@@ -16,6 +17,8 @@ else:
 
 logger = logging.getLogger(__name__)
 
+HP2_PATH = os.path.join(os.path.dirname(__file__), 'files', 'hP2-Mg.cif')
+
 
 @unittest.skipIf(not PYCIFRW,
                  'CifFileReader tests require the PyCifRW package.')
@@ -25,8 +28,8 @@ class BaseCifFileReaderTest(unittest.TestCase):
         reader = garnett.reader.PosFileReader(precision=precision)
         return reader.read(stream)
 
-    def read_cif_trajectory(self, stream, precision=None):
-        reader = garnett.reader.CifFileReader(precision=precision)
+    def read_cif_trajectory(self, stream, precision=None, **kwargs):
+        reader = garnett.reader.CifFileReader(precision=precision, **kwargs)
         return reader.read(stream)
 
 
@@ -161,6 +164,16 @@ class CifFileReaderTest(CifFileWriterTest):
         with self.assertRaises(ValueError):
             # This should fail since it's using 2d positions
             traj[-1].cif_coordinates = [[0, 0], [0, 0]]
+
+    def test_hexagonal(self):
+        with open(HP2_PATH, 'r') as f:
+            default_trajectory = self.read_cif_trajectory(f)
+
+            f.seek(0)
+            bad_trajectory = self.read_cif_trajectory(f, tolerance=1e-5)
+
+            self.assertEqual(len(default_trajectory[0].positions), 2)
+            self.assertGreater(len(bad_trajectory[0].positions), 2)
 
 
 if __name__ == '__main__':

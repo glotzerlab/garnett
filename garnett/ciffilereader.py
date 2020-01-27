@@ -172,8 +172,14 @@ class CifFileFrame(Frame):
 
                 # find similar points and add them to the list
                 for index in list(replicated_fractions):
-                    if np.allclose(replicated_fractions[index], ref_point, self.tolerance):
-                        current_points.append(replicated_fractions.pop(index))
+                    # find nearest periodic image
+                    delta = replicated_fractions[index] - ref_point
+                    delta[delta > 0.5] -= 1
+                    delta[delta < -0.5] += 1
+
+                    if np.allclose(delta, 0, atol=self.tolerance):
+                        del replicated_fractions[index]
+                        current_points.append(ref_point + delta)
 
                         if replicated_types[ref_index] != replicated_types[index]:
                             bad_types = True
@@ -230,12 +236,13 @@ class CifFileReader(object):
         :param precision: The number of digits to
                           round floating-point values to.
         :type precision: int
-        :param tolerance: Floating-point tolerance of particle
-                          identity as symmetry operations are applied
+        :param tolerance: Floating-point tolerance (in fractional
+                          coordinates) of particle identity as symmetry
+                          operations are applied
         :type tolerance: float
     """
 
-    def __init__(self, precision=None, tolerance=1e-5):
+    def __init__(self, precision=None, tolerance=1e-3):
         """Initialize a cif-file reader."""
         self._precision = precision or CIFFILE_FLOAT_DIGITS
         self._tolerance = tolerance
