@@ -172,8 +172,8 @@ class CifFileReaderTest(CifFileWriterTest):
             f.seek(0)
             bad_trajectory = self.read_cif_trajectory(f, tolerance=1e-5)
 
-            self.assertEqual(len(default_trajectory[0].positions), 2)
-            self.assertGreater(len(bad_trajectory[0].positions), 2)
+        self.assertEqual(len(default_trajectory[0].positions), 2)
+        self.assertGreater(len(bad_trajectory[0].positions), 2)
 
 
 if __name__ == '__main__':
