@@ -140,13 +140,10 @@ class CifFileFrame(Frame):
         else:
             site_types = len(fractions)*[self.default_type]
 
-        space_group_keys = ['_symmetry_equiv_pos_as_xyz', '_space_group_symop_operation_xyz']
-        found_keys = [key for key in space_group_keys if key in self.parsed]
-        if found_keys:
-            key_to_use = found_keys[0]
+        if '_symmetry_equiv_pos_as_xyz' in self.parsed:
             symmetry_ops = [PARSE_DIVISION_REGEXP.sub(
                             _parse_division, REMOVE_NONNUM_REGEXP.sub('', sym))
-                            for sym in self.parsed[key_to_use]]
+                            for sym in self.parsed['_symmetry_equiv_pos_as_xyz']]
 
             replicated_fractions = []
             replicated_types = []
