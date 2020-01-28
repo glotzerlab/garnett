@@ -8,9 +8,10 @@ The trajectory module provides classes to store discretized
 trajectories."""
 
 import logging
-
+import deprecation
 import numpy as np
 import rowan
+from . import __version__
 
 from .shapes import SphereShape, ConvexPolyhedronShape, \
     ConvexSpheropolyhedronShape, GeneralPolyhedronShape, PolygonShape, \
@@ -158,13 +159,28 @@ class FrameData(object):
     def __repr__(self):
         return str(self)
 
+    @deprecation.deprecated(deprecated_in="0.7.0",
+                            removed_in="0.8.0",
+                            current_version=__version__,
+                            details="Use to_hoomd_snapshot with no argument.")
     def make_snapshot(self):
         "Create a HOOMD-blue snapshot object from this frame."
-        return make_hoomd_blue_snapshot(self)
+        return _make_hoomd_blue_snapshot(self)
 
+    def to_hoomd_snapshot(self, snapshot=None):
+        "Copy this frame to a HOOMD-blue snapshot."
+        if snapshot is None:
+            return _make_hoomd_blue_snapshot(self)
+        else:
+            return _to_hoomd_snapshot(self, snapshot)
+
+    @deprecation.deprecated(deprecated_in="0.7.0",
+                            removed_in="0.8.0",
+                            current_version=__version__,
+                            details="Use to_hoomd_snapshot.")
     def copyto_snapshot(self, snapshot):
         "Copy this frame to a HOOMD-blue snapshot."
-        return copyto_hoomd_blue_snapshot(self, snapshot)
+        return self.to_hoomd_snapshot(snapshot)
 
 
 class _RawFrameData(object):
@@ -344,15 +360,31 @@ class Frame(object):
     def __ne__(self, other):
         return not self.__eq__(other)
 
+    @deprecation.deprecated(deprecated_in="0.7.0",
+                            removed_in="0.8.0",
+                            current_version=__version__,
+                            details="Use to_hoomd_snapshot with no argument.")
     def make_snapshot(self):
         "Create a HOOMD-blue snapshot object from this frame."
         self.load()
-        return make_hoomd_blue_snapshot(self.frame_data)
+        return _make_hoomd_blue_snapshot(self.frame_data)
 
+    def to_hoomd_snapshot(self, snapshot=None):
+        "Copy this frame to a HOOMD-blue snapshot."
+        self.load()
+        if snapshot is None:
+            return _make_hoomd_blue_snapshot(self.frame_data)
+        else:
+            return _to_hoomd_snapshot(self.frame_data, snapshot)
+
+    @deprecation.deprecated(deprecated_in="0.7.0",
+                            removed_in="0.8.0",
+                            current_version=__version__,
+                            details="Use to_hoomd_snapshot.")
     def copyto_snapshot(self, snapshot):
         "Copy this frame to a HOOMD-blue snapshot."
         self.load()
-        return copyto_hoomd_blue_snapshot(self.frame_data, snapshot)
+        return self.to_hoomd_snapshot(snapshot)
 
     def to_plato_scene(self, backend, scene=None):
         """Create a plato scene from this frame.
@@ -1278,7 +1310,7 @@ def _generate_type_id_array(types, type_ids):
     return _type
 
 
-def copyto_hoomd_blue_snapshot(frame, snapshot):
+def _to_hoomd_snapshot(frame, snapshot):
     "Copy the frame into a HOOMD-blue snapshot."
     if frame.positions is not None:
         np.copyto(snapshot.particles.position, frame.positions)
@@ -1301,7 +1333,16 @@ def copyto_hoomd_blue_snapshot(frame, snapshot):
     return snapshot
 
 
-def copyfrom_hoomd_blue_snapshot(frame, snapshot):
+@deprecation.deprecated(deprecated_in="0.7.0",
+                        removed_in="0.8.0",
+                        current_version=__version__,
+                        details="This function is deprecated.")
+def copyto_hoomd_blue_snapshot(frame, snapshot):
+    "Copy the frame into a HOOMD-blue snapshot."
+    return _to_hoomd_snapshot(frame, snapshot)
+
+
+def _from_hood_snapshot(frame, snapshot):
     """"Copy the HOOMD-blue snapshot into the frame.
 
     Note that only the properties listed below will be copied.
@@ -1322,7 +1363,19 @@ def copyfrom_hoomd_blue_snapshot(frame, snapshot):
     return frame
 
 
-def make_hoomd_blue_snapshot(frame):
+@deprecation.deprecated(deprecated_in="0.7.0",
+                        removed_in="0.8.0",
+                        current_version=__version__,
+                        details="This function is deprecated.")
+def copyfrom_hoomd_blue_snapshot(frame, snapshot):
+    """"Copy the HOOMD-blue snapshot into the frame.
+
+    Note that only the properties listed below will be copied.
+    """
+    return _from_hood_snapshot(frame, snapshot)
+
+
+def _make_hoomd_blue_snapshot(frame):
     "Create a HOOMD-blue snapshot from the frame instance."
     try:
         from hoomd import data
@@ -1341,4 +1394,13 @@ def make_hoomd_blue_snapshot(frame):
     np.copyto(
         snapshot.particles.typeid,
         np.array(type_ids, dtype=snapshot.particles.typeid.dtype))
-    return copyto_hoomd_blue_snapshot(frame, snapshot)
+    return _to_hoomd_snapshot(frame, snapshot)
+
+
+@deprecation.deprecated(deprecated_in="0.7.0",
+                        removed_in="0.8.0",
+                        current_version=__version__,
+                        details="This function is deprecated.")
+def make_hoomd_blue_snapshot(frame):
+    "Create a HOOMD-blue snapshot from the frame instance."
+    return _make_hoomd_blue_snapshot(frame)
