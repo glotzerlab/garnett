@@ -11,7 +11,7 @@ import logging
 import deprecation
 import numpy as np
 import rowan
-from . import __version__
+from .version import __version__
 
 from .shapes import SphereShape, ConvexPolyhedronShape, \
     ConvexSpheropolyhedronShape, GeneralPolyhedronShape, PolygonShape, \
