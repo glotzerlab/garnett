@@ -1375,7 +1375,7 @@ def copyfrom_hoomd_blue_snapshot(frame, snapshot):
     return _from_hood_snapshot(frame, snapshot)
 
 
-def _make_hoomd_blue_snapshot(frame):
+def _make_hoomd_snapshot(frame):
     "Create a HOOMD-blue snapshot from the frame instance."
     try:
         from hoomd import data
