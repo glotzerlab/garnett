@@ -18,7 +18,7 @@ class BaseHOOMDXMLFileReaderTest(unittest.TestCase):
         traj = self.read_trajectory(garnett.samples.HOOMD_BLUE_XML)
         self.assertEqual(len(traj), 1)
         self.assertEqual(len(traj[0]), 10)
-        self.assertTrue(np.allclose(traj[0].positions, np.array([
+        self.assertTrue(np.allclose(traj[0].position, np.array([
             [-0.391116261482, 2.34347701073, 1.0384979248],
             [2.03885579109, -2.35620737076, -1.75283277035],
             [-0.931703925133, 2.35222411156, -1.66501355171],
@@ -30,7 +30,7 @@ class BaseHOOMDXMLFileReaderTest(unittest.TestCase):
             [-1.39306223392, -0.266534328461, 1.78225398064],
             [-1.27463591099, -2.22765517235, 0.162209749222],
         ])))
-        self.assertTrue(np.allclose(traj[0].velocities, np.array([
+        self.assertTrue(np.allclose(traj[0].velocity, np.array([
             [-0.391116261482, 2.34347701073, 1.0384979248],
             [2.03885579109, -2.35620737076, -1.75283277035],
             [-0.931703925133, 2.35222411156, -1.66501355171],
@@ -55,7 +55,7 @@ class BaseHOOMDXMLFileReaderTest(unittest.TestCase):
         traj = self.read_trajectory(garnett.samples.HOOMD_BLUE_XML_2D)
         self.assertEqual(len(traj), 1)
         self.assertEqual(len(traj[0]), 10)
-        self.assertTrue(np.allclose(traj[0].positions, np.array([
+        self.assertTrue(np.allclose(traj[0].position, np.array([
                [-0.391116261482, 2.34347701073, 0],
                [2.03885579109, -2.35620737076, 0],
                [-0.931703925133, 2.35222411156, 0],
@@ -67,7 +67,7 @@ class BaseHOOMDXMLFileReaderTest(unittest.TestCase):
                [-1.39306223392, -0.266534328461, 0],
                [-1.27463591099, -2.22765517235, 0],
            ])))
-        self.assertTrue(np.allclose(traj[0].velocities, np.array([
+        self.assertTrue(np.allclose(traj[0].velocity, np.array([
                [-0.391116261482, 2.34347701073, 0],
                [2.03885579109, -2.35620737076, 0],
                [-0.931703925133, 2.35222411156, 0],

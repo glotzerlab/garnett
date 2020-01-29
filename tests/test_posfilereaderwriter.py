@@ -56,7 +56,7 @@ class BasePosFileReaderTest(unittest.TestCase):
 
     def assert_raise_attribute_error(self, frame):
         with self.assertRaises(AttributeError):
-            frame.velocities
+            frame.velocity
         with self.assertRaises(AttributeError):
             frame.charge
         with self.assertRaises(AttributeError):
@@ -81,17 +81,17 @@ class BasePosFileWriterTest(BasePosFileReaderTest):
 
     def assert_approximately_equal_frames(self, a, b,
                                           decimals=6, atol=1e-5,
-                                          ignore_orientations=False):
+                                          ignore_orientation=False):
         self.assertEqual(a.box.round(decimals), b.box.round(decimals))
         self.assertEqual(a.types, b.types)
-        self.assertTrue(np.allclose(a.positions, b.positions, atol=atol))
+        self.assertTrue(np.allclose(a.position, b.position, atol=atol))
         try:
-            self.assertTrue(np.allclose(a.velocities, b.velocities, atol=atol))
+            self.assertTrue(np.allclose(a.velocity, b.velocity, atol=atol))
         except AttributeError:
             pass
-        if not ignore_orientations:
+        if not ignore_orientation:
             try:
-                self.assertTrue(np.allclose(a.orientations, b.orientations, atol=atol))
+                self.assertTrue(np.allclose(a.orientation, b.orientation, atol=atol))
             except AttributeError:
                 pass
         self.assertEqual(a.data, b.data)
@@ -349,7 +349,7 @@ class PosFileWriterTest(BasePosFileWriterTest):
         traj.load_arrays()
         for frame in traj:
             frame.shapedef['A'] = ArrowShape()
-            frame.orientations.T[3] = 0
+            frame.orientation.T[3] = 0
         dump = io.StringIO()
         self.write_trajectory(traj, dump)
         dump.seek(0)
@@ -430,7 +430,7 @@ class PosFileWriterTest(BasePosFileWriterTest):
                     for f0, f1 in zip(traj0, traj1):
                         self.assert_approximately_equal_frames(
                             f0, f1, decimals=4, atol=1e-6,
-                            ignore_orientations=True  # The shapes themselves are differently oriented
+                            ignore_orientation=True  # The shapes themselves are differently oriented
                             )
 
 

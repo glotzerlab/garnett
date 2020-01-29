@@ -48,12 +48,7 @@ class GetarFrame(Frame):
     def read(self):
         raw_frame = _RawFrameData()
         raw_frame.shapedef = collections.OrderedDict()
-        prop_map = {
-            'position': 'positions',
-            'orientation': 'orientations',
-            'velocity': 'velocities',
-            'angular_momentum_quat': 'angmom',
-            'image': 'image'}
+        prop_map = {'angular_momentum_quat': 'angmom'}
         supported_records = ['position', 'orientation', 'velocity',
                              'mass', 'charge', 'diameter',
                              'moment_inertia', 'angular_momentum_quat',
@@ -76,7 +71,7 @@ class GetarFrame(Frame):
                 self._records['type'], self._frame)
             raw_frame.types = [names[t] for t in types]
         else:
-            raw_frame.types = len(raw_frame.positions) * [self._default_type]
+            raw_frame.types = len(raw_frame.position) * [self._default_type]
 
         if 'box' in self._records:
             # Read dimension if stored
@@ -85,7 +80,7 @@ class GetarFrame(Frame):
                              self._records['dimensions'], self._frame)[0]
             # Fallback to detection based on z coordinates
             else:
-                zs = raw_frame.positions[:, 2]
+                zs = raw_frame.position[:, 2]
                 dimensions = 2 if np.allclose(zs, 0.0, atol=1e-7) else 3
 
             box = self._trajectory.getRecord(self._records['box'], self._frame)

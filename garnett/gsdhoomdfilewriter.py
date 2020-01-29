@@ -123,46 +123,11 @@ class GSDHOOMDFileWriter(object):
                 except AttributeError:
                     types = ['A']
                 snap.particles.types = types
-                try:
-                    snap.particles.typeid = [types.index(typeid) for typeid in frame.types]
-                except AttributeError:
-                    pass
-                try:
-                    snap.particles.position = frame.positions
-                except AttributeError:
-                    pass
-                try:
-                    snap.particles.orientation = frame.orientations
-                except AttributeError:
-                    pass
-                try:
-                    snap.particles.velocity = frame.velocities
-                except AttributeError:
-                    pass
-                try:
-                    snap.particles.mass = frame.mass
-                except AttributeError:
-                    pass
-                try:
-                    snap.particles.charge = frame.charge
-                except AttributeError:
-                    pass
-                try:
-                    snap.particles.diameter = frame.diameter
-                except AttributeError:
-                    pass
-                try:
-                    snap.particles.moment_inertia = frame.moment_inertia
-                except AttributeError:
-                    pass
-                try:
-                    snap.particles.angmom = frame.angmom
-                except AttributeError:
-                    pass
-                try:
-                    snap.particles.image = frame.image
-                except AttributeError:
-                    pass
+                for prop in trajectory.TRAJ_ATTRIBUTES[4:]:
+                    try:
+                        setattr(snap.particles, prop, getattr(frame, prop))
+                    except AttributeError:
+                        pass
                 snap.configuration.box = frame.box.get_box_array()
                 snap.configuration.dimensions = frame.box.dimensions
                 try:
@@ -172,4 +137,3 @@ class GSDHOOMDFileWriter(object):
                     pass
                 traj_outfile.append(snap)
                 logger.debug("Wrote frame {}.".format(i + 1))
-        logger.info("Wrote {} frames.".format(i + 1))

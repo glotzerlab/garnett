@@ -25,9 +25,9 @@ class BaseGetarFileReaderTest(unittest.TestCase):
         self.getar_file_fn = os.path.join(self.tmp_dir.name, 'sample.tar')
 
     def setup_sample(self, N, dim=3):
-        self.positions = np.random.rand(N, 3)
-        self.orientations = np.random.rand(N, 4)
-        self.velocities = np.random.rand(N, 3)
+        self.position = np.random.rand(N, 3)
+        self.orientation = np.random.rand(N, 4)
+        self.velocity = np.random.rand(N, 3)
         self.mass = np.random.rand(N)
         self.charge = np.random.rand(N)
         self.diameter = np.random.rand(N)
@@ -39,13 +39,13 @@ class BaseGetarFileReaderTest(unittest.TestCase):
         self.box = np.array([1.0, 1.0, 1.0, 0.0, 0.0, 0.0])
         self.types = [type_names[t] for t in types]
         if dim == 2:
-            self.positions[:, 2] = 0
-            self.velocities[:, 2] = 0
+            self.position[:, 2] = 0
+            self.velocity[:, 2] = 0
 
         with gtar.GTAR(self.getar_file_fn, 'w') as traj:
-            traj.writePath('frames/0/position.f32.ind', self.positions)
-            traj.writePath('frames/0/orientation.f32.ind', self.orientations)
-            traj.writePath('frames/0/velocity.f32.ind', self.velocities)
+            traj.writePath('frames/0/position.f32.ind', self.position)
+            traj.writePath('frames/0/orientation.f32.ind', self.orientation)
+            traj.writePath('frames/0/velocity.f32.ind', self.velocity)
             traj.writePath('frames/0/mass.f32.ind', self.mass)
             traj.writePath('frames/0/charge.f32.ind', self.charge)
             traj.writePath('frames/0/diameter.f32.ind', self.diameter)
@@ -71,9 +71,9 @@ class BaseGetarFileReaderTest(unittest.TestCase):
         self.assertEqual(len(frame), N)
         self.assertEqual(frame.box, garnett.trajectory.Box(1.0, 1.0, 1.0))
         self.assertEqual(frame.box.dimensions, 3)
-        np.testing.assert_allclose(frame.positions, self.positions)
-        np.testing.assert_allclose(frame.orientations, self.orientations)
-        np.testing.assert_allclose(frame.velocities, self.velocities)
+        np.testing.assert_allclose(frame.position, self.position)
+        np.testing.assert_allclose(frame.orientation, self.orientation)
+        np.testing.assert_allclose(frame.velocity, self.velocity)
         np.testing.assert_allclose(frame.mass, self.mass)
         np.testing.assert_allclose(frame.charge, self.charge)
         np.testing.assert_allclose(frame.diameter, self.diameter)
@@ -91,9 +91,9 @@ class BaseGetarFileReaderTest(unittest.TestCase):
         self.assertEqual(len(frame), N)
         self.assertEqual(frame.box, garnett.trajectory.Box(1.0, 1.0, 1.0, dimensions=2))
         self.assertEqual(frame.box.dimensions, 2)
-        np.testing.assert_allclose(frame.positions, self.positions)
-        np.testing.assert_allclose(frame.orientations, self.orientations)
-        np.testing.assert_allclose(frame.velocities, self.velocities)
+        np.testing.assert_allclose(frame.position, self.position)
+        np.testing.assert_allclose(frame.orientation, self.orientation)
+        np.testing.assert_allclose(frame.velocity, self.velocity)
         np.testing.assert_allclose(frame.mass, self.mass)
         np.testing.assert_allclose(frame.charge, self.charge)
         np.testing.assert_allclose(frame.diameter, self.diameter)
@@ -110,9 +110,9 @@ class NoTypesGetarFileReaderTest(BaseGetarFileReaderTest):
     types."""
 
     def setup_sample(self, N, dim=3):
-        self.positions = np.random.rand(N, 3)
-        self.orientations = np.random.rand(N, 4)
-        self.velocities = np.random.rand(N, 3)
+        self.position = np.random.rand(N, 3)
+        self.orientation = np.random.rand(N, 4)
+        self.velocity = np.random.rand(N, 3)
         self.mass = np.random.rand(N)
         self.charge = np.random.rand(N)
         self.diameter = np.random.rand(N)
@@ -122,13 +122,13 @@ class NoTypesGetarFileReaderTest(BaseGetarFileReaderTest):
         self.box = np.array([1.0, 1.0, 1.0, 0.0, 0.0, 0.0])
         self.types = N*['A']
         if dim == 2:
-            self.positions[:, 2] = 0
-            self.velocities[:, 2] = 0
+            self.position[:, 2] = 0
+            self.velocity[:, 2] = 0
 
         with gtar.GTAR(self.getar_file_fn, 'w') as traj:
-            traj.writePath('frames/0/position.f32.ind', self.positions)
-            traj.writePath('frames/0/orientation.f32.ind', self.orientations)
-            traj.writePath('frames/0/velocity.f32.ind', self.velocities)
+            traj.writePath('frames/0/position.f32.ind', self.position)
+            traj.writePath('frames/0/orientation.f32.ind', self.orientation)
+            traj.writePath('frames/0/velocity.f32.ind', self.velocity)
             traj.writePath('frames/0/mass.f32.ind', self.mass)
             traj.writePath('frames/0/charge.f32.ind', self.charge)
             traj.writePath('frames/0/diameter.f32.ind', self.diameter)
