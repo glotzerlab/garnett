@@ -348,7 +348,7 @@ class FrameSnapshotExport(TrajectoryTest):
 
     def make_snapshot(self, sample):
         traj = self.get_trajectory(sample)
-        return traj[-1].make_snapshot()
+        return traj[-1].to_hoomd_snapshot()
 
     def del_system(self):
         del self.system
@@ -399,7 +399,7 @@ class FrameSnapshotExport(TrajectoryTest):
             f_1 = traj[-1]
             # Pos-files don't support box dimensions.
             f_1.box.dimensions = self.system.box.dimensions
-            snapshot1 = f_1.make_snapshot()
+            snapshot1 = f_1.to_hoomd_snapshot()
             self.assert_snapshots_equal(snapshot0, snapshot1)
             self.system.restore_snapshot(snapshot1)
             pos.disable()
