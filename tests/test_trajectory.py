@@ -99,20 +99,20 @@ class TrajectoryTest(unittest.TestCase):
         sample_file = self.get_sample_file()
         traj = self.reader().read(sample_file)
         for frame in traj:
-            self.assertTrue(isinstance(frame.positions, np.ndarray))
-            self.assertTrue(frame.positions.dtype ==
+            self.assertTrue(isinstance(frame.position, np.ndarray))
+            self.assertTrue(frame.position.dtype ==
                             garnett.trajectory.DEFAULT_DTYPE)
         for dtype in (np.float32, np.float64):
             traj.set_dtype(dtype)
             for frame in traj:
-                self.assertTrue(isinstance(frame.positions, np.ndarray))
-                self.assertTrue(frame.positions.dtype == dtype)
+                self.assertTrue(isinstance(frame.position, np.ndarray))
+                self.assertTrue(frame.position.dtype == dtype)
         traj.set_dtype(np.float32)
         frame0 = traj[0]
-        self.assertTrue(frame0.positions.dtype == np.float32)
+        self.assertTrue(frame0.position.dtype == np.float32)
         frame0.load()
-        self.assertTrue(isinstance(frame0.positions, np.ndarray))
-        self.assertTrue(frame0.positions.dtype == np.float32)
+        self.assertTrue(isinstance(frame0.position, np.ndarray))
+        self.assertTrue(frame0.position.dtype == np.float32)
         with self.assertRaises(RuntimeError):
             traj.set_dtype(np.float64)
         with self.assertRaises(RuntimeError):
@@ -159,62 +159,68 @@ class TrajectoryTest(unittest.TestCase):
         type_ids_0 = [traj.type.index(t) for t in traj.types[0]]
         self.assertEqual(type_ids_0, traj.type_ids[0].tolist())
 
-    def test_positions(self):
+    def test_position(self):
         sample_file = self.get_sample_file()
         traj = self.reader().read(sample_file)
         with self.assertRaises(RuntimeError):
-            traj.positions
+            traj.position
         traj.load_arrays()
-        if traj.positions is not None and None not in traj.positions:
+        if traj.position is not None and None not in traj.position:
             self.assertTrue(np.issubdtype(
-                traj.positions.dtype, garnett.trajectory.DEFAULT_DTYPE))
-            self.assertEqual(traj.positions.shape, (len(traj), len(traj[0]), 3))
-            self.assertTrue((traj.positions[0] == traj[0].positions).all())
+                traj.position.dtype, garnett.trajectory.DEFAULT_DTYPE))
+            self.assertEqual(traj.position.shape, (len(traj), len(traj[0]), 3))
+            self.assertTrue((traj.position[0] == traj[0].position).all())
             with self.assertRaises(ValueError):
-                traj[0].positions = 'hello'
+                traj[0].position = 'hello'
             with self.assertRaises(ValueError):
                 # This should fail since it's using 2d positions
-                traj[0].positions = [[0, 0], [0, 0]]
+                traj[0].position = [[0, 0], [0, 0]]
+            with self.assertWarns(DeprecationWarning):
+                self.assertTrue(np.array_equal(traj[0].positions, traj[0].position))
 
-    def test_orientations(self):
+    def test_orientation(self):
         sample_file = self.get_sample_file()
         traj = self.reader().read(sample_file)
         with self.assertRaises(RuntimeError):
-            traj.orientations
+            traj.orientation
         traj.load_arrays()
         try:
-            if len(traj.orientations.shape) > 1:
+            if len(traj.orientation.shape) > 1:
                 self.assertTrue(np.issubdtype(
-                    traj.orientations.dtype, garnett.trajectory.DEFAULT_DTYPE))
-                self.assertEqual(traj.orientations.shape,
+                    traj.orientation.dtype, garnett.trajectory.DEFAULT_DTYPE))
+                self.assertEqual(traj.orientation.shape,
                                  (len(traj), len(traj[0]), 4))
-                self.assertTrue((traj.orientations[0] == traj[0].orientations).all())
+                self.assertTrue((traj.orientation[0] == traj[0].orientation).all())
             with self.assertRaises(ValueError):
-                traj[0].orientations = 'hello'
+                traj[0].orientation = 'hello'
             with self.assertRaises(ValueError):
                 # This should fail since it's using 2d positions
-                traj[0].orientations = [[0, 0], [0, 0]]
+                traj[0].orientation = [[0, 0], [0, 0]]
+            with self.assertWarns(DeprecationWarning):
+                self.assertTrue(np.array_equal(traj[0].orientations, traj[0].orientation))
         except AttributeError:
             pass
 
-    def test_velocities(self):
+    def test_velocity(self):
         sample_file = self.get_sample_file()
         traj = self.reader().read(sample_file)
         with self.assertRaises(RuntimeError):
-            traj.velocities
+            traj.velocity
         traj.load_arrays()
         try:
-            if len(traj.velocities.shape) > 1:
+            if len(traj.velocity.shape) > 1:
                 self.assertTrue(np.issubdtype(
-                    traj.velocities.dtype, garnett.trajectory.DEFAULT_DTYPE))
-                self.assertEqual(traj.velocities.shape,
+                    traj.velocity.dtype, garnett.trajectory.DEFAULT_DTYPE))
+                self.assertEqual(traj.velocity.shape,
                                  (len(traj), len(traj[0]), 3))
-                self.assertTrue((traj.velocities[0] == traj[0].velocities).all())
+                self.assertTrue((traj.velocity[0] == traj[0].velocity).all())
             with self.assertRaises(ValueError):
-                traj[0].velocities = 'hello'
+                traj[0].velocity = 'hello'
             with self.assertRaises(ValueError):
                 # This should fail since it's using 2d velocities
-                traj[0].velocities = [[0, 0], [0, 0]]
+                traj[0].velocity = [[0, 0], [0, 0]]
+            with self.assertWarns(DeprecationWarning):
+                self.assertTrue(np.array_equal(traj[0].velocities, traj[0].velocity))
         except AttributeError:
             pass
 

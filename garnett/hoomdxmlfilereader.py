@@ -37,13 +37,13 @@ class HOOMDXMLFrame(Frame):
         config = self.root.find('configuration')
         raw_frame.box = np.asarray(_get_box_matrix(config.find('box')))
         raw_frame.box_dimensions = int(config.get('dimensions', 3))
-        raw_frame.positions = list(_parse_positions(config.find('position')))
-        orientations = config.find('orientation')
-        if orientations is not None:
-            raw_frame.orientations = list(_parse_orientations(orientations))
-        velocities = config.find('velocity')
-        if velocities is not None:
-            raw_frame.velocities = list(_parse_velocities(velocities))
+        raw_frame.position = list(_parse_position(config.find('position')))
+        orientation = config.find('orientation')
+        if orientation is not None:
+            raw_frame.orientation = list(_parse_orientation(orientation))
+        velocity = config.find('velocity')
+        if velocity is not None:
+            raw_frame.velocity = list(_parse_velocity(velocity))
 
         raw_frame.types = list(_parse_types(config.find('type')))
         return raw_frame
@@ -88,29 +88,29 @@ def _get_box_matrix(box):
     ]
 
 
-def _parse_positions(positions):
-    for i, position in enumerate(positions.text.splitlines()[1:]):
-        yield [float(x) for x in position.split()]
-    if i + 1 != int(positions.attrib.get('num', i + 1)):
-        warnings.warn("Number of positions inconsistent.")
+def _parse_position(position):
+    for i, position_str in enumerate(position.text.splitlines()[1:]):
+        yield [float(x) for x in position_str.split()]
+    if i + 1 != int(position.attrib.get('num', i + 1)):
+        warnings.warn("Number of positions is inconsistent.")
 
 
-def _parse_velocities(velocities):
-    for i, velocity in enumerate(velocities.text.splitlines()[1:]):
-        yield [float(x) for x in velocity.split()]
-    if i + 1 != int(velocities.attrib.get('num', i + 1)):
-        warnings.warn("Number of velocities inconsistent.")
+def _parse_velocity(velocity):
+    for i, velocity_str in enumerate(velocity.text.splitlines()[1:]):
+        yield [float(x) for x in velocity_str.split()]
+    if i + 1 != int(velocity.attrib.get('num', i + 1)):
+        warnings.warn("Number of velocities is inconsistent.")
 
 
-def _parse_orientations(orientations):
-    for i, orientation in enumerate(orientations.text.splitlines()[1:]):
-        yield [float(x) for x in orientation.split()]
-    if i + 1 != int(orientations.attrib.get('num', i + 1)):
-        warnings.warn("Number of orientations inconsistent.")
+def _parse_orientation(orientation):
+    for i, orientation_str in enumerate(orientation.text.splitlines()[1:]):
+        yield [float(x) for x in orientation_str.split()]
+    if i + 1 != int(orientation.attrib.get('num', i + 1)):
+        warnings.warn("Number of orientations is inconsistent.")
 
 
 def _parse_types(types):
     for i, type in enumerate(types.text.splitlines()[1:]):
         yield str(type)
     if i + 1 != int(types.attrib.get('num', i)):
-        warnings.warn("Number of types inconsistent.")
+        warnings.warn("Number of types is inconsistent.")

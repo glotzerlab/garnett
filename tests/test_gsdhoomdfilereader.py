@@ -83,7 +83,7 @@ class BaseGSDHOOMDFileReaderTest(TrajectoryTest):
         self.assertTrue(np.allclose(
             np.asarray(traj[0].box.get_box_matrix()),
             np.array([[8.0, 0, 0], [0, 10.0, 0], [0, 0, 10.0]])))
-        self.assertTrue(np.allclose(traj[0].positions, np.array([
+        self.assertTrue(np.allclose(traj[0].position, np.array([
          [-3., -4., -4.],
          [-3., -4., -2.],
          [-3., -4.,  0.],
@@ -414,9 +414,9 @@ class BaseGSDHOOMDFileReaderTest(TrajectoryTest):
                                     dynamic=['attribute', 'property', 'momentum'])
         gsd_writer.dump_state(self.mc)
         prop_map = dict(
-            position='positions',
-            orientation='orientations',
-            velocity='velocities',
+            position='position',
+            orientation='orientation',
+            velocity='velocity',
             angular_momentum='angmom')
         with open(self.fn_gsd, 'rb') as gsdfile:
             gsd_reader = garnett.gsdhoomdfilereader.GSDHOOMDFileReader()

@@ -41,9 +41,9 @@ class GetarFileWriter(object):
     """
 
     property_record_map = {
-        'positions': 'position.f32.ind',
-        'orientations': 'orientation.f32.ind',
-        'velocities': 'velocity.f32.ind',
+        'position': 'position.f32.ind',
+        'orientation': 'orientation.f32.ind',
+        'velocity': 'velocity.f32.ind',
         'mass': 'mass.f32.ind',
         'charge': 'charge.f32.ind',
         'diameter': 'diameter.f32.ind',

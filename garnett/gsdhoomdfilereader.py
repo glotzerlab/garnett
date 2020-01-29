@@ -227,9 +227,9 @@ class GSDHoomdFrame(Frame):
         raw_frame.box = _box_matrix(frame.configuration.box)
         raw_frame.box_dimensions = int(frame.configuration.dimensions)
         raw_frame.types = [frame.particles.types[t] for t in frame.particles.typeid]
-        raw_frame.positions = frame.particles.position
-        raw_frame.orientations = frame.particles.orientation
-        raw_frame.velocities = frame.particles.velocity
+        raw_frame.position = frame.particles.position
+        raw_frame.orientation = frame.particles.orientation
+        raw_frame.velocity = frame.particles.velocity
         raw_frame.mass = frame.particles.mass
         raw_frame.charge = frame.particles.charge
         raw_frame.diameter = frame.particles.diameter
