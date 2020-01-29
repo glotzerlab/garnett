@@ -167,12 +167,12 @@ class FrameData(object):
                             details="Use to_hoomd_snapshot with no argument.")
     def make_snapshot(self):
         "Create a HOOMD-blue snapshot object from this frame."
-        return _make_hoomd_blue_snapshot(self)
+        return _make_hoomd_snapshot(self)
 
     def to_hoomd_snapshot(self, snapshot=None):
         "Copy this frame to a HOOMD-blue snapshot."
         if snapshot is None:
-            return _make_hoomd_blue_snapshot(self)
+            return _make_hoomd_snapshot(self)
         else:
             return _to_hoomd_snapshot(self, snapshot)
 
@@ -360,13 +360,13 @@ class Frame(object):
     def make_snapshot(self):
         "Create a HOOMD-blue snapshot object from this frame."
         self.load()
-        return _make_hoomd_blue_snapshot(self.frame_data)
+        return _make_hoomd_snapshot(self.frame_data)
 
     def to_hoomd_snapshot(self, snapshot=None):
         "Copy this frame to a HOOMD-blue snapshot."
         self.load()
         if snapshot is None:
-            return _make_hoomd_blue_snapshot(self.frame_data)
+            return _make_hoomd_snapshot(self.frame_data)
         else:
             return _to_hoomd_snapshot(self.frame_data, snapshot)
 
@@ -1402,4 +1402,4 @@ def _make_hoomd_snapshot(frame):
                         details="This function is deprecated.")
 def make_hoomd_blue_snapshot(frame):
     "Create a HOOMD-blue snapshot from the frame instance."
-    return _make_hoomd_blue_snapshot(frame)
+    return _make_hoomd_snapshot(frame)
