@@ -165,7 +165,7 @@ class FrameData(object):
 
     def copyto_snapshot(self, snapshot):
         "Copy this frame to a HOOMD-blue snapshot."
-        return copy_to_hoomd_blue_snapshot(self, snapshot)
+        return copyto_hoomd_blue_snapshot(self, snapshot)
 
 
 class _RawFrameData(object):
@@ -344,7 +344,7 @@ class Frame(object):
     def copyto_snapshot(self, snapshot):
         "Copy this frame to a HOOMD-blue snapshot."
         self.load()
-        return copy_to_hoomd_blue_snapshot(self.frame_data, snapshot)
+        return copyto_hoomd_blue_snapshot(self.frame_data, snapshot)
 
     def to_plato_scene(self, backend, scene=None):
         """Create a plato scene from this frame.
@@ -1339,4 +1339,4 @@ def make_hoomd_blue_snapshot(frame):
     np.copyto(
         snapshot.particles.typeid,
         np.array(type_ids, dtype=snapshot.particles.typeid.dtype))
-    return copy_to_hoomd_blue_snapshot(frame, snapshot)
+    return copyto_hoomd_blue_snapshot(frame, snapshot)
