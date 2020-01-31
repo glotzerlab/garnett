@@ -176,7 +176,7 @@ class TrajectoryTest(unittest.TestCase):
                 # This should fail since it's using 2d positions
                 traj[0].position = [[0, 0], [0, 0]]
             with self.assertWarns(DeprecationWarning):
-                self.assertTrue(np.array_equal(traj[0].positions, traj[0].position))
+                self.assertTrue(np.array_equal(traj[0].position, traj[0].position))
 
     def test_orientation(self):
         sample_file = self.get_sample_file()
@@ -197,7 +197,7 @@ class TrajectoryTest(unittest.TestCase):
                 # This should fail since it's using 2d positions
                 traj[0].orientation = [[0, 0], [0, 0]]
             with self.assertWarns(DeprecationWarning):
-                self.assertTrue(np.array_equal(traj[0].orientations, traj[0].orientation))
+                self.assertTrue(np.array_equal(traj[0].orientation, traj[0].orientation))
         except AttributeError:
             pass
 
@@ -220,7 +220,7 @@ class TrajectoryTest(unittest.TestCase):
                 # This should fail since it's using 2d velocities
                 traj[0].velocity = [[0, 0], [0, 0]]
             with self.assertWarns(DeprecationWarning):
-                self.assertTrue(np.array_equal(traj[0].velocities, traj[0].velocity))
+                self.assertTrue(np.array_equal(traj[0].velocity, traj[0].velocity))
         except AttributeError:
             pass
 
