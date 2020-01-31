@@ -20,6 +20,7 @@ __all__ = [
     'ConvexPolyhedronUnionShape',
     'ConvexSpheropolyhedronShape',
     'GeneralPolyhedronShape',
+    'EllipsoidShape',
 ]
 
 logger = logging.getLogger(__name__)
