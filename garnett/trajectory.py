@@ -798,8 +798,8 @@ class Trajectory(BaseTrajectory):
         traj.load_arrays()
         M = len(traj)
         traj.N             # M
-        traj.positions     # MxNx3
-        traj.orientations  # MxNx4
+        traj.position     # MxNx3
+        traj.orientation  # MxNx4
         traj.types         # MxN
         traj.type_ids      # MxN
 
@@ -811,8 +811,8 @@ class Trajectory(BaseTrajectory):
         last_frame = traj[-1]
         n_th_frame = traj[n]
 
-        first_frame.positions     # Nx3
-        first_frame.orientations  # Nx4
+        first_frame.position     # Nx3
+        first_frame.orientation  # Nx4
         first_frame.types         # Nx1
 
     You can iterate through individual frames:
@@ -820,7 +820,7 @@ class Trajectory(BaseTrajectory):
     .. code::
 
         for frame in trajectory:
-            print(frame.positions)
+            print(frame.position)
 
     and create a sub-trajectory from the *i'th* to the *(j-1)'th* frame:
 
@@ -920,8 +920,8 @@ class Trajectory(BaseTrajectory):
 
             traj.load_arrays()
             traj.N             # M -- frame sizes
-            traj.positions     # MxNx3
-            traj.orientations  # MxNx4
+            traj.position     # MxNx3
+            traj.orientation  # MxNx4
             traj.types         # MxN
             traj.type_ids      # MxN
 
@@ -934,7 +934,7 @@ class Trajectory(BaseTrajectory):
 
                 traj.load_arrays()
                 sub_traj = traj[m:n]
-                sub_traj.positions
+                sub_traj.position
 
             However, it may be more efficient to call :meth:`~.load_arrays`
             only for the sub trajectory if other data is not of interest:
@@ -943,7 +943,7 @@ class Trajectory(BaseTrajectory):
 
                 sub_traj = traj[m:n]
                 sub_traj.load_arrays()
-                sub_traj.positions
+                sub_traj.position
         """
         # Determine array shapes
         _N = np.array([len(f) for f in self.frames], dtype=np.int_)
@@ -1038,7 +1038,7 @@ class Trajectory(BaseTrajectory):
 
         .. code::
 
-            pos_i = traj.positions[i][0:traj.N[i]]
+            pos_i = traj.position[i][0:traj.N[i]]
 
         :returns: frame size as array with length M
         :rtype: :class:`numpy.ndarray` (dtype= :class:`numpy.int_`)
