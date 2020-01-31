@@ -175,8 +175,6 @@ class TrajectoryTest(unittest.TestCase):
             with self.assertRaises(ValueError):
                 # This should fail since it's using 2d positions
                 traj[0].position = [[0, 0], [0, 0]]
-            with self.assertWarns(DeprecationWarning):
-                self.assertTrue(np.array_equal(traj[0].position, traj[0].position))
 
     def test_orientation(self):
         sample_file = self.get_sample_file()
@@ -196,8 +194,6 @@ class TrajectoryTest(unittest.TestCase):
             with self.assertRaises(ValueError):
                 # This should fail since it's using 2d positions
                 traj[0].orientation = [[0, 0], [0, 0]]
-            with self.assertWarns(DeprecationWarning):
-                self.assertTrue(np.array_equal(traj[0].orientation, traj[0].orientation))
         except AttributeError:
             pass
 
@@ -219,8 +215,6 @@ class TrajectoryTest(unittest.TestCase):
             with self.assertRaises(ValueError):
                 # This should fail since it's using 2d velocities
                 traj[0].velocity = [[0, 0], [0, 0]]
-            with self.assertWarns(DeprecationWarning):
-                self.assertTrue(np.array_equal(traj[0].velocity, traj[0].velocity))
         except AttributeError:
             pass
 
@@ -342,6 +336,26 @@ class TrajectoryTest(unittest.TestCase):
         except AttributeError:
             pass
 
+    def test_deprecated(self):
+        sample_file = self.get_sample_file()
+        traj = self.reader().read(sample_file)
+        _shape_pos = traj[0].position.shape
+        _shape_ort = traj[0].orientation.shape
+        with self.assertWarns(DeprecationWarning):
+            self.assertTrue(np.array_equal(traj[0].positions, traj[0].position))
+            # Since this test class is subclassed by the tests of other formats
+            # that may or may not support orientations & velocities...
+            for frame in traj:
+                try:
+                    self.assertTrue(np.array_equal(frame.orientations, frame.orientation))
+                except AttributeError:
+                    frame.orientations = np.random.random(_shape_ort)
+                    self.assertTrue(np.array_equal(frame.orientations, frame.orientation))
+                try:
+                    self.assertTrue(np.array_equal(frame.velocities, frame.velocity))
+                except AttributeError:
+                    frame.velocities = np.random.random(_shape_pos)
+                    self.assertTrue(np.array_equal(frame.velocities, frame.velocity))
 
 @unittest.skipIf(not HOOMD, 'requires hoomd-blue')
 class FrameSnapshotExport(TrajectoryTest):
