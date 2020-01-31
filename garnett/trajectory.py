@@ -260,13 +260,6 @@ class Frame(object):
             raise ValueError("Input array must be of shape (N, {}) where N is the number of particles.".format(nelem))
         return value
 
-    def _deprecation_warning(self, old_attr, new_attr):
-        warnings.warn(
-            "This property was renamed to {}. {} will be removed in version 0.8.0.".format(new_attr, old_attr),
-            DeprecationWarning,
-            stacklevel=2
-        )
-
     def _raw_frame_to_frame(self, raw_frame, dtype=None):
         """Generate a frame object from a raw frame object."""
         N = len(raw_frame.types)
@@ -532,12 +525,15 @@ class Frame(object):
         self.frame_data.position = value
 
     @property
+    @deprecation.deprecated(deprecated_in="0.7.0",
+                            removed_in="0.8.0",
+                            current_version=__version__,
+                            details="This property is deprecated, use position instead.")
     def positions(self):
         """
         Nx3 array of coordinates for N particles in 3 dimensions.
         Deprecated alias for position.
         """
-        self._deprecation_warning('positions', 'position')
         return self.position
 
     @positions.setter
@@ -560,12 +556,15 @@ class Frame(object):
         self.frame_data.orientation = value
 
     @property
+    @deprecation.deprecated(deprecated_in="0.7.0",
+                            removed_in="0.8.0",
+                            current_version=__version__,
+                            details="This property is deprecated, use orientation instead.")
     def orientations(self):
         """
         Nx4 array of rotational coordinates for N particles represented as quaternions.
         Deprecated alias for orientation.
         """
-        self._deprecation_warning('orientations', 'orientation')
         return self.orientation
 
     @orientations.setter
@@ -587,12 +586,15 @@ class Frame(object):
         self.frame_data.velocity = value
 
     @property
+    @deprecation.deprecated(deprecated_in="0.7.0",
+                            removed_in="0.8.0",
+                            current_version=__version__,
+                            details="This property is deprecated, use velocity instead.")
     def velocities(self):
         """
         Nx3 array of velocities for N particles in 3 dimensions.
         Deprecated alias for velocity.
         """
-        self._deprecation_warning('velocities', 'velocity')
         return self.velocity
 
     @velocities.setter
@@ -908,14 +910,6 @@ class Trajectory(BaseTrajectory):
         "Returns the size of the largest frame within this trajectory."
         return max((len(f) for f in self.frames))
 
-    def _deprecation_warning(self, old_attr, new_attr):
-        warnings.warn(
-            "This property was renamed to {}. {} will be removed in "
-            "version 0.8.0.".format(new_attr, old_attr),
-            DeprecationWarning,
-            stacklevel=2
-        )
-
     def load_arrays(self):
         """Load positions, orientations and types into memory.
 
@@ -1112,12 +1106,15 @@ class Trajectory(BaseTrajectory):
         self._assertarrays_loaded()
         return self._check_nonempty_property('_position')
 
+    @deprecation.deprecated(deprecated_in="0.7.0",
+                            removed_in="0.8.0",
+                            current_version=__version__,
+                            details="This property is deprecated, use position instead.")
     @property
     def positions(self):
         """
         Deprecated alias for position.
         """
-        self._deprecation_warning('positions', 'position')
         return self.position
 
     @property
@@ -1134,10 +1131,13 @@ class Trajectory(BaseTrajectory):
         self._assertarrays_loaded()
         return self._check_nonempty_property('_orientation')
 
+    @deprecation.deprecated(deprecated_in="0.7.0",
+                            removed_in="0.8.0",
+                            current_version=__version__,
+                            details="This property is deprecated, use orientation instead.")
     @property
     def orientations(self):
         """Deprecated alias for orientation."""
-        self._deprecation_warning('orientations', 'orientation')
         return self.orientation
 
     @property
@@ -1152,10 +1152,13 @@ class Trajectory(BaseTrajectory):
         self._assertarrays_loaded()
         return self._check_nonempty_property('_velocity')
 
+    @deprecation.deprecated(deprecated_in="0.7.0",
+                            removed_in="0.8.0",
+                            current_version=__version__,
+                            details="This property is deprecated, use velocity instead.")
     @property
     def velocities(self):
         """Deprecated alias for velocity."""
-        self._deprecation_warning('velocities', 'velocity')
         return self.velocity
 
     @property
