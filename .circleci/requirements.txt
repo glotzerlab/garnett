@@ -6,3 +6,4 @@ gsd==1.9.0
 gtar==1.0.1
 numpy==1.16.1
 rowan==1.2.0
+deprecation>=2
