@@ -9,7 +9,6 @@ trajectories."""
 
 import logging
 import deprecation
-import warnings
 
 import numpy as np
 import rowan
