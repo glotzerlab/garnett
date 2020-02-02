@@ -345,7 +345,7 @@ class Frame(object):
     def make_snapshot(self):
         "Create a HOOMD-blue snapshot object from this frame."
         self.load()
-        return _make_hoomd_snapshot(self.frame_data)
+        return self.to_hoomd_snapshot()
 
     def to_hoomd_snapshot(self, snapshot=None):
         "Copy this frame to a HOOMD-blue snapshot."
