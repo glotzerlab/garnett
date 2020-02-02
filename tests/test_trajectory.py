@@ -342,10 +342,10 @@ class TrajectoryTest(unittest.TestCase):
         _shape_pos = traj[0].position.shape
         _shape_ort = traj[0].orientation.shape
         with self.assertWarns(DeprecationWarning):
-            self.assertTrue(np.array_equal(traj[0].positions, traj[0].position))
             # Since this test class is subclassed by the tests of other formats
             # that may or may not support orientations & velocities...
             for frame in traj:
+                self.assertTrue(np.array_equal(frame.positions, frame.position))
                 try:
                     self.assertTrue(np.array_equal(frame.orientations, frame.orientation))
                 except AttributeError:
