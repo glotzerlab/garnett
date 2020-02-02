@@ -23,6 +23,10 @@ logger = logging.getLogger(__name__)
 
 DEFAULT_DTYPE = np.float32
 
+FRAME_TRAJ_PROPS = ['N', 'type', 'types', 'type_ids', 'position',
+                    'orientation', 'velocity', 'mass', 'charge',
+                    'diameter', 'moment_inertia', 'angmom', 'image']
+
 
 class Box(object):
     """A triclinical box class.
@@ -219,17 +223,6 @@ class Frame(object):
 
     :param dtype: The data type for frame data.
     """
-    FRAME_ATTRIBUTES = [
-            'position',
-            'orientation',
-            'velocity',
-            'mass',
-            'charge',
-            'diameter',
-            'moment_inertia',
-            'angmom',
-            'image'
-            ]
 
     def __init__(self, dtype=None):
         if dtype is None:
@@ -265,7 +258,7 @@ class Frame(object):
         ret = FrameData()
 
         mapping = dict()
-        for prop in self.FRAME_ATTRIBUTES:
+        for prop in FRAME_TRAJ_PROPS[4:]:
             mapping[prop] = np.asarray(getattr(raw_frame, prop), dtype=dtype)
             if len(mapping[prop]) == 0:
                 mapping[prop] = None
@@ -283,7 +276,7 @@ class Frame(object):
                                                          raw_frame.box,
                                                          dtype,
                                                          box_dimensions)
-        for prop in self.FRAME_ATTRIBUTES:
+        for prop in FRAME_TRAJ_PROPS[4:]:
             setattr(ret, prop, mapping[prop])
         ret.shapedef = raw_frame.shapedef
         ret.types = raw_frame.types
@@ -291,7 +284,7 @@ class Frame(object):
         ret.data_keys = raw_frame.data_keys
         ret.view_rotation = raw_frame.view_rotation
         # validate data
-        for prop in self.FRAME_ATTRIBUTES:
+        for prop in FRAME_TRAJ_PROPS[4:]:
             if getattr(ret, prop) is not None:
                 assert N == len(getattr(ret, prop))
         return ret
@@ -832,10 +825,6 @@ class Trajectory(BaseTrajectory):
     :param dtype: The default data type for trajectory data.
     """
 
-    TRAJ_ATTRIBUTES = ['N', 'type', 'types', 'type_ids', 'position',
-                       'orientation', 'velocity', 'mass', 'charge',
-                       'diameter', 'moment_inertia', 'angmom', 'image']
-
     def __init__(self, frames=None, dtype=None):
         super(Trajectory, self).__init__(frames=frames)
         if dtype is None:
@@ -885,7 +874,7 @@ class Trajectory(BaseTrajectory):
         """Returns true if arrays are loaded into memory.
 
         See also: :meth:`~.load_arrays`"""
-        return any(getattr(self, '_' + key) is not None for key in self.TRAJ_ATTRIBUTES)
+        return any(getattr(self, '_' + key) is not None for key in FRAME_TRAJ_PROPS)
 
     def _assert_loaded(self):
         "Raises a RuntimeError if trajectory is not loaded."
@@ -968,7 +957,7 @@ class Trajectory(BaseTrajectory):
 
         for i, frame in enumerate(self.frames):
             # loop over desired properties
-            for prop in self.TRAJ_ATTRIBUTES[4:]:
+            for prop in FRAME_TRAJ_PROPS[4:]:
                 try:
                     frame_prop = frame._raise_attributeerror(prop)
                 except AttributeError:
@@ -976,7 +965,7 @@ class Trajectory(BaseTrajectory):
                 if frame_prop is not None:
                     props[prop][i] = frame_prop
 
-        for prop in self.TRAJ_ATTRIBUTES[4:]:
+        for prop in FRAME_TRAJ_PROPS[4:]:
             # This builds NumPy arrays for properties with
             # no missing values (i.e. None).
             if any(p is None for p in props[prop]):
