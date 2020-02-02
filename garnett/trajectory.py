@@ -1088,11 +1088,11 @@ class Trajectory(BaseTrajectory):
         self._assertarrays_loaded()
         return self._check_nonempty_property('_position')
 
+    @property
     @deprecation.deprecated(deprecated_in="0.7.0",
                             removed_in="0.8.0",
                             current_version=__version__,
                             details="This property is deprecated, use position instead.")
-    @property
     def positions(self):
         """
         Deprecated alias for position.
@@ -1113,11 +1113,11 @@ class Trajectory(BaseTrajectory):
         self._assertarrays_loaded()
         return self._check_nonempty_property('_orientation')
 
+    @property
     @deprecation.deprecated(deprecated_in="0.7.0",
                             removed_in="0.8.0",
                             current_version=__version__,
                             details="This property is deprecated, use orientation instead.")
-    @property
     def orientations(self):
         """Deprecated alias for orientation."""
         return self.orientation
@@ -1134,11 +1134,11 @@ class Trajectory(BaseTrajectory):
         self._assertarrays_loaded()
         return self._check_nonempty_property('_velocity')
 
+    @property
     @deprecation.deprecated(deprecated_in="0.7.0",
                             removed_in="0.8.0",
                             current_version=__version__,
                             details="This property is deprecated, use velocity instead.")
-    @property
     def velocities(self):
         """Deprecated alias for velocity."""
         return self.velocity
