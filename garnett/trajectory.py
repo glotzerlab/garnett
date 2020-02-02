@@ -1317,7 +1317,7 @@ def copyto_hoomd_blue_snapshot(frame, snapshot):
     return _to_hoomd_snapshot(frame, snapshot)
 
 
-def _from_hood_snapshot(frame, snapshot):
+def _from_hoomd_snapshot(frame, snapshot):
     """"Copy the HOOMD-blue snapshot into the frame.
 
     Note that only the properties listed below will be copied.
@@ -1340,7 +1340,7 @@ def copyfrom_hoomd_blue_snapshot(frame, snapshot):
 
     Note that only the properties listed below will be copied.
     """
-    return _from_hood_snapshot(frame, snapshot)
+    return _from_hoomd_snapshot(frame, snapshot)
 
 
 def _make_hoomd_snapshot(frame):
