@@ -34,9 +34,9 @@ Deprecated
 
   - The following ``trajectory`` module-level functions have been deprecated:
 
-    - make_hoomd_blue_snapshot (now _make_hoomd_snapshot)
-    - copyfrom_hoomd_blue_snapshot (now _from_hood_snapshot)
-    - copyto_hoomd_blue_snapshot (now _to_hood_snapshot)
+    - make_hoomd_blue_snapshot
+    - copyfrom_hoomd_blue_snapshot
+    - copyto_hoomd_blue_snapshot
 
 Version 0.6
 ===========
