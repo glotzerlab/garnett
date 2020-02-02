@@ -174,10 +174,7 @@ class FrameData(object):
 
     def to_hoomd_snapshot(self, snapshot=None):
         "Copy this frame to a HOOMD-blue snapshot."
-        if snapshot is None:
-            return _make_hoomd_snapshot(self)
-        else:
-            return _to_hoomd_snapshot(self, snapshot)
+        return _to_hoomd_snapshot(self, snapshot)
 
     @deprecation.deprecated(deprecated_in="0.7.0",
                             removed_in="0.8.0",
@@ -350,10 +347,7 @@ class Frame(object):
     def to_hoomd_snapshot(self, snapshot=None):
         "Copy this frame to a HOOMD-blue snapshot."
         self.load()
-        if snapshot is None:
-            return _make_hoomd_snapshot(self.frame_data)
-        else:
-            return _to_hoomd_snapshot(self.frame_data, snapshot)
+        return _to_hoomd_snapshot(self.frame_data, snapshot)
 
     @deprecation.deprecated(deprecated_in="0.7.0",
                             removed_in="0.8.0",
@@ -1300,8 +1294,28 @@ def _generate_type_id_array(types, type_ids):
     return _type
 
 
-def _to_hoomd_snapshot(frame, snapshot):
+def _to_hoomd_snapshot(frame, snapshot=None):
     "Copy the frame into a HOOMD-blue snapshot."
+    if snapshot is None:
+        try:
+            from hoomd import data
+        except ImportError:
+            try:
+                # Try importing from hoomd 1.x
+                from hoomd_script import data
+            except ImportError:
+                raise ImportError('hoomd')
+        particle_types = list(set(frame.types))
+        type_ids = [particle_types.index(t) for t in frame.types]
+        snapshot = data.make_snapshot(
+                                      N=len(frame),
+                                      box=data.boxdim(**frame.box.__dict__),
+                                      particle_types=particle_types
+                                      )
+        np.copyto(
+                  snapshot.particles.typeid,
+                  np.array(type_ids, dtype=snapshot.particles.typeid.dtype)
+                  )
     for prop in FRAME_TRAJ_PROPS[4:]:
         if getattr(frame, prop) is not None:
             np.copyto(getattr(snapshot.particles, prop), getattr(frame, prop))
@@ -1343,32 +1357,10 @@ def copyfrom_hoomd_blue_snapshot(frame, snapshot):
     return _from_hoomd_snapshot(frame, snapshot)
 
 
-def _make_hoomd_snapshot(frame):
-    "Create a HOOMD-blue snapshot from the frame instance."
-    try:
-        from hoomd import data
-    except ImportError:
-        try:
-            # Try importing from hoomd 1.x
-            from hoomd_script import data
-        except ImportError:
-            raise ImportError('hoomd')
-    particle_types = list(set(frame.types))
-    type_ids = [particle_types.index(t) for t in frame.types]
-    snapshot = data.make_snapshot(
-        N=len(frame),
-        box=data.boxdim(**frame.box.__dict__),
-        particle_types=particle_types)
-    np.copyto(
-        snapshot.particles.typeid,
-        np.array(type_ids, dtype=snapshot.particles.typeid.dtype))
-    return _to_hoomd_snapshot(frame, snapshot)
-
-
 @deprecation.deprecated(deprecated_in="0.7.0",
                         removed_in="0.8.0",
                         current_version=__version__,
                         details="This function is deprecated.")
 def make_hoomd_blue_snapshot(frame):
     "Create a HOOMD-blue snapshot from the frame instance."
-    return _make_hoomd_snapshot(frame)
+    return _to_hoomd_snapshot(frame)
