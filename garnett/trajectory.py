@@ -1302,24 +1302,9 @@ def _generate_type_id_array(types, type_ids):
 
 def _to_hoomd_snapshot(frame, snapshot):
     "Copy the frame into a HOOMD-blue snapshot."
-    if frame.position is not None:
-        np.copyto(snapshot.particles.position, frame.position)
-    if frame.orientation is not None:
-        np.copyto(snapshot.particles.orientation, frame.orientation)
-    if frame.velocity is not None:
-        np.copyto(snapshot.particles.velocity, frame.velocity)
-    if frame.mass is not None:
-        np.copyto(snapshot.particles.mass, frame.mass)
-    if frame.charge is not None:
-        np.copyto(snapshot.particles.charge, frame.charge)
-    if frame.diameter is not None:
-        np.copyto(snapshot.particles.diameter, frame.diameter)
-    if frame.moment_inertia is not None:
-        np.copyto(snapshot.particles.moment_inertia, frame.moment_inertia)
-    if frame.angmom is not None:
-        np.copyto(snapshot.particles.angmom, frame.angmom)
-    if frame.image is not None:
-        np.copyto(snapshot.particles.image, frame.image)
+    for prop in FRAME_TRAJ_PROPS[4:]:
+        if getattr(frame, prop) is not None:
+            np.copyto(getattr(snapshot.particles, prop), getattr(frame, prop))
     return snapshot
 
 
@@ -1341,15 +1326,8 @@ def _from_hood_snapshot(frame, snapshot):
     particle_types = list(set(snapshot.particles.types))
     snap_types = [particle_types[i] for i in snapshot.particles.typeid]
     frame.types = snap_types
-    frame.position = snapshot.particles.position
-    frame.orientation = snapshot.particles.orientation
-    frame.velocity = snapshot.particles.velocity
-    frame.mass = snapshot.particles.mass
-    frame.charge = snapshot.particles.charge
-    frame.diameter = snapshot.particles.diameter
-    frame.moment_inertia = snapshot.particles.moment_inertia
-    frame.angmom = snapshot.particles.angmom
-    frame.image = snapshot.particles.image
+    for prop in FRAME_TRAJ_PROPS[4:]:
+        setattr(frame, prop, getattr(snapshot.particles, prop))
     return frame
 
 
