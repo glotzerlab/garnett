@@ -190,7 +190,7 @@ Sub-trajectories inherit already loaded data:
 Example use with HOOMD-blue
 ===========================
 
-The **garnett** frames can be used to initialize HOOMD-blue simulations by creating snapshots or copying the frame data to existing snapshots with the :py:meth:`~.Frame.to_hoomd_snapshot` method.
+The **garnett** frames can be used to initialize HOOMD-blue simulations by creating snapshots or copying the frame data to existing snapshots with the :py:meth:`~.Frame.to_hoomd_snapshot` method:
 
 .. code-block:: python
 
