@@ -76,7 +76,7 @@ Trajectory array access
 -----------------------
 
 The complete trajectory may be loaded into memory by calling the :py:meth:`~.trajectory.Trajectory.load_arrays` method.
-This will allow access to fields such as position, orientation, and velocity across all frames and particles. 
+This will allow access to fields such as position, orientation, and velocity across all frames and particles.
 Supported properties are listed below:
 
 .. code-block:: python
@@ -190,7 +190,7 @@ Sub-trajectories inherit already loaded data:
 Example use with HOOMD-blue
 ===========================
 
-The **garnett** frames can be used to initialize HOOMD-blue by creating snapshots with the :py:meth:`~.Frame.make_snapshot` method or by copying the frame data to existing snapshots with the :py:meth:`~.Frame.copyto_snapshot` methods:
+The **garnett** frames can be used to initialize HOOMD-blue simulations by creating snapshots or copying the frame data to existing snapshots with the :py:meth:`~.Frame.to_hoomd_snapshot` method.
 
 .. code-block:: python
 
@@ -200,9 +200,9 @@ The **garnett** frames can be used to initialize HOOMD-blue by creating snapshot
     with gt.read('cube.pos') as traj:
 
         # Initialize from last frame
-        snapshot = traj[-1].make_snapshot()
+        snapshot = traj[-1].to_hoomd_snapshot()
         system = init.read_snapshot(snapshot)
 
         # Restore last frame
         snapshot = system.take_snapshot()
-        traj[-1].copyto_snapshot(snapshot)
+        traj[-1].to_hoomd_snapshot(snapshot)
