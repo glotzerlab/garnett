@@ -14,6 +14,10 @@ Added
 +++++
   - Added ability to read ``_space_group_symop_operation_xyz`` keys in CIF files.
 
+Changed
++++++++
+  - Updated GSD reader to use the GSD v2.0.0 API.
+
 Fixed
 +++++
   - Fixed finding nearest image when applying space group operations to CIF files. The meaning of the ``tolerance`` parameter is also adjusted to be absolute (in units of fractional coordinates), rather than relative.
