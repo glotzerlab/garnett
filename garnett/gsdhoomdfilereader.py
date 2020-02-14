@@ -289,7 +289,7 @@ class GSDHOOMDFileReader(object):
         :type frame: :class:`trajectory.Frame`"""
         if NATIVE:
             try:
-                gsdfile = gsd.fl.open(stream.name, mode='rb')
+                gsdfile = gsd.fl.open(stream.name, stream.mode)
                 traj = gsdhoomd.HOOMDTrajectory(gsdfile)
             except AttributeError:
                 logger.info(
