@@ -38,7 +38,7 @@ from .shapes import SphereShape, ConvexPolyhedronShape, ConvexSpheropolyhedronSh
     PolygonShape, SpheropolygonShape, EllipsoidShape, _parse_type_shape
 
 try:
-    import gsd
+    import gsd.hoomd
     NATIVE = True
 except ImportError:
     NATIVE = False
@@ -289,7 +289,7 @@ class GSDHOOMDFileReader(object):
         :type frame: :class:`trajectory.Frame`"""
         if NATIVE:
             try:
-                gsdfile = gsd.fl.open(stream.name, stream.mode)
+                gsdfile = gsd.hoomd.open(name=stream.name, mode=stream.mode)
                 traj = gsdhoomd.HOOMDTrajectory(gsdfile)
             except AttributeError:
                 logger.info(
