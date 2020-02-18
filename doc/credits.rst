@@ -78,6 +78,10 @@ James Antonaglia, University of Michigan
 
 Chengyu Dai, University of Michigan
 
+Tim Moore, University of Michigan
+
+    * GSD 2.0 compatibility
+
 Source code
 -----------
 
