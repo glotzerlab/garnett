@@ -7,7 +7,7 @@ import tempfile
 import warnings
 import garnett
 import numpy as np
-from garnett.trajectory import FRAME_TRAJ_PROPS
+from garnett.trajectory import PARTICLE_PROPERTIES
 
 try:
     try:
@@ -396,7 +396,7 @@ class FrameSnapshotExport(TrajectoryTest):
         traj = self.get_trajectory(garnett.samples.POS_HPMC)
         frame = traj[-1]
         snapshot = frame.to_hoomd_snapshot()
-        for prop in FRAME_TRAJ_PROPS[4:]:
+        for prop in PARTICLE_PROPERTIES:
             try:
                 self.assertTrue(np.array_equal(getattr(snapshot.particles, prop), \
                                                getattr(frame, prop)))

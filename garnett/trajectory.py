@@ -23,9 +23,17 @@ logger = logging.getLogger(__name__)
 
 DEFAULT_DTYPE = np.float32
 
-FRAME_TRAJ_PROPS = ['N', 'type', 'types', 'type_ids', 'position',
-                    'orientation', 'velocity', 'mass', 'charge',
-                    'diameter', 'moment_inertia', 'angmom', 'image']
+PARTICLE_PROPERTIES = ['position',
+                       'orientation',
+                       'velocity',
+                       'mass',
+                       'charge',
+                       'diameter',
+                       'moment_inertia',
+                       'angmom',
+                       'image']
+
+FRAME_TRAJ_PROPS = PARTICLE_PROPERTIES + ['N', 'type', 'types', 'type_ids']
 
 
 class Box(object):
@@ -255,7 +263,7 @@ class Frame(object):
         ret = FrameData()
 
         mapping = dict()
-        for prop in FRAME_TRAJ_PROPS[4:]:
+        for prop in PARTICLE_PROPERTIES:
             mapping[prop] = np.asarray(getattr(raw_frame, prop), dtype=dtype)
             if len(mapping[prop]) == 0:
                 mapping[prop] = None
@@ -273,7 +281,7 @@ class Frame(object):
                                                          raw_frame.box,
                                                          dtype,
                                                          box_dimensions)
-        for prop in FRAME_TRAJ_PROPS[4:]:
+        for prop in PARTICLE_PROPERTIES:
             setattr(ret, prop, mapping[prop])
         ret.shapedef = raw_frame.shapedef
         ret.types = raw_frame.types
@@ -281,7 +289,7 @@ class Frame(object):
         ret.data_keys = raw_frame.data_keys
         ret.view_rotation = raw_frame.view_rotation
         # validate data
-        for prop in FRAME_TRAJ_PROPS[4:]:
+        for prop in PARTICLE_PROPERTIES:
             if getattr(ret, prop) is not None:
                 assert N == len(getattr(ret, prop))
         return ret
@@ -951,7 +959,7 @@ class Trajectory(BaseTrajectory):
 
         for i, frame in enumerate(self.frames):
             # loop over desired properties
-            for prop in FRAME_TRAJ_PROPS[4:]:
+            for prop in PARTICLE_PROPERTIES:
                 try:
                     frame_prop = frame._raise_attributeerror(prop)
                 except AttributeError:
@@ -959,7 +967,7 @@ class Trajectory(BaseTrajectory):
                 if frame_prop is not None:
                     props[prop][i] = frame_prop
 
-        for prop in FRAME_TRAJ_PROPS[4:]:
+        for prop in PARTICLE_PROPERTIES:
             # This builds NumPy arrays for properties with
             # no missing values (i.e. None).
             if any(p is None for p in props[prop]):
@@ -1316,7 +1324,7 @@ def _to_hoomd_snapshot(frame, snapshot=None):
                   snapshot.particles.typeid,
                   np.array(type_ids, dtype=snapshot.particles.typeid.dtype)
                   )
-    for prop in FRAME_TRAJ_PROPS[4:]:
+    for prop in PARTICLE_PROPERTIES:
         if getattr(frame, prop) is not None:
             np.copyto(getattr(snapshot.particles, prop), getattr(frame, prop))
     return snapshot
@@ -1340,7 +1348,7 @@ def _from_hoomd_snapshot(frame, snapshot):
     particle_types = list(set(snapshot.particles.types))
     snap_types = [particle_types[i] for i in snapshot.particles.typeid]
     frame.types = snap_types
-    for prop in FRAME_TRAJ_PROPS[4:]:
+    for prop in PARTICLE_PROPERTIES:
         setattr(frame, prop, getattr(snapshot.particles, prop))
     return frame
 
