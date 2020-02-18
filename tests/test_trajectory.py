@@ -7,7 +7,7 @@ import tempfile
 import warnings
 import garnett
 import numpy as np
-
+from garnett.trajectory import FRAME_TRAJ_PROPS
 
 try:
     try:
@@ -390,6 +390,18 @@ class FrameSnapshotExport(TrajectoryTest):
         self.assertTrue((s0.particles.position == s1.particles.position).all())
         self.assertTrue((s0.particles.orientation ==
                          s1.particles.orientation).all())
+
+
+    def test_to_hoomd_snapshot(self):
+        traj = self.get_trajectory(garnett.samples.POS_HPMC)
+        frame = traj[-1]
+        snapshot = frame.to_hoomd_snapshot()
+        for prop in FRAME_TRAJ_PROPS[4:]:
+            try:
+                self.assertTrue(np.array_equal(getattr(snapshot.particles, prop), \
+                                               getattr(frame, prop)))
+            except AttributeError:
+                pass
 
     @unittest.skipIf(not HPMC, 'requires HPMC')
     def test_sphere(self):
