@@ -4,7 +4,7 @@
 import io
 import unittest
 import tempfile
-
+import warnings
 import garnett
 import numpy as np
 
@@ -337,25 +337,39 @@ class TrajectoryTest(unittest.TestCase):
             pass
 
     def test_deprecated(self):
-        sample_file = self.get_sample_file()
-        traj = self.reader().read(sample_file)
-        _shape_pos = traj[0].position.shape
-        _shape_ort = traj[0].orientation.shape
-        with self.assertWarns(DeprecationWarning):
+
+        def _access_deprected_props(obj, pos_shape, ort_shape, is_traj):
             # Since this test class is subclassed by the tests of other formats
             # that may or may not support orientations & velocities...
+            self.assertTrue(np.array_equal(obj.positions, obj.position))
+            try:
+                self.assertTrue(np.array_equal(obj.orientations, obj.orientation))
+            except AttributeError:
+                # because traj objects have no setters
+                if not is_traj:
+                    obj.orientations = np.random.random(ort_shape)
+                    self.assertTrue(np.array_equal(obj.orientations, obj.orientation))
+                else:
+                    pass
+            try:
+                self.assertTrue(np.array_equal(obj.velocities, obj.velocity))
+            except AttributeError:
+                if not is_traj:
+                    obj.velocities = np.random.random(pos_shape)
+                    self.assertTrue(np.array_equal(obj.velocities, obj.velocity))
+                else:
+                    pass
+
+        sample_file = self.get_sample_file()
+        traj = self.reader().read(sample_file)
+        traj.load_arrays()
+        M = len(traj)
+        N = len(traj[0])
+        with warnings.catch_warnings():
+            warnings.simplefilter("always")
+            _access_deprected_props(traj, (M, N, 3), (M, N, 4), True)
             for frame in traj:
-                self.assertTrue(np.array_equal(frame.positions, frame.position))
-                try:
-                    self.assertTrue(np.array_equal(frame.orientations, frame.orientation))
-                except AttributeError:
-                    frame.orientations = np.random.random(_shape_ort)
-                    self.assertTrue(np.array_equal(frame.orientations, frame.orientation))
-                try:
-                    self.assertTrue(np.array_equal(frame.velocities, frame.velocity))
-                except AttributeError:
-                    frame.velocities = np.random.random(_shape_pos)
-                    self.assertTrue(np.array_equal(frame.velocities, frame.velocity))
+                _access_deprected_props(frame, (N, 3), (N, 4), False)
 
 @unittest.skipIf(not HOOMD, 'requires hoomd-blue')
 class FrameSnapshotExport(TrajectoryTest):
