@@ -107,12 +107,12 @@ with open('cube.pos') as posfile:
     traj = pos_reader.read(posfile)
 
 # Initialize from last frame
-snapshot = traj[-1].make_snapshot()
+snapshot = traj[-1].to_hoomd_snapshot()
 system = init.read_snapshot(snapshot)
 
 # Restore last frame
 snapshot = system.take_snapshot()
-traj[-1].copyto_snapshot(snapshot)
+traj[-1].to_hoomd_snapshot(snapshot)
 
 ```
 
