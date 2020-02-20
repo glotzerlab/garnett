@@ -39,7 +39,7 @@ with hoomd.context.SimulationContext():
 with hoomd.context.SimulationContext():
 
     with garnett.read('cube.pos') as traj:
-        snapshot = traj[-1].make_snapshot()
+        snapshot = traj[-1].to_hoomd_snapshot()
         system = hoomd.init.read_snapshot(snapshot)
 
     mc = hpmc.integrate.convex_polyhedron(seed=452784, d=0.2, a=0.4)
