@@ -289,8 +289,8 @@ class GSDHOOMDFileReader(object):
         :type frame: :class:`trajectory.Frame`"""
         if NATIVE:
             try:
-                gsdfile = gsd.fl.open(name=stream.name, mode="rb")
-                traj = gsdhoomd.HOOMDTrajectory(gsdfile)
+                traj = gsd.hoomd.open(name=stream.name, mode="rb")
+                gsdfile = traj.file
             except AttributeError:
                 logger.info(
                     "Unable to open file stream natively, falling back "
