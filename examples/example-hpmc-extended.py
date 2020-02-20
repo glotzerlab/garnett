@@ -40,13 +40,13 @@ with open('cube.pos') as posfile:
 
 # Restore a snapshot
 sn2 = system.take_snapshot()
-traj[-1].copyto_snapshot(sn2)
+traj[-1].to_hoomd_snapshot(sn2)
 
 # New system
 init.reset()
 with open('cube.pos') as posfile:
     traj = pos_reader.read(posfile)
-snapshot = traj[-1].make_snapshot()
+snapshot = traj[-1].to_hoomd_snapshot()
 system = init.read_snapshot(snapshot)
 
 mc = hpmc.integrate.convex_polyhedron(seed=452784, d=0.2, a=0.4)
