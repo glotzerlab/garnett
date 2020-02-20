@@ -131,14 +131,14 @@ class CifFileReaderTest(CifFileWriterTest):
         aflow_traj = self.read_cif_trajectory(aflow_sample)
 
         logger.debug('AFLOW cif-read positions:')
-        logger.debug(aflow_traj[-1].positions)
+        logger.debug(aflow_traj[-1].position)
         logger.debug('Cif-read positions:')
-        logger.debug(traj[-1].positions)
+        logger.debug(traj[-1].position)
 
         # confirm that the string was modified
         self.assertNotEqual(garnett.samples.CIF, aflow_dialect_cif)
         # confirm that positions are the same
-        self.assertTrue(np.allclose(aflow_traj[-1].positions, traj[-1].positions))
+        self.assertTrue(np.allclose(aflow_traj[-1].position, traj[-1].position))
 
     def test_cif_read_write(self):
         sample = io.StringIO(garnett.samples.CIF)
@@ -172,8 +172,8 @@ class CifFileReaderTest(CifFileWriterTest):
             f.seek(0)
             bad_trajectory = self.read_cif_trajectory(f, tolerance=1e-5)
 
-        self.assertEqual(len(default_trajectory[0].positions), 2)
-        self.assertGreater(len(bad_trajectory[0].positions), 2)
+        self.assertEqual(len(default_trajectory[0].position), 2)
+        self.assertGreater(len(bad_trajectory[0].position), 2)
 
 
 if __name__ == '__main__':

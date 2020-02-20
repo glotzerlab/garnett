@@ -165,8 +165,8 @@ class PosFileReaderTest(BasePosFileReaderTest):
 
     def test_default(self):
         with TemporaryDirectory() as tmp_dir:
-            gsdfile = 'testfile.gsd'
-            posfile = 'testfile.pos'
+            gsdfile = os.path.join(tmp_dir, 'testfile.gsd')
+            posfile = os.path.join(tmp_dir, 'testfile.pos')
             with open(gsdfile, "wb") as f:
                 f.write(base64.b64decode(garnett.samples.GSD_BASE64))
             with garnett.read(gsdfile) as traj:

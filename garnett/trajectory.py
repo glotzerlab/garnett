@@ -8,10 +8,11 @@ The trajectory module provides classes to store discretized
 trajectories."""
 
 import logging
-import warnings
+import deprecation
 
 import numpy as np
 import rowan
+from .version import __version__
 
 from .shapes import SphereShape, ConvexPolyhedronShape, \
     ConvexSpheropolyhedronShape, GeneralPolyhedronShape, PolygonShape, \
@@ -21,6 +22,18 @@ from .shapes import SphereShape, ConvexPolyhedronShape, \
 logger = logging.getLogger(__name__)
 
 DEFAULT_DTYPE = np.float32
+
+PARTICLE_PROPERTIES = ['position',
+                       'orientation',
+                       'velocity',
+                       'mass',
+                       'charge',
+                       'diameter',
+                       'moment_inertia',
+                       'angmom',
+                       'image']
+
+FRAME_TRAJ_PROPS = PARTICLE_PROPERTIES + ['N', 'type', 'types', 'type_ids']
 
 
 class Box(object):
@@ -159,13 +172,25 @@ class FrameData(object):
     def __repr__(self):
         return str(self)
 
+    @deprecation.deprecated(deprecated_in="0.7.0",
+                            removed_in="0.8.0",
+                            current_version=__version__,
+                            details="Use to_hoomd_snapshot with no argument.")
     def make_snapshot(self):
         "Create a HOOMD-blue snapshot object from this frame."
-        return make_hoomd_blue_snapshot(self)
+        return self.to_hoomd_snapshot()
 
+    def to_hoomd_snapshot(self, snapshot=None):
+        "Copy this frame to a HOOMD-blue snapshot."
+        return _to_hoomd_snapshot(self, snapshot)
+
+    @deprecation.deprecated(deprecated_in="0.7.0",
+                            removed_in="0.8.0",
+                            current_version=__version__,
+                            details="Use to_hoomd_snapshot.")
     def copyto_snapshot(self, snapshot):
         "Copy this frame to a HOOMD-blue snapshot."
-        return copyto_hoomd_blue_snapshot(self, snapshot)
+        return self.to_hoomd_snapshot(snapshot)
 
 
 class _RawFrameData(object):
@@ -203,17 +228,6 @@ class Frame(object):
 
     :param dtype: The data type for frame data.
     """
-    FRAME_ATTRIBUTES = [
-            'position',
-            'orientation',
-            'velocity',
-            'mass',
-            'charge',
-            'diameter',
-            'moment_inertia',
-            'angmom',
-            'image'
-            ]
 
     def __init__(self, dtype=None):
         if dtype is None:
@@ -243,20 +257,13 @@ class Frame(object):
             raise ValueError("Input array must be of shape (N, {}) where N is the number of particles.".format(nelem))
         return value
 
-    def _deprecation_warning(self, old_attr, new_attr):
-        warnings.warn(
-            "This property was renamed to {}. {} will be removed in version 0.8.0.".format(new_attr, old_attr),
-            DeprecationWarning,
-            stacklevel=2
-        )
-
     def _raw_frame_to_frame(self, raw_frame, dtype=None):
         """Generate a frame object from a raw frame object."""
         N = len(raw_frame.types)
         ret = FrameData()
 
         mapping = dict()
-        for prop in self.FRAME_ATTRIBUTES:
+        for prop in PARTICLE_PROPERTIES:
             mapping[prop] = np.asarray(getattr(raw_frame, prop), dtype=dtype)
             if len(mapping[prop]) == 0:
                 mapping[prop] = None
@@ -274,7 +281,7 @@ class Frame(object):
                                                          raw_frame.box,
                                                          dtype,
                                                          box_dimensions)
-        for prop in self.FRAME_ATTRIBUTES:
+        for prop in PARTICLE_PROPERTIES:
             setattr(ret, prop, mapping[prop])
         ret.shapedef = raw_frame.shapedef
         ret.types = raw_frame.types
@@ -282,7 +289,7 @@ class Frame(object):
         ret.data_keys = raw_frame.data_keys
         ret.view_rotation = raw_frame.view_rotation
         # validate data
-        for prop in self.FRAME_ATTRIBUTES:
+        for prop in PARTICLE_PROPERTIES:
             if getattr(ret, prop) is not None:
                 assert N == len(getattr(ret, prop))
         return ret
@@ -336,15 +343,28 @@ class Frame(object):
     def __ne__(self, other):
         return not self.__eq__(other)
 
+    @deprecation.deprecated(deprecated_in="0.7.0",
+                            removed_in="0.8.0",
+                            current_version=__version__,
+                            details="Use to_hoomd_snapshot with no argument.")
     def make_snapshot(self):
         "Create a HOOMD-blue snapshot object from this frame."
         self.load()
-        return make_hoomd_blue_snapshot(self.frame_data)
+        return self.to_hoomd_snapshot()
 
+    def to_hoomd_snapshot(self, snapshot=None):
+        "Copy this frame to a HOOMD-blue snapshot."
+        self.load()
+        return _to_hoomd_snapshot(self.frame_data, snapshot)
+
+    @deprecation.deprecated(deprecated_in="0.7.0",
+                            removed_in="0.8.0",
+                            current_version=__version__,
+                            details="Use to_hoomd_snapshot.")
     def copyto_snapshot(self, snapshot):
         "Copy this frame to a HOOMD-blue snapshot."
         self.load()
-        return copyto_hoomd_blue_snapshot(self.frame_data, snapshot)
+        return self.to_hoomd_snapshot(snapshot)
 
     def to_plato_scene(self, backend, scene=None):
         """Create a plato scene from this frame.
@@ -499,12 +519,15 @@ class Frame(object):
         self.frame_data.position = value
 
     @property
+    @deprecation.deprecated(deprecated_in="0.7.0",
+                            removed_in="0.8.0",
+                            current_version=__version__,
+                            details="This property is deprecated, use position instead.")
     def positions(self):
         """
         Nx3 array of coordinates for N particles in 3 dimensions.
         Deprecated alias for position.
         """
-        self._deprecation_warning('positions', 'position')
         return self.position
 
     @positions.setter
@@ -527,12 +550,15 @@ class Frame(object):
         self.frame_data.orientation = value
 
     @property
+    @deprecation.deprecated(deprecated_in="0.7.0",
+                            removed_in="0.8.0",
+                            current_version=__version__,
+                            details="This property is deprecated, use orientation instead.")
     def orientations(self):
         """
         Nx4 array of rotational coordinates for N particles represented as quaternions.
         Deprecated alias for orientation.
         """
-        self._deprecation_warning('orientations', 'orientation')
         return self.orientation
 
     @orientations.setter
@@ -554,12 +580,15 @@ class Frame(object):
         self.frame_data.velocity = value
 
     @property
+    @deprecation.deprecated(deprecated_in="0.7.0",
+                            removed_in="0.8.0",
+                            current_version=__version__,
+                            details="This property is deprecated, use velocity instead.")
     def velocities(self):
         """
         Nx3 array of velocities for N particles in 3 dimensions.
         Deprecated alias for velocity.
         """
-        self._deprecation_warning('velocities', 'velocity')
         return self.velocity
 
     @velocities.setter
@@ -763,8 +792,8 @@ class Trajectory(BaseTrajectory):
         traj.load_arrays()
         M = len(traj)
         traj.N             # M
-        traj.positions     # MxNx3
-        traj.orientations  # MxNx4
+        traj.position      # MxNx3
+        traj.orientation   # MxNx4
         traj.types         # MxN
         traj.type_ids      # MxN
 
@@ -776,8 +805,8 @@ class Trajectory(BaseTrajectory):
         last_frame = traj[-1]
         n_th_frame = traj[n]
 
-        first_frame.positions     # Nx3
-        first_frame.orientations  # Nx4
+        first_frame.position      # Nx3
+        first_frame.orientation   # Nx4
         first_frame.types         # Nx1
 
     You can iterate through individual frames:
@@ -785,7 +814,7 @@ class Trajectory(BaseTrajectory):
     .. code::
 
         for frame in trajectory:
-            print(frame.positions)
+            print(frame.position)
 
     and create a sub-trajectory from the *i'th* to the *(j-1)'th* frame:
 
@@ -797,10 +826,6 @@ class Trajectory(BaseTrajectory):
     :type frames: :class:`~.Frame`
     :param dtype: The default data type for trajectory data.
     """
-
-    TRAJ_ATTRIBUTES = ['N', 'type', 'types', 'type_ids', 'position',
-                       'orientation', 'velocity', 'mass', 'charge',
-                       'diameter', 'moment_inertia', 'angmom', 'image']
 
     def __init__(self, frames=None, dtype=None):
         super(Trajectory, self).__init__(frames=frames)
@@ -851,7 +876,7 @@ class Trajectory(BaseTrajectory):
         """Returns true if arrays are loaded into memory.
 
         See also: :meth:`~.load_arrays`"""
-        return any(getattr(self, '_' + key) is not None for key in self.TRAJ_ATTRIBUTES)
+        return any(getattr(self, '_' + key) is not None for key in FRAME_TRAJ_PROPS)
 
     def _assert_loaded(self):
         "Raises a RuntimeError if trajectory is not loaded."
@@ -875,14 +900,6 @@ class Trajectory(BaseTrajectory):
         "Returns the size of the largest frame within this trajectory."
         return max((len(f) for f in self.frames))
 
-    def _deprecation_warning(self, old_attr, new_attr):
-        warnings.warn(
-            "This property was renamed to {}. {} will be removed in "
-            "version 0.8.0.".format(new_attr, old_attr),
-            DeprecationWarning,
-            stacklevel=2
-        )
-
     def load_arrays(self):
         """Load positions, orientations and types into memory.
 
@@ -893,8 +910,8 @@ class Trajectory(BaseTrajectory):
 
             traj.load_arrays()
             traj.N             # M -- frame sizes
-            traj.positions     # MxNx3
-            traj.orientations  # MxNx4
+            traj.position      # MxNx3
+            traj.orientation   # MxNx4
             traj.types         # MxN
             traj.type_ids      # MxN
 
@@ -907,7 +924,7 @@ class Trajectory(BaseTrajectory):
 
                 traj.load_arrays()
                 sub_traj = traj[m:n]
-                sub_traj.positions
+                sub_traj.position
 
             However, it may be more efficient to call :meth:`~.load_arrays`
             only for the sub trajectory if other data is not of interest:
@@ -916,7 +933,7 @@ class Trajectory(BaseTrajectory):
 
                 sub_traj = traj[m:n]
                 sub_traj.load_arrays()
-                sub_traj.positions
+                sub_traj.position
         """
         # Determine array shapes
         _N = np.array([len(f) for f in self.frames], dtype=np.int_)
@@ -942,7 +959,7 @@ class Trajectory(BaseTrajectory):
 
         for i, frame in enumerate(self.frames):
             # loop over desired properties
-            for prop in self.TRAJ_ATTRIBUTES[4:]:
+            for prop in PARTICLE_PROPERTIES:
                 try:
                     frame_prop = frame._raise_attributeerror(prop)
                 except AttributeError:
@@ -950,7 +967,7 @@ class Trajectory(BaseTrajectory):
                 if frame_prop is not None:
                     props[prop][i] = frame_prop
 
-        for prop in self.TRAJ_ATTRIBUTES[4:]:
+        for prop in PARTICLE_PROPERTIES:
             # This builds NumPy arrays for properties with
             # no missing values (i.e. None).
             if any(p is None for p in props[prop]):
@@ -1011,7 +1028,7 @@ class Trajectory(BaseTrajectory):
 
         .. code::
 
-            pos_i = traj.positions[i][0:traj.N[i]]
+            pos_i = traj.position[i][0:traj.N[i]]
 
         :returns: frame size as array with length M
         :rtype: :class:`numpy.ndarray` (dtype= :class:`numpy.int_`)
@@ -1080,11 +1097,14 @@ class Trajectory(BaseTrajectory):
         return self._check_nonempty_property('_position')
 
     @property
+    @deprecation.deprecated(deprecated_in="0.7.0",
+                            removed_in="0.8.0",
+                            current_version=__version__,
+                            details="This property is deprecated, use position instead.")
     def positions(self):
         """
         Deprecated alias for position.
         """
-        self._deprecation_warning('positions', 'position')
         return self.position
 
     @property
@@ -1102,9 +1122,12 @@ class Trajectory(BaseTrajectory):
         return self._check_nonempty_property('_orientation')
 
     @property
+    @deprecation.deprecated(deprecated_in="0.7.0",
+                            removed_in="0.8.0",
+                            current_version=__version__,
+                            details="This property is deprecated, use orientation instead.")
     def orientations(self):
         """Deprecated alias for orientation."""
-        self._deprecation_warning('orientations', 'orientation')
         return self.orientation
 
     @property
@@ -1120,9 +1143,12 @@ class Trajectory(BaseTrajectory):
         return self._check_nonempty_property('_velocity')
 
     @property
+    @deprecation.deprecated(deprecated_in="0.7.0",
+                            removed_in="0.8.0",
+                            current_version=__version__,
+                            details="This property is deprecated, use velocity instead.")
     def velocities(self):
         """Deprecated alias for velocity."""
-        self._deprecation_warning('velocities', 'velocity')
         return self.velocity
 
     @property
@@ -1276,30 +1302,44 @@ def _generate_type_id_array(types, type_ids):
     return _type
 
 
-def copyto_hoomd_blue_snapshot(frame, snapshot=None):
+def _to_hoomd_snapshot(frame, snapshot=None):
     "Copy the frame into a HOOMD-blue snapshot."
-    if frame.position is not None:
-        np.copyto(snapshot.particles.position, frame.position)
-    if frame.orientation is not None:
-        np.copyto(snapshot.particles.orientation, frame.orientation)
-    if frame.velocity is not None:
-        np.copyto(snapshot.particles.velocity, frame.velocity)
-    if frame.mass is not None:
-        np.copyto(snapshot.particles.mass, frame.mass)
-    if frame.charge is not None:
-        np.copyto(snapshot.particles.charge, frame.charge)
-    if frame.diameter is not None:
-        np.copyto(snapshot.particles.diameter, frame.diameter)
-    if frame.moment_inertia is not None:
-        np.copyto(snapshot.particles.moment_inertia, frame.moment_inertia)
-    if frame.angmom is not None:
-        np.copyto(snapshot.particles.angmom, frame.angmom)
-    if frame.image is not None:
-        np.copyto(snapshot.particles.image, frame.image)
+    if snapshot is None:
+        try:
+            from hoomd import data
+        except ImportError:
+            try:
+                # Try importing from hoomd 1.x
+                from hoomd_script import data
+            except ImportError:
+                raise ImportError('hoomd')
+        particle_types = list(set(frame.types))
+        type_ids = [particle_types.index(t) for t in frame.types]
+        snapshot = data.make_snapshot(
+                                      N=len(frame),
+                                      box=data.boxdim(**frame.box.__dict__),
+                                      particle_types=particle_types
+                                      )
+        np.copyto(
+                  snapshot.particles.typeid,
+                  np.array(type_ids, dtype=snapshot.particles.typeid.dtype)
+                  )
+    for prop in PARTICLE_PROPERTIES:
+        if getattr(frame, prop) is not None:
+            np.copyto(getattr(snapshot.particles, prop), getattr(frame, prop))
     return snapshot
 
 
-def copyfrom_hoomd_blue_snapshot(frame, snapshot):
+@deprecation.deprecated(deprecated_in="0.7.0",
+                        removed_in="0.8.0",
+                        current_version=__version__,
+                        details="This function is deprecated.")
+def copyto_hoomd_blue_snapshot(frame, snapshot):
+    "Copy the frame into a HOOMD-blue snapshot."
+    return _to_hoomd_snapshot(frame, snapshot)
+
+
+def _from_hoomd_snapshot(frame, snapshot):
     """"Copy the HOOMD-blue snapshot into the frame.
 
     Note that only the properties listed below will be copied.
@@ -1308,35 +1348,27 @@ def copyfrom_hoomd_blue_snapshot(frame, snapshot):
     particle_types = list(set(snapshot.particles.types))
     snap_types = [particle_types[i] for i in snapshot.particles.typeid]
     frame.types = snap_types
-    frame.position = snapshot.particles.position
-    frame.orientation = snapshot.particles.orientation
-    frame.velocity = snapshot.particles.velocity
-    frame.mass = snapshot.particles.mass
-    frame.charge = snapshot.particles.charge
-    frame.diameter = snapshot.particles.diameter
-    frame.moment_inertia = snapshot.particles.moment_inertia
-    frame.angmom = snapshot.particles.angmom
-    frame.image = snapshot.particles.image
+    for prop in PARTICLE_PROPERTIES:
+        setattr(frame, prop, getattr(snapshot.particles, prop))
     return frame
 
 
+@deprecation.deprecated(deprecated_in="0.7.0",
+                        removed_in="0.8.0",
+                        current_version=__version__,
+                        details="This function is deprecated.")
+def copyfrom_hoomd_blue_snapshot(frame, snapshot):
+    """"Copy the HOOMD-blue snapshot into the frame.
+
+    Note that only the properties listed below will be copied.
+    """
+    return _from_hoomd_snapshot(frame, snapshot)
+
+
+@deprecation.deprecated(deprecated_in="0.7.0",
+                        removed_in="0.8.0",
+                        current_version=__version__,
+                        details="This function is deprecated.")
 def make_hoomd_blue_snapshot(frame):
     "Create a HOOMD-blue snapshot from the frame instance."
-    try:
-        from hoomd import data
-    except ImportError:
-        try:
-            # Try importing from hoomd 1.x
-            from hoomd_script import data
-        except ImportError:
-            raise ImportError('hoomd')
-    particle_types = list(set(frame.types))
-    type_ids = [particle_types.index(t) for t in frame.types]
-    snapshot = data.make_snapshot(
-        N=len(frame),
-        box=data.boxdim(**frame.box.__dict__),
-        particle_types=particle_types)
-    np.copyto(
-        snapshot.particles.typeid,
-        np.array(type_ids, dtype=snapshot.particles.typeid.dtype))
-    return copyto_hoomd_blue_snapshot(frame, snapshot)
+    return _to_hoomd_snapshot(frame)

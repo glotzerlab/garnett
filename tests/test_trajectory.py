@@ -4,10 +4,10 @@
 import io
 import unittest
 import tempfile
-
+import warnings
 import garnett
 import numpy as np
-
+from garnett.trajectory import PARTICLE_PROPERTIES
 
 try:
     try:
@@ -175,8 +175,6 @@ class TrajectoryTest(unittest.TestCase):
             with self.assertRaises(ValueError):
                 # This should fail since it's using 2d positions
                 traj[0].position = [[0, 0], [0, 0]]
-            with self.assertWarns(DeprecationWarning):
-                self.assertTrue(np.array_equal(traj[0].positions, traj[0].position))
 
     def test_orientation(self):
         sample_file = self.get_sample_file()
@@ -196,8 +194,6 @@ class TrajectoryTest(unittest.TestCase):
             with self.assertRaises(ValueError):
                 # This should fail since it's using 2d positions
                 traj[0].orientation = [[0, 0], [0, 0]]
-            with self.assertWarns(DeprecationWarning):
-                self.assertTrue(np.array_equal(traj[0].orientations, traj[0].orientation))
         except AttributeError:
             pass
 
@@ -219,8 +215,6 @@ class TrajectoryTest(unittest.TestCase):
             with self.assertRaises(ValueError):
                 # This should fail since it's using 2d velocities
                 traj[0].velocity = [[0, 0], [0, 0]]
-            with self.assertWarns(DeprecationWarning):
-                self.assertTrue(np.array_equal(traj[0].velocities, traj[0].velocity))
         except AttributeError:
             pass
 
@@ -342,13 +336,47 @@ class TrajectoryTest(unittest.TestCase):
         except AttributeError:
             pass
 
+    def test_deprecated(self):
+
+        def _access_deprected_props(obj, pos_shape, ort_shape, is_traj):
+            # Since this test class is subclassed by the tests of other formats
+            # that may or may not support orientations & velocities...
+            self.assertTrue(np.array_equal(obj.positions, obj.position))
+            try:
+                self.assertTrue(np.array_equal(obj.orientations, obj.orientation))
+            except AttributeError:
+                # because traj objects have no setters
+                if not is_traj:
+                    obj.orientations = np.random.random(ort_shape)
+                    self.assertTrue(np.array_equal(obj.orientations, obj.orientation))
+                else:
+                    pass
+            try:
+                self.assertTrue(np.array_equal(obj.velocities, obj.velocity))
+            except AttributeError:
+                if not is_traj:
+                    obj.velocities = np.random.random(pos_shape)
+                    self.assertTrue(np.array_equal(obj.velocities, obj.velocity))
+                else:
+                    pass
+
+        sample_file = self.get_sample_file()
+        traj = self.reader().read(sample_file)
+        traj.load_arrays()
+        M = len(traj)
+        N = len(traj[0])
+        with warnings.catch_warnings():
+            warnings.simplefilter("always")
+            _access_deprected_props(traj, (M, N, 3), (M, N, 4), True)
+            for frame in traj:
+                _access_deprected_props(frame, (N, 3), (N, 4), False)
 
 @unittest.skipIf(not HOOMD, 'requires hoomd-blue')
 class FrameSnapshotExport(TrajectoryTest):
 
     def make_snapshot(self, sample):
         traj = self.get_trajectory(sample)
-        return traj[-1].make_snapshot()
+        return traj[-1].to_hoomd_snapshot()
 
     def del_system(self):
         del self.system
@@ -362,6 +390,18 @@ class FrameSnapshotExport(TrajectoryTest):
         self.assertTrue((s0.particles.position == s1.particles.position).all())
         self.assertTrue((s0.particles.orientation ==
                          s1.particles.orientation).all())
+
+
+    def test_to_hoomd_snapshot(self):
+        traj = self.get_trajectory(garnett.samples.POS_HPMC)
+        frame = traj[-1]
+        snapshot = frame.to_hoomd_snapshot()
+        for prop in PARTICLE_PROPERTIES:
+            try:
+                self.assertTrue(np.array_equal(getattr(snapshot.particles, prop), \
+                                               getattr(frame, prop)))
+            except AttributeError:
+                pass
 
     @unittest.skipIf(not HPMC, 'requires HPMC')
     def test_sphere(self):
@@ -399,7 +439,7 @@ class FrameSnapshotExport(TrajectoryTest):
             f_1 = traj[-1]
             # Pos-files don't support box dimensions.
             f_1.box.dimensions = self.system.box.dimensions
-            snapshot1 = f_1.make_snapshot()
+            snapshot1 = f_1.to_hoomd_snapshot()
             self.assert_snapshots_equal(snapshot0, snapshot1)
             self.system.restore_snapshot(snapshot1)
             pos.disable()

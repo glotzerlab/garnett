@@ -13,6 +13,7 @@ Version 0.7
 Added
 +++++
   - Added ability to read ``_space_group_symop_operation_xyz`` keys in CIF files.
+  - Added ``to_hoomd_snapshot`` method to ``Frame`` objects. Replaces the deprecated ``make_snapshot`` and ``copyto_snapshot`` methods.
 
 Changed
 +++++++
@@ -21,6 +22,25 @@ Changed
 Fixed
 +++++
   - Fixed finding nearest image when applying space group operations to CIF files. The meaning of the ``tolerance`` parameter is also adjusted to be absolute (in units of fractional coordinates), rather than relative.
+
+Deprecated
+++++++++++
+  - The following ``Frame`` and ``Trajectory`` attributes have been deprecated:
+
+    - positions (now position)
+    - orientations (now orientation)
+    - velocities (now velocity)
+
+  - The following ``Frame`` methods have been deprecated:
+
+    - make_snapshot
+    - copyto_snapshot
+
+  - The following ``trajectory`` module-level functions have been deprecated:
+
+    - make_hoomd_blue_snapshot
+    - copyfrom_hoomd_blue_snapshot
+    - copyto_hoomd_blue_snapshot
 
 Version 0.6
 ===========

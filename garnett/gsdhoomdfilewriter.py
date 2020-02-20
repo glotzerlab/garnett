@@ -16,6 +16,8 @@ from .shapes import SphereShape, ConvexPolyhedronShape, ConvexSpheropolyhedronSh
     PolygonShape, SpheropolygonShape, EllipsoidShape
 from .errors import GSDShapeError
 
+from .trajectory import PARTICLE_PROPERTIES
+
 logger = logging.getLogger(__name__)
 
 
@@ -123,7 +125,7 @@ class GSDHOOMDFileWriter(object):
                 except AttributeError:
                     types = ['A']
                 snap.particles.types = types
-                for prop in trajectory.TRAJ_ATTRIBUTES[4:]:
+                for prop in PARTICLE_PROPERTIES:
                     try:
                         setattr(snap.particles, prop, getattr(frame, prop))
                     except AttributeError:
