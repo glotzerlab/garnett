@@ -20,7 +20,9 @@ This is a collection of samples, parsers and writers for formats used in the Glo
 
 To install this package with pip, execute:
 
-    pip install garnett --user
+```bash
+pip install garnett --user
+```
 
 ## Documentation
 
@@ -28,15 +30,17 @@ To install this package with pip, execute:
 
 To build the documentation yourself using sphinx, execute within the repository:
 
-    cd doc
-    make html
-    open _build/html/index.html
+```bash
+cd doc
+make html
+open _build/html/index.html
+```
 
 ## Quickstart
 
 ### Reading and writing
 
-``` python
+```python
 import garnett
 
 # Autodetects file format for a uniform trajectory API
@@ -51,18 +55,19 @@ with garnett.read('posfile.pos') as traj:
 
 ### Data access
 
-Access individual frames by indexing or create sub trajectories with slicing:
+Access individual frames by indexing or create subsets of trajectories with slicing:
+
 ```python
 first_frame = traj[0]
 last_frame = traj[-1]
-n_th_frame = traj[n]
+nth_frame = traj[n]
 # and so on
 
 sub_trajectory = traj[i:j]
 ```
 
 Access properties of trajectories:
-```
+```python
 traj.load_arrays()
 traj.position        # MxNx3
 traj.orientation     # MxNx4
@@ -72,16 +77,19 @@ traj.charge          # MxN
 traj.diameter        # MxN
 traj.moment_inertia  # MxNx3
 traj.angmom          # MxNx4
-traj.types           # MxN
+traj.types           # MxT
 
-# where M=len(traj) and N=max((len(f) for f in traj))
+# M is the number of frames: len(traj)
+# N is the maximum number of particles: max((len(f) for f in traj))
+# T is the number of particle types
 ```
 
 Access properties of individual frames:
-```
+```python
 frame = traj[i]
 frame.box              # 3x3 matrix (not required to be upper-triangular)
-frame.types            # N
+frame.types            # T
+frame.typeid           # N
 frame.position         # Nx3
 frame.orientation      # Nx4
 frame.velocity         # Nx3
@@ -94,14 +102,14 @@ frame.data             # A dictionary of lists for each attribute
 frame.data_key         # A list of strings
 frame.shapedef         # A ordered dictionary of instances of ShapeDefinition
 ```
+
 All matrices are `numpy` arrays.
 
 ## Example use with HOOMD-blue
 
 See the [examples directory](https://github.com/glotzerlab/garnett/tree/master/examples) for additional examples.
 
-```
-#!python
+```python
 pos_reader = PosFileReader()
 with open('cube.pos') as posfile:
     traj = pos_reader.read(posfile)
@@ -113,13 +121,14 @@ system = init.read_snapshot(snapshot)
 # Restore last frame
 snapshot = system.take_snapshot()
 traj[-1].to_hoomd_snapshot(snapshot)
-
 ```
 
 ## Testing
 
 To run all garnett tests, `ddt`, HOOMD-blue (`hoomd`), and `pycifrw` must be installed in the testing environments.
 
-Execute the tests with
+Execute the tests with:
 
-    python -m unittest discover tests
+```bash
+python -m unittest discover tests
+```
