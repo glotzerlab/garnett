@@ -119,7 +119,7 @@ Inidividual frame objects can be accessed via indexing of a (sub-)trajectory obj
     frame.angmom           # Nx4
     frame.data             # A dictionary of lists for each attribute
     frame.data_key         # A list of strings
-    frame.shapedef         # A ordered dictionary of instances of ShapeDefinition
+    frame.type_shapes      # A list of instances of Shape for each type
 
 Iterating over trajectories
 ---------------------------
