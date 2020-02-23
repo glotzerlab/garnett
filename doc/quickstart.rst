@@ -83,6 +83,7 @@ Supported properties are listed below:
 
     traj.load_arrays()
     traj.N               # M
+    traj.types           # MxT
     traj.position        # MxNx3
     traj.orientation     # MxNx4
     traj.velocity        # MxNx3
@@ -92,12 +93,11 @@ Supported properties are listed below:
     traj.moment_inertia  # MxNx3
     traj.angmom          # MxNx4
     traj.image           # MxNx4
-    traj.types           # MxN
     traj.type_ids        # MxN
-    traj.type            # list of type names ordered by type_id
 
-    # where M=len(traj) is the number of frames and N=max((len(f) for f in traj))
-    # is the is the maximum number of particles in any frame.
+    # where M is the number of frames,
+    # T is the number of particle types in a frame,
+    # and N is the number of particles in a frame
 
 Individual frame access
 -----------------------
@@ -108,7 +108,8 @@ Inidividual frame objects can be accessed via indexing of a (sub-)trajectory obj
 
     frame = traj[i]
     frame.box              # garnett.trajectory.Box object
-    frame.types            # N
+    frame.types            # T
+    frame.typeid           # N
     frame.position         # Nx3
     frame.orientation      # Nx4
     frame.velocity         # Nx3

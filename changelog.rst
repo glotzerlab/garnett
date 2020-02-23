@@ -18,6 +18,7 @@ Added
 Changed
 +++++++
   - Updated GSD reader to use the GSD v2.0.0 API.
+  - Changed behavior of ``types``, ``typeid``, ``type_shapes`` to match HOOMD conventions.
 
 Fixed
 +++++
