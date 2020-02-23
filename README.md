@@ -100,7 +100,7 @@ frame.moment_inertia   # Nx3
 frame.angmom           # Nx4
 frame.data             # A dictionary of lists for each attribute
 frame.data_key         # A list of strings
-frame.shapedef         # A ordered dictionary of instances of ShapeDefinition
+frame.type_shapes      # T, Shape for each type
 ```
 
 All matrices are `numpy` arrays.
