@@ -49,7 +49,7 @@ from numpy.core import numeric as _nx
 from numpy.core.numeric import asanyarray
 
 from .trajectory import Frame, Trajectory
-from .trajectory import _RawFrameData, _generate_type_id_array
+from .trajectory import _RawFrameData
 from . import pydcdreader
 
 logger = logging.getLogger(__name__)

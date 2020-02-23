@@ -18,7 +18,7 @@ import xml.etree.ElementTree as ET
 
 import numpy as np
 
-from .trajectory import _RawFrameData, Frame, Trajectory
+from .trajectory import _RawFrameData, Frame, Trajectory, _generate_types_typeid
 from .errors import ParserError
 
 
@@ -110,13 +110,8 @@ def _parse_orientation(orientation):
 
 
 def _parse_types(types_element):
-    types = []
-    typeid = []
-    for typ in types_element.text.splitlines()[1:]:
-        typ = str(typ)
-        if typ not in types:
-            types.append(typ)
-        typeid.append(types.index(typ))
+    type_strings = types_element.text.splitlines()[1:]
+    types, typeid = _generate_types_typeid(type_strings)
     if len(typeid) != int(types_element.attrib.get('num', -1)):
         warnings.warn("Number of types is inconsistent.")
     return types, typeid

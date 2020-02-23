@@ -18,7 +18,7 @@ import warnings
 
 import numpy as np
 
-from .trajectory import _RawFrameData, Frame, Trajectory
+from .trajectory import _RawFrameData, Frame, Trajectory, _generate_types_typeid
 
 # CifFile is from the pycifrw package
 from CifFile import CifFile
@@ -144,8 +144,7 @@ class CifFileFrame(Frame):
         found_keys = [key for key in space_group_keys if key in self.parsed]
 
         unique_points = []
-        types = []
-        typeid = []
+        type_strings = []
 
         if found_keys:
             key_to_use = found_keys[0]
@@ -190,21 +189,18 @@ class CifFileFrame(Frame):
                                    'position, the types for this file are invalid.')
                             warnings.warn(msg, ParserWarning)
 
-                if type_name not in types:
-                    types.append(type_name)
-                typeid.append(types.index(type_name))
+                type_strings.append(type_name)
                 unique_points.append(np.mean(current_points, axis=0))
             unique_points = np.array(unique_points, dtype=np.float32)
 
             if bad_types:
-                types = [self.default_type]
-                typeid = np.zeros(len(unique_points), dtype=np.uint)
+                type_strings = [self.default_type] * len(unique_points)
         else:
-            for type_name in site_types:
-                if type_name not in types:
-                    types.append(type_name)
-                typeid.append(types.index(type_name))
             unique_points = fractions
+            type_strings = site_types
+
+        # Convert type strings to types, typeid
+        types, typeid = _generate_types_typeid(type_strings)
 
         # Save the exact points
         cif_coordinates = unique_points.copy()
@@ -216,8 +212,6 @@ class CifFileFrame(Frame):
         coordinates = np.sum(
             unique_points[:, np.newaxis, :]*box_matrix[np.newaxis, :, :], axis=2)
 
-        types = np.asarray(types, dtype=str)
-        typeid = np.asarray(typeid, dtype=np.uint)
         raw_frame = _RawFrameData()
         raw_frame.box = box_matrix
         raw_frame.types = types

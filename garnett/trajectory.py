@@ -1284,13 +1284,17 @@ def _regularize_box(position, velocity,
     return position, velocity, orientation, angmom, box
 
 
-def _generate_type_id_array(types, type_ids):
-    "Generate type_id array."
-    _type = sorted(set(t_ for t in types for t_ in t))
-    for i, t in enumerate(types):
-        for j, t_ in enumerate(t):
-            type_ids[i][j] = _type.index(t_)
-    return _type
+def _generate_types_typeid(type_strings):
+    """Generate types and typeid from list of type strings."""
+    types = []
+    typeid = []
+    for name in map(str, type_strings):
+        if name not in types:
+            types.append(name)
+        typeid.append(types.index(name))
+    types = np.asarray(types, dtype=str)
+    typeid = np.asarray(typeid, dtype=np.uint)
+    return types, typeid
 
 
 def _to_hoomd_snapshot(frame, snapshot=None):
