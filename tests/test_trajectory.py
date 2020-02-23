@@ -360,6 +360,7 @@ class TrajectoryTest(unittest.TestCase):
             for frame in traj:
                 _access_deprected_props(frame, (N, 3), (N, 4), False)
 
+
 @unittest.skipIf(not HOOMD, 'requires hoomd-blue')
 class FrameSnapshotExport(TrajectoryTest):
 
@@ -380,14 +381,13 @@ class FrameSnapshotExport(TrajectoryTest):
         self.assertTrue((s0.particles.orientation ==
                          s1.particles.orientation).all())
 
-
     def test_to_hoomd_snapshot(self):
         traj = self.get_trajectory(garnett.samples.POS_HPMC)
         frame = traj[-1]
         snapshot = frame.to_hoomd_snapshot()
         for prop in PARTICLE_PROPERTIES:
             try:
-                self.assertTrue(np.array_equal(getattr(snapshot.particles, prop), \
+                self.assertTrue(np.array_equal(getattr(snapshot.particles, prop),
                                                getattr(frame, prop)))
             except AttributeError:
                 pass

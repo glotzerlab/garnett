@@ -29,7 +29,6 @@ This example reads shape data from a HOOMD-blue POS frame:
 import logging
 import warnings
 import copy
-import collections
 
 import numpy as np
 
@@ -63,7 +62,6 @@ def _parse_shape_definitions(frame, gsdfile, frame_index):
     This method uses the ``type_shapes`` property if it is set. Otherwise it
     falls back to reading HPMC state data and inferring ``type_shapes``.
     """
-
 
     def get_chunk(i, chunk, default=None):
         if gsdfile.chunk_exists(i, chunk):

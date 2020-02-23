@@ -13,7 +13,6 @@ Authors: Bradley Dice
 """
 
 from gtar import GTAR, Record
-import numpy as np
 import json
 import logging
 logger = logging.getLogger(__name__)

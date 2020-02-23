@@ -11,12 +11,10 @@ Authors: Matthew Spellings, Carl Simon Adorf
     traj = reader.read(open('trajectory.tar', 'rb'))
 """
 
+import gtar
 import json
 import logging
-import collections
-
 import numpy as np
-import gtar
 
 from .trajectory import _RawFrameData, Box, Frame, Trajectory
 from .shapes import _parse_type_shape

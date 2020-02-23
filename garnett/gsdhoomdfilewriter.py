@@ -10,11 +10,6 @@ Author: Vyas Ramasubramani
 import gsd
 import gsd.hoomd
 import logging
-import numpy as np
-
-from .shapes import SphereShape, ConvexPolyhedronShape, ConvexSpheropolyhedronShape, \
-    PolygonShape, SpheropolygonShape, EllipsoidShape
-from .errors import GSDShapeError
 
 from .trajectory import PARTICLE_PROPERTIES
 
