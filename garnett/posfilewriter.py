@@ -115,7 +115,7 @@ class PosFileWriter(object):
 
             # Orientations must be provided for all particles
             # If the frame does not have orientations, identity quaternions are used
-            orientation = getattr(frame, 'orientation', np.array([[1, 0, 0, 0]] * len(frame.types)))
+            orientation = getattr(frame, 'orientation', np.array([[1, 0, 0, 0]] * frame.N))
 
             for typeid, pos, rot in zip(frame.typeid, frame.position, orientation):
                 name = frame.types[typeid]
