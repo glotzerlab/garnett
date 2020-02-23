@@ -95,10 +95,8 @@ class PosFileWriter(object):
 
             # shape defs
             try:
-                required = set(frame.types).intersection(
-                    set(frame.shapedef.keys()))
-                not_defined = set(frame.types).difference(
-                    set(frame.shapedef.keys()))
+                required = [t for t in frame.types if t in frame.shapedef]
+                not_defined = [t for t in frame.types if t not in frame.shapedef]
                 for name in required:
                     _write('def {} "{}"'.format(name, frame.shapedef[name].pos_string))
                 for name in not_defined:
