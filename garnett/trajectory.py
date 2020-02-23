@@ -24,15 +24,18 @@ logger = logging.getLogger(__name__)
 
 DEFAULT_DTYPE = np.float32
 
+# Scalar properties for a frame
 FRAME_PROPERTIES = {
     'N': np.uint,
 }
 
+# Properties of length T (number of types)
 TYPE_PROPERTIES = {
     'types': str,
     'type_shapes': object,
 }
 
+# Properties of length N (number of particles)
 PARTICLE_PROPERTIES = {
     'typeid': np.uint,
     'position': DEFAULT_DTYPE,

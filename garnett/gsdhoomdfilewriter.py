@@ -75,6 +75,5 @@ class GSDHOOMDFileWriter(object):
                         setattr(snap.particles, prop, getattr(frame, prop))
                     except AttributeError:
                         pass
-
                 traj_outfile.append(snap)
                 logger.debug("Wrote frame {}.".format(i + 1))

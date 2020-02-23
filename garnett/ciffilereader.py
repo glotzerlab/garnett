@@ -167,7 +167,6 @@ class CifFileFrame(Frame):
             # for points near each point to find symmetry-induced duplicates
             while len(replicated_fractions):
                 (ref_index, ref_point) = replicated_fractions.popitem()
-                print(ref_index, ref_point)
                 type_name = replicated_types[ref_index]
 
                 # set of points that are ~equivalent to ref_point given a tolerance
