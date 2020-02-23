@@ -124,19 +124,9 @@ class TrajectoryTest(unittest.TestCase):
         with self.assertRaises(RuntimeError):
             traj.types
         traj.load_arrays()
-        self.assertTrue(np.issubdtype(traj.N.dtype, np.int_))
-        N = np.array([len(f) for f in traj], dtype=np.int_)
+        self.assertTrue(np.issubdtype(traj.N.dtype, np.uint))
+        N = np.array([len(f) for f in traj], dtype=np.uint)
         self.assertTrue((traj.N == N).all())
-
-    def test_type(self):
-        sample_file = self.get_sample_file()
-        traj = self.reader().read(sample_file)
-        with self.assertRaises(RuntimeError):
-            traj.types
-        traj.load_arrays()
-        self.assertTrue(isinstance(traj.type, list))
-        _type = sorted(set((t_ for f in traj for t_ in f.types)))
-        self.assertEqual(traj.type, _type)
 
     def test_types(self):
         sample_file = self.get_sample_file()
@@ -145,19 +135,18 @@ class TrajectoryTest(unittest.TestCase):
             traj.types
         traj.load_arrays()
         self.assertTrue(np.issubdtype(traj.types.dtype, np.str_))
-        self.assertEqual(traj.types.shape, (len(traj), len(traj[0])))
+        self.assertEqual(traj.types.shape, (len(traj), len(np.unique(traj[0].typeid))))
         self.assertTrue((traj.types[0] == traj[0].types).all())
 
-    def test_type_ids(self):
+    def test_typeid(self):
         sample_file = self.get_sample_file()
         traj = self.reader().read(sample_file)
         with self.assertRaises(RuntimeError):
             traj.types
         traj.load_arrays()
-        self.assertTrue(np.issubdtype(traj.type_ids.dtype, np.int_))
-        self.assertEqual(traj.type_ids.shape, (len(traj), len(traj[0])))
-        type_ids_0 = [traj.type.index(t) for t in traj.types[0]]
-        self.assertEqual(type_ids_0, traj.type_ids[0].tolist())
+        self.assertTrue(np.issubdtype(traj.typeid.dtype, np.uint))
+        self.assertEqual(traj.typeid.shape, (len(traj), len(traj[0])))
+        self.assertTrue((traj.typeid[0] == traj[0].typeid).all())
 
     def test_position(self):
         sample_file = self.get_sample_file()
@@ -327,7 +316,7 @@ class TrajectoryTest(unittest.TestCase):
         try:
             if len(traj.image.shape) > 1:
                 self.assertTrue(np.issubdtype(
-                    traj.image.dtype, np.int32))
+                    traj.image.dtype, np.int_), traj.image.dtype)
                 self.assertEqual(traj.image.shape,
                                  (len(traj), len(traj[0]), 3))
                 self.assertTrue((traj.image[0] == traj[0].image).all())

@@ -34,10 +34,9 @@ class BaseGetarFileReaderTest(unittest.TestCase):
         self.moment_inertia = np.random.rand(N, 3)
         self.angmom = np.random.rand(N, 4)
         self.image = np.random.randint(-1000, 1000, size=(N, 3), dtype=np.int32)
-        types = N // 2 * [0] + (N - N // 2) * [1]
-        type_names = ['A', 'B']
+        self.types = ['A', 'B']
+        self.typeid = N // 2 * [0] + (N - N // 2) * [1]
         self.box = np.array([1.0, 1.0, 1.0, 0.0, 0.0, 0.0])
-        self.types = [type_names[t] for t in types]
         if dim == 2:
             self.position[:, 2] = 0
             self.velocity[:, 2] = 0
@@ -53,8 +52,8 @@ class BaseGetarFileReaderTest(unittest.TestCase):
             traj.writePath('frames/0/angular_momentum_quat.f32.ind', self.angmom)
             traj.writePath('frames/0/box.f32.ind', self.box)
             traj.writePath('frames/0/image.i32.ind', self.image)
-            traj.writePath('type.u32.ind', types)
-            traj.writePath('type_names.json', json.dumps(type_names))
+            traj.writePath('type.u32.ind', self.typeid)
+            traj.writePath('type_names.json', json.dumps(self.types))
 
     def read_trajectory(self):
         reader = garnett.reader.GetarFileReader()
@@ -120,7 +119,7 @@ class NoTypesGetarFileReaderTest(BaseGetarFileReaderTest):
         self.angmom = np.random.rand(N, 4)
         self.image = np.random.randint(-1000, 1000, size=(N, 3), dtype=np.int32)
         self.box = np.array([1.0, 1.0, 1.0, 0.0, 0.0, 0.0])
-        self.types = N*['A']
+        self.types = ['A']
         if dim == 2:
             self.position[:, 2] = 0
             self.velocity[:, 2] = 0
