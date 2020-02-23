@@ -119,8 +119,8 @@ class PosFileWriter(object):
             # If the frame does not have orientations, identity quaternions are used
             orientation = getattr(frame, 'orientation', np.array([[1, 0, 0, 0]] * len(frame.types)))
 
-            for name, pos, rot in zip(frame.types, frame.position, orientation):
-
+            for typeid, pos, rot in zip(frame.typeid, frame.position, orientation):
+                name = frame.types[typeid]
                 _write(name, end=' ')
                 try:
                     shapedef = frame.shapedef.get(name)
