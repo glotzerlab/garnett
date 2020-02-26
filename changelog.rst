@@ -19,6 +19,7 @@ Changed
 +++++++
   - Updated GSD reader to use the GSD v2.0.0 API.
   - Changed behavior of ``types``, ``typeid``, ``type_shapes`` to match HOOMD conventions.
+  - Shapes can still be read from GSD via HOOMD-HPMC state but shapes are always written to ``type_shapes`` instead of the HPMC state.
 
 Fixed
 +++++
@@ -65,7 +66,7 @@ Added
 
 Changed
 +++++++
-  - GSD and GTAR writers now output shape information that adheres to the GSD shape visualization specification
+  - GSD and GTAR writers now output shape information that adheres to the GSD shape visualization specification.
 
 Removed
 +++++++

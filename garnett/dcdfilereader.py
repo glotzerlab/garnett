@@ -147,7 +147,7 @@ class DCDFrame(Frame):
         self._position = xyz.swapaxes(0, 1)
 
     def _load(self, xyz=None, ort=None):
-        N = int(self.file_header.n_particles)
+        N = np.uint(self.file_header.n_particles)
         if xyz is None:
             xyz = np.zeros((3, N), dtype=np.float32)
         if ort is None:
@@ -157,8 +157,8 @@ class DCDFrame(Frame):
             self._types = [self.default_type]
             self._typeid = np.zeros(N, dtype=np.uint)
         else:
-            self._types = self.t_frame.types
-            self._typeid = self.t_frame.typeid
+            self._types = copy.copy(self.t_frame.types)
+            self._typeid = copy.copy(self.t_frame.typeid)
         if self.t_frame is None or self.t_frame.box.dimensions == 3:
             ort.T[0] = 1.0
             ort.T[1:] = 0
@@ -228,7 +228,7 @@ class DCDTrajectory(Trajectory):
         # Determine array shapes
         M = len(self)
         N = len(self.frames[0])
-        _N = np.ones(M) * N
+        _N = np.ones(M, dtype=np.uint) * N
 
         # Coordinates
         xyz = np.zeros((M, 3, N), dtype=np.float32)
