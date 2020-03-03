@@ -69,6 +69,7 @@ sub_trajectory = traj[i:j]
 Access properties of trajectories:
 ```python
 traj.load_arrays()
+traj.box             # M
 traj.position        # MxNx3
 traj.orientation     # MxNx4
 traj.velocity        # MxNx3
@@ -87,7 +88,7 @@ traj.types           # MxT
 Access properties of individual frames:
 ```python
 frame = traj[i]
-frame.box              # 3x3 matrix (not required to be upper-triangular)
+frame.box              # garnett.trajectory.Box object
 frame.types            # T
 frame.typeid           # N
 frame.position         # Nx3
@@ -103,7 +104,7 @@ frame.data_key         # A list of strings
 frame.type_shapes      # T, Shape for each type
 ```
 
-All matrices are `numpy` arrays.
+All matrices are `NumPy` arrays.
 
 ## Example use with HOOMD-blue
 
