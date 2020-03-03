@@ -331,9 +331,8 @@ class TrajectoryTest(unittest.TestCase):
         with self.assertRaises(RuntimeError):
             traj.box
         traj.load_arrays()
-        print(traj.box)
         self.assertTrue(len(traj.box.shape) == 1)
-        self.assertTrue(np.issubdtype(traj.box.dtype, object))
+        self.assertTrue(np.issubdtype(traj.box.dtype, np.object_))
         M = len(traj)
         self.assertEqual(traj.box.shape, (M,))
         self.assertTrue(np.all(traj.box[i] == traj[i].box for i in range(M)))
