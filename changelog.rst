@@ -14,6 +14,7 @@ Added
 +++++
   - Added ability to read ``_space_group_symop_operation_xyz`` keys in CIF files.
   - Added ``to_hoomd_snapshot`` method to ``Frame`` objects. Replaces the deprecated ``make_snapshot`` and ``copyto_snapshot`` methods.
+  - Added ``box`` property to trajectory objects.
 
 Changed
 +++++++
