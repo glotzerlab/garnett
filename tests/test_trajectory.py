@@ -325,6 +325,19 @@ class TrajectoryTest(unittest.TestCase):
         except AttributeError:
             pass
 
+    def test_box(self):
+        sample_file = self.get_sample_file()
+        traj = self.reader().read(sample_file)
+        with self.assertRaises(RuntimeError):
+            traj.box
+        traj.load_arrays()
+        print(traj.box)
+        self.assertTrue(len(traj.box.shape) == 1)
+        self.assertTrue(np.issubdtype(traj.box.dtype, object))
+        M = len(traj)
+        self.assertEqual(traj.box.shape, (M,))
+        self.assertTrue(np.all(traj.box[i] == traj[i].box for i in range(M)))
+
     def test_deprecated(self):
 
         def _access_deprected_props(obj, pos_shape, ort_shape, is_traj):

@@ -24,10 +24,10 @@ logger = logging.getLogger(__name__)
 
 DEFAULT_DTYPE = np.float32
 
-# Scalar/unique properties for a frame
+# Scalar/per-frame properties
 FRAME_PROPERTIES = {
     'N': np.uint,
-    'box', object
+    'box': object,
 }
 
 # Properties of length T (number of types)
