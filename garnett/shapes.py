@@ -201,8 +201,8 @@ class SphereUnionShape(Shape):
             'centers': [[0, 0, 1.0], [0, 1.0, 0], [1.0, 0, 0]]}
         """
         return {'type': 'SphereUnion',
-                'centers': self.centers,
-                'diameters': self.diameters}
+                'diameters': self.diameters,
+                'centers': self.centers}
 
 
 class PolygonShape(Shape):
