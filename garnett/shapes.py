@@ -191,6 +191,19 @@ class SphereUnionShape(Shape):
 
         return shape_def
 
+    @property
+    @_json_sanitize
+    def type_shape(self):
+        """Shape as dictionary. Example:
+
+           >>> SphereUnionShape([0.5, 0.5, 0.5], [[0, 0, 1.0], [0, 1.0, 0], [1.0, 0, 0]]).type_shape
+           {'type': 'SphereUnion', 'diameters': [0.5, 0.5, 0.5],
+            'centers': [[0, 0, 1.0], [0, 1.0, 0], [1.0, 0, 0]]}
+        """
+        return {'type': 'SphereUnion',
+                'centers': self.centers,
+                'diameters': self.diameters}
+
 
 class PolygonShape(Shape):
     """Shape class for polygons in a 2D plane.
@@ -575,6 +588,10 @@ def _parse_type_shape(shape):
                                             faces=shape['faces'],
                                             facet_colors=shape['colors'],
                                             color=None)
+    elif type_name == 'sphereunion':
+        type_shape = SphereUnionShape(diameters=shape['diameters'],
+                                      centers=shape['centers'],
+                                      color=None)
 
     if type_shape is None:
         logger.warning("Failed to parse shape definition: shape {} not supported. "
