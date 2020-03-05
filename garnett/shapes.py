@@ -526,9 +526,9 @@ class EllipsoidShape(Shape):
 
             >>> EllipsoidShape(7.0, 5.0, 3.0).type_shape
             {'type': 'Ellipsoid',
-            'a': 7.0,
-            'b': 5.0,
-            'c': 3.0}
+             'a': 7.0,
+             'b': 5.0,
+             'c': 3.0}
 
         """
         return {'type': 'Ellipsoid',
