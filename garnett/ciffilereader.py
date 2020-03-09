@@ -88,7 +88,7 @@ class CifFileFrame(Frame):
         idx = s.rfind('(')
         return self._num(s[:idx]) if idx >= 0 else self._num(s)
 
-    def _parseBox(self, parsed):
+    def _parse_box(self, parsed):
         (a, b, c) = [self._safer_float(parsed['_cell_length_{}'.format(name)])
                      for name in ['a', 'b', 'c']]
         (alpha, beta, gamma) = [self._safer_float(parsed['_cell_angle_{}'.format(name)])
@@ -141,7 +141,7 @@ class CifFileFrame(Frame):
 
     def read(self):
         "Read the frame data from the stream."
-        box_matrix = self._parseBox(self.parsed)
+        box_matrix = self._parse_box(self.parsed)
 
         fractions = np.array([(self._safer_float(x), self._safer_float(y), self._safer_float(z))
                               for (x, y, z) in zip(
