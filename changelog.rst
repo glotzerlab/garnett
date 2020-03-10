@@ -29,9 +29,10 @@ Deprecated
 ++++++++++
   - The following ``Frame`` and ``Trajectory`` attributes have been deprecated:
 
-    - positions (now position)
-    - orientations (now orientation)
-    - velocities (now velocity)
+    - ``positions`` (now ``position``)
+    - ``orientations`` (now ``orientation``)
+    - ``velocities`` (now ``velocity``)
+    - ``shapedef`` dict has been replaced by ``type_shapes`` list. Until this feature is removed, altering shape definitions is only supported if the entire dictionary is set at once.
 
   - The following ``Frame`` methods have been deprecated:
 

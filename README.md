@@ -71,6 +71,7 @@ Access properties of trajectories:
 traj.load_arrays()
 traj.N               # M
 traj.types           # MxT
+traj.type_shapes     # MxT
 traj.typeid          # MxN
 traj.position        # MxNx3
 traj.orientation     # MxNx4
@@ -83,18 +84,18 @@ traj.angmom          # MxNx4
 traj.image           # MxNx3
 
 # M is the number of frames
-# T is the number of particle types
-# N is the number of particles
+# T is the number of particle types in a frame
+# N is the number of particles in a frame
 ```
 
 Access properties of individual frames:
 ```python
 frame = traj[i]
 frame.box              # garnett.trajectory.Box object
-frame.N                # scalar
+frame.N                # scalar, number of particles
 frame.types            # T, string names for each type
-frame.type_shapes      # T, instances of Shape for each type
-frame.typeid           # N, type indices
+frame.type_shapes      # T, list of shapes for each type
+frame.typeid           # N, type indices of each particle
 frame.position         # Nx3
 frame.orientation      # Nx4
 frame.velocity         # Nx3
