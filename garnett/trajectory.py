@@ -962,10 +962,10 @@ class Trajectory(BaseTrajectory):
         return max((len(f) for f in self.frames))
 
     def load_arrays(self):
-        """Load positions, orientations and types into memory.
+        """Load all trajectory properties into memory.
 
-        After calling this function, positions, orientations
-        and types can be accessed as coherent NumPy arrays:
+        After calling this function, all properties can be accessed as coherent
+        NumPy arrays:
 
         .. code::
 
