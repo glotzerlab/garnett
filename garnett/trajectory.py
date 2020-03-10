@@ -555,6 +555,7 @@ class Frame(object):
 
     @typeid.setter
     def typeid(self, value):
+        value = self._validate_input_array(value, dim=1, dtype=np.uint)
         self.load()
         self.frame_data.typeid = value
 
