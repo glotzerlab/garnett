@@ -747,6 +747,12 @@ class Frame(object):
         self.frame_data.data_keys = value
 
     @property
+    @deprecation.deprecated(
+        deprecated_in="0.7.0",
+        removed_in="0.8.0",
+        current_version=__version__,
+        details=("This property is deprecated, use type_shapes instead. "
+                 "If setting shapedef, the entire dictionary must be set at once."))
     def shapedef(self):
         "An ordered dictionary of instances of :class:`~.shapes.Shape`."
         types = self.types
