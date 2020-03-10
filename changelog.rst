@@ -15,11 +15,14 @@ Added
   - Added ability to read ``_space_group_symop_operation_xyz`` keys in CIF files.
   - Added ``to_hoomd_snapshot`` method to ``Frame`` objects. Replaces the deprecated ``make_snapshot`` and ``copyto_snapshot`` methods.
   - Enabled ``type_shape`` for ``SphereUnionShape`` class.
+  - Added ability to read getar files with dynamic properties (such as ``type_shapes.json``) stored at a different period than positions.
 
 Changed
 +++++++
   - Updated GSD reader to use the GSD v2.0.0 API.
   - Changed behavior of ``types``, ``typeid``, ``type_shapes`` to match HOOMD conventions.
+  - Shapes can still be read from GSD via HOOMD-HPMC state but shapes are always written to ``type_shapes`` instead of the HPMC state.
+  - ``PosFileWriter`` requires the number of ``type_shapes`` to match the number of ``types``.
 
 Fixed
 +++++
@@ -29,9 +32,10 @@ Deprecated
 ++++++++++
   - The following ``Frame`` and ``Trajectory`` attributes have been deprecated:
 
-    - positions (now position)
-    - orientations (now orientation)
-    - velocities (now velocity)
+    - ``positions`` (now ``position``)
+    - ``orientations`` (now ``orientation``)
+    - ``velocities`` (now ``velocity``)
+    - ``shapedef`` dict has been replaced by ``type_shapes`` list. Until this feature is removed, altering shape definitions is only supported if the entire dictionary is set at once.
 
   - The following ``Frame`` methods have been deprecated:
 
@@ -66,7 +70,7 @@ Added
 
 Changed
 +++++++
-  - GSD and GTAR writers now output shape information that adheres to the GSD shape visualization specification
+  - GSD and GTAR writers now output shape information that adheres to the GSD shape visualization specification.
 
 Removed
 +++++++
