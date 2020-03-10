@@ -1059,7 +1059,7 @@ class Trajectory(BaseTrajectory):
             calling :meth:`~.load_arrays` or
             :meth:`~.Trajectory.load`."""
         self._assertarrays_loaded()
-        return np.asarray(self._N, dtype=np.uint)
+        return self._check_nonempty_property('_N')
 
     @property
     def types(self):
@@ -1071,7 +1071,7 @@ class Trajectory(BaseTrajectory):
             calling :meth:`~.load_arrays` or
             :meth:`~.Trajectory.load`."""
         self._assertarrays_loaded()
-        return np.asarray(self._types, dtype=np.str_)
+        return self._check_nonempty_property('_types')
 
     @property
     def typeid(self):
@@ -1085,7 +1085,7 @@ class Trajectory(BaseTrajectory):
             calling :meth:`~.load_arrays` or
             :meth:`~.Trajectory.load`."""
         self._assertarrays_loaded()
-        return np.asarray(self._typeid, dtype=np.uint)
+        return self._check_nonempty_property('_typeid')
 
     @property
     def position(self):
