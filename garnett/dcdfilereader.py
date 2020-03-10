@@ -228,7 +228,7 @@ class DCDTrajectory(Trajectory):
         # Determine array shapes
         M = len(self)
         N = len(self.frames[0])
-        _N = np.ones(M, dtype=np.uint) * N
+        _N = np.full(M, N, dtype=np.uint)
 
         # Coordinates
         xyz = np.zeros((M, 3, N), dtype=np.float32)
