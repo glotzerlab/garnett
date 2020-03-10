@@ -16,6 +16,7 @@ def main(args):
         print(base64.b64encode(file.read()))
     return 0
 
+
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(
         description="Dump a binary in base64 encoding.")
