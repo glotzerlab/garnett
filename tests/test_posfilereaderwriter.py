@@ -176,8 +176,9 @@ class PosFileReaderTest(BasePosFileReaderTest):
             with garnett.read(posfile) as traj:
                 for frame in traj:
                     for name in frame.shapedef.keys():
-                        self.assertEqual(frame.shapedef[name], \
+                        self.assertEqual(frame.shapedef[name],
                                          DEFAULT_SHAPE_DEFINITION)
+
 
 @unittest.skipIf(not HPMC, 'requires HPMC')
 class HPMCPosFileReaderTest(BasePosFileReaderTest):
