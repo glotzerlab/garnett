@@ -18,7 +18,7 @@ import xml.etree.ElementTree as ET
 
 import numpy as np
 
-from .trajectory import _RawFrameData, Frame, Trajectory
+from .trajectory import _RawFrameData, Frame, Trajectory, _generate_types_typeid
 from .errors import ParserError
 
 
@@ -45,7 +45,7 @@ class HOOMDXMLFrame(Frame):
         if velocity is not None:
             raw_frame.velocity = list(_parse_velocity(velocity))
 
-        raw_frame.types = list(_parse_types(config.find('type')))
+        raw_frame.types, raw_frame.typeid = _parse_types(config.find('type'))
         return raw_frame
 
     def __str__(self):
@@ -109,8 +109,9 @@ def _parse_orientation(orientation):
         warnings.warn("Number of orientations is inconsistent.")
 
 
-def _parse_types(types):
-    for i, type in enumerate(types.text.splitlines()[1:]):
-        yield str(type)
-    if i + 1 != int(types.attrib.get('num', i)):
+def _parse_types(types_element):
+    type_strings = types_element.text.splitlines()[1:]
+    types, typeid = _generate_types_typeid(type_strings)
+    if len(typeid) != int(types_element.attrib.get('num', -1)):
         warnings.warn("Number of types is inconsistent.")
+    return types, typeid

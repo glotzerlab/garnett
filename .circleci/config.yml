@@ -17,7 +17,7 @@ jobs:
           name: style-check
           command: |
             pip install --user -U flake8==3.7.1
-            python -m flake8 --show-source garnett/
+            python -m flake8 --show-source .
 
 
   test-3.7: &test-template

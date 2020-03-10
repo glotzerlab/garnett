@@ -34,7 +34,7 @@ class BaseGetarFileWriterTest(unittest.TestCase):
         traj = garnett.reader.GSDHOOMDFileReader().read(gsdfile)
         traj.load_arrays()
         len_orig = len(traj)
-        readwrite_props = ['N', 'types', 'type_ids',
+        readwrite_props = ['N', 'types', 'typeid',
                            'position', 'orientation', 'velocity',
                            'mass', 'charge', 'diameter',
                            'moment_inertia', 'angmom', 'image']

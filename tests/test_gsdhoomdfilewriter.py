@@ -28,9 +28,9 @@ def get_filename(filename):
 
 
 class ColorlessShape(garnett.shapes.Shape):
-    """ShapeDefinition without colors, for comparing formats.
+    """Shape without colors, for comparing formats.
 
-    :param other: Another ShapeDefinition object.
+    :param other: Another Shape object.
     :type other: :py:class:`garnett.shapes.Shape`
     """
 
@@ -66,7 +66,7 @@ class BaseGSDHOOMDFileWriterTest(unittest.TestCase):
         traj = self.reader.read(gsdfile)
         traj.load_arrays()
         len_orig = len(traj)
-        readwrite_props = ['N', 'types', 'type_ids',
+        readwrite_props = ['N', 'types', 'typeid',
                            'position', 'orientation', 'velocity',
                            'mass', 'charge', 'diameter',
                            'moment_inertia', 'angmom', 'image']

@@ -11,12 +11,10 @@ Authors: Matthew Spellings, Carl Simon Adorf
     traj = reader.read(open('trajectory.tar', 'rb'))
 """
 
+import gtar
 import json
 import logging
-import collections
-
 import numpy as np
-import gtar
 
 from .trajectory import _RawFrameData, Box, Frame, Trajectory
 from .shapes import _parse_type_shape
@@ -47,12 +45,20 @@ class GetarFrame(Frame):
 
     def read(self):
         raw_frame = _RawFrameData()
-        raw_frame.shapedef = collections.OrderedDict()
-        prop_map = {'angular_momentum_quat': 'angmom'}
-        supported_records = ['position', 'orientation', 'velocity',
-                             'mass', 'charge', 'diameter',
-                             'moment_inertia', 'angular_momentum_quat',
-                             'image']
+        raw_frame.type_shapes = []
+
+        # Map getar field names onto HOOMD convention's names
+        prop_map = {
+            'angular_momentum_quat': 'angmom',
+            'type': 'typeid',
+        }
+
+        supported_records = [
+            'type', 'position', 'orientation', 'velocity',
+            'mass', 'charge', 'diameter',
+            'moment_inertia', 'angular_momentum_quat',
+            'image'
+        ]
         for name in supported_records:
             try:
                 values = self._trajectory.getRecord(
@@ -65,13 +71,10 @@ class GetarFrame(Frame):
                 setattr(raw_frame, frame_prop, values)
 
         if 'type' in self._records and 'type_names.json' in self._records:
-            names = json.loads(self._trajectory.getRecord(
+            raw_frame.types = json.loads(self._trajectory.getRecord(
                 self._records['type_names.json'], self._frame))
-            types = self._trajectory.getRecord(
-                self._records['type'], self._frame)
-            raw_frame.types = [names[t] for t in types]
         else:
-            raw_frame.types = len(raw_frame.position) * [self._default_type]
+            raw_frame.types = [self._default_type]
 
         if 'box' in self._records:
             # Read dimension if stored
@@ -94,14 +97,10 @@ class GetarFrame(Frame):
         else:
             raw_frame.box = self._default_box
 
-        if 'type_names.json' in self._records and 'type_shapes.json' in self._records:
-            names = json.loads(self._trajectory.getRecord(
-                self._records['type_names.json'], self._frame))
-            shapes = json.loads(self._trajectory.getRecord(
+        if 'type_shapes.json' in self._records:
+            type_shapes = json.loads(self._trajectory.getRecord(
                 self._records['type_shapes.json'], self._frame))
-            for name, shape in zip(names, shapes):
-                shape_def = _parse_type_shape(shape)
-                raw_frame.shapedef.update({name: shape_def})
+            raw_frame.type_shapes = [_parse_type_shape(t) for t in type_shapes]
 
         return raw_frame
 

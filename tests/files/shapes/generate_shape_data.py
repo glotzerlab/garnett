@@ -98,8 +98,10 @@ shape_classes = [
     },
 ]
 
+
 def script_path(filename):
     return os.path.join(os.path.dirname(__file__), filename)
+
 
 if __name__ == '__main__':
     for shape_class in shape_classes:

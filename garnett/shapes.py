@@ -20,6 +20,7 @@ __all__ = [
     'ConvexPolyhedronUnionShape',
     'ConvexSpheropolyhedronShape',
     'GeneralPolyhedronShape',
+    'EllipsoidShape',
 ]
 
 logger = logging.getLogger(__name__)
@@ -535,49 +536,49 @@ def _parse_type_shape(shape):
     if not shape:
         return FallbackShape('')
 
-    rounding_radius = shape.get('rounding_radius', 0)
-    shape_type = shape['type'].lower()
+    type_name = shape['type'].lower()
+    type_shape = None
 
-    shapedef = None
-
-    if shape_type in ('sphere', 'disk'):
+    if type_name in ('sphere', 'disk'):
         # disk support is for backwards compatibility with get_type_shapes()
         # from HOOMD-blue < 2.7
         diameter = shape.get('diameter', 2*shape.get('rounding_radius', 0.5))
         orientable = shape.get('orientable', False)
-        shapedef = SphereShape(diameter=diameter, orientable=orientable, color=None)
-    elif shape_type == 'ellipsoid':
-        shapedef = EllipsoidShape(a=shape['a'], b=shape['b'], c=shape['c'], color=None)
-    elif shape_type == 'polygon':
+        type_shape = SphereShape(diameter=diameter, orientable=orientable, color=None)
+    elif type_name == 'ellipsoid':
+        type_shape = EllipsoidShape(a=shape['a'], b=shape['b'], c=shape['c'], color=None)
+    elif type_name == 'polygon':
+        rounding_radius = shape.get('rounding_radius', 0)
         if rounding_radius == 0:
-            shapedef = PolygonShape(vertices=shape['vertices'], color=None)
+            type_shape = PolygonShape(vertices=shape['vertices'], color=None)
         else:
-            shapedef = SpheropolygonShape(vertices=shape['vertices'],
-                                          rounding_radius=rounding_radius,
-                                          color=None)
-    elif shape_type == 'convexpolyhedron':
+            type_shape = SpheropolygonShape(vertices=shape['vertices'],
+                                            rounding_radius=rounding_radius,
+                                            color=None)
+    elif type_name == 'convexpolyhedron':
+        rounding_radius = shape.get('rounding_radius', 0)
         if rounding_radius == 0:
-            shapedef = ConvexPolyhedronShape(vertices=shape['vertices'], color=None)
+            type_shape = ConvexPolyhedronShape(vertices=shape['vertices'], color=None)
         else:
-            shapedef = ConvexSpheropolyhedronShape(vertices=shape['vertices'],
-                                                   rounding_radius=rounding_radius,
-                                                   color=None)
-    elif shape_type == 'mesh':
-        shapedef = GeneralPolyhedronShape(vertices=shape['vertices'],
-                                          faces=shape['indices'],
-                                          facet_colors=shape['colors'],
-                                          color=None)
-    elif shape_type == 'polyhedron':
+            type_shape = ConvexSpheropolyhedronShape(vertices=shape['vertices'],
+                                                     rounding_radius=rounding_radius,
+                                                     color=None)
+    elif type_name == 'mesh':
+        type_shape = GeneralPolyhedronShape(vertices=shape['vertices'],
+                                            faces=shape['indices'],
+                                            facet_colors=shape['colors'],
+                                            color=None)
+    elif type_name == 'polyhedron':
         # polyhedron support is for backwards compatibility with
         # get_type_shapes() from HOOMD-blue < 2.7
-        shapedef = GeneralPolyhedronShape(vertices=shape['vertices'],
-                                          faces=shape['faces'],
-                                          facet_colors=shape['colors'],
-                                          color=None)
+        type_shape = GeneralPolyhedronShape(vertices=shape['vertices'],
+                                            faces=shape['faces'],
+                                            facet_colors=shape['colors'],
+                                            color=None)
 
-    if shapedef is None:
+    if type_shape is None:
         logger.warning("Failed to parse shape definition: shape {} not supported. "
-                       "Using fallback mode.".format(shape_type))
-        shapedef = FallbackShape(json.dumps(shape))
+                       "Using fallback mode.".format(type_name))
+        type_shape = FallbackShape(json.dumps(shape))
 
-    return shapedef
+    return type_shape

@@ -44,6 +44,7 @@ Bradley Dice, University of Michigan
     * GETAR file writer
     * Support for additional frame properties
     * Improved support for parsing and writing particle shapes
+    * Refactored ``types``, ``typeid``, ``type_shapes`` to match HOOMD conventions
 
 Sophie Youjung Lee, University of Michigan
 
