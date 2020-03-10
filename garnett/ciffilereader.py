@@ -218,7 +218,8 @@ class CifFileFrame(Frame):
         site_types = list(OrderedDict.fromkeys(site_types))
 
         # Convert type strings to typeid
-        typeid = [site_types.index(t) for t in type_strings]
+        site_types_lookup = {key: index for index, key in enumerate(site_types)}
+        typeid = [site_types_lookup[t] for t in type_strings]
 
         # Save the exact points
         cif_coordinates = unique_points.copy()
