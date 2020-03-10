@@ -34,7 +34,7 @@ jobs:
           command: |
             python --version
             pip --version
-            pip install --user -r .circleci/requirements.txt
+            pip install --user -r requirements-dev.txt
             python setup.py build
 
       - run:
