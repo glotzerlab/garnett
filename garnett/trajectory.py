@@ -135,6 +135,8 @@ class FrameData(object):
         "Instance of :class:`~.Box`"
         self.types = None
         "T array of type names represented as strings."
+        self.type_shapes = None
+        "T array of shape instances."
         self.typeid = None
         "N array of type indices for N particles."
         self.position = None
