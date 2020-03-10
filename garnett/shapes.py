@@ -43,6 +43,8 @@ def _json_sanitize(func):
     def wrapper(*args, **kwargs):
         data = func(*args, **kwargs)
         return json.loads(json.dumps(data, cls=_NumpyEncoder))
+    # Ensure that the decorated function inherits the intended docstring.
+    wrapper.__doc__ = func.__doc__
     return wrapper
 
 
@@ -190,6 +192,19 @@ class SphereUnionShape(Shape):
             shape_def += '{0} '.format(c)
 
         return shape_def
+
+    @property
+    @_json_sanitize
+    def type_shape(self):
+        """Shape as dictionary. Example:
+
+           >>> SphereUnionShape([0.5, 0.5, 0.5], [[0, 0, 1.0], [0, 1.0, 0], [1.0, 0, 0]]).type_shape
+           {'type': 'SphereUnion', 'diameters': [0.5, 0.5, 0.5],
+            'centers': [[0, 0, 1.0], [0, 1.0, 0], [1.0, 0, 0]]}
+        """
+        return {'type': 'SphereUnion',
+                'diameters': self.diameters,
+                'centers': self.centers}
 
 
 class PolygonShape(Shape):
@@ -512,9 +527,9 @@ class EllipsoidShape(Shape):
 
             >>> EllipsoidShape(7.0, 5.0, 3.0).type_shape
             {'type': 'Ellipsoid',
-            'a': 7.0,
-            'b': 5.0,
-            'c': 3.0}
+             'a': 7.0,
+             'b': 5.0,
+             'c': 3.0}
 
         """
         return {'type': 'Ellipsoid',
@@ -575,6 +590,10 @@ def _parse_type_shape(shape):
                                             faces=shape['faces'],
                                             facet_colors=shape['colors'],
                                             color=None)
+    elif type_name == 'sphereunion':
+        type_shape = SphereUnionShape(diameters=shape['diameters'],
+                                      centers=shape['centers'],
+                                      color=None)
 
     if type_shape is None:
         logger.warning("Failed to parse shape definition: shape {} not supported. "

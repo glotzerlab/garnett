@@ -84,6 +84,8 @@ Supported properties are listed below:
     traj.load_arrays()
     traj.N               # M
     traj.types           # MxT
+    traj.type_shapes     # MxT
+    traj.typeid          # MxN
     traj.position        # MxNx3
     traj.orientation     # MxNx4
     traj.velocity        # MxNx3
@@ -92,12 +94,11 @@ Supported properties are listed below:
     traj.diameter        # MxN
     traj.moment_inertia  # MxNx3
     traj.angmom          # MxNx4
-    traj.image           # MxNx4
-    traj.type_ids        # MxN
+    traj.image           # MxNx3
 
-    # where M is the number of frames,
-    # T is the number of particle types in a frame,
-    # and N is the number of particles in a frame
+    # M is the number of frames
+    # T is the number of particle types in a frame
+    # N is the number of particles in a frame
 
 Individual frame access
 -----------------------
@@ -108,8 +109,10 @@ Inidividual frame objects can be accessed via indexing of a (sub-)trajectory obj
 
     frame = traj[i]
     frame.box              # garnett.trajectory.Box object
-    frame.types            # T
-    frame.typeid           # N
+    frame.N                # scalar, number of particles
+    frame.types            # T, string names for each type
+    frame.type_shapes      # T, list of shapes for each type
+    frame.typeid           # N, type indices of each particle
     frame.position         # Nx3
     frame.orientation      # Nx4
     frame.velocity         # Nx3
@@ -118,9 +121,9 @@ Inidividual frame objects can be accessed via indexing of a (sub-)trajectory obj
     frame.diameter         # N
     frame.moment_inertia   # Nx3
     frame.angmom           # Nx4
-    frame.data             # A dictionary of lists for each attribute
-    frame.data_key         # A list of strings
-    frame.type_shapes      # A list of instances of Shape for each type
+    frame.image            # Nx3
+    frame.data             # Dictionary of lists for each attribute
+    frame.data_key         # List of strings
 
 Iterating over trajectories
 ---------------------------
