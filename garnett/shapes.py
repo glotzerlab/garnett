@@ -43,6 +43,7 @@ def _json_sanitize(func):
     def wrapper(*args, **kwargs):
         data = func(*args, **kwargs)
         return json.loads(json.dumps(data, cls=_NumpyEncoder))
+    # Ensure that the decorated function inherits the intended docstring.
     wrapper.__doc__ = func.__doc__
     return wrapper
 
