@@ -39,7 +39,7 @@ PARSE_DIVISION_REGEXP = re.compile(r'(?P<num>\d+(\.(\d+)?)?)\s*/\s*(?P<denom>\d+
 # This regex matches _atom_site_label component 0 (but not component 1) of the
 # definition here:
 # https://www.iucr.org/__data/iucr/cif/standard/cifstd15.html
-_ATOM_SITE_LABEL_COMPONENT_0 = re.compile(r'^(([^ _0-9])|([0-9]*[\+\-]))*')
+_ATOM_SITE_LABEL_COMPONENT_0 = re.compile(r'^(([^\s_0-9])|([0-9]*[\+\-]))*')
 
 
 def _parse_division(match):
