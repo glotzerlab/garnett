@@ -20,6 +20,7 @@ Changed
   - Updated GSD reader to use the GSD v2.0.0 API.
   - Changed behavior of ``types``, ``typeid``, ``type_shapes`` to match HOOMD conventions.
   - Shapes can still be read from GSD via HOOMD-HPMC state but shapes are always written to ``type_shapes`` instead of the HPMC state.
+  - ``PosFileWriter`` requires the number of ``type_shapes`` to match the number of ``types``.
 
 Fixed
 +++++
