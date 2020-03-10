@@ -34,10 +34,9 @@ class BaseGetarFileReaderTest(unittest.TestCase):
         self.moment_inertia = np.random.rand(N, 3)
         self.angmom = np.random.rand(N, 4)
         self.image = np.random.randint(-1000, 1000, size=(N, 3), dtype=np.int32)
-        types = N // 2 * [0] + (N - N // 2) * [1]
-        type_names = ['A', 'B']
+        self.types = ['A', 'B']
+        self.typeid = N // 2 * [0] + (N - N // 2) * [1]
         self.box = np.array([1.0, 1.0, 1.0, 0.0, 0.0, 0.0])
-        self.types = [type_names[t] for t in types]
         if dim == 2:
             self.position[:, 2] = 0
             self.velocity[:, 2] = 0
@@ -53,8 +52,8 @@ class BaseGetarFileReaderTest(unittest.TestCase):
             traj.writePath('frames/0/angular_momentum_quat.f32.ind', self.angmom)
             traj.writePath('frames/0/box.f32.ind', self.box)
             traj.writePath('frames/0/image.i32.ind', self.image)
-            traj.writePath('type.u32.ind', types)
-            traj.writePath('type_names.json', json.dumps(type_names))
+            traj.writePath('type.u32.ind', self.typeid)
+            traj.writePath('type_names.json', json.dumps(self.types))
 
     def read_trajectory(self):
         reader = garnett.reader.GetarFileReader()
@@ -120,7 +119,7 @@ class NoTypesGetarFileReaderTest(BaseGetarFileReaderTest):
         self.angmom = np.random.rand(N, 4)
         self.image = np.random.randint(-1000, 1000, size=(N, 3), dtype=np.int32)
         self.box = np.array([1.0, 1.0, 1.0, 0.0, 0.0, 0.0])
-        self.types = N*['A']
+        self.types = ['A']
         if dim == 2:
             self.position[:, 2] = 0
             self.velocity[:, 2] = 0
@@ -138,6 +137,35 @@ class NoTypesGetarFileReaderTest(BaseGetarFileReaderTest):
             traj.writePath('frames/0/image.i32.ind', self.image)
             traj.writePath('angle/type.u32.ind', [0])
             traj.writePath('angle/type_names.json', '["Angle_A"]')
+
+
+@unittest.skipIf(not GTAR, 'GetarFileReader requires the gtar module.')
+class GetarTrajectoryFrameTest(unittest.TestCase):
+
+    def setUp(self):
+        self.tmp_dir = TemporaryDirectory(prefix='garnett_getar_tmp')
+        self.addCleanup(self.tmp_dir.cleanup)
+        self.getar_file_fn = os.path.join(self.tmp_dir.name, 'sample.tar')
+
+        with gtar.GTAR(self.getar_file_fn, 'w') as traj:
+            for frame in range(6):
+                traj.writePath('frames/{}/position.f32.ind'.format(frame),
+                               [(0, 0, 0)])
+                if frame % 2:
+                    traj.writePath('frames/{}/box.f32.uni'.format(frame),
+                                   [frame + 1, 1, 1, 0, 0, 0])
+
+        reader = garnett.reader.GetarFileReader()
+        self.getarfile = open(self.getar_file_fn, 'rb')
+        self.addCleanup(self.getarfile.close)
+        self.trajectory = reader.read(self.getarfile)
+
+    def test_ragged_frames(self):
+        # first frame uses the default box value and a new value is
+        # written on frame 1, 3, ...
+        target_lxs = [1, 2, 2, 4, 4, 6]
+        lxs = [frame.box.Lx for frame in self.trajectory]
+        np.testing.assert_allclose(target_lxs, lxs)
 
 
 if __name__ == '__main__':

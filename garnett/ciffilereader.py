@@ -18,7 +18,7 @@ import warnings
 
 import numpy as np
 
-from .trajectory import _RawFrameData, Frame, Trajectory
+from .trajectory import _RawFrameData, Frame, Trajectory, _generate_types_typeid
 
 # CifFile is from the pycifrw package
 from CifFile import CifFile
@@ -142,6 +142,10 @@ class CifFileFrame(Frame):
 
         space_group_keys = ['_symmetry_equiv_pos_as_xyz', '_space_group_symop_operation_xyz']
         found_keys = [key for key in space_group_keys if key in self.parsed]
+
+        unique_points = []
+        type_strings = []
+
         if found_keys:
             key_to_use = found_keys[0]
             symmetry_ops = [PARSE_DIVISION_REGEXP.sub(
@@ -150,22 +154,20 @@ class CifFileFrame(Frame):
 
             replicated_fractions = []
             replicated_types = []
-            for (typ, (fx, fy, fz)) in zip(site_types, fractions):
+            for (type_name, (fx, fy, fz)) in zip(site_types, fractions):
                 extra_fractions = [eval(sym, dict(x=fx, y=fy, z=fz)) for sym in symmetry_ops]
                 replicated_fractions.extend(extra_fractions)
-                replicated_types.extend(len(extra_fractions)*[typ])
+                replicated_types.extend(len(extra_fractions)*[type_name])
             # wrap back into the box
             replicated_fractions -= np.floor(replicated_fractions)
             replicated_fractions = dict(enumerate(np.array(replicated_fractions, dtype=np.float32)))
 
-            unique_points = []
-            types = []
             bad_types = False
             # short of using scipy or freud, we just exhaustively search
             # for points near each point to find symmetry-induced duplicates
             while len(replicated_fractions):
                 (ref_index, ref_point) = replicated_fractions.popitem()
-                types.append(replicated_types[ref_index])
+                type_name = replicated_types[ref_index]
 
                 # set of points that are ~equivalent to ref_point given a tolerance
                 current_points = [ref_point]
@@ -186,18 +188,20 @@ class CifFileFrame(Frame):
                                    'position, the types for this file are invalid.')
                             warnings.warn(msg, ParserWarning)
 
+                type_strings.append(type_name)
                 unique_points.append(np.mean(current_points, axis=0))
             unique_points = np.array(unique_points, dtype=np.float32)
 
             if bad_types:
-                unique_types = len(unique_points)*[self.default_type]
-            else:
-                unique_types = types
+                type_strings = [self.default_type] * len(unique_points)
         else:
             unique_points = fractions
-            unique_types = site_types
+            type_strings = site_types
 
-        # Safe the exact points
+        # Convert type strings to types, typeid
+        types, typeid = _generate_types_typeid(type_strings)
+
+        # Save the exact points
         cif_coordinates = unique_points.copy()
 
         # shift so that (0, 0, 0) in fractional coordinates goes to a
@@ -209,7 +213,8 @@ class CifFileFrame(Frame):
 
         raw_frame = _RawFrameData()
         raw_frame.box = box_matrix
-        raw_frame.types = unique_types
+        raw_frame.types = types
+        raw_frame.typeid = typeid
         raw_frame.position = coordinates
         raw_frame.cif_coordinates = cif_coordinates
         return raw_frame

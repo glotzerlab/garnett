@@ -102,10 +102,10 @@ def wrap_into_box(frame):
 
 
 def color_by_type(frame):
-    if len(frame.shapedef) > len(COLORS):
+    if len(frame.type_shapes) > len(COLORS):
         raise RuntimeError("Number of types larger than color map!")
-    for sd, color in zip(frame.shapedef, COLORS):
-        frame.shapedef[sd].color = color
+    for type_shape, color in zip(frame.type_shapes, COLORS):
+        type_shape.color = color
     return frame
 
 

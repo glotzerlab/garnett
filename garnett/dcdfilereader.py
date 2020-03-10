@@ -49,7 +49,8 @@ from numpy.core import numeric as _nx
 from numpy.core.numeric import asanyarray
 
 from .trajectory import Frame, Trajectory
-from .trajectory import _RawFrameData, _generate_type_id_array
+from .trajectory import FRAME_PROPERTIES, TYPE_PROPERTIES, PARTICLE_PROPERTIES
+from .trajectory import _RawFrameData
 from . import pydcdreader
 
 logger = logging.getLogger(__name__)
@@ -131,6 +132,7 @@ class DCDFrame(Frame):
         self.t_frame = t_frame
         self.default_type = default_type
         self._types = None
+        self._typeid = None
         self._box = None
         self._position = None
         self._orientation = None
@@ -146,16 +148,19 @@ class DCDFrame(Frame):
         self._position = xyz.swapaxes(0, 1)
 
     def _load(self, xyz=None, ort=None):
-        N = int(self.file_header.n_particles)
+        N = FRAME_PROPERTIES['N'](self.file_header.n_particles)
         if xyz is None:
             xyz = np.zeros((3, N), dtype=np.float32)
         if ort is None:
             ort = np.zeros((N, 4), dtype=self._dtype)
         self._read(xyz=xyz)
         if self.t_frame is None:
-            self._types = [self.default_type] * len(self)
+            self._types = np.asarray([self.default_type],
+                                     dtype=TYPE_PROPERTIES['types'])
+            self._typeid = np.zeros(N, dtype=PARTICLE_PROPERTIES['typeid'])
         else:
-            self._types = self.t_frame.types
+            self._types = copy.copy(self.t_frame.types)
+            self._typeid = copy.copy(self.t_frame.typeid)
         if self.t_frame is None or self.t_frame.box.dimensions == 3:
             ort.T[0] = 1.0
             ort.T[1:] = 0
@@ -169,6 +174,7 @@ class DCDFrame(Frame):
 
     def _loaded(self):
         return not (self._types is None or
+                    self._typeid is None or
                     self._box is None or
                     self._position is None or
                     self._orientation is None)
@@ -180,17 +186,18 @@ class DCDFrame(Frame):
             raw_frame.data_keys = copy.deepcopy(self.t_frame.data_keys)
             raw_frame.box_dimensions = self.t_frame.box.dimensions
             try:
-                raw_frame.shapedef = copy.deepcopy(self.t_frame.shapedef)
+                raw_frame.type_shapes = copy.deepcopy(self.t_frame.type_shapes)
             except AttributeError:
                 pass
         if not self._loaded():
             self._load()
         assert self._loaded()
         raw_frame.box = self._box
-        raw_frame.types = copy.copy(self._types)
+        raw_frame.types = self._types
+        raw_frame.typeid = self._typeid
         raw_frame.position = self._position
         raw_frame.orientation = self._orientation
-        assert len(raw_frame.types) == len(self)
+        assert len(raw_frame.typeid) == len(self)
         assert len(raw_frame.position) == len(self)
         assert len(raw_frame.orientation) == len(self)
         return raw_frame
@@ -214,9 +221,8 @@ class DCDTrajectory(Trajectory):
 
         See also: :meth:`~.load_arrays`"""
         return not (self._N is None or
-                    self._type is None or
                     self._types is None or
-                    self._type_ids is None or
+                    self._typeid is None or
                     self._position is None or
                     self._orientation is None)
 
@@ -224,7 +230,7 @@ class DCDTrajectory(Trajectory):
         # Determine array shapes
         M = len(self)
         N = len(self.frames[0])
-        _N = np.ones(M) * N
+        _N = np.full(M, N, dtype=FRAME_PROPERTIES['N'])
 
         # Coordinates
         xyz = np.zeros((M, 3, N), dtype=np.float32)
@@ -233,17 +239,17 @@ class DCDTrajectory(Trajectory):
             if not frame._loaded():
                 frame._load(xyz=xyz[i], ort=ort[i])
 
-        # Types, Can only be handled after frame._load() calls.
-        types = [f._types for f in self.frames]
-        type_ids = np.zeros((len(self), N), dtype=np.int_)
-        _type = _generate_type_id_array(types, type_ids)
+        # Types can only be handled after frame._load() calls.
+        types = np.asarray([f._types for f in self.frames],
+                           dtype=TYPE_PROPERTIES['types'])
+        typeid = np.asarray([f._typeid for f in self.frames],
+                            dtype=PARTICLE_PROPERTIES['typeid'])
 
         try:
             # Perform swap
             self._N = _N
-            self._type = _type
             self._types = types
-            self._type_ids = type_ids
+            self._typeid = typeid
             self._position = xyz.swapaxes(1, 2)
             self._orientation = ort
         except Exception:

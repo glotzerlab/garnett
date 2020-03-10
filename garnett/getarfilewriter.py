@@ -13,7 +13,6 @@ Authors: Bradley Dice
 """
 
 from gtar import GTAR, Record
-import numpy as np
 import json
 import logging
 logger = logging.getLogger(__name__)
@@ -41,6 +40,7 @@ class GetarFileWriter(object):
     """
 
     property_record_map = {
+        'typeid': 'type.u32.ind',
         'position': 'position.f32.ind',
         'orientation': 'orientation.f32.ind',
         'velocity': 'velocity.f32.ind',
@@ -64,17 +64,10 @@ class GetarFileWriter(object):
     def writeFrame(self, bulkwriter, frame, index=None, skip_props=False):
         """Write the frame data for an index using a bulk writer."""
 
-        # Types
-        type_rec = self.makeRecord('type.u32.ind', index=index)
-        types = list(set(frame.types))
-        type_contents = np.array([types.index(t) for t in frame.types],
-                                 dtype=np.uint32)
-        bulkwriter.writeRecord(rec=type_rec, contents=type_contents)
-
         # Type names
-        name_rec = self.makeRecord('type_names.json', index=index)
-        name_contents = json.dumps(types)
-        bulkwriter.writeRecord(rec=name_rec, contents=name_contents)
+        types_rec = self.makeRecord('type_names.json', index=index)
+        types_contents = json.dumps(frame.types)
+        bulkwriter.writeRecord(rec=types_rec, contents=types_contents)
 
         if not skip_props:
             # Particle properties
@@ -90,19 +83,11 @@ class GetarFileWriter(object):
         bulkwriter.writeRecord(rec=dim_rec, contents=[frame.box.dimensions])
 
         # Shape definitions
-        shape_rec = self.makeRecord('type_shapes.json', index=index)
-        shape_contents = []
-        for typename in types:
-            try:
-                shape_contents.append(frame.shapedef[typename].type_shape)
-            except AttributeError:
-                shape_contents.append(None)
-            except KeyError:
-                logger.info('Type name \'{}\' has no stored shape information.'.format(
-                    typename))
-                shape_contents.append(None)
-        shape_contents = json.dumps(shape_contents)
-        bulkwriter.writeRecord(rec=shape_rec, contents=shape_contents)
+        type_shapes = getattr(frame, 'type_shapes', None)
+        if type_shapes is not None:
+            shape_rec = self.makeRecord('type_shapes.json', index=index)
+            type_shapes = json.dumps([t.type_shape for t in type_shapes])
+            bulkwriter.writeRecord(rec=shape_rec, contents=type_shapes)
 
     def write(self, trajectory, stream, static_frame=None):
         """Serialize a trajectory into gtar-format and write it to a file.

@@ -117,7 +117,8 @@ class PosFileReaderTest(BasePosFileReaderTest):
         box_expected = garnett.trajectory.Box(Lx=10, Ly=10, Lz=10)
         for frame in traj:
             N = len(frame)
-            self.assertEqual(frame.types, ['A'] * N)
+            self.assertEqual(frame.types, ['A'])
+            self.assertTrue(all(frame.typeid == [0] * N))
             self.assertEqual(frame.box, box_expected)
             self.assert_raise_attribute_error(frame)
 
@@ -130,7 +131,8 @@ class PosFileReaderTest(BasePosFileReaderTest):
         box_expected = garnett.trajectory.Box(Lx=10, Ly=10, Lz=10)
         for frame in traj:
             N = len(frame)
-            self.assertEqual(frame.types, ['A'] * N)
+            self.assertEqual(frame.types, ['A'])
+            self.assertTrue(all(frame.typeid == [0] * N))
             self.assertEqual(frame.box, box_expected)
             self.assert_raise_attribute_error(frame)
 
@@ -143,7 +145,8 @@ class PosFileReaderTest(BasePosFileReaderTest):
         box_expected = garnett.trajectory.Box(Lx=10, Ly=10, Lz=10)
         for frame in traj:
             N = len(frame)
-            self.assertEqual(frame.types, ['A'] * N)
+            self.assertEqual(frame.types, ['A'])
+            self.assertTrue(all(frame.typeid == [0] * N))
             self.assertEqual(frame.box, box_expected)
             self.assert_raise_attribute_error(frame)
 
@@ -156,7 +159,8 @@ class PosFileReaderTest(BasePosFileReaderTest):
         box_expected = garnett.trajectory.Box(Lx=10, Ly=10, Lz=10)
         for frame in traj:
             N = len(frame)
-            self.assertEqual(frame.types, ['A'] * N)
+            self.assertEqual(frame.types, ['A'])
+            self.assertTrue(all(frame.typeid == [0] * N))
             self.assertEqual(frame.box, box_expected)
             self.assert_raise_attribute_error(frame)
 
@@ -349,7 +353,7 @@ class PosFileWriterTest(BasePosFileWriterTest):
         traj = self.read_trajectory(sample)
         traj.load_arrays()
         for frame in traj:
-            frame.shapedef['A'] = ArrowShape()
+            frame.shapedef = {'A': ArrowShape()}
             frame.orientation.T[3] = 0
         dump = io.StringIO()
         self.write_trajectory(traj, dump)
@@ -369,7 +373,7 @@ class PosFileWriterTest(BasePosFileWriterTest):
         b = 0.25
         c = 0.125
         for frame in traj:
-            frame.shapedef['A'] = EllipsoidShape(a=a, b=b, c=c)
+            frame.shapedef = {'A': EllipsoidShape(a=a, b=b, c=c)}
         dump = io.StringIO()
         self.write_trajectory(traj, dump)
         dump.seek(0)

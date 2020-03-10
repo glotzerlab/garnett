@@ -1,7 +1,7 @@
 # Copyright (c) 2019 The Regents of the University of Michigan
 # All rights reserved.
 # This software is licensed under the BSD 3-Clause License.
-"""Hoomd-GSD-file reader for the Glotzer Group, University of Michigan.
+"""HOOMD-blue GSD file reader for the Glotzer Group, University of Michigan.
 
 Author: Carl Simon Adorf
 
@@ -13,7 +13,7 @@ To provide additional information it is possible
 to pass a frame object, whose properties
 are copied into each frame of the gsd trajectory.
 
-The example is given for a hoomd-blue xml frame:
+This example reads shape data from a HOOMD-blue POS frame:
 
 .. code::
 
@@ -29,7 +29,6 @@ The example is given for a hoomd-blue xml frame:
 import logging
 import warnings
 import copy
-import collections
 
 import numpy as np
 
@@ -58,6 +57,11 @@ def _box_matrix(box):
 
 
 def _parse_shape_definitions(frame, gsdfile, frame_index):
+    """Parses shape information for a frame in a GSD file.
+
+    This method uses the ``type_shapes`` property if it is set. Otherwise it
+    falls back to reading HPMC state data and inferring ``type_shapes``.
+    """
 
     def get_chunk(i, chunk, default=None):
         if gsdfile.chunk_exists(i, chunk):
@@ -67,24 +71,17 @@ def _parse_shape_definitions(frame, gsdfile, frame_index):
         else:
             return default
 
-    shapedefs = collections.OrderedDict()
-    types = frame.particles.types
-
     if get_chunk(frame_index, 'particles/type_shapes') is not None:
         # --------------------------------------------------
         # Parsing from GSD Shape Visualization Specification
         # --------------------------------------------------
-
-        type_shapes = frame.particles.type_shapes
-        for typename, type_shape in zip(types, type_shapes):
-            shapedefs[typename] = _parse_type_shape(type_shape)
-        return shapedefs
+        return [_parse_type_shape(t) for t in frame.particles.type_shapes]
     else:
-
         # -----------------------
         # Parsing from HPMC State
         # -----------------------
 
+        type_shapes = []
         # Spheres
         if get_chunk(frame_index, 'state/hpmc/sphere/radius') is not None:
             radii = get_chunk(frame_index, 'state/hpmc/sphere/radius')
@@ -93,10 +90,11 @@ def _parse_shape_definitions(frame, gsdfile, frame_index):
             # not all GSD files may have it. Thus, it is set to False in such cases.
             if orientables is None:
                 orientables = [False]*len(radii)
-            for typename, radius, orientable in zip(types, radii, orientables):
-                shapedefs[typename] = SphereShape(
+            for radius, orientable in zip(radii, orientables):
+                shape = SphereShape(
                     diameter=radius*2, orientable=orientable, color=None)
-            return shapedefs
+                type_shapes.append(shape)
+            return type_shapes
 
         # Convex Polyhedra
         elif get_chunk(frame_index, 'state/hpmc/convex_polyhedron/N') is not None:
@@ -105,10 +103,11 @@ def _parse_shape_definitions(frame, gsdfile, frame_index):
             N_end = [sum(N[:i+1]) for i in range(len(N))]
             verts = get_chunk(frame_index, 'state/hpmc/convex_polyhedron/vertices')
             verts_split = [verts[start:end] for start, end in zip(N_start, N_end)]
-            for typename, typeverts in zip(types, verts_split):
-                shapedefs[typename] = ConvexPolyhedronShape(
+            for typeverts in verts_split:
+                shape = ConvexPolyhedronShape(
                     vertices=typeverts, color=None)
-            return shapedefs
+                type_shapes.append(shape)
+            return type_shapes
 
         # Convex Spheropolyhedra
         elif get_chunk(frame_index, 'state/hpmc/convex_spheropolyhedron/N') is not None:
@@ -120,20 +119,22 @@ def _parse_shape_definitions(frame, gsdfile, frame_index):
             verts_split = [verts[start:end] for start, end in zip(N_start, N_end)]
             sweep_radii = get_chunk(frame_index,
                                     'state/hpmc/convex_spheropolyhedron/sweep_radius')
-            for typename, typeverts, radius in zip(types, verts_split, sweep_radii):
-                shapedefs[typename] = ConvexSpheropolyhedronShape(
+            for typeverts, radius in zip(verts_split, sweep_radii):
+                shape = ConvexSpheropolyhedronShape(
                     vertices=typeverts, rounding_radius=radius, color=None)
-            return shapedefs
+                type_shapes.append(shape)
+            return type_shapes
 
         # Ellipsoid
         elif get_chunk(frame_index, 'state/hpmc/ellipsoid/a') is not None:
             a_all = get_chunk(frame_index, 'state/hpmc/ellipsoid/a')
             b_all = get_chunk(frame_index, 'state/hpmc/ellipsoid/b')
             c_all = get_chunk(frame_index, 'state/hpmc/ellipsoid/c')
-            for typename, a, b, c in zip(types, a_all, b_all, c_all):
-                shapedefs[typename] = EllipsoidShape(
+            for a, b, c in zip(a_all, b_all, c_all):
+                shape = EllipsoidShape(
                     a=a, b=b, c=c, color=None)
-            return shapedefs
+                type_shapes.append(shape)
+            return type_shapes
 
         # Convex Polygons
         elif get_chunk(frame_index, 'state/hpmc/convex_polygon/N') is not None:
@@ -142,10 +143,11 @@ def _parse_shape_definitions(frame, gsdfile, frame_index):
             N_end = [sum(N[:i+1]) for i in range(len(N))]
             verts = get_chunk(frame_index, 'state/hpmc/convex_polygon/vertices')
             verts_split = [verts[start:end] for start, end in zip(N_start, N_end)]
-            for typename, typeverts in zip(types, verts_split):
-                shapedefs[typename] = PolygonShape(
+            for typeverts in verts_split:
+                shape = PolygonShape(
                     vertices=typeverts, color=None)
-            return shapedefs
+                type_shapes.append(shape)
+            return type_shapes
 
         # Convex Spheropolygons
         elif get_chunk(frame_index, 'state/hpmc/convex_spheropolygon/N') is not None:
@@ -156,10 +158,11 @@ def _parse_shape_definitions(frame, gsdfile, frame_index):
             verts_split = [verts[start:end] for start, end in zip(N_start, N_end)]
             sweep_radii = get_chunk(frame_index,
                                     'state/hpmc/convex_spheropolygon/sweep_radius')
-            for typename, typeverts, radius in zip(types, verts_split, sweep_radii):
-                shapedefs[typename] = SpheropolygonShape(
+            for typeverts, radius in zip(verts_split, sweep_radii):
+                shape = SpheropolygonShape(
                     vertices=typeverts, rounding_radius=radius, color=None)
-            return shapedefs
+                type_shapes.append(shape)
+            return type_shapes
 
         # Simple Polygons
         elif get_chunk(frame_index, 'state/hpmc/simple_polygon/N') is not None:
@@ -168,10 +171,11 @@ def _parse_shape_definitions(frame, gsdfile, frame_index):
             N_end = [sum(N[:i+1]) for i in range(len(N))]
             verts = get_chunk(frame_index, 'state/hpmc/simple_polygon/vertices')
             verts_split = [verts[start:end] for start, end in zip(N_start, N_end)]
-            for typename, typeverts in zip(types, verts_split):
-                shapedefs[typename] = PolygonShape(
+            for typeverts in verts_split:
+                shape = PolygonShape(
                     vertices=typeverts, color=None)
-            return shapedefs
+                type_shapes.append(shape)
+            return type_shapes
 
         # If no shapes were detected, return None
         else:
@@ -218,15 +222,16 @@ class GSDHoomdFrame(Frame):
             raw_frame.data_keys = copy.deepcopy(self.t_frame.data_keys)
             raw_frame.box_dimensions = self.t_frame.box.dimensions
             try:
-                raw_frame.shapedef = copy.deepcopy(self.t_frame.shapedef)
+                raw_frame.type_shapes = copy.deepcopy(self.t_frame.type_shapes)
             except AttributeError:
                 pass
         else:
             # Fallback to gsd shape data if no frame is provided
-            raw_frame.shapedef = _parse_shape_definitions(frame, self.gsdfile, self.frame_index)
+            raw_frame.type_shapes = _parse_shape_definitions(frame, self.gsdfile, self.frame_index)
         raw_frame.box = _box_matrix(frame.configuration.box)
         raw_frame.box_dimensions = int(frame.configuration.dimensions)
-        raw_frame.types = [frame.particles.types[t] for t in frame.particles.typeid]
+        raw_frame.types = frame.particles.types
+        raw_frame.typeid = frame.particles.typeid
         raw_frame.position = frame.particles.position
         raw_frame.orientation = frame.particles.orientation
         raw_frame.velocity = frame.particles.velocity
@@ -243,7 +248,7 @@ class GSDHoomdFrame(Frame):
 
 
 class GSDHOOMDFileReader(object):
-    """Hoomd-GSD-file reader for the Glotzer Group, University of Michigan.
+    """HOOMD-blue GSD file reader for the Glotzer Group, University of Michigan.
 
     Author: Carl Simon Adorf
 

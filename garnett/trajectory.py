@@ -9,6 +9,7 @@ trajectories."""
 
 import logging
 import deprecation
+from collections import OrderedDict
 
 import numpy as np
 import rowan
@@ -23,21 +24,40 @@ logger = logging.getLogger(__name__)
 
 DEFAULT_DTYPE = np.float32
 
-PARTICLE_PROPERTIES = ['position',
-                       'orientation',
-                       'velocity',
-                       'mass',
-                       'charge',
-                       'diameter',
-                       'moment_inertia',
-                       'angmom',
-                       'image']
+# Scalar properties for a frame
+FRAME_PROPERTIES = {
+    'N': np.uint,
+}
 
-FRAME_TRAJ_PROPS = PARTICLE_PROPERTIES + ['N', 'type', 'types', 'type_ids']
+# Properties of length T (number of types)
+TYPE_PROPERTIES = {
+    'types': str,
+    'type_shapes': object,
+}
+
+# Properties of length N (number of particles)
+PARTICLE_PROPERTIES = {
+    'typeid': np.uint,
+    'position': DEFAULT_DTYPE,
+    'orientation': DEFAULT_DTYPE,
+    'velocity': DEFAULT_DTYPE,
+    'mass': DEFAULT_DTYPE,
+    'charge': DEFAULT_DTYPE,
+    'diameter': DEFAULT_DTYPE,
+    'moment_inertia': DEFAULT_DTYPE,
+    'angmom': DEFAULT_DTYPE,
+    'image': np.int_,
+}
+
+TRAJECTORY_PROPERTIES = {
+    **FRAME_PROPERTIES,
+    **TYPE_PROPERTIES,
+    **PARTICLE_PROPERTIES
+}
 
 
 class Box(object):
-    """A triclinical box class.
+    """A triclinic box class.
 
     You can access the box size and tilt factors via attributes:
 
@@ -114,7 +134,11 @@ class FrameData(object):
         self.box = None
         "Instance of :class:`~.Box`"
         self.types = None
-        "Nx1 array of types represented as strings."
+        "T array of type names represented as strings."
+        self.type_shapes = None
+        "T array of Shape objects."
+        self.typeid = None
+        "N array of type indices for N particles."
         self.position = None
         "Nx3 array of coordinates for N particles in 3 dimensions."
         self.orientation = None
@@ -137,31 +161,30 @@ class FrameData(object):
         "A dictionary of lists for each attribute."
         self.data_keys = None
         "A list of strings, where each string represents one attribute."
-        self.shapedef = None
-        "A ordered dictionary of instances of :class:`~.shapes.ShapeDefinition`."
         self.view_rotation = None
         "A quaternion specifying a rotation that should be applied for visualization."
 
     def __len__(self):
-        return len(self.types)
+        return len(self.position)
 
     def __eq__(self, other):
         if len(self) != len(other):
             return False
         else:  # rigorous comparison required
             return self.box == other.box \
-                and self.types == other.types\
-                and np.array_equal(self.position, other.position)\
-                and np.array_equal(self.orientation, other.orientation)\
-                and np.array_equal(self.velocity, other.velocity)\
-                and np.array_equal(self.mass, other.mass)\
-                and np.array_equal(self.charge, other.charge)\
-                and np.array_equal(self.diameter, other.diameter)\
-                and np.array_equal(self.moment_inertia, other.moment_inertia)\
-                and np.array_equal(self.angmom, other.angmom)\
-                and np.array_equal(self.image, other.image)\
-                and self.data == other.data\
-                and self.shapedef == other.shapedef
+                and self.types == other.types \
+                and np.array_equal(self.typeid, other.typeid) \
+                and np.array_equal(self.position, other.position) \
+                and np.array_equal(self.orientation, other.orientation) \
+                and np.array_equal(self.velocity, other.velocity) \
+                and np.array_equal(self.mass, other.mass) \
+                and np.array_equal(self.charge, other.charge) \
+                and np.array_equal(self.diameter, other.diameter) \
+                and np.array_equal(self.moment_inertia, other.moment_inertia) \
+                and np.array_equal(self.angmom, other.angmom) \
+                and np.array_equal(self.image, other.image) \
+                and self.data == other.data \
+                and self.type_shapes == other.type_shapes
 
     def __ne__(self, other):
         return not self.__eq__(other)
@@ -196,13 +219,15 @@ class FrameData(object):
 class _RawFrameData(object):
     """Class to capture unprocessed frame data during parsing.
 
-    All matrices are numpy arrays."""
+    All matrices are NumPy arrays."""
 
     def __init__(self):
         # 3x3 matrix (not required to be upper-triangular)
         self.box = None
         self.box_dimensions = 3
-        self.types = list()                         # Nx1
+        self.types = list()                         # T
+        self.type_shapes = list()                   # T
+        self.typeid = list()                        # N
         self.position = list()                      # Nx3
         self.orientation = list()                   # Nx4
         self.velocity = list()                      # Nx3
@@ -215,8 +240,6 @@ class _RawFrameData(object):
         # A dictionary of lists for each attribute
         self.data = None
         self.data_keys = None                       # A list of strings
-        # A ordered dictionary of instances of ShapeDefinition
-        self.shapedef = None
         # A view rotation (does not affect the actual trajectory)
         self.view_rotation = None
 
@@ -248,8 +271,8 @@ class Frame(object):
         try:
             value = np.asarray(value, dtype=dtype)
         except ValueError:
-            raise ValueError("This property can only be set to numeric arrays.")
-        if not np.all(np.isfinite(value)):
+            raise ValueError("This property can only be set to values compatible with {}.".format(dtype))
+        if np.issubdtype(dtype, np.number) and not np.all(np.isfinite(value)):
             raise ValueError("Property being set must all be finite numbers.")
         elif len(value.shape) != dim:
             raise ValueError("Input array must be {}-dimensional.".format(dim))
@@ -259,12 +282,14 @@ class Frame(object):
 
     def _raw_frame_to_frame(self, raw_frame, dtype=None):
         """Generate a frame object from a raw frame object."""
-        N = len(raw_frame.types)
+        N = len(raw_frame.position)
         ret = FrameData()
 
         mapping = dict()
-        for prop in PARTICLE_PROPERTIES:
-            mapping[prop] = np.asarray(getattr(raw_frame, prop), dtype=dtype)
+        for prop, dtype_ in PARTICLE_PROPERTIES.items():
+            if dtype_ == DEFAULT_DTYPE:
+                dtype_ = dtype
+            mapping[prop] = np.asarray(getattr(raw_frame, prop), dtype=dtype_)
             if len(mapping[prop]) == 0:
                 mapping[prop] = None
 
@@ -281,10 +306,11 @@ class Frame(object):
                                                          raw_frame.box,
                                                          dtype,
                                                          box_dimensions)
+        ret.types = raw_frame.types
+        ret.type_shapes = raw_frame.type_shapes
+        ret.typeid = raw_frame.typeid
         for prop in PARTICLE_PROPERTIES:
             setattr(ret, prop, mapping[prop])
-        ret.shapedef = raw_frame.shapedef
-        ret.types = raw_frame.types
         ret.data = raw_frame.data
         ret.data_keys = raw_frame.data_keys
         ret.view_rotation = raw_frame.view_rotation
@@ -332,8 +358,7 @@ class Frame(object):
 
     def __len__(self):
         "Return the number of particles in this frame."
-        self.load()
-        return len(self.frame_data)
+        return self.N
 
     def __eq__(self, other):
         self.load()
@@ -484,6 +509,12 @@ class Frame(object):
         return scene
 
     @property
+    def N(self):
+        "Number of particles."
+        self.load()
+        return len(self.frame_data)
+
+    @property
     def box(self):
         "Instance of :class:`~.Box`"
         self.load()
@@ -496,14 +527,39 @@ class Frame(object):
 
     @property
     def types(self):
-        "Nx1 array of types represented as strings."
+        "T array of type names represented as strings."
         self.load()
-        return self.frame_data.types
+        return self._raise_attributeerror('types')
 
     @types.setter
     def types(self, value):
+        value = self._validate_input_array(value, dim=1, dtype=TYPE_PROPERTIES['types'])
         self.load()
         self.frame_data.types = value
+
+    @property
+    def type_shapes(self):
+        "T list of shape definitions."
+        self.load()
+        return self._raise_attributeerror('type_shapes')
+
+    @type_shapes.setter
+    def type_shapes(self, value):
+        value = self._validate_input_array(value, dim=1, dtype=TYPE_PROPERTIES['type_shapes'])
+        self.load()
+        self.frame_data.type_shapes = value
+
+    @property
+    def typeid(self):
+        "N array of type indices for N particles."
+        self.load()
+        return self.frame_data.typeid
+
+    @typeid.setter
+    def typeid(self, value):
+        value = self._validate_input_array(value, dim=1, dtype=PARTICLE_PROPERTIES['typeid'])
+        self.load()
+        self.frame_data.typeid = value
 
     @property
     def position(self):
@@ -666,7 +722,7 @@ class Frame(object):
 
     @image.setter
     def image(self, value):
-        value = self._validate_input_array(value, dim=2, nelem=3, dtype=np.int32)
+        value = self._validate_input_array(value, dim=2, nelem=3, dtype=PARTICLE_PROPERTIES['image'])
         self.load()
         self.frame_data.image = value
 
@@ -693,15 +749,25 @@ class Frame(object):
         self.frame_data.data_keys = value
 
     @property
+    @deprecation.deprecated(deprecated_in="0.7.0",
+                            removed_in="0.8.0",
+                            current_version=__version__,
+                            details=("This property is deprecated, use type_shapes instead. "
+                                     "Until its removal, shapedef keys should not be individually "
+                                     "set, only the entire dictionary at once."))
     def shapedef(self):
         "An ordered dictionary of instances of :class:`~.shapes.Shape`."
-        self.load()
-        return self._raise_attributeerror('shapedef')
+        types = self.types
+        type_shapes = self.type_shapes
+        if len(types) != len(type_shapes):
+            raise AttributeError('Number of types and type_shapes is inconsistent.')
+        else:
+            return OrderedDict(zip(types, type_shapes))
 
     @shapedef.setter
     def shapedef(self, value):
-        self.load()
-        self.frame_data.shapedef = value
+        self.types = list(value.keys())
+        self.type_shapes = list(value.values())
 
     @property
     def view_rotation(self):
@@ -730,12 +796,10 @@ class BaseTrajectory(object):
     def __getitem__(self, index):
         if isinstance(index, slice):
             traj = type(self)(self.frames[index])
-            for x in ('_N', '_types', '_type', '_type_ids',
-                      '_position', '_orientation', '_velocity',
-                      '_mass', '_charge', '_diameter',
-                      '_moment_inertia', '_angmom', '_image'):
-                if getattr(self, x) is not None:
-                    setattr(traj, x, getattr(self, x)[index])
+            for prop in TRAJECTORY_PROPERTIES:
+                prop_key = '_' + prop
+                if getattr(self, prop_key) is not None:
+                    setattr(traj, prop_key, getattr(self, prop_key)[index])
             return traj
         else:
             return self.frames[index]
@@ -785,7 +849,7 @@ class Trajectory(BaseTrajectory):
 
     A trajectory is basically a sequence of :class:`~.Frame` instances.
 
-    Trajectory data can either be accessed as coherent numpy arrays:
+    Trajectory data can either be accessed as coherent NumPy arrays:
 
     .. code::
 
@@ -794,8 +858,7 @@ class Trajectory(BaseTrajectory):
         traj.N             # M
         traj.position      # MxNx3
         traj.orientation   # MxNx4
-        traj.types         # MxN
-        traj.type_ids      # MxN
+        traj.typeid        # MxN
 
     or by individual frames:
 
@@ -833,9 +896,9 @@ class Trajectory(BaseTrajectory):
             dtype = DEFAULT_DTYPE
         self._dtype = dtype
         self._N = None
-        self._type = None
         self._types = None
-        self._type_ids = None
+        self._type_shapes = None
+        self._typeid = None
         self._position = None
         self._orientation = None
         self._velocity = None
@@ -876,14 +939,14 @@ class Trajectory(BaseTrajectory):
         """Returns true if arrays are loaded into memory.
 
         See also: :meth:`~.load_arrays`"""
-        return any(getattr(self, '_' + key) is not None for key in FRAME_TRAJ_PROPS)
+        return any(getattr(self, '_' + key) is not None for key in TRAJECTORY_PROPERTIES)
 
     def _assert_loaded(self):
         "Raises a RuntimeError if trajectory is not loaded."
         if not self.loaded():
             raise RuntimeError("Trajectory not loaded! Use load().")
 
-    def _assertarrays_loaded(self):
+    def _assert_arrays_loaded(self):
         "Raises a RuntimeError if trajectory arrays are not loaded."
         if not self.arrays_loaded():
             raise RuntimeError(
@@ -901,10 +964,10 @@ class Trajectory(BaseTrajectory):
         return max((len(f) for f in self.frames))
 
     def load_arrays(self):
-        """Load positions, orientations and types into memory.
+        """Load all available trajectory properties into memory.
 
-        After calling this function, positions, orientations
-        and types can be accessed as coherent numpy arrays:
+        After calling this function, trajectory properties can be accessed as
+        coherent NumPy arrays:
 
         .. code::
 
@@ -912,8 +975,7 @@ class Trajectory(BaseTrajectory):
             traj.N             # M -- frame sizes
             traj.position      # MxNx3
             traj.orientation   # MxNx4
-            traj.types         # MxN
-            traj.type_ids      # MxN
+            traj.typeid        # MxN
 
         .. note::
 
@@ -935,73 +997,36 @@ class Trajectory(BaseTrajectory):
                 sub_traj.load_arrays()
                 sub_traj.position
         """
-        # Determine array shapes
-        _N = np.array([len(f) for f in self.frames], dtype=np.int_)
-        M = len(self)
-        N = _N.max()
+        # Set up dictionary of properties with a list of values for each frame.
+        props = {prop: [None] * len(self) for prop in TRAJECTORY_PROPERTIES}
 
-        # Types
-        types = [f.types for f in self.frames]
-        type_ids = np.zeros((M, N), dtype=np.uint32)
-        _type = _generate_type_id_array(types, type_ids)
-
-        props = dict(
-            position=[None] * M,
-            orientation=[None] * M,
-            velocity=[None] * M,
-            mass=[None] * M,
-            charge=[None] * M,
-            diameter=[None] * M,
-            moment_inertia=[None] * M,
-            angmom=[None] * M,
-            image=[None] * M,
-        )
-
+        # Copy attributes from frames into props.
         for i, frame in enumerate(self.frames):
-            # loop over desired properties
-            for prop in PARTICLE_PROPERTIES:
-                try:
-                    frame_prop = frame._raise_attributeerror(prop)
-                except AttributeError:
-                    frame_prop = None
-                if frame_prop is not None:
-                    props[prop][i] = frame_prop
+            for prop in TRAJECTORY_PROPERTIES:
+                props[prop][i] = getattr(frame, prop, None)
 
-        for prop in PARTICLE_PROPERTIES:
-            # This builds NumPy arrays for properties with
-            # no missing values (i.e. None).
+        # Build NumPy arrays for properties with no missing values (i.e. None).
+        for prop, dtype_ in TRAJECTORY_PROPERTIES.items():
             if any(p is None for p in props[prop]):
                 # If the list contains a None value, set property to None
-                # in order for AttributeError to be raised properly
+                # in order for AttributeError to be raised properly.
                 props[prop] = None
             else:
-                dtype_ = np.int32 if prop == 'image' else DEFAULT_DTYPE
                 try:
                     props[prop] = np.asarray(props[prop], dtype=dtype_)
                 except (TypeError, ValueError):
                     props[prop] = np.asarray(props[prop])
 
+        # Copy props data into trajectory's hidden attributes.
         try:
-            # Perform swap
-            self._N = _N
-            self._type = _type
-            self._types = types
-            self._type_ids = type_ids
-            self._position = props['position']
-            self._orientation = props['orientation']
-            self._velocity = props['velocity']
-            self._mass = props['mass']
-            self._charge = props['charge']
-            self._diameter = props['diameter']
-            self._moment_inertia = props['moment_inertia']
-            self._angmom = props['angmom']
-            self._image = props['image']
+            for prop in TRAJECTORY_PROPERTIES:
+                prop_key = '_' + prop
+                setattr(self, prop_key, props[prop])
         except Exception:
-            # Ensure consistent error state
-            self._N = self._type = self._types = self._type_ids = \
-                self._position = self._orientation = self._velocity = \
-                self._mass = self._charge = self._diameter = \
-                self._moment_inertia = self._angmom = self._image = None
+            # Ensure consistent error state by resetting all properties
+            for prop in TRAJECTORY_PROPERTIES:
+                prop_key = '_' + prop
+                setattr(self, prop_key, None)
             raise
 
     def set_dtype(self, value):
@@ -1022,7 +1047,7 @@ class Trajectory(BaseTrajectory):
 
     @property
     def N(self):
-        """Access the frame sizes as a numpy array.
+        """Access the frame sizes as a NumPy array.
 
         Mostly important when the trajectory has varying size.
 
@@ -1030,49 +1055,29 @@ class Trajectory(BaseTrajectory):
 
             pos_i = traj.position[i][0:traj.N[i]]
 
-        :returns: frame size as array with length M
+        :returns: frame sizes as array with length M
         :rtype: :class:`numpy.ndarray` (dtype= :class:`numpy.int_`)
         :raises RuntimeError: When accessed before
             calling :meth:`~.load_arrays` or
             :meth:`~.Trajectory.load`."""
-        self._assertarrays_loaded()
-        return np.asarray(self._N, dtype=np.int_)
+        self._assert_arrays_loaded()
+        return self._check_nonempty_property('_N')
 
     @property
     def types(self):
-        """Access the particle types as a numpy array.
+        """List of type names ordered by type_id.
 
-        :returns: particles types as (MxN) array
+        :returns: particles type names as (MxT) array
         :rtype: :class:`numpy.ndarray` (dtype= :class:`numpy.str_` )
         :raises RuntimeError: When accessed before
             calling :meth:`~.load_arrays` or
             :meth:`~.Trajectory.load`."""
-        self._assertarrays_loaded()
-        return np.asarray(self._types, dtype=np.str_)
+        self._assert_arrays_loaded()
+        return self._check_nonempty_property('_types')
 
     @property
-    def type(self):
-        """List of type names ordered by type_id.
-
-        Use the type list to map between type_ids and type names:
-
-        .. code::
-
-            type_name = traj.type[type_id]
-
-        See also: :attr:`~.Trajectory.type_ids`
-
-        :returns: particle types in order of type id.
-        :rtype: list
-        :raises RuntimeError: When accessed before
-            calling :meth:`~.load_arrays` or
-            :meth:`~.Trajectory.load`."""
-        self._assertarrays_loaded()
-        return self._type
-
-    @property
-    def type_ids(self):
-        """Access the particle type ids as a numpy array.
+    def typeid(self):
+        """Access the particle type ids as a NumPy array.
 
         See also: :attr:`~.Trajectory.type`
 
@@ -1081,19 +1086,19 @@ class Trajectory(BaseTrajectory):
         :raises RuntimeError: When accessed before
             calling :meth:`~.load_arrays` or
             :meth:`~.Trajectory.load`."""
-        self._assertarrays_loaded()
-        return np.asarray(self._type_ids, dtype=np.int_)
+        self._assert_arrays_loaded()
+        return self._check_nonempty_property('_typeid')
 
     @property
     def position(self):
-        """Access the particle positions as a numpy array.
+        """Access the particle positions as a NumPy array.
 
         :returns: particle positions as (Nx3) array
         :rtype: :class:`numpy.ndarray`
         :raises RuntimeError: When accessed before
             calling :meth:`~.load_arrays` or
             :meth:`~.Trajectory.load`."""
-        self._assertarrays_loaded()
+        self._assert_arrays_loaded()
         return self._check_nonempty_property('_position')
 
     @property
@@ -1109,7 +1114,7 @@ class Trajectory(BaseTrajectory):
 
     @property
     def orientation(self):
-        """Access the particle orientations as a numpy array.
+        """Access the particle orientations as a NumPy array.
 
         Orientations are stored as quaternions.
 
@@ -1118,7 +1123,7 @@ class Trajectory(BaseTrajectory):
         :raises RuntimeError: When accessed before
             calling :meth:`~.load_arrays` or
             :meth:`~.Trajectory.load`."""
-        self._assertarrays_loaded()
+        self._assert_arrays_loaded()
         return self._check_nonempty_property('_orientation')
 
     @property
@@ -1132,14 +1137,14 @@ class Trajectory(BaseTrajectory):
 
     @property
     def velocity(self):
-        """Access the particle velocities as a numpy array.
+        """Access the particle velocities as a NumPy array.
 
         :returns: particle velocities as (Nx3) array
         :rtype: :class:`numpy.ndarray`
         :raises RuntimeError: When accessed before
             calling :meth:`~.load_arrays` or
             :meth:`~.Trajectory.load`."""
-        self._assertarrays_loaded()
+        self._assert_arrays_loaded()
         return self._check_nonempty_property('_velocity')
 
     @property
@@ -1153,44 +1158,44 @@ class Trajectory(BaseTrajectory):
 
     @property
     def mass(self):
-        """Access the particle mass as a numpy array.
+        """Access the particle mass as a NumPy array.
 
         :returns: particle mass as (N) element array
         :rtype: :class:`numpy.ndarray`
         :raises RuntimeError: When accessed before
             calling :meth:`~.load_arrays` or
             :meth:`~.Trajectory.load`."""
-        self._assertarrays_loaded()
+        self._assert_arrays_loaded()
         return self._check_nonempty_property('_mass')
 
     @property
     def charge(self):
-        """Access the particle charge as a numpy array.
+        """Access the particle charge as a NumPy array.
 
         :returns: particle charge as (N) element array
         :rtype: :class:`numpy.ndarray`
         :raises RuntimeError: When accessed before
             calling :meth:`~.load_arrays` or
             :meth:`~.Trajectory.load`."""
-        self._assertarrays_loaded()
+        self._assert_arrays_loaded()
         return self._check_nonempty_property('_charge')
 
     @property
     def diameter(self):
-        """Access the particle diameter as a numpy array.
+        """Access the particle diameter as a NumPy array.
 
         :returns: particle diameter as (N) element array
         :rtype: :class:`numpy.ndarray`
         :raises RuntimeError: When accessed before
             calling :meth:`~.load_arrays` or
             :meth:`~.Trajectory.load`."""
-        self._assertarrays_loaded()
+        self._assert_arrays_loaded()
         return self._check_nonempty_property('_diameter')
 
     @property
     def moment_inertia(self):
         """Access the particle principal moment of inertia components as a
-        numpy array.
+        NumPy array.
 
         :returns: particle principal moment of inertia components as (Nx3)
                   element array
@@ -1198,31 +1203,31 @@ class Trajectory(BaseTrajectory):
         :raises RuntimeError: When accessed before
             calling :meth:`~.load_arrays` or
             :meth:`~.Trajectory.load`."""
-        self._assertarrays_loaded()
+        self._assert_arrays_loaded()
         return self._check_nonempty_property('_moment_inertia')
 
     @property
     def angmom(self):
-        """Access the particle angular momenta as a numpy array.
+        """Access the particle angular momenta as a NumPy array.
 
         :returns: particle angular momenta quaternions as (Nx4) element array
         :rtype: :class:`numpy.ndarray`
         :raises RuntimeError: When accessed before
             calling :meth:`~.load_arrays` or
             :meth:`~.Trajectory.load`."""
-        self._assertarrays_loaded()
+        self._assert_arrays_loaded()
         return self._check_nonempty_property('_angmom')
 
     @property
     def image(self):
-        """Access the particle periodic images as a numpy array.
+        """Access the particle periodic images as a NumPy array.
 
         :returns: particle periodic images as (Nx3) element array
         :rtype: :class:`numpy.ndarray`
         :raises RuntimeError: When accessed before
             calling :meth:`~.load_arrays` or
             :meth:`~.Trajectory.load`."""
-        self._assertarrays_loaded()
+        self._assert_arrays_loaded()
         return self._check_nonempty_property('_image')
 
 
@@ -1293,13 +1298,17 @@ def _regularize_box(position, velocity,
     return position, velocity, orientation, angmom, box
 
 
-def _generate_type_id_array(types, type_ids):
-    "Generate type_id array."
-    _type = sorted(set(t_ for t in types for t_ in t))
-    for i, t in enumerate(types):
-        for j, t_ in enumerate(t):
-            type_ids[i][j] = _type.index(t_)
-    return _type
+def _generate_types_typeid(type_strings):
+    """Generate types and typeid from list of type strings."""
+    types = []
+    typeid = []
+    for name in map(str, type_strings):
+        if name not in types:
+            types.append(name)
+        typeid.append(types.index(name))
+    types = np.asarray(types, dtype=str)
+    typeid = np.asarray(typeid, dtype=np.uint)
+    return types, typeid
 
 
 def _to_hoomd_snapshot(frame, snapshot=None):
@@ -1345,10 +1354,7 @@ def _from_hoomd_snapshot(frame, snapshot):
     Note that only the properties listed below will be copied.
     """
     frame.box.__dict__ = snapshot.box.__dict__
-    particle_types = list(set(snapshot.particles.types))
-    snap_types = [particle_types[i] for i in snapshot.particles.typeid]
-    frame.types = snap_types
-    for prop in PARTICLE_PROPERTIES:
+    for prop in {**TYPE_PROPERTIES, **PARTICLE_PROPERTIES}:
         setattr(frame, prop, getattr(snapshot.particles, prop))
     return frame
 

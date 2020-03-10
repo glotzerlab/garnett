@@ -117,7 +117,8 @@ class CifFileWriter(object):
         type_counter = defaultdict(int)
         n_digits = len(str(len(frame.position)))
         particle_str = "{ptype}{pnum:0" + str(n_digits) + "d} {ptype} {occ:3.2f} {position}"
-        for i, (position, particle_type, occupancy) in enumerate(zip(fractions, frame.types, occupancies)):
+        for i, (position, typeid, occupancy) in enumerate(zip(fractions, frame.typeid, occupancies)):
+            particle_type = frame.types[typeid]
             _write(particle_str.format(
                 pnum=type_counter[particle_type],
                 ptype=particle_type,
