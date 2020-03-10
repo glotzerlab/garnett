@@ -157,8 +157,8 @@ class DCDFrame(Frame):
             self._types = [self.default_type]
             self._typeid = np.zeros(N, dtype=np.uint)
         else:
-            self._types = self.t_frame.types
-            self._typeid = self.t_frame.typeid
+            self._types = copy.copy(self.t_frame.types)
+            self._typeid = copy.copy(self.t_frame.typeid)
         if self.t_frame is None or self.t_frame.box.dimensions == 3:
             ort.T[0] = 1.0
             ort.T[1:] = 0
