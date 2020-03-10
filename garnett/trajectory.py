@@ -944,7 +944,7 @@ class Trajectory(BaseTrajectory):
         if not self.loaded():
             raise RuntimeError("Trajectory not loaded! Use load().")
 
-    def _assertarrays_loaded(self):
+    def _assert_arrays_loaded(self):
         "Raises a RuntimeError if trajectory arrays are not loaded."
         if not self.arrays_loaded():
             raise RuntimeError(
@@ -1058,7 +1058,7 @@ class Trajectory(BaseTrajectory):
         :raises RuntimeError: When accessed before
             calling :meth:`~.load_arrays` or
             :meth:`~.Trajectory.load`."""
-        self._assertarrays_loaded()
+        self._assert_arrays_loaded()
         return self._check_nonempty_property('_N')
 
     @property
@@ -1070,7 +1070,7 @@ class Trajectory(BaseTrajectory):
         :raises RuntimeError: When accessed before
             calling :meth:`~.load_arrays` or
             :meth:`~.Trajectory.load`."""
-        self._assertarrays_loaded()
+        self._assert_arrays_loaded()
         return self._check_nonempty_property('_types')
 
     @property
@@ -1084,7 +1084,7 @@ class Trajectory(BaseTrajectory):
         :raises RuntimeError: When accessed before
             calling :meth:`~.load_arrays` or
             :meth:`~.Trajectory.load`."""
-        self._assertarrays_loaded()
+        self._assert_arrays_loaded()
         return self._check_nonempty_property('_typeid')
 
     @property
@@ -1096,7 +1096,7 @@ class Trajectory(BaseTrajectory):
         :raises RuntimeError: When accessed before
             calling :meth:`~.load_arrays` or
             :meth:`~.Trajectory.load`."""
-        self._assertarrays_loaded()
+        self._assert_arrays_loaded()
         return self._check_nonempty_property('_position')
 
     @property
@@ -1121,7 +1121,7 @@ class Trajectory(BaseTrajectory):
         :raises RuntimeError: When accessed before
             calling :meth:`~.load_arrays` or
             :meth:`~.Trajectory.load`."""
-        self._assertarrays_loaded()
+        self._assert_arrays_loaded()
         return self._check_nonempty_property('_orientation')
 
     @property
@@ -1142,7 +1142,7 @@ class Trajectory(BaseTrajectory):
         :raises RuntimeError: When accessed before
             calling :meth:`~.load_arrays` or
             :meth:`~.Trajectory.load`."""
-        self._assertarrays_loaded()
+        self._assert_arrays_loaded()
         return self._check_nonempty_property('_velocity')
 
     @property
@@ -1163,7 +1163,7 @@ class Trajectory(BaseTrajectory):
         :raises RuntimeError: When accessed before
             calling :meth:`~.load_arrays` or
             :meth:`~.Trajectory.load`."""
-        self._assertarrays_loaded()
+        self._assert_arrays_loaded()
         return self._check_nonempty_property('_mass')
 
     @property
@@ -1175,7 +1175,7 @@ class Trajectory(BaseTrajectory):
         :raises RuntimeError: When accessed before
             calling :meth:`~.load_arrays` or
             :meth:`~.Trajectory.load`."""
-        self._assertarrays_loaded()
+        self._assert_arrays_loaded()
         return self._check_nonempty_property('_charge')
 
     @property
@@ -1187,7 +1187,7 @@ class Trajectory(BaseTrajectory):
         :raises RuntimeError: When accessed before
             calling :meth:`~.load_arrays` or
             :meth:`~.Trajectory.load`."""
-        self._assertarrays_loaded()
+        self._assert_arrays_loaded()
         return self._check_nonempty_property('_diameter')
 
     @property
@@ -1201,7 +1201,7 @@ class Trajectory(BaseTrajectory):
         :raises RuntimeError: When accessed before
             calling :meth:`~.load_arrays` or
             :meth:`~.Trajectory.load`."""
-        self._assertarrays_loaded()
+        self._assert_arrays_loaded()
         return self._check_nonempty_property('_moment_inertia')
 
     @property
@@ -1213,7 +1213,7 @@ class Trajectory(BaseTrajectory):
         :raises RuntimeError: When accessed before
             calling :meth:`~.load_arrays` or
             :meth:`~.Trajectory.load`."""
-        self._assertarrays_loaded()
+        self._assert_arrays_loaded()
         return self._check_nonempty_property('_angmom')
 
     @property
@@ -1225,7 +1225,7 @@ class Trajectory(BaseTrajectory):
         :raises RuntimeError: When accessed before
             calling :meth:`~.load_arrays` or
             :meth:`~.Trajectory.load`."""
-        self._assertarrays_loaded()
+        self._assert_arrays_loaded()
         return self._check_nonempty_property('_image')
 
 
