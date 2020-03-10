@@ -14,6 +14,7 @@ Added
 +++++
   - Added ability to read ``_space_group_symop_operation_xyz`` keys in CIF files.
   - Added ``to_hoomd_snapshot`` method to ``Frame`` objects. Replaces the deprecated ``make_snapshot`` and ``copyto_snapshot`` methods.
+  - Enabled ``type_shape`` for ``SphereUnionShape`` class.
   - Added ability to read getar files with dynamic properties (such as ``type_shapes.json``) stored at a different period than positions.
 
 Changed
