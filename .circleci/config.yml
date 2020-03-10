@@ -7,7 +7,7 @@ version: 2
 jobs:
   style-check:
     docker:
-      - image: circleci/python:3.7
+      - image: circleci/python:3.8
 
     working_directory: ~/repo
 
@@ -16,13 +16,13 @@ jobs:
       - run:
           name: style-check
           command: |
-            pip install --user -U flake8==3.7.1
-            python -m flake8 --show-source garnett/
+            pip install --user -U flake8==3.7.9
+            python -m flake8 --show-source .
 
 
-  test-3.7: &test-template
+  test-3.8: &test-template
     docker:
-      - image: circleci/python:3.7
+      - image: circleci/python:3.8
 
     working_directory: ~/repo
 
@@ -40,27 +40,31 @@ jobs:
       - run:
           name: Run tests
           command: |
-            python -m unittest discover tests/ -v
-            python -m coverage run -m unittest discover tests/
+            python -m coverage run -m unittest discover tests/ -v
             python -m coverage report
 
       - store_artifacts:
           path: test-reports
           destination: test-reports
 
-  test-3.5:
+  test-3.7:
     <<: *test-template
     docker:
-      - image: circleci/python:3.5
+      - image: circleci/python:3.7
 
   test-3.6:
     <<: *test-template
     docker:
       - image: circleci/python:3.6
 
+  test-3.5:
+    <<: *test-template
+    docker:
+      - image: circleci/python:3.5
+
   test-deploy-pypi:
     docker:
-      - image: circleci/python:3.7
+      - image: circleci/python:3.8
     working_directory: ~/repo
     steps:
       - checkout
@@ -68,11 +72,11 @@ jobs:
           name: test-deploy-pypi
           command: |
             pip install --user -U -r .requirements-deploy.txt
-            bash .test-deploy.bash
+            bash .circleci/deploy.bash testpypi
 
   deploy-pypi:
     docker:
-      - image: circleci/python:3.7
+      - image: circleci/python:3.8
     working_directory: ~/repo
     steps:
       - checkout
@@ -80,20 +84,23 @@ jobs:
           name: deploy-pypi
           command: |
             pip install --user -U -r .requirements-deploy.txt
-            bash .deploy.bash
+            bash .circleci/deploy.bash testpypi
 
 workflows:
   version: 2
   style-check-and-tests:
     jobs:
       - style-check
-      - test-3.5:
+      - test-3.8:
+          requires:
+            - style-check
+      - test-3.7:
           requires:
             - style-check
       - test-3.6:
           requires:
             - style-check
-      - test-3.7:
+      - test-3.5:
           requires:
             - style-check
       - test-deploy-pypi:
@@ -101,9 +108,10 @@ workflows:
             branches:
               only: /release\/.*/
           requires:
-            - test-3.5
-            - test-3.6
+            - test-3.8
             - test-3.7
+            - test-3.6
+            - test-3.5
   deploy:
     jobs:
       - deploy-pypi:
