@@ -55,6 +55,11 @@ Sophie Youjung Lee, University of Michigan
 Luis Y. Rivera-Rivera, University of Michigan
 
     * Maintainer
+    * Various bugs and documentation fixes/updates
+    * Implemented error handling for unstored properties
+    * Improved dimension detection on GTAR and POS readers
+    * Enabled GSD v2.0.0 compatibility
+    * Added ``box`` to loadable trajectory attributes
 
 Kelly Wang, University of Michigan
 

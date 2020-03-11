@@ -48,7 +48,7 @@ import numpy as np
 from numpy.core import numeric as _nx
 from numpy.core.numeric import asanyarray
 
-from .trajectory import Frame, Trajectory
+from .trajectory import Frame, Trajectory, Box
 from .trajectory import FRAME_PROPERTIES, TYPE_PROPERTIES, PARTICLE_PROPERTIES
 from .trajectory import _RawFrameData
 from . import pydcdreader
@@ -62,7 +62,7 @@ def _euler_to_quaternion(alpha, q):
     q.T[3] = np.sin(alpha * 0.5)
 
 
-def _box_matrix_from_frame_header(frame_header, tol=1e-12):
+def _box_from_frame_header(frame_header):
     fh = frame_header
 
     lx = fh.box_a
@@ -75,10 +75,7 @@ def _box_matrix_from_frame_header(frame_header, tol=1e-12):
     xy /= ly
     xz /= lz
     yz /= lz
-    return [
-        [lx, 0.0, 0.0],
-        [(xy * ly), ly, 0.0],
-        [(xz * lz), (yz * lz), lz]]
+    return Box(lx, ly, lz, xy=xy, xz=xz, yz=yz, dimensions=3)
 
 
 def _np_stack(arrays, axis=0):
@@ -131,9 +128,9 @@ class DCDFrame(Frame):
         self.offset = offset
         self.t_frame = t_frame
         self.default_type = default_type
+        self._box = None
         self._types = None
         self._typeid = None
-        self._box = None
         self._position = None
         self._orientation = None
         super(DCDFrame, self).__init__(dtype=dtype)
@@ -144,7 +141,7 @@ class DCDFrame(Frame):
     def _read(self, xyz):
         frame_header = _DCDFrameHeader(
             ** self._dcdreader.read_frame(self.stream, xyz, self.offset))
-        self._box = np.asarray(_box_matrix_from_frame_header(frame_header)).T
+        self._box = _box_from_frame_header(frame_header)
         self._position = xyz.swapaxes(0, 1)
 
     def _load(self, xyz=None, ort=None):
@@ -173,9 +170,9 @@ class DCDFrame(Frame):
         self._orientation = ort
 
     def _loaded(self):
-        return not (self._types is None or
+        return not (self._box is None or
+                    self._types is None or
                     self._typeid is None or
-                    self._box is None or
                     self._position is None or
                     self._orientation is None)
 
@@ -203,8 +200,8 @@ class DCDFrame(Frame):
         return raw_frame
 
     def unload(self):
-        self._types = None
         self._box = None
+        self._types = None
         self._position = None
         self._orientation = None
         super(DCDFrame, self).unload()
@@ -220,7 +217,8 @@ class DCDTrajectory(Trajectory):
         """Returns true if arrays are loaded into memory.
 
         See also: :meth:`~.load_arrays`"""
-        return not (self._N is None or
+        return not (self._box is None or
+                    self._N is None or
                     self._types is None or
                     self._typeid is None or
                     self._position is None or
@@ -244,9 +242,12 @@ class DCDTrajectory(Trajectory):
                            dtype=TYPE_PROPERTIES['types'])
         typeid = np.asarray([f._typeid for f in self.frames],
                             dtype=PARTICLE_PROPERTIES['typeid'])
+        box = np.asarray([f._box for f in self.frames],
+                         dtype=FRAME_PROPERTIES['box'])
 
         try:
             # Perform swap
+            self._box = box
             self._N = _N
             self._types = types
             self._typeid = typeid
@@ -254,8 +255,8 @@ class DCDTrajectory(Trajectory):
             self._orientation = ort
         except Exception:
             # Ensure consistent error state
-            self._N = self._type = self._types = self._type_ids = \
-                self._position = self._orientation = None
+            self._box = self._N = self._type = self._types = \
+                self._type_ids = self._position = self._orientation = None
             raise
 
     def xyz(self, xyz=None):

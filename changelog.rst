@@ -17,6 +17,7 @@ Added
   - The CIF reader supports a broader range of ``_atom_site_label`` values that match `component 0 as specified here <https://www.iucr.org/__data/iucr/cif/standard/cifstd15.html>`_.
   - Enabled ``type_shape`` for ``SphereUnionShape`` class.
   - Added ability to read getar files with dynamic properties (such as ``type_shapes.json``) stored at a different period than positions.
+  - Added ``box`` property to trajectory objects.
 
 Changed
 +++++++

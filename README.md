@@ -69,6 +69,7 @@ sub_trajectory = traj[i:j]
 Access properties of trajectories:
 ```python
 traj.load_arrays()
+traj.box             # M
 traj.N               # M
 traj.types           # MxT
 traj.type_shapes     # MxT

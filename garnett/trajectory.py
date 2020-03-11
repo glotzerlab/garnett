@@ -24,8 +24,9 @@ logger = logging.getLogger(__name__)
 
 DEFAULT_DTYPE = np.float32
 
-# Scalar properties for a frame
+# Scalar/per-frame properties
 FRAME_PROPERTIES = {
+    'box': object,
     'N': np.uint,
 }
 
@@ -895,6 +896,7 @@ class Trajectory(BaseTrajectory):
         if dtype is None:
             dtype = DEFAULT_DTYPE
         self._dtype = dtype
+        self._box = None
         self._N = None
         self._types = None
         self._type_shapes = None
@@ -1044,6 +1046,18 @@ class Trajectory(BaseTrajectory):
                 x = x.astype(value)
         for frame in self.frames:
             frame.dtype = value
+
+    @property
+    def box(self):
+        """Access the frame boxes as a NumPy array.
+
+        :returns: frame boxes as an (M) element array
+        :rtype: :class:`numpy.ndarray` (dtype= :class:`numpy.object_`)
+        :raises RuntimeError: When accessed before
+            calling :meth:`~.load_arrays` or
+            :meth:`~.Trajectory.load`."""
+        self._assert_arrays_loaded()
+        return self._check_nonempty_property('_box')
 
     @property
     def N(self):

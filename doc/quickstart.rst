@@ -82,6 +82,7 @@ Supported properties are listed below:
 .. code-block:: python
 
     traj.load_arrays()
+    traj.box             # M
     traj.N               # M
     traj.types           # MxT
     traj.type_shapes     # MxT

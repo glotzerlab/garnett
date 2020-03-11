@@ -118,6 +118,18 @@ class TrajectoryTest(unittest.TestCase):
         with self.assertRaises(RuntimeError):
             frame0.dtype = np.float64
 
+    def test_box(self):
+        sample_file = self.get_sample_file()
+        traj = self.reader().read(sample_file)
+        with self.assertRaises(RuntimeError):
+            traj.box
+        traj.load_arrays()
+        self.assertTrue(len(traj.box.shape) == 1)
+        self.assertTrue(np.issubdtype(traj.box.dtype, np.object_))
+        M = len(traj)
+        self.assertEqual(traj.box.shape, (M,))
+        self.assertTrue(np.all(traj.box[i] == traj[i].box for i in range(M)))
+
     def test_N(self):
         sample_file = self.get_sample_file()
         traj = self.reader().read(sample_file)
