@@ -896,6 +896,7 @@ class Trajectory(BaseTrajectory):
         if dtype is None:
             dtype = DEFAULT_DTYPE
         self._dtype = dtype
+        self._box = None
         self._N = None
         self._types = None
         self._type_shapes = None
@@ -909,7 +910,6 @@ class Trajectory(BaseTrajectory):
         self._moment_inertia = None
         self._angmom = None
         self._image = None
-        self._box = None
 
     def __iter__(self):
         return iter(ImmutableTrajectory(self.frames))
@@ -1046,6 +1046,18 @@ class Trajectory(BaseTrajectory):
                 x = x.astype(value)
         for frame in self.frames:
             frame.dtype = value
+
+    @property
+    def box(self):
+        """Access the frame boxes as a NumPy array.
+
+        :returns: frame boxes as an (M) element array
+        :rtype: :class:`numpy.ndarray` (dtype= :class:`numpy.object_`)
+        :raises RuntimeError: When accessed before
+            calling :meth:`~.load_arrays` or
+            :meth:`~.Trajectory.load`."""
+        self._assert_arrays_loaded()
+        return self._check_nonempty_property('_box')
 
     @property
     def N(self):
@@ -1231,18 +1243,6 @@ class Trajectory(BaseTrajectory):
             :meth:`~.Trajectory.load`."""
         self._assert_arrays_loaded()
         return self._check_nonempty_property('_image')
-
-    @property
-    def box(self):
-        """Access the frame boxes as a NumPy array.
-
-        :returns: frame boxes as an (M) element array
-        :rtype: :class:`numpy.ndarray` (dtype= :class:`~.Box`)
-        :raises RuntimeError: When accessed before
-            calling :meth:`~.load_arrays` or
-            :meth:`~.Trajectory.load`."""
-        self._assert_arrays_loaded()
-        return self._check_nonempty_property('_box')
 
 
 def _regularize_box(position, velocity,

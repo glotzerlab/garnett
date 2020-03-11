@@ -128,9 +128,9 @@ class DCDFrame(Frame):
         self.offset = offset
         self.t_frame = t_frame
         self.default_type = default_type
+        self._box = None
         self._types = None
         self._typeid = None
-        self._box = None
         self._position = None
         self._orientation = None
         super(DCDFrame, self).__init__(dtype=dtype)
@@ -170,9 +170,9 @@ class DCDFrame(Frame):
         self._orientation = ort
 
     def _loaded(self):
-        return not (self._types is None or
+        return not (self._box is None or
+                    self._types is None or
                     self._typeid is None or
-                    self._box is None or
                     self._position is None or
                     self._orientation is None)
 
@@ -200,8 +200,8 @@ class DCDFrame(Frame):
         return raw_frame
 
     def unload(self):
-        self._types = None
         self._box = None
+        self._types = None
         self._position = None
         self._orientation = None
         super(DCDFrame, self).unload()
@@ -217,12 +217,12 @@ class DCDTrajectory(Trajectory):
         """Returns true if arrays are loaded into memory.
 
         See also: :meth:`~.load_arrays`"""
-        return not (self._N is None or
+        return not (self._box is None or
+                    self._N is None or
                     self._types is None or
                     self._typeid is None or
                     self._position is None or
-                    self._orientation is None or
-                    self._box is None)
+                    self._orientation is None)
 
     def load_arrays(self):
         # Determine array shapes
@@ -247,16 +247,16 @@ class DCDTrajectory(Trajectory):
 
         try:
             # Perform swap
+            self._box = box
             self._N = _N
             self._types = types
             self._typeid = typeid
             self._position = xyz.swapaxes(1, 2)
             self._orientation = ort
-            self._box = box
         except Exception:
             # Ensure consistent error state
-            self._N = self._type = self._types = self._type_ids = \
-                self._position = self._orientation = self._box = None
+            self._box = self._N = self._type = self._types = \
+                self._type_ids = self._position = self._orientation =  None
             raise
 
     def xyz(self, xyz=None):
