@@ -136,6 +136,8 @@ class FrameData(object):
         "Instance of :class:`~.Box`"
         self.types = None
         "T array of type names represented as strings."
+        self.type_shapes = None
+        "T array of Shape objects."
         self.typeid = None
         "N array of type indices for N particles."
         self.position = None
@@ -270,8 +272,8 @@ class Frame(object):
         try:
             value = np.asarray(value, dtype=dtype)
         except ValueError:
-            raise ValueError("This property can only be set to numeric arrays.")
-        if not np.all(np.isfinite(value)):
+            raise ValueError("This property can only be set to values compatible with {}.".format(dtype))
+        if np.issubdtype(dtype, np.number) and not np.all(np.isfinite(value)):
             raise ValueError("Property being set must all be finite numbers.")
         elif len(value.shape) != dim:
             raise ValueError("Input array must be {}-dimensional.".format(dim))
@@ -532,6 +534,7 @@ class Frame(object):
 
     @types.setter
     def types(self, value):
+        value = self._validate_input_array(value, dim=1, dtype=TYPE_PROPERTIES['types'])
         self.load()
         self.frame_data.types = value
 
@@ -543,6 +546,7 @@ class Frame(object):
 
     @type_shapes.setter
     def type_shapes(self, value):
+        value = self._validate_input_array(value, dim=1, dtype=TYPE_PROPERTIES['type_shapes'])
         self.load()
         self.frame_data.type_shapes = value
 
@@ -554,6 +558,7 @@ class Frame(object):
 
     @typeid.setter
     def typeid(self, value):
+        value = self._validate_input_array(value, dim=1, dtype=PARTICLE_PROPERTIES['typeid'])
         self.load()
         self.frame_data.typeid = value
 
@@ -718,7 +723,7 @@ class Frame(object):
 
     @image.setter
     def image(self, value):
-        value = self._validate_input_array(value, dim=2, nelem=3, dtype=np.int32)
+        value = self._validate_input_array(value, dim=2, nelem=3, dtype=PARTICLE_PROPERTIES['image'])
         self.load()
         self.frame_data.image = value
 
@@ -745,6 +750,12 @@ class Frame(object):
         self.frame_data.data_keys = value
 
     @property
+    @deprecation.deprecated(deprecated_in="0.7.0",
+                            removed_in="0.8.0",
+                            current_version=__version__,
+                            details=("This property is deprecated, use type_shapes instead. "
+                                     "Until its removal, shapedef keys should not be individually "
+                                     "set, only the entire dictionary at once."))
     def shapedef(self):
         "An ordered dictionary of instances of :class:`~.shapes.Shape`."
         types = self.types
@@ -752,7 +763,7 @@ class Frame(object):
         if len(types) != len(type_shapes):
             raise AttributeError('Number of types and type_shapes is inconsistent.')
         else:
-            return OrderedDict(zip(self.types, self.type_shapes))
+            return OrderedDict(zip(types, type_shapes))
 
     @shapedef.setter
     def shapedef(self, value):
@@ -937,7 +948,7 @@ class Trajectory(BaseTrajectory):
         if not self.loaded():
             raise RuntimeError("Trajectory not loaded! Use load().")
 
-    def _assertarrays_loaded(self):
+    def _assert_arrays_loaded(self):
         "Raises a RuntimeError if trajectory arrays are not loaded."
         if not self.arrays_loaded():
             raise RuntimeError(
@@ -955,10 +966,10 @@ class Trajectory(BaseTrajectory):
         return max((len(f) for f in self.frames))
 
     def load_arrays(self):
-        """Load positions, orientations and types into memory.
+        """Load all available trajectory properties into memory.
 
-        After calling this function, positions, orientations
-        and types can be accessed as coherent NumPy arrays:
+        After calling this function, trajectory properties can be accessed as
+        coherent NumPy arrays:
 
         .. code::
 
@@ -1046,13 +1057,13 @@ class Trajectory(BaseTrajectory):
 
             pos_i = traj.position[i][0:traj.N[i]]
 
-        :returns: frame size as array with length M
+        :returns: frame sizes as array with length M
         :rtype: :class:`numpy.ndarray` (dtype= :class:`numpy.int_`)
         :raises RuntimeError: When accessed before
             calling :meth:`~.load_arrays` or
             :meth:`~.Trajectory.load`."""
-        self._assertarrays_loaded()
-        return np.asarray(self._N, dtype=np.uint)
+        self._assert_arrays_loaded()
+        return self._check_nonempty_property('_N')
 
     @property
     def types(self):
@@ -1063,8 +1074,8 @@ class Trajectory(BaseTrajectory):
         :raises RuntimeError: When accessed before
             calling :meth:`~.load_arrays` or
             :meth:`~.Trajectory.load`."""
-        self._assertarrays_loaded()
-        return np.asarray(self._types, dtype=np.str_)
+        self._assert_arrays_loaded()
+        return self._check_nonempty_property('_types')
 
     @property
     def typeid(self):
@@ -1077,8 +1088,8 @@ class Trajectory(BaseTrajectory):
         :raises RuntimeError: When accessed before
             calling :meth:`~.load_arrays` or
             :meth:`~.Trajectory.load`."""
-        self._assertarrays_loaded()
-        return np.asarray(self._typeid, dtype=np.uint)
+        self._assert_arrays_loaded()
+        return self._check_nonempty_property('_typeid')
 
     @property
     def position(self):
@@ -1089,7 +1100,7 @@ class Trajectory(BaseTrajectory):
         :raises RuntimeError: When accessed before
             calling :meth:`~.load_arrays` or
             :meth:`~.Trajectory.load`."""
-        self._assertarrays_loaded()
+        self._assert_arrays_loaded()
         return self._check_nonempty_property('_position')
 
     @property
@@ -1114,7 +1125,7 @@ class Trajectory(BaseTrajectory):
         :raises RuntimeError: When accessed before
             calling :meth:`~.load_arrays` or
             :meth:`~.Trajectory.load`."""
-        self._assertarrays_loaded()
+        self._assert_arrays_loaded()
         return self._check_nonempty_property('_orientation')
 
     @property
@@ -1135,7 +1146,7 @@ class Trajectory(BaseTrajectory):
         :raises RuntimeError: When accessed before
             calling :meth:`~.load_arrays` or
             :meth:`~.Trajectory.load`."""
-        self._assertarrays_loaded()
+        self._assert_arrays_loaded()
         return self._check_nonempty_property('_velocity')
 
     @property
@@ -1156,7 +1167,7 @@ class Trajectory(BaseTrajectory):
         :raises RuntimeError: When accessed before
             calling :meth:`~.load_arrays` or
             :meth:`~.Trajectory.load`."""
-        self._assertarrays_loaded()
+        self._assert_arrays_loaded()
         return self._check_nonempty_property('_mass')
 
     @property
@@ -1168,7 +1179,7 @@ class Trajectory(BaseTrajectory):
         :raises RuntimeError: When accessed before
             calling :meth:`~.load_arrays` or
             :meth:`~.Trajectory.load`."""
-        self._assertarrays_loaded()
+        self._assert_arrays_loaded()
         return self._check_nonempty_property('_charge')
 
     @property
@@ -1180,7 +1191,7 @@ class Trajectory(BaseTrajectory):
         :raises RuntimeError: When accessed before
             calling :meth:`~.load_arrays` or
             :meth:`~.Trajectory.load`."""
-        self._assertarrays_loaded()
+        self._assert_arrays_loaded()
         return self._check_nonempty_property('_diameter')
 
     @property
@@ -1194,7 +1205,7 @@ class Trajectory(BaseTrajectory):
         :raises RuntimeError: When accessed before
             calling :meth:`~.load_arrays` or
             :meth:`~.Trajectory.load`."""
-        self._assertarrays_loaded()
+        self._assert_arrays_loaded()
         return self._check_nonempty_property('_moment_inertia')
 
     @property
@@ -1206,7 +1217,7 @@ class Trajectory(BaseTrajectory):
         :raises RuntimeError: When accessed before
             calling :meth:`~.load_arrays` or
             :meth:`~.Trajectory.load`."""
-        self._assertarrays_loaded()
+        self._assert_arrays_loaded()
         return self._check_nonempty_property('_angmom')
 
     @property
@@ -1218,7 +1229,7 @@ class Trajectory(BaseTrajectory):
         :raises RuntimeError: When accessed before
             calling :meth:`~.load_arrays` or
             :meth:`~.Trajectory.load`."""
-        self._assertarrays_loaded()
+        self._assert_arrays_loaded()
         return self._check_nonempty_property('_image')
 
     @property
@@ -1230,7 +1241,7 @@ class Trajectory(BaseTrajectory):
         :raises RuntimeError: When accessed before
             calling :meth:`~.load_arrays` or
             :meth:`~.Trajectory.load`."""
-        self._assertarrays_loaded()
+        self._assert_arrays_loaded()
         return self._check_nonempty_property('_box')
 
 

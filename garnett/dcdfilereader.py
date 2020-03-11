@@ -49,6 +49,7 @@ from numpy.core import numeric as _nx
 from numpy.core.numeric import asanyarray
 
 from .trajectory import Frame, Trajectory, Box
+from .trajectory import FRAME_PROPERTIES, TYPE_PROPERTIES, PARTICLE_PROPERTIES
 from .trajectory import _RawFrameData
 from . import pydcdreader
 
@@ -144,18 +145,19 @@ class DCDFrame(Frame):
         self._position = xyz.swapaxes(0, 1)
 
     def _load(self, xyz=None, ort=None):
-        N = int(self.file_header.n_particles)
+        N = FRAME_PROPERTIES['N'](self.file_header.n_particles)
         if xyz is None:
             xyz = np.zeros((3, N), dtype=np.float32)
         if ort is None:
             ort = np.zeros((N, 4), dtype=self._dtype)
         self._read(xyz=xyz)
         if self.t_frame is None:
-            self._types = [self.default_type]
-            self._typeid = np.zeros(N, dtype=np.uint)
+            self._types = np.asarray([self.default_type],
+                                     dtype=TYPE_PROPERTIES['types'])
+            self._typeid = np.zeros(N, dtype=PARTICLE_PROPERTIES['typeid'])
         else:
-            self._types = self.t_frame.types
-            self._typeid = self.t_frame.typeid
+            self._types = copy.copy(self.t_frame.types)
+            self._typeid = copy.copy(self.t_frame.typeid)
         if self.t_frame is None or self.t_frame.box.dimensions == 3:
             ort.T[0] = 1.0
             ort.T[1:] = 0
@@ -226,7 +228,7 @@ class DCDTrajectory(Trajectory):
         # Determine array shapes
         M = len(self)
         N = len(self.frames[0])
-        _N = np.ones(M) * N
+        _N = np.full(M, N, dtype=FRAME_PROPERTIES['N'])
 
         # Coordinates
         xyz = np.zeros((M, 3, N), dtype=np.float32)
@@ -236,8 +238,10 @@ class DCDTrajectory(Trajectory):
                 frame._load(xyz=xyz[i], ort=ort[i])
 
         # Types can only be handled after frame._load() calls.
-        types = np.asarray([f._types for f in self.frames])
-        typeid = np.asarray([f._typeid for f in self.frames])
+        types = np.asarray([f._types for f in self.frames],
+                           dtype=TYPE_PROPERTIES['types'])
+        typeid = np.asarray([f._typeid for f in self.frames],
+                            dtype=PARTICLE_PROPERTIES['typeid'])
         box = np.asarray([f._box for f in self.frames])
 
         try:

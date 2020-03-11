@@ -95,15 +95,10 @@ class PosFileWriter(object):
 
             # shape defs
             try:
-                required = [t for t in frame.types if t in frame.shapedef]
-                not_defined = [t for t in frame.types if t not in frame.shapedef]
-                for name in required:
-                    _write('def {} "{}"'.format(name, frame.shapedef[name].pos_string))
-                for name in not_defined:
-                    logger.info(
-                        "No shape defined for '{}'. "
-                        "Using fallback definition.".format(name))
-                    _write('def {} "{}"'.format(name, DEFAULT_SHAPE_DEFINITION.pos_string))
+                if len(frame.types) != len(frame.type_shapes):
+                    raise ValueError("Unequal number of types and type_shapes.")
+                for name, type_shape in zip(frame.types, frame.type_shapes):
+                    _write('def {} "{}"'.format(name, type_shape.pos_string))
             except AttributeError:
                 # If AttributeError is raised because the frame does not contain
                 # shape information, fill them all with the default shape

@@ -11,6 +11,8 @@ Authors: Matthew Spellings, Carl Simon Adorf
     traj = reader.read(open('trajectory.tar', 'rb'))
 """
 
+import bisect
+import functools
 import gtar
 import json
 import logging
@@ -20,6 +22,19 @@ from .trajectory import _RawFrameData, Box, Frame, Trajectory
 from .shapes import _parse_type_shape
 
 logger = logging.getLogger(__name__)
+
+
+def _find_le(a, x):
+    """Find rightmost value less than or equal to x"""
+    i = bisect.bisect_right(a, x)
+    if i:
+        return a[i-1]
+    raise ValueError
+
+
+@functools.lru_cache(maxsize=64)
+def _get_record_frames(trajectory, record):
+    return trajectory.queryFrames(record)
 
 
 class GetarFrame(Frame):
@@ -43,6 +58,16 @@ class GetarFrame(Frame):
     def __str__(self):
         return "GetarFrame({})".format(self._records)
 
+    def _get_record_frame(self, name):
+        record = self._records[name]
+        frames = _get_record_frames(self._trajectory, record)
+        return _find_le(frames, self._frame)
+
+    def _get_record_value(self, name):
+        record = self._records[name]
+        frame = self._get_record_frame(name)
+        return self._trajectory.getRecord(record, frame)
+
     def read(self):
         raw_frame = _RawFrameData()
         raw_frame.type_shapes = []
@@ -61,32 +86,38 @@ class GetarFrame(Frame):
         ]
         for name in supported_records:
             try:
-                values = self._trajectory.getRecord(
-                    self._records[name], self._frame)
-            except KeyError:
-                values = None
-
-            if values is not None:
+                values = self._get_record_value(name)
                 frame_prop = prop_map.get(name, name)
                 setattr(raw_frame, frame_prop, values)
+            except (KeyError, ValueError):
+                # either the record wasn't present (KeyError) or the
+                # quantity was not yet provided in index-order
+                # (ValueError)
+                pass
 
-        if 'type' in self._records and 'type_names.json' in self._records:
-            raw_frame.types = json.loads(self._trajectory.getRecord(
-                self._records['type_names.json'], self._frame))
-        else:
+        try:
+            raw_frame.types = json.loads(self._get_record_value('type_names.json'))
+        except (KeyError, ValueError):
             raw_frame.types = [self._default_type]
+        # if raw_frame.typeid is not set, np.max() here returns a
+        # float, so pass through int()
+        num_types_to_add = (int(np.max(raw_frame.typeid, initial=0)) +
+                            1 - len(raw_frame.types))
+        last_type_name = raw_frame.types[-1]
+        for t in range(1, num_types_to_add + 1):
+            type_name = (last_type_name[:-1] + chr(ord(last_type_name[-1]) + t))
+            raw_frame.types.append(type_name)
 
-        if 'box' in self._records:
+        try:
             # Read dimension if stored
             if 'dimensions' in self._records:
-                dimensions = self._trajectory.getRecord(
-                             self._records['dimensions'], self._frame)[0]
+                dimensions = self._get_record_value('dimensions')[0]
             # Fallback to detection based on z coordinates
             else:
                 zs = raw_frame.position[:, 2]
                 dimensions = 2 if np.allclose(zs, 0.0, atol=1e-7) else 3
 
-            box = self._trajectory.getRecord(self._records['box'], self._frame)
+            box = self._get_record_value('box')
             gbox = Box(
                 **dict(
                     zip(['Lx', 'Ly', 'Lz', 'xy', 'xz', 'yz'], box),
@@ -94,13 +125,14 @@ class GetarFrame(Frame):
             )
             raw_frame.box = np.array(gbox.get_box_matrix())
             raw_frame.box_dimensions = int(dimensions)
-        else:
+        except (KeyError, ValueError):
             raw_frame.box = self._default_box
 
-        if 'type_shapes.json' in self._records:
-            type_shapes = json.loads(self._trajectory.getRecord(
-                self._records['type_shapes.json'], self._frame))
+        try:
+            type_shapes = json.loads(self._get_record_value('type_shapes.json'))
             raw_frame.type_shapes = [_parse_type_shape(t) for t in type_shapes]
+        except (KeyError, ValueError):
+            pass
 
         return raw_frame
 

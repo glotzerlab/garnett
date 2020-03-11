@@ -70,6 +70,10 @@ Access properties of trajectories:
 ```python
 traj.load_arrays()
 traj.box             # M
+traj.N               # M
+traj.types           # MxT
+traj.type_shapes     # MxT
+traj.typeid          # MxN
 traj.position        # MxNx3
 traj.orientation     # MxNx4
 traj.velocity        # MxNx3
@@ -78,19 +82,21 @@ traj.charge          # MxN
 traj.diameter        # MxN
 traj.moment_inertia  # MxNx3
 traj.angmom          # MxNx4
-traj.types           # MxT
+traj.image           # MxNx3
 
-# M is the number of frames: len(traj)
-# N is the maximum number of particles: max((len(f) for f in traj))
-# T is the number of particle types
+# M is the number of frames
+# T is the number of particle types in a frame
+# N is the number of particles in a frame
 ```
 
 Access properties of individual frames:
 ```python
 frame = traj[i]
 frame.box              # garnett.trajectory.Box object
-frame.types            # T
-frame.typeid           # N
+frame.N                # scalar, number of particles
+frame.types            # T, string names for each type
+frame.type_shapes      # T, list of shapes for each type
+frame.typeid           # N, type indices of each particle
 frame.position         # Nx3
 frame.orientation      # Nx4
 frame.velocity         # Nx3
@@ -99,9 +105,9 @@ frame.charge           # N
 frame.diameter         # N
 frame.moment_inertia   # Nx3
 frame.angmom           # Nx4
-frame.data             # A dictionary of lists for each attribute
-frame.data_key         # A list of strings
-frame.type_shapes      # T, Shape for each type
+frame.image            # Nx3
+frame.data             # Dictionary of lists for each attribute
+frame.data_key         # List of strings
 ```
 
 All matrices are `NumPy` arrays.
