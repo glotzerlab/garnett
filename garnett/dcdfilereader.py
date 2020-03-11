@@ -243,7 +243,7 @@ class DCDTrajectory(Trajectory):
         typeid = np.asarray([f._typeid for f in self.frames],
                             dtype=PARTICLE_PROPERTIES['typeid'])
         box = np.asarray([f._box for f in self.frames],
-                         dtype=FRAME_PROPERTIES["box"])
+                         dtype=FRAME_PROPERTIES['box'])
 
         try:
             # Perform swap
