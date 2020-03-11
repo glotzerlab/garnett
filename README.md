@@ -110,7 +110,7 @@ frame.data             # Dictionary of lists for each attribute
 frame.data_key         # List of strings
 ```
 
-All matrices are `NumPy` arrays.
+All matrices are NumPy arrays.
 
 ## Example use with HOOMD-blue
 
