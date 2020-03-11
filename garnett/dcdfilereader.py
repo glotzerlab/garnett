@@ -256,7 +256,7 @@ class DCDTrajectory(Trajectory):
         except Exception:
             # Ensure consistent error state
             self._box = self._N = self._type = self._types = \
-                self._type_ids = self._position = self._orientation =  None
+                self._type_ids = self._position = self._orientation = None
             raise
 
     def xyz(self, xyz=None):
