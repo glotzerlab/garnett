@@ -20,6 +20,31 @@ logger = logging.getLogger(__name__)
 HP2_PATH = os.path.join(os.path.dirname(__file__), 'files', 'hP2-Mg.cif')
 
 
+class CifAtomSiteLabelParserTest(unittest.TestCase):
+
+    def test_parse_labels(self):
+        # Test parsing _atom_site_label.
+        # These examples are taken from:
+        # https://www.iucr.org/__data/iucr/cif/standard/cifstd15.html
+        parser = garnett.ciffilereader._parse_atom_site_label_to_type_name
+        assert parser('Cu') == 'Cu'
+        assert parser('Cu2+') == 'Cu2+'
+        assert parser('dummy') == 'dummy'
+        assert parser('Fe3+Ni2+') == 'Fe3+Ni2+'
+        assert parser('S-') == 'S-'
+        assert parser('H+') == 'H+'
+        assert parser('H*') == 'H*'
+        assert parser('H(SDS)') == 'H(SDS)'
+        assert parser('C1') == 'C'
+        assert parser('C103g28') == 'C'
+        assert parser('Fe3+17b') == 'Fe3+'
+        assert parser('H*251') == 'H*'
+        assert parser('boron2a') == 'boron'
+        assert parser('Ni22+') == 'Ni22+'
+        assert parser('Ni2+2') == 'Ni2+'
+        assert parser('Fe2+Ni2+2') == 'Fe2+Ni2+'
+
+
 @unittest.skipIf(not PYCIFRW,
                  'CifFileReader tests require the PyCifRW package.')
 class BaseCifFileReaderTest(unittest.TestCase):

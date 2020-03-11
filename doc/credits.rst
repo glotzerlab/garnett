@@ -45,6 +45,7 @@ Bradley Dice, University of Michigan
     * Support for additional frame properties
     * Improved support for parsing and writing particle shapes
     * Refactored ``types``, ``typeid``, ``type_shapes`` to match HOOMD conventions
+    * Expanded support for CIF ``_atom_site_label`` types.
 
 Sophie Youjung Lee, University of Michigan
 
