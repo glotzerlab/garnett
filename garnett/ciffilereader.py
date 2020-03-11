@@ -15,10 +15,11 @@ Authors: Matthew Spellings
 import logging
 import re
 import warnings
+from collections import OrderedDict
 
 import numpy as np
 
-from .trajectory import _RawFrameData, Frame, Trajectory, _generate_types_typeid
+from .trajectory import _RawFrameData, Frame, Trajectory
 
 # CifFile is from the pycifrw package
 from CifFile import CifFile
@@ -29,18 +30,32 @@ logger = logging.getLogger(__name__)
 
 CIFFILE_FLOAT_DIGITS = 11
 
-
 # invalid characters for symmetry expressions
 REMOVE_NONNUM_REGEXP = re.compile(r'[^+\-*/0-9\.,\(\)xyz]+')
 
 # (an integer or floating point number)/(an integer or floating point number)
 PARSE_DIVISION_REGEXP = re.compile(r'(?P<num>\d+(\.(\d+)?)?)\s*/\s*(?P<denom>\d+(\.(\d+)?)?)')
 
+# This regex matches _atom_site_label component 0 (but not component 1) of the
+# definition here:
+# https://www.iucr.org/__data/iucr/cif/standard/cifstd15.html
+_ATOM_SITE_LABEL_COMPONENT_0 = re.compile(r'^(([^\s_0-9])|([0-9]*[\+\-]))*')
+
 
 def _parse_division(match):
     """Helper function to substitute ratios in cif files, like '1/4', into
     fractions, like '0.25'."""
     return str(float(match.group('num'))/float(match.group('denom')))
+
+
+def _parse_atom_site_label_to_type_name(label):
+    """Matches _atom_site_label component 0.
+
+    This regex matches component 0 (but not component 1) of the definition here:
+    https://www.iucr.org/__data/iucr/cif/standard/cifstd15.html
+    """
+    m = re.search(_ATOM_SITE_LABEL_COMPONENT_0, label)
+    return m.group()
 
 
 class _RawCifFrameData(_RawFrameData):
@@ -73,7 +88,7 @@ class CifFileFrame(Frame):
         idx = s.rfind('(')
         return self._num(s[:idx]) if idx >= 0 else self._num(s)
 
-    def _parseBox(self, parsed):
+    def _parse_box(self, parsed):
         (a, b, c) = [self._safer_float(parsed['_cell_length_{}'.format(name)])
                      for name in ['a', 'b', 'c']]
         (alpha, beta, gamma) = [self._safer_float(parsed['_cell_angle_{}'.format(name)])
@@ -126,7 +141,7 @@ class CifFileFrame(Frame):
 
     def read(self):
         "Read the frame data from the stream."
-        box_matrix = self._parseBox(self.parsed)
+        box_matrix = self._parse_box(self.parsed)
 
         fractions = np.array([(self._safer_float(x), self._safer_float(y), self._safer_float(z))
                               for (x, y, z) in zip(
@@ -135,7 +150,7 @@ class CifFileFrame(Frame):
         if '_atom_site_type_symbol' in self.parsed:
             site_types = list(self.parsed['_atom_site_type_symbol'])
         elif '_atom_site_label' in self.parsed:
-            site_types = [re.search('([a-zA-Z]+)', label)
+            site_types = [_parse_atom_site_label_to_type_name(label)
                           for label in self.parsed['_atom_site_label']]
         else:
             site_types = len(fractions)*[self.default_type]
@@ -193,13 +208,18 @@ class CifFileFrame(Frame):
             unique_points = np.array(unique_points, dtype=np.float32)
 
             if bad_types:
+                site_types = [self.default_type]
                 type_strings = [self.default_type] * len(unique_points)
         else:
             unique_points = fractions
             type_strings = site_types
 
-        # Convert type strings to types, typeid
-        types, typeid = _generate_types_typeid(type_strings)
+        # Remove duplicate site_types while preserving their order
+        site_types = list(OrderedDict.fromkeys(site_types))
+
+        # Convert type strings to typeid
+        site_types_lookup = {key: index for index, key in enumerate(site_types)}
+        typeid = [site_types_lookup[t] for t in type_strings]
 
         # Save the exact points
         cif_coordinates = unique_points.copy()
@@ -213,7 +233,7 @@ class CifFileFrame(Frame):
 
         raw_frame = _RawFrameData()
         raw_frame.box = box_matrix
-        raw_frame.types = types
+        raw_frame.types = site_types
         raw_frame.typeid = typeid
         raw_frame.position = coordinates
         raw_frame.cif_coordinates = cif_coordinates
