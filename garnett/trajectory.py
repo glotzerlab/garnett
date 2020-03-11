@@ -26,8 +26,8 @@ DEFAULT_DTYPE = np.float32
 
 # Scalar/per-frame properties
 FRAME_PROPERTIES = {
-    'N': np.uint,
     'box': object,
+    'N': np.uint,
 }
 
 # Properties of length T (number of types)
