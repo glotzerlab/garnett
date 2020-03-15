@@ -261,8 +261,12 @@ class Frame(object):
             raise ValueError("Input array must be of shape (N, {}) where N is the number of particles.".format(nelem))
         return value
 
-    def _raw_frame_to_frame(self, raw_frame, dtype=None):
-        """Generate a frame object from a raw frame object."""
+    @classmethod
+    def _raw_frame_data_to_frame_data(self, raw_frame, dtype=None):
+        """Generate a _FrameData object from a _RawFrameData object.
+
+        This method performs some normalization and validation on raw input data.
+        """
         N = len(raw_frame.position)
         ret = _FrameData()
 
@@ -309,7 +313,7 @@ class Frame(object):
         "Load the frame into memory."
         if self._frame_data is None:
             logger.debug("Loading frame.")
-            self._frame_data = self._raw_frame_to_frame(self.read(), dtype=self._dtype)
+            self._frame_data = self._raw_frame_data_to_frame_data(self.read(), dtype=self._dtype)
 
     def unload(self):
         """Unload the frame from memory.
@@ -408,8 +412,8 @@ class Frame(object):
 
         :param snapshot: A HOOMD snapshot.
         """
-        frame = cls()
-        frame.box = Box(
+        raw_frame = _RawFrameData()
+        raw_frame.box = Box(
             Lx=snapshot.box.Lx,
             Ly=snapshot.box.Ly,
             Lz=snapshot.box.Lz,
@@ -419,7 +423,13 @@ class Frame(object):
             dimensions=snapshot.box.dimensions,
         )
         for prop in {**TYPE_PROPERTIES, **PARTICLE_PROPERTIES}:
-            setattr(frame, prop, getattr(snapshot.particles, prop))
+            try:
+                setattr(raw_frame, prop, getattr(snapshot.particles, prop))
+            except AttributeError:
+                pass
+
+        frame = cls()
+        frame._frame_data = cls._raw_frame_data_to_frame_data(raw_frame)
         return frame
 
     def to_plato_scene(self, backend, scene=None):
