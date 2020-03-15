@@ -63,7 +63,7 @@ class ShapeTest(unittest.TestCase):
 
             # Ignore improper sphero-shapes with too few vertices
             valid_shapes = True
-            for shape in traj[-1].shapedef.values():
+            for shape in traj[-1].type_shapes:
                 if isinstance(shape, ConvexSpheropolyhedronShape) or \
                         isinstance(shape, SpheropolygonShape):
                     if len(shape.vertices) < dimensions + 1:
@@ -73,18 +73,16 @@ class ShapeTest(unittest.TestCase):
                 for backend in ('fresnel', 'povray', 'vispy', 'matplotlib'):
                     try:
                         scene = traj[-1].to_plato_scene(backend=backend)
+                        if dimensions == 3:
+                            scene.rotation = [9.9774611e-01, 2.3801494e-02, -6.2734932e-02, 5.5756618e-04]
+                        scene.enable('antialiasing')
+                        scene.save('{}.png'.format(self.get_filename(shape_name)))
                     except Exception:
                         continue
                     else:
                         break
                 else:
-                    raise RuntimeError(
-                        'No available backend could render the scene.')
-                if dimensions == 3:
-                    scene.rotation = [9.9774611e-01, 2.3801494e-02,
-                                      -6.2734932e-02, 5.5756618e-04]
-                scene.enable('antialiasing')
-                scene.save('{}.png'.format(self.get_filename(shape_name)))
+                    raise RuntimeError('No available backend could render the scene.')
 
 
 @ddt
