@@ -72,9 +72,14 @@ jobs:
       - checkout
 
       - run:
+          name: Install compilers
+          command: |
+            conda install -c conda-forge gcc_linux-64 gxx_linux-64 --yes --quiet
+
+      - run:
           name: Install dependencies
           command: |
-            conda install -c conda-forge -c schrodinger compilers fresnel hoomd matplotlib-base povray --yes --quiet
+            conda install -c conda-forge -c schrodinger fresnel hoomd matplotlib-base povray --yes --quiet
             python --version
             pip --version
             pip install --user -r requirements-dev.txt
