@@ -55,15 +55,22 @@ class ShapeTest(unittest.TestCase):
         return os.path.join(SHAPE_DATA_PATH,
                             '{}.{}'.format(shape_name, self.extension))
 
-    def render_shape_class(self, shape_class):
+    def render_shape_class(self, shape_class, suffix=None):
         shape_name = shape_class['name']
-        with open(self.get_filename(shape_name), self.mode) as f:
+        if suffix is not None:
+            shape_name += suffix
+        filename = self.get_filename(shape_name)
+        with open(filename, self.mode) as f:
             traj = self.reader().read(f)
             dimensions = traj[-1].box.dimensions
 
-            # Ignore improper sphero-shapes with too few vertices
             valid_shapes = True
             for shape in traj[-1].type_shapes:
+                # Ignore convex spheropolyhedra because they're not well supported by plato backends
+                if isinstance(shape, ConvexSpheropolyhedronShape):
+                    valid_shapes = False
+
+                # Ignore improper sphero-shapes with too few vertices
                 if isinstance(shape, ConvexSpheropolyhedronShape) or \
                         isinstance(shape, SpheropolygonShape):
                     if len(shape.vertices) < dimensions + 1:
@@ -82,7 +89,7 @@ class ShapeTest(unittest.TestCase):
                     else:
                         break
                 else:
-                    raise RuntimeError('No available backend could render the scene.')
+                    raise RuntimeError('No available backend could render the scene: {}'.format(filename))
 
 
 @ddt
@@ -92,8 +99,12 @@ class GSDShapeTest(ShapeTest):
     mode = 'rb'
 
     @data(*annotate_shape_test('GSDHOOMDFileReader', get_shape_classes()))
-    def test_shapes(self, shape_class):
-        self.render_shape_class(shape_class)
+    def test_shape(self, shape_class):
+        self.render_shape_class(shape_class, suffix='_shape')
+
+    @data(*annotate_shape_test('GSDHOOMDFileReader', get_shape_classes()))
+    def test_state(self, shape_class):
+        self.render_shape_class(shape_class, suffix='_state')
 
 
 @unittest.skipIf(not GTAR, 'GetarFileReader requires the gtar module.')
@@ -104,7 +115,7 @@ class GetarShapeTest(ShapeTest):
     mode = 'r'
 
     @data(*annotate_shape_test('GetarFileReader', get_shape_classes()))
-    def test_shapes(self, shape_class):
+    def test_shape(self, shape_class):
         self.render_shape_class(shape_class)
 
 
@@ -115,7 +126,7 @@ class POSShapeTest(ShapeTest):
     mode = 'r'
 
     @data(*annotate_shape_test('PosFileReader', get_shape_classes()))
-    def test_shapes(self, shape_class):
+    def test_shape(self, shape_class):
         if shape_class['dimensions'] == 3 or shape_class['cls'] == 'convex_polygon':
             self.render_shape_class(shape_class)
 

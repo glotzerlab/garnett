@@ -527,7 +527,7 @@ class Frame(object):
                     radius=type_shape['rounding_radius'],
                 )
             else:
-                print('Unsupported shape:', type_shape)
+                logger.warning('Unsupported shape: {}'.format(type_shape))
                 continue
             prims.append(prim)
 
