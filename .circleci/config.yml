@@ -91,10 +91,6 @@ jobs:
           path: test-reports
           destination: test-reports
 
-    <<: *test-template
-    docker:
-        - image: glotzerlab/software:latest
-
   test-deploy-pypi:
     docker:
       - image: circleci/python:3.8
