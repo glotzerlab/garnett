@@ -72,6 +72,11 @@ jobs:
       - checkout
 
       - run:
+          name: Prepare conda
+          command: |
+            conda init bash
+
+      - run:
           name: Install compilers
           command: |
             conda activate base
