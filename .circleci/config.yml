@@ -74,11 +74,13 @@ jobs:
       - run:
           name: Install compilers
           command: |
+            conda activate base
             conda install -c conda-forge gcc_linux-64 gxx_linux-64 --yes --quiet
 
       - run:
           name: Install dependencies
           command: |
+            conda activate base
             conda install -c conda-forge -c schrodinger fresnel hoomd matplotlib-base povray --yes --quiet
             python --version
             pip --version
