@@ -369,9 +369,18 @@ class Frame(object):
                     from hoomd_script import data
                 except ImportError:
                     raise ImportError('hoomd')
+            box = data.boxdim(
+                Lx=self.box.Lx,
+                Ly=self.box.Ly,
+                Lz=self.box.Lz,
+                xy=self.box.xy,
+                xz=self.box.xz,
+                yz=self.box.yz,
+                dimensions=self.box.dimensions,
+            )
             snapshot = data.make_snapshot(
                 N=len(self),
-                box=data.boxdim(**dict(self.box)),
+                box=box,
                 particle_types=self.types,
             )
             np.copyto(
@@ -379,8 +388,10 @@ class Frame(object):
                 np.array(self.typeid, dtype=snapshot.particles.typeid.dtype)
             )
         for prop in PARTICLE_PROPERTIES:
-            if getattr(self, prop) is not None:
+            try:
                 np.copyto(getattr(snapshot.particles, prop), getattr(self, prop))
+            except AttributeError:
+                pass
         return snapshot
 
     @deprecation.deprecated(deprecated_in="0.7.0",
@@ -405,7 +416,8 @@ class Frame(object):
             xy=snapshot.box.xy,
             xz=snapshot.box.xz,
             yz=snapshot.box.yz,
-            dimensions=snapshot.box.dimensions)
+            dimensions=snapshot.box.dimensions,
+        )
         for prop in {**TYPE_PROPERTIES, **PARTICLE_PROPERTIES}:
             setattr(frame, prop, getattr(snapshot.particles, prop))
         return frame
