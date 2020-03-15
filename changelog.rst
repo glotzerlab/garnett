@@ -50,6 +50,10 @@ Deprecated
     - copyfrom_hoomd_blue_snapshot
     - copyto_hoomd_blue_snapshot
 
+Removed
++++++++
+  - The ``Frame.frame_data`` property and ``FrameData`` class have been removed from the public API.
+
 Version 0.6
 ===========
 
