@@ -66,7 +66,7 @@ author = 'The Regents of the University of Michigan'
 # |version| and |release|, also used in various other places throughout the
 # built documents.
 #
-# The short X.Y version.
+# The short X.Y.Z version.
 version = '0.6.1'
 # The full version, including alpha/beta/rc tags.
 release = '0.6.1'
