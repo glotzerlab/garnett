@@ -62,7 +62,7 @@ jobs:
     docker:
       - image: circleci/python:3.5
 
-  test-hoomd:
+  test-integration:
     docker:
       - image: continuumio/miniconda3
 
@@ -74,10 +74,11 @@ jobs:
       - run:
           name: Install dependencies
           command: |
-            conda install -c conda-forge compilers hoomd --yes --quiet
+            conda install -c conda-forge -c schrodinger compilers fresnel hoomd matplotlib-base povray --yes --quiet
             python --version
             pip --version
             pip install --user -r requirements-dev.txt
+            pip install --user plato-draw
             python setup.py build
 
       - run:
@@ -142,7 +143,7 @@ workflows:
             - test-py37
             - test-py36
             - test-py35
-            - test-hoomd
+            - test-integration
   deploy:
     jobs:
       - deploy-pypi:
