@@ -139,10 +139,7 @@ workflows:
             - style-check
       - test-integration:
           requires:
-            - test-py38
-            - test-py37
-            - test-py36
-            - test-py35
+            - style-check
       - test-deploy-pypi:
           filters:
             branches:
