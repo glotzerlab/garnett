@@ -81,10 +81,10 @@ This table outlines the supported properties of each format reader and writer.
 
 The following collection of readers and writers is ordered by different file formats.
 
-POS-Files
+POS Files
 ---------
 
-The *POS*-format is a non-standardized *text-based* format which is human-readable, but very inefficient for storing of trajectory data.
+The *POS* format is a non-standardized *text-based* format which is human-readable, but very inefficient for storing of trajectory data.
 The format is used as primary input/output format for the **injavis** visualization tool.
 HOOMD-blue provides a writer for this format, which is classified as deprecated since version 2.0.
 
@@ -101,7 +101,7 @@ HOOMD-blue provides a writer for this format, which is classified as deprecated 
 GSD (HOOMD-blue schema)
 -----------------------
 
-The *GSD*-format is a highly efficient and versatile *binary* format for storing and reading trajectory data.
+The *GSD* format is a highly efficient and versatile *binary* format for storing and reading trajectory data.
 HOOMD-blue provides a writer for this format.
 
 See also: `<http://gsd.readthedocs.io>`_
@@ -119,7 +119,7 @@ See also: `<http://gsd.readthedocs.io>`_
 GeTAR
 -----
 
-The *GeTAR*-format is a highly versatile, *binary* format for storing and reading trajectory data.
+The *GeTAR* format is a highly versatile, *binary* format for storing and reading trajectory data.
 HOOMD-blue provides a writer for this format.
 
 See also: `<https://libgetar.readthedocs.io>`_
@@ -132,7 +132,7 @@ See also: `<https://libgetar.readthedocs.io>`_
 HOOMD-blue XML
 --------------
 
-The HOOMD-blue XML-format contains topological information about one individual frame.
+The HOOMD-blue XML format contains topological information about one individual frame.
 HOOMD-blue provides a writer for this format, which is classified as deprecated since version 2.0.
 
 .. autoclass:: garnett.reader.HOOMDXMLFileReader
@@ -143,11 +143,11 @@ HOOMD-blue provides a writer for this format, which is classified as deprecated 
 DCD
 ---
 
-The *DCD*-format is a very storage efficient *binary* format for storing simple trajectory data.
+The *DCD* format is a very storage efficient *binary* format for storing simple trajectory data.
 The format contains only data about particle positions and the simulation boxes of individual frames.
 
 HOOMD-blue provides a writer for this format with a special dialect for 2-dimensional systems.
-The *garnett* dcd-reader is capable of reading both the standard and the 2-dim. dialect.
+The *garnett* DCD reader is capable of reading both the standard and the 2-dim. dialect.
 
 .. note::
     Unlike most other readers, the :py:class:`~.reader.DCDFileReader` will return an instance
@@ -167,7 +167,7 @@ The *garnett* dcd-reader is capable of reading both the standard and the 2-dim. 
 CIF
 ---
 
-The *cif*-format is a *text-based* format primarily used in the context of crystallography.
+The `Crystallographic Information File (CIF) <https://www.iucr.org/resources/cif>`_ format is a *text-based* format primarily used in the context of crystallography.
 
 .. autoclass:: garnett.reader.CifFileReader
     :members:

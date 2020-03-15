@@ -3,8 +3,8 @@ Shape Definitions
 
 Shape definitions contain information about the shape of individual particles.
 Some shapes define a :code:`type_shape` property, which returns a
-:py:class:`dict` for consumption by visualization tools, in the format of
-:py:meth:`hoomd.hpmc.integrate.mode_hpmc.get_type_shapes`.
+:py:class:`dict` for consumption by visualization tools.
+The :code:`type_shape` specification can be found here: :doc:`gsd:shapes`.
 
 .. autoclass:: garnett.shapes.FallbackShape
    :members:

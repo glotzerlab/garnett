@@ -3,7 +3,6 @@
 branch = True
 source = garnett
 omit =
-    garnett/common/six.py
     garnett/gsdhoomd.py
     garnett/pygsd.py
 

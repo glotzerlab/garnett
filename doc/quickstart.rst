@@ -23,7 +23,7 @@ This can be used to quickly load and save :py:class:`~.trajectory.Trajectory` ob
 Using reader and writer classes
 -------------------------------
 
-Readers and writers are defined in the ``reader`` and ``writer`` modules.
+Readers and writers are defined in the :py:mod:`~.reader` and :py:mod:`~.writer` modules.
 The following code uses the :py:class:`~.reader.PosFileReader` and :py:class:`~.writer.PosFileWriter` as an example.
 
 .. code-block:: python
@@ -147,15 +147,15 @@ This is an example on how to modify frames in-place:
 .. code-block:: python
 
     import numpy as np
-    import garnett as gt
+    import garnett
 
     def center(frame):
         frame.position -= np.average(frame.position, axis=0)
         return frame
 
-    with gt.read('in.pos') as traj:
+    with garnett.read('in.pos') as traj:
         traj_centered = Trajectory((center(frame) for frame in traj))
-        gt.write(traj_centered, 'out.pos')
+        garnett.write(traj_centered, 'out.pos')
 
 Loading trajectories into memory
 ================================
@@ -200,9 +200,9 @@ The **garnett** frames can be used to initialize HOOMD-blue simulations by creat
 .. code-block:: python
 
     from hoomd import init
-    import garnett as gt
+    import garnett
 
-    with gt.read('cube.pos') as traj:
+    with garnett.read('cube.pos') as traj:
 
         # Initialize from last frame
         snapshot = traj[-1].to_hoomd_snapshot()

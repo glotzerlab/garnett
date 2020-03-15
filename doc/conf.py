@@ -59,7 +59,7 @@ master_doc = 'index'
 
 # General information about the project.
 project = 'garnett'
-copyright = '2015-2019, The Regents of the University of Michigan'
+copyright = '2015-2020, The Regents of the University of Michigan'
 author = 'The Regents of the University of Michigan'
 
 # The version info for the project you're documenting, acts as replacement for
@@ -67,7 +67,7 @@ author = 'The Regents of the University of Michigan'
 # built documents.
 #
 # The short X.Y version.
-version = '0.4'
+version = '0.6.1'
 # The full version, including alpha/beta/rc tags.
 release = '0.6.1'
 
@@ -299,6 +299,7 @@ texinfo_documents = [
 # Example configuration for intersphinx: refer to the Python standard library.
 intersphinx_mapping = {
     'python': ('https://docs.python.org/', None),
+    'gsd': ('https://gsd.readthedocs.io/en/stable/', None),
     'hoomd': ('https://hoomd-blue.readthedocs.io/en/stable/', None),
     'plato': ('https://plato-draw.readthedocs.io/en/stable/', None),
 }
