@@ -339,7 +339,7 @@ class TrajectoryTest(unittest.TestCase):
 
     def test_deprecated(self):
 
-        def _access_deprected_props(obj, pos_shape, ort_shape, is_traj):
+        def _access_deprecated_props(obj, pos_shape, ort_shape, is_traj):
             # Since this test class is subclassed by the tests of other formats
             # that may or may not support orientations & velocities...
             self.assertTrue(np.array_equal(obj.positions, obj.position))
@@ -368,9 +368,9 @@ class TrajectoryTest(unittest.TestCase):
         N = len(traj[0])
         with warnings.catch_warnings():
             warnings.simplefilter("always")
-            _access_deprected_props(traj, (M, N, 3), (M, N, 4), True)
+            _access_deprecated_props(traj, (M, N, 3), (M, N, 4), True)
             for frame in traj:
-                _access_deprected_props(frame, (N, 3), (N, 4), False)
+                _access_deprecated_props(frame, (N, 3), (N, 4), False)
 
 
 @unittest.skipIf(not HOOMD, 'requires hoomd-blue')
