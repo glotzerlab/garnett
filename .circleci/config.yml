@@ -72,20 +72,15 @@ jobs:
       - checkout
 
       - run:
-          name: Prepare conda
-          command: |
-            conda init bash
-
-      - run:
           name: Install compilers
           command: |
-            conda activate base
+            source activate base
             conda install -c conda-forge gcc_linux-64 gxx_linux-64 --yes --quiet
 
       - run:
           name: Install dependencies
           command: |
-            conda activate base
+            source activate base
             conda install -c conda-forge -c schrodinger fresnel hoomd matplotlib-base povray --yes --quiet
             python --version
             pip --version
