@@ -128,8 +128,8 @@ class Box(object):
             dimensions=self.dimensions)
 
 
-class FrameData(object):
-    """One FrameData instance manages the data of one frame in a trajectory."""
+class _FrameData(object):
+    """One _FrameData instance manages the data of one frame in a trajectory."""
 
     def __init__(self):
         self.box = None
@@ -196,26 +196,6 @@ class FrameData(object):
     def __repr__(self):
         return str(self)
 
-    @deprecation.deprecated(deprecated_in="0.7.0",
-                            removed_in="0.8.0",
-                            current_version=__version__,
-                            details="Use to_hoomd_snapshot with no argument.")
-    def make_snapshot(self):
-        "Create a HOOMD-blue snapshot object from this frame."
-        return self.to_hoomd_snapshot()
-
-    def to_hoomd_snapshot(self, snapshot=None):
-        "Copy this frame to a HOOMD-blue snapshot."
-        return _to_hoomd_snapshot(self, snapshot)
-
-    @deprecation.deprecated(deprecated_in="0.7.0",
-                            removed_in="0.8.0",
-                            current_version=__version__,
-                            details="Use to_hoomd_snapshot.")
-    def copyto_snapshot(self, snapshot):
-        "Copy this frame to a HOOMD-blue snapshot."
-        return self.to_hoomd_snapshot(snapshot)
-
 
 class _RawFrameData(object):
     """Class to capture unprocessed frame data during parsing.
@@ -256,11 +236,11 @@ class Frame(object):
     def __init__(self, dtype=None):
         if dtype is None:
             dtype = DEFAULT_DTYPE
-        self.frame_data = None
+        self._frame_data = None
         self._dtype = dtype
 
     def _raise_attributeerror(self, attr):
-        value = getattr(self.frame_data, attr, None)
+        value = getattr(self._frame_data, attr, None)
         if value is None:
             raise AttributeError('{} not available for this frame'.format(attr))
         else:
@@ -284,7 +264,7 @@ class Frame(object):
     def _raw_frame_to_frame(self, raw_frame, dtype=None):
         """Generate a frame object from a raw frame object."""
         N = len(raw_frame.position)
-        ret = FrameData()
+        ret = _FrameData()
 
         mapping = dict()
         for prop, dtype_ in PARTICLE_PROPERTIES.items():
@@ -323,13 +303,13 @@ class Frame(object):
 
     def loaded(self):
         "Returns True if the frame is loaded into memory."
-        return self.frame_data is not None
+        return self._frame_data is not None
 
     def load(self):
         "Load the frame into memory."
-        if self.frame_data is None:
+        if self._frame_data is None:
             logger.debug("Loading frame.")
-            self.frame_data = self._raw_frame_to_frame(self.read(), dtype=self._dtype)
+            self._frame_data = self._raw_frame_to_frame(self.read(), dtype=self._dtype)
 
     def unload(self):
         """Unload the frame from memory.
@@ -339,7 +319,7 @@ class Frame(object):
         however any other references that may still exist, will
         prevent a removal of said data from memory."""
         logger.debug("Removing frame data reference.")
-        self.frame_data = None
+        self._frame_data = None
 
     @property
     def dtype(self):
@@ -364,7 +344,7 @@ class Frame(object):
     def __eq__(self, other):
         self.load()
         other.load()
-        return self.frame_data == other.frame_data
+        return self._frame_data == other._frame_data
 
     def __ne__(self, other):
         return not self.__eq__(other)
@@ -375,13 +355,33 @@ class Frame(object):
                             details="Use to_hoomd_snapshot with no argument.")
     def make_snapshot(self):
         "Create a HOOMD-blue snapshot object from this frame."
-        self.load()
         return self.to_hoomd_snapshot()
 
     def to_hoomd_snapshot(self, snapshot=None):
         "Copy this frame to a HOOMD-blue snapshot."
         self.load()
-        return _to_hoomd_snapshot(self.frame_data, snapshot)
+        if snapshot is None:
+            try:
+                from hoomd import data
+            except ImportError:
+                try:
+                    # Try importing from hoomd 1.x
+                    from hoomd_script import data
+                except ImportError:
+                    raise ImportError('hoomd')
+            snapshot = data.make_snapshot(
+                N=len(self),
+                box=data.boxdim(**dict(self.box)),
+                particle_types=self.types,
+            )
+            np.copyto(
+                snapshot.particles.typeid,
+                np.array(self.typeid, dtype=snapshot.particles.typeid.dtype)
+            )
+        for prop in PARTICLE_PROPERTIES:
+            if getattr(self, prop) is not None:
+                np.copyto(getattr(snapshot.particles, prop), getattr(self, prop))
+        return snapshot
 
     @deprecation.deprecated(deprecated_in="0.7.0",
                             removed_in="0.8.0",
@@ -389,8 +389,26 @@ class Frame(object):
                             details="Use to_hoomd_snapshot.")
     def copyto_snapshot(self, snapshot):
         "Copy this frame to a HOOMD-blue snapshot."
-        self.load()
         return self.to_hoomd_snapshot(snapshot)
+
+    @classmethod
+    def from_hoomd_snapshot(cls, snapshot):
+        """Constructs a Frame object from a HOOMD-blue snapshot.
+
+        :param snapshot: A HOOMD snapshot.
+        """
+        frame = cls()
+        frame.box = Box(
+            Lx=snapshot.box.Lx,
+            Ly=snapshot.box.Ly,
+            Lz=snapshot.box.Lz,
+            xy=snapshot.box.xy,
+            xz=snapshot.box.xz,
+            yz=snapshot.box.yz,
+            dimensions=snapshot.box.dimensions)
+        for prop in {**TYPE_PROPERTIES, **PARTICLE_PROPERTIES}:
+            setattr(frame, prop, getattr(snapshot.particles, prop))
+        return frame
 
     def to_plato_scene(self, backend, scene=None):
         """Create a plato scene from this frame.
@@ -513,18 +531,18 @@ class Frame(object):
     def N(self):
         "Number of particles."
         self.load()
-        return len(self.frame_data)
+        return len(self._frame_data)
 
     @property
     def box(self):
         "Instance of :class:`~.Box`"
         self.load()
-        return self.frame_data.box
+        return self._frame_data.box
 
     @box.setter
     def box(self, value):
         self.load()
-        self.frame_data.box = value
+        self._frame_data.box = value
 
     @property
     def types(self):
@@ -536,7 +554,7 @@ class Frame(object):
     def types(self, value):
         value = self._validate_input_array(value, dim=1, dtype=TYPE_PROPERTIES['types'])
         self.load()
-        self.frame_data.types = value
+        self._frame_data.types = value
 
     @property
     def type_shapes(self):
@@ -548,19 +566,19 @@ class Frame(object):
     def type_shapes(self, value):
         value = self._validate_input_array(value, dim=1, dtype=TYPE_PROPERTIES['type_shapes'])
         self.load()
-        self.frame_data.type_shapes = value
+        self._frame_data.type_shapes = value
 
     @property
     def typeid(self):
         "N array of type indices for N particles."
         self.load()
-        return self.frame_data.typeid
+        return self._frame_data.typeid
 
     @typeid.setter
     def typeid(self, value):
         value = self._validate_input_array(value, dim=1, dtype=PARTICLE_PROPERTIES['typeid'])
         self.load()
-        self.frame_data.typeid = value
+        self._frame_data.typeid = value
 
     @property
     def position(self):
@@ -573,7 +591,7 @@ class Frame(object):
         # Various sanity checks
         value = self._validate_input_array(value, dim=2, nelem=3)
         self.load()
-        self.frame_data.position = value
+        self._frame_data.position = value
 
     @property
     @deprecation.deprecated(deprecated_in="0.7.0",
@@ -592,7 +610,7 @@ class Frame(object):
         # Various sanity checks
         value = self._validate_input_array(value, dim=2, nelem=3)
         self.load()
-        self.frame_data.position = value
+        self._frame_data.position = value
 
     @property
     def orientation(self):
@@ -604,7 +622,7 @@ class Frame(object):
     def orientation(self, value):
         value = self._validate_input_array(value, dim=2, nelem=4)
         self.load()
-        self.frame_data.orientation = value
+        self._frame_data.orientation = value
 
     @property
     @deprecation.deprecated(deprecated_in="0.7.0",
@@ -622,7 +640,7 @@ class Frame(object):
     def orientations(self, value):
         value = self._validate_input_array(value, dim=2, nelem=4)
         self.load()
-        self.frame_data.orientation = value
+        self._frame_data.orientation = value
 
     @property
     def velocity(self):
@@ -634,7 +652,7 @@ class Frame(object):
     def velocity(self, value):
         value = self._validate_input_array(value, dim=2, nelem=3)
         self.load()
-        self.frame_data.velocity = value
+        self._frame_data.velocity = value
 
     @property
     @deprecation.deprecated(deprecated_in="0.7.0",
@@ -652,7 +670,7 @@ class Frame(object):
     def velocities(self, value):
         value = self._validate_input_array(value, dim=2, nelem=3)
         self.load()
-        self.frame_data.velocity = value
+        self._frame_data.velocity = value
 
     @property
     def mass(self):
@@ -664,7 +682,7 @@ class Frame(object):
     def mass(self, value):
         value = self._validate_input_array(value, dim=1)
         self.load()
-        self.frame_data.mass = value
+        self._frame_data.mass = value
 
     @property
     def charge(self):
@@ -676,7 +694,7 @@ class Frame(object):
     def charge(self, value):
         value = self._validate_input_array(value, dim=1)
         self.load()
-        self.frame_data.charge = value
+        self._frame_data.charge = value
 
     @property
     def diameter(self):
@@ -688,7 +706,7 @@ class Frame(object):
     def diameter(self, value):
         value = self._validate_input_array(value, dim=1)
         self.load()
-        self.frame_data.diameter = value
+        self._frame_data.diameter = value
 
     @property
     def moment_inertia(self):
@@ -701,7 +719,7 @@ class Frame(object):
         ndof = self.box.dimensions * (self.box.dimensions - 1) / 2
         self._validate_input_array(value, dim=2, nelem=ndof)
         self.load()
-        self.frame_data.moment_inertia = value
+        self._frame_data.moment_inertia = value
 
     @property
     def angmom(self):
@@ -713,7 +731,7 @@ class Frame(object):
     def angmom(self, value):
         value = self._validate_input_array(value, dim=2, nelem=4)
         self.load()
-        self.frame_data.angmom = value
+        self._frame_data.angmom = value
 
     @property
     def image(self):
@@ -725,29 +743,29 @@ class Frame(object):
     def image(self, value):
         value = self._validate_input_array(value, dim=2, nelem=3, dtype=PARTICLE_PROPERTIES['image'])
         self.load()
-        self.frame_data.image = value
+        self._frame_data.image = value
 
     @property
     def data(self):
         "A dictionary of lists for each attribute."
         self.load()
-        return self.frame_data.data
+        return self._frame_data.data
 
     @data.setter
     def data(self, value):
         self.load()
-        self.frame_data.data = value
+        self._frame_data.data = value
 
     @property
     def data_keys(self):
         "A list of strings, where each string represents one attribute."
         self.load()
-        return self.frame_data.data_keys
+        return self._frame_data.data_keys
 
     @data_keys.setter
     def data_keys(self, value):
         self.load()
-        self.frame_data.data_keys = value
+        self._frame_data.data_keys = value
 
     @property
     @deprecation.deprecated(deprecated_in="0.7.0",
@@ -774,7 +792,7 @@ class Frame(object):
     def view_rotation(self):
         "A quaternion specifying a rotation that should be applied for visualization."
         self.load()
-        return self.frame_data.view_rotation
+        return self._frame_data.view_rotation
 
 
 class BaseTrajectory(object):
@@ -1325,52 +1343,13 @@ def _generate_types_typeid(type_strings):
     return types, typeid
 
 
-def _to_hoomd_snapshot(frame, snapshot=None):
-    "Copy the frame into a HOOMD-blue snapshot."
-    if snapshot is None:
-        try:
-            from hoomd import data
-        except ImportError:
-            try:
-                # Try importing from hoomd 1.x
-                from hoomd_script import data
-            except ImportError:
-                raise ImportError('hoomd')
-        particle_types = list(set(frame.types))
-        type_ids = [particle_types.index(t) for t in frame.types]
-        snapshot = data.make_snapshot(
-                                      N=len(frame),
-                                      box=data.boxdim(**frame.box.__dict__),
-                                      particle_types=particle_types
-                                      )
-        np.copyto(
-                  snapshot.particles.typeid,
-                  np.array(type_ids, dtype=snapshot.particles.typeid.dtype)
-                  )
-    for prop in PARTICLE_PROPERTIES:
-        if getattr(frame, prop) is not None:
-            np.copyto(getattr(snapshot.particles, prop), getattr(frame, prop))
-    return snapshot
-
-
 @deprecation.deprecated(deprecated_in="0.7.0",
                         removed_in="0.8.0",
                         current_version=__version__,
                         details="This function is deprecated.")
 def copyto_hoomd_blue_snapshot(frame, snapshot):
     "Copy the frame into a HOOMD-blue snapshot."
-    return _to_hoomd_snapshot(frame, snapshot)
-
-
-def _from_hoomd_snapshot(frame, snapshot):
-    """"Copy the HOOMD-blue snapshot into the frame.
-
-    Note that only the properties listed below will be copied.
-    """
-    frame.box.__dict__ = snapshot.box.__dict__
-    for prop in {**TYPE_PROPERTIES, **PARTICLE_PROPERTIES}:
-        setattr(frame, prop, getattr(snapshot.particles, prop))
-    return frame
+    return frame.to_hoomd_snapshot(snapshot)
 
 
 @deprecation.deprecated(deprecated_in="0.7.0",
@@ -1378,11 +1357,9 @@ def _from_hoomd_snapshot(frame, snapshot):
                         current_version=__version__,
                         details="This function is deprecated.")
 def copyfrom_hoomd_blue_snapshot(frame, snapshot):
-    """"Copy the HOOMD-blue snapshot into the frame.
-
-    Note that only the properties listed below will be copied.
-    """
-    return _from_hoomd_snapshot(frame, snapshot)
+    """"Copy the HOOMD-blue snapshot into the frame."""
+    frame = Frame.from_hoomd_snapshot(snapshot)
+    return frame
 
 
 @deprecation.deprecated(deprecated_in="0.7.0",
@@ -1391,4 +1368,4 @@ def copyfrom_hoomd_blue_snapshot(frame, snapshot):
                         details="This function is deprecated.")
 def make_hoomd_blue_snapshot(frame):
     "Create a HOOMD-blue snapshot from the frame instance."
-    return _to_hoomd_snapshot(frame)
+    return frame.to_hoomd_snapshot()

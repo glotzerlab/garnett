@@ -115,7 +115,7 @@ class CifFileFrame(Frame):
     def cif_coordinates(self):
         "Nx3 matrix of exact coordinates provided in the CIF file."
         self.load()
-        return self.frame_data.cif_coordinates
+        return self._frame_data.cif_coordinates
 
     @cif_coordinates.setter
     def cif_coordinates(self, value):
@@ -130,7 +130,7 @@ class CifFileFrame(Frame):
                              "number of particles.".format(self.box.dimensions))
 
         self.load()
-        self.frame_data.cif_coordinates = value
+        self._frame_data.cif_coordinates = value
 
     def _raw_frame_to_frame(self, raw_frame, dtype=None):
         """Extend parent function to also incorporate cif_coordinates"""
