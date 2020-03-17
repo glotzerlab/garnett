@@ -262,7 +262,7 @@ class Frame(object):
         return value
 
     @classmethod
-    def _raw_frame_data_to_frame_data(self, raw_frame, dtype=None):
+    def _raw_frame_data_to_frame_data(cls, raw_frame, dtype=None):
         """Generate a _FrameData object from a _RawFrameData object.
 
         This method performs some normalization and validation on raw input data.
