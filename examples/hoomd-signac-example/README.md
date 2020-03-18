@@ -13,15 +13,17 @@ in various combinations.
 You need to install HOOMD-blue and signac to run these examples.
 
 You can install these packages for example with:
-```
+
+```bash
 conda install -c conda-forge hoomd signac
 ```
 
 ## How to run the example
 
-Execute the scripts in the following order
-```
-$ python init.py
-$ python run.py
-$ python test_read.py
+Execute the scripts in the following order:
+
+```bash
+python init.py
+python run.py
+python test_read.py
 ```
