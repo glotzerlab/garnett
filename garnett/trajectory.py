@@ -461,9 +461,9 @@ class Frame(object):
             box.Lz = 0
         prims.append(backend.Box.from_box(box, color=(0, 0, 0, 1)))
 
-        # Create a shape primitive for each shape definition
-        for type_name, type_shape in self.shapedef.items():
-            subset = np.where(np.asarray(self.types) == type_name)[0]
+        # Create a shape primitive for each type
+        for typeid, type_shape in enumerate(self.type_shapes):
+            subset = np.where(np.asarray(self.typeid) == typeid)[0]
             N_prim = len(subset)
             dimensions = self.box.dimensions
 
