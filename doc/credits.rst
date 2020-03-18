@@ -96,7 +96,7 @@ GSD is used to construct trajectory objects from GSD files and is available at h
 The files :code:`garnett/gsdhoomd.py` and :code:`garnett/pygsd.py` are directly copied from the GSD source code.
 GSD is used under the BSD license::
 
-    Copyright (c) 2016-2019 The Regents of the University of Michigan
+    Copyright (c) 2016-2020 The Regents of the University of Michigan
     All rights reserved.
 
     Redistribution and use in source and binary forms, with or without

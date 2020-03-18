@@ -1,4 +1,4 @@
-# Copyright (c) 2019 The Regents of the University of Michigan
+# Copyright (c) 2020 The Regents of the University of Michigan
 # All rights reserved.
 # This software is licensed under the BSD 3-Clause License.
 """Trajectories are the path that objects follow
@@ -1121,9 +1121,7 @@ class Trajectory(BaseTrajectory):
                             current_version=__version__,
                             details="This property is deprecated, use position instead.")
     def positions(self):
-        """
-        Deprecated alias for position.
-        """
+        """Deprecated alias for position."""
         return self.position
 
     @property
@@ -1248,7 +1246,7 @@ class Trajectory(BaseTrajectory):
 def _regularize_box(position, velocity,
                     orientation, angmom,
                     box_matrix, dtype=None, dimensions=3):
-    """ Convert box into a right-handed coordinate frame with
+    """Convert box into a right-handed coordinate frame with
     only upper triangular entries. Also convert corresponding
     positions and orientations."""
     # First use QR decomposition to compute the new basis

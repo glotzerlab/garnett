@@ -1,15 +1,13 @@
-# Copyright (c) 2019 The Regents of the University of Michigan
+# Copyright (c) 2020 The Regents of the University of Michigan
 # All rights reserved.
 # This software is licensed under the BSD 3-Clause License.
-import signac
 
 import garnett
-import gsd
-import gsd.fl
-import gsd.hoomd
+import signac
 
 
 project = signac.get_project()
+
 
 for job in project:
     print(job)

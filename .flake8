@@ -1,7 +1,6 @@
 [flake8]
 exclude =
     doc/conf.py,
-    examples,
     garnett/gsdhoomd.py,
     garnett/pygsd.py,
 max_line_length=120
