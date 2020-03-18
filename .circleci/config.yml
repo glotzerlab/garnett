@@ -16,11 +16,11 @@ jobs:
       - run:
           name: style-check
           command: |
-            pip install --user -U flake8==3.7.9
+            pip install --progress-bar off --user -U flake8==3.7.9
             python -m flake8 --show-source .
 
 
-  test-3.8: &test-template
+  test-py38: &test-template
     docker:
       - image: circleci/python:3.8
 
@@ -34,33 +34,73 @@ jobs:
           command: |
             python --version
             pip --version
-            pip install --user -r requirements-dev.txt
+            pip install --progress-bar off --user -r requirements-dev.txt
+            pip install --progress-bar off codecov
             python setup.py build
 
       - run:
           name: Run tests
           command: |
             python -m coverage run -m unittest discover tests/ -v
-            python -m coverage report
+            python -m coverage report -i
+            codecov
 
       - store_artifacts:
           path: test-reports
           destination: test-reports
 
-  test-3.7:
+  test-py37:
     <<: *test-template
     docker:
       - image: circleci/python:3.7
 
-  test-3.6:
+  test-py36:
     <<: *test-template
     docker:
       - image: circleci/python:3.6
 
-  test-3.5:
+  test-py35:
     <<: *test-template
     docker:
       - image: circleci/python:3.5
+
+  test-integration:
+    docker:
+      - image: continuumio/miniconda3
+
+    working_directory: ~/repo
+
+    steps:
+      - checkout
+
+      - run:
+          name: Install compilers
+          command: |
+            source activate base
+            conda install -c conda-forge gcc_linux-64 gxx_linux-64 --yes --quiet
+
+      - run:
+          name: Install dependencies
+          command: |
+            source activate base
+            conda install -c conda-forge -c schrodinger fresnel hoomd matplotlib-base povray --yes --quiet
+            python --version
+            pip --version
+            pip install --progress-bar off -r requirements-dev.txt
+            pip install --progress-bar off plato-draw>=1.9.0
+            pip install --progress-bar off codecov
+            python setup.py build
+
+      - run:
+          name: Run tests
+          command: |
+            python -m coverage run -m unittest discover tests/ -v
+            python -m coverage report -i
+            codecov
+
+      - store_artifacts:
+          path: test-reports
+          destination: test-reports
 
   test-deploy-pypi:
     docker:
@@ -71,7 +111,6 @@ jobs:
       - run:
           name: test-deploy-pypi
           command: |
-            pip install --user -U -r .requirements-deploy.txt
             bash .circleci/deploy.bash testpypi
 
   deploy-pypi:
@@ -83,24 +122,26 @@ jobs:
       - run:
           name: deploy-pypi
           command: |
-            pip install --user -U -r .requirements-deploy.txt
-            bash .circleci/deploy.bash testpypi
+            bash .circleci/deploy.bash pypi
 
 workflows:
   version: 2
   style-check-and-tests:
     jobs:
       - style-check
-      - test-3.8:
+      - test-py38:
           requires:
             - style-check
-      - test-3.7:
+      - test-py37:
           requires:
             - style-check
-      - test-3.6:
+      - test-py36:
           requires:
             - style-check
-      - test-3.5:
+      - test-py35:
+          requires:
+            - style-check
+      - test-integration:
           requires:
             - style-check
       - test-deploy-pypi:
@@ -108,10 +149,11 @@ workflows:
             branches:
               only: /release\/.*/
           requires:
-            - test-3.8
-            - test-3.7
-            - test-3.6
-            - test-3.5
+            - test-py38
+            - test-py37
+            - test-py36
+            - test-py35
+            - test-integration
   deploy:
     jobs:
       - deploy-pypi:

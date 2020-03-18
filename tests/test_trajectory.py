@@ -339,7 +339,7 @@ class TrajectoryTest(unittest.TestCase):
 
     def test_deprecated(self):
 
-        def _access_deprected_props(obj, pos_shape, ort_shape, is_traj):
+        def _access_deprecated_props(obj, pos_shape, ort_shape, is_traj):
             # Since this test class is subclassed by the tests of other formats
             # that may or may not support orientations & velocities...
             self.assertTrue(np.array_equal(obj.positions, obj.position))
@@ -368,9 +368,9 @@ class TrajectoryTest(unittest.TestCase):
         N = len(traj[0])
         with warnings.catch_warnings():
             warnings.simplefilter("always")
-            _access_deprected_props(traj, (M, N, 3), (M, N, 4), True)
+            _access_deprecated_props(traj, (M, N, 3), (M, N, 4), True)
             for frame in traj:
-                _access_deprected_props(frame, (N, 3), (N, 4), False)
+                _access_deprecated_props(frame, (N, 3), (N, 4), False)
 
 
 @unittest.skipIf(not HOOMD, 'requires hoomd-blue')
@@ -433,16 +433,23 @@ class FrameSnapshotExport(TrajectoryTest):
         with tempfile.NamedTemporaryFile('r') as tmpfile:
             pos = dump.pos(filename=tmpfile.name, period=1)
             run(10, quiet=True)
-            snapshot0 = self.system.take_snapshot()
+            snapshot_0 = self.system.take_snapshot()
+            frame_0 = garnett.trajectory.Frame.from_hoomd_snapshot(snapshot_0)
             run(1, quiet=True)  # the hoomd pos-writer lags by one sweep
             tmpfile.flush()
             traj = self.read_trajectory(tmpfile)
-            f_1 = traj[-1]
+            frame_1 = traj[-1]
+
+            # Ensure that some attributes are equal between the POS file and HOOMD snapshot
+            # (not all properties are supported by a POS file of spheres)
+            for attr in ('box', 'position', 'types', 'typeid'):
+                np.testing.assert_equal(getattr(frame_0, attr), getattr(frame_1, attr))
+
             # Pos-files don't support box dimensions.
-            f_1.box.dimensions = self.system.box.dimensions
-            snapshot1 = f_1.to_hoomd_snapshot()
-            self.assert_snapshots_equal(snapshot0, snapshot1)
-            self.system.restore_snapshot(snapshot1)
+            frame_1.box.dimensions = self.system.box.dimensions
+            snapshot_1 = frame_1.to_hoomd_snapshot()
+            self.assert_snapshots_equal(snapshot_0, snapshot_1)
+            self.system.restore_snapshot(snapshot_1)
             pos.disable()
             run(1, quiet=True)  # sanity check
 
