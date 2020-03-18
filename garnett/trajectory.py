@@ -261,8 +261,8 @@ class Frame(object):
             raise ValueError("Input array must be of shape (N, {}) where N is the number of particles.".format(nelem))
         return value
 
-    @classmethod
-    def _raw_frame_data_to_frame_data(cls, raw_frame, dtype=None):
+    @staticmethod
+    def _raw_frame_data_to_frame_data(raw_frame, dtype=None):
         """Generate a _FrameData object from a _RawFrameData object.
 
         This method performs some normalization and validation on raw input data.

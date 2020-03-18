@@ -132,10 +132,10 @@ class CifFileFrame(Frame):
         self.load()
         self._frame_data.cif_coordinates = value
 
-    @classmethod
-    def _raw_frame_data_to_frame_data(cls, raw_frame, dtype=None):
+    @staticmethod
+    def _raw_frame_data_to_frame_data(raw_frame, dtype=None):
         """Extend parent function to also incorporate cif_coordinates"""
-        ret = super(CifFileFrame, cls)._raw_frame_data_to_frame_data(raw_frame, dtype)
+        ret = super(CifFileFrame, CifFileFrame)._raw_frame_data_to_frame_data(raw_frame, dtype)
         ret.cif_coordinates = np.asarray(raw_frame.cif_coordinates, dtype=dtype)
         assert len(ret.position) == len(ret.cif_coordinates)
         return ret
