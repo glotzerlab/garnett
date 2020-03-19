@@ -56,11 +56,12 @@ setup(
     python_requires='>=3.5, <4',
 
     install_requires=[
-        'rowan>=0.5'
+        'deprecation>=2',
+        'numpy>=1.14',
+        'rowan>=0.5',
     ],
 
     tests_require=[
-        'nose',
-        'ddt'
+        'ddt',
     ],
 )
