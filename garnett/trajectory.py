@@ -1295,14 +1295,14 @@ def _regularize_box(position, velocity,
     Q = Q.astype(dtype)
     R = R.astype(dtype)
 
-    # We need Q to be a pure rotation to avoid changing system chirality The Q
+    # We need Q to be a pure rotation to avoid changing system chirality. The Q
     # matrix will contain a reflection if the original box was left-handed, but
-    # the QR decomposition could produce introduce reflections in both Q and R
+    # the QR decomposition could contain reflections in both Q and R
     # given a right-handed box. Since we need a right-handed coordinate system,
     # we simply remove any reflection from Q and then manually enforce the
     # handedness of the coordinate system in R.
     sign = np.linalg.det(Q)
-    Q = Q*sign
+    Q *= sign
 
     if np.linalg.det(box_matrix) < 0:
         R[:, 0] *= -1
