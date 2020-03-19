@@ -7,15 +7,17 @@ import sys
 
 description = "Samples, parsers, and writers for formats used in the Glotzer Group."
 
-# Import Cython if available
-try:
-    from Cython.Build import cythonize
-    import numpy as np
-except ImportError:
-    print("WARNING: Cython not available!", file=sys.stderr)
-    CYTHON = False
-else:
-    CYTHON = True
+# Import Cython if available and not disabled.
+# Cython is disabled for wheel builds so the package is pure Python.
+CYTHON = False
+if '--no-cython' not in sys.argv:
+    try:
+        from Cython.Build import cythonize
+        import numpy as np
+    except ImportError:
+        print("WARNING: Cython not available!", file=sys.stderr)
+    else:
+        CYTHON = True
 
 # Get long description from README.md
 try:
