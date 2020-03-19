@@ -10,12 +10,15 @@ description = "Samples, parsers, and writers for formats used in the Glotzer Gro
 # Import Cython if available and not disabled.
 # Cython is disabled for wheel builds so the package is pure Python.
 CYTHON = False
-if '--no-cython' not in sys.argv:
-    try:
-        from Cython.Build import cythonize
-        import numpy as np
-    except ImportError:
-        print("WARNING: Cython not available!", file=sys.stderr)
+try:
+    from Cython.Build import cythonize
+    import numpy as np
+except ImportError:
+    print("WARNING: Cython not available!", file=sys.stderr)
+else:
+    if '--no-cython' in sys.argv:
+        print("WARNING: Cython is disabled.", file=sys.stderr)
+        sys.argv.remove('--no-cython')
     else:
         CYTHON = True
 
