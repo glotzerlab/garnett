@@ -5,6 +5,7 @@ import os
 import unittest
 import garnett
 from tempfile import TemporaryDirectory
+from contextlib import contextmanager
 
 try:
     import CifFile  # noqa: F401
@@ -12,6 +13,14 @@ except ImportError:
     PYCIFRW = False
 else:
     PYCIFRW = True
+
+try:
+    import gsd  # noqa: F401
+except ImportError:
+    GSD = False
+else:
+    GSD = True
+
 
 try:
     import gtar  # noqa: F401
@@ -84,74 +93,79 @@ class UtilReaderTest(unittest.TestCase):
 
 
 class UtilWriterTest(unittest.TestCase):
-    def setUp(self):
-        self.tmp_dir = TemporaryDirectory()
-        self.addCleanup(self.tmp_dir.cleanup)
-        with garnett.read(get_filename('dump.gsd')) as traj:
-            self.trajectory = traj
 
+    @contextmanager
+    def create_tmp_and_traj(self):
+        with TemporaryDirectory() as tmp_dir:
+            with garnett.read(get_filename('dump.gsd')) as traj:
+                yield (tmp_dir, traj)
+
+    @unittest.skipIf(not GSD, 'GSDHOOMDFileWriter requires the gsd module.')
     def test_write_io(self):
-        tmp_name = os.path.join(self.tmp_dir.name, 'test_io.gsd')
-        with open(tmp_name, 'wb') as gsdfile:
-            garnett.write(self.trajectory, gsdfile)
+        with self.create_tmp_and_traj() as (tmp_dir, traj):
+            tmp_name = os.path.join(tmp_dir, 'test_io.gsd')
+            with open(tmp_name, 'wb') as gsdfile:
+                garnett.write(traj, gsdfile)
 
-        # Read back the file and check if it is the same as the original read
-        with garnett.read(tmp_name) as traj:
-            self.assertEqual(len(traj), len(self.trajectory))
+            # Read back the file and check if it is the same as the original
+            with garnett.read(tmp_name) as traj2:
+                self.assertEqual(len(traj), len(traj2))
 
+    @unittest.skipIf(not GSD, 'GSDHOOMDFileWriter requires the gsd module.')
     def test_write_gsd(self):
-        tmp_name = os.path.join(self.tmp_dir.name, 'test.gsd')
-        garnett.write(self.trajectory, tmp_name)
+        with self.create_tmp_and_traj() as (tmp_dir, traj):
+            tmp_name = os.path.join(tmp_dir, 'test.gsd')
+            garnett.write(traj, tmp_name)
 
-        # Read back the file and check if it is the same as the original read
-        with garnett.read(tmp_name) as traj:
-            self.assertEqual(len(traj), len(self.trajectory))
+            # Read back the file and check if it is the same as the original
+            with garnett.read(tmp_name) as traj2:
+                self.assertEqual(len(traj), len(traj2))
 
     @unittest.skipIf(not GTAR, 'GetarFileWriter requires the gtar module.')
     def test_write_gtar(self):
-        tmp_name = os.path.join(self.tmp_dir.name, 'test.zip')
-        garnett.write(self.trajectory, tmp_name)
+        with self.create_tmp_and_traj() as (tmp_dir, traj):
+            tmp_name = os.path.join(tmp_dir, 'test.zip')
+            garnett.write(traj, tmp_name)
 
-        # Read back the file and check if it is the same as the original read
-        with garnett.read(tmp_name) as traj:
-            self.assertEqual(len(traj), len(self.trajectory))
+            # Read back the file and check if it is the same as the original
+            with garnett.read(tmp_name) as traj2:
+                self.assertEqual(len(traj), len(traj2))
 
     @unittest.skipIf(not PYCIFRW, 'CifFileReader tests require the PyCifRW package.')
     def test_write_cif(self):
-        tmp_name = os.path.join(self.tmp_dir.name, 'test.cif')
-        garnett.write(self.trajectory, tmp_name)
+        with self.create_tmp_and_traj() as (tmp_dir, traj):
+            tmp_name = os.path.join(tmp_dir, 'test.cif')
+            garnett.write(traj, tmp_name)
 
-        # Read back the file and check if it is the same as the original read
-        with garnett.read(tmp_name) as traj:
-            self.assertEqual(len(traj), len(self.trajectory))
+            # Read back the file and check if it is the same as the original
+            with garnett.read(tmp_name) as traj2:
+                self.assertEqual(len(traj), len(traj2))
 
     def test_write_pos(self):
-        tmp_name = os.path.join(self.tmp_dir.name, 'test.pos')
-        garnett.write(self.trajectory, tmp_name)
+        with self.create_tmp_and_traj() as (tmp_dir, traj):
+            tmp_name = os.path.join(tmp_dir, 'test.pos')
+            garnett.write(traj, tmp_name)
 
-        # Read back the file and check if it is the same as the original read
-        with garnett.read(tmp_name) as traj:
-            self.assertEqual(len(traj), len(self.trajectory))
+            # Read back the file and check if it is the same as the original
+            with garnett.read(tmp_name) as traj2:
+                self.assertEqual(len(traj), len(traj2))
 
     def test_write_format(self):
-        # No suffix is given to the temp file, so no format will be detected
-        tmp_name = os.path.join(self.tmp_dir.name, 'test')
-        garnett.write(self.trajectory, tmp_name, fmt='pos')
+        with self.create_tmp_and_traj() as (tmp_dir, traj):
+            # No suffix is given to the temp file, so no format is detected
+            tmp_name = os.path.join(tmp_dir, 'test')
+            garnett.write(traj, tmp_name, fmt='pos')
 
-        # Read back the file and check if it is the same as the original read
-        with garnett.read(tmp_name, fmt='pos') as traj:
-            self.assertEqual(len(traj), len(self.trajectory))
+            # Read back the file and check if it is the same as the original
+            with garnett.read(tmp_name, fmt='pos') as traj2:
+                self.assertEqual(len(traj), len(traj2))
 
     def test_write_unsupported(self):
-        # No suffix is given to the temp file, so no format will be detected
-        tmp_name = os.path.join(self.tmp_dir.name, 'test')
-        with self.assertRaises(NotImplementedError):
-            garnett.write(self.trajectory, tmp_name)
-
-    def test_read_unsupported(self):
-        with self.assertRaises(NotImplementedError):
-            with garnett.read(get_filename('unsupported.ext')):
-                pass
+        with self.create_tmp_and_traj() as (tmp_dir, traj):
+            # No suffix is given to the temp file, so no format is detected
+            tmp_name = os.path.join(tmp_dir, 'test')
+            with self.assertRaises(NotImplementedError):
+                garnett.write(traj, tmp_name)
 
 
 if __name__ == '__main__':
