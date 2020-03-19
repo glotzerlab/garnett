@@ -158,6 +158,9 @@ workflows:
   style-check-and-tests:
     jobs:
       - style-check
+      - test-py38-minimal:
+          requires:
+            - style-check
       - test-py38:
           requires:
             - style-check
@@ -178,6 +181,7 @@ workflows:
             branches:
               only: /release\/.*/
           requires:
+            - test-py38-minimal
             - test-py38
             - test-py37
             - test-py36
