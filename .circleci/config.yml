@@ -20,6 +20,36 @@ jobs:
             python -m flake8 --show-source .
 
 
+  test-py38-minimal: &test-template
+    docker:
+      - image: circleci/python:3.8
+
+    working_directory: ~/repo
+
+    steps:
+      - checkout
+
+      - run:
+          name: Install minimal dependencies
+          command: |
+            python --version
+            pip --version
+            pip install --progress-bar off --user -r requirements.txt
+            pip install --progress-bar off ddt
+            pip install --progress-bar off codecov
+            python setup.py build
+
+      - run:
+          name: Run tests
+          command: |
+            python -m coverage run -m unittest discover tests/ -v
+            python -m coverage report -i
+            codecov
+
+      - store_artifacts:
+          path: test-reports
+          destination: test-reports
+
   test-py38: &test-template
     docker:
       - image: circleci/python:3.8
@@ -129,6 +159,9 @@ workflows:
   style-check-and-tests:
     jobs:
       - style-check
+      - test-py38-minimal:
+          requires:
+            - style-check
       - test-py38:
           requires:
             - style-check
@@ -149,6 +182,7 @@ workflows:
             branches:
               only: /release\/.*/
           requires:
+            - test-py38-minimal
             - test-py38
             - test-py37
             - test-py36
