@@ -1330,8 +1330,8 @@ def _regularize_box(position, velocity,
 
         # For orientations and angular momenta, we use the quaternion
         quat = rowan.from_matrix(Q.T)
-        if orientations is not None:
-            orientations = rowan.multiply(quat, orientations)
+        if orientation is not None:
+            orientation = rowan.multiply(quat, orientation)
         if angmom is not None:
             angmom = rowan.multiply(quat, angmom)
 
