@@ -35,6 +35,7 @@ jobs:
             python --version
             pip --version
             pip install --progress-bar off --user -r requirements.txt
+            pip install --progress-bar off ddt
             pip install --progress-bar off codecov
             python setup.py build
 
