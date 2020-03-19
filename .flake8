@@ -1,6 +1,0 @@
-[flake8]
-exclude =
-    doc/conf.py,
-    garnett/gsdhoomd.py,
-    garnett/pygsd.py,
-max_line_length=120
