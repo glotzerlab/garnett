@@ -1,13 +1,6 @@
 [flake8]
 exclude =
-    .git,
-    __pycache__,
-    build,
-    dist,
     doc/conf.py,
-    examples,
-    garnett/common/six.py,
     garnett/gsdhoomd.py,
     garnett/pygsd.py,
-    samples,
 max_line_length=120

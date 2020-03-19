@@ -1,4 +1,4 @@
-# Copyright (c) 2019 The Regents of the University of Michigan
+# Copyright (c) 2020 The Regents of the University of Michigan
 # All rights reserved.
 # This software is licensed under the BSD 3-Clause License.
 """cif-file writer for the Glotzer Group, University of Michigan.
@@ -67,7 +67,7 @@ class CifFileWriter(object):
         from . import __version__
 
         if occupancies is None:
-            occupancies = np.ones(frame.positions.shape[0])
+            occupancies = np.ones(frame.position.shape[0])
 
         def _write(msg='', end='\n'):
             file.write(msg + end)
@@ -108,16 +108,17 @@ class CifFileWriter(object):
             fractions = frame.cif_coordinates.copy()
         else:
             if fractional:
-                fractions = frame.positions.copy()
+                fractions = frame.position.copy()
             else:
                 invbox = np.linalg.inv(frame.box.get_box_matrix())
-                fractions = np.dot(invbox, frame.positions.T).T
+                fractions = np.dot(invbox, frame.position.T).T
             fractions += 0.5
 
         type_counter = defaultdict(int)
-        n_digits = len(str(len(frame.positions)))
+        n_digits = len(str(len(frame.position)))
         particle_str = "{ptype}{pnum:0" + str(n_digits) + "d} {ptype} {occ:3.2f} {position}"
-        for i, (position, particle_type, occupancy) in enumerate(zip(fractions, frame.types, occupancies)):
+        for i, (position, typeid, occupancy) in enumerate(zip(fractions, frame.typeid, occupancies)):
+            particle_type = frame.types[typeid]
             _write(particle_str.format(
                 pnum=type_counter[particle_type],
                 ptype=particle_type,

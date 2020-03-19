@@ -23,7 +23,7 @@ This can be used to quickly load and save :py:class:`~.trajectory.Trajectory` ob
 Using reader and writer classes
 -------------------------------
 
-Readers and writers are defined in the ``reader`` and ``writer`` modules.
+Readers and writers are defined in the :py:mod:`~.reader` and :py:mod:`~.writer` modules.
 The following code uses the :py:class:`~.reader.PosFileReader` and :py:class:`~.writer.PosFileWriter` as an example.
 
 .. code-block:: python
@@ -75,28 +75,31 @@ The actual trajectory data is then either accessed on a *per trajectory* or *per
 Trajectory array access
 -----------------------
 
-Access positions, orientations and types as coherent numpy arrays, by calling the :py:meth:`~.trajectory.Trajectory.load_arrays` method.
-This method will load the complete trajectory into memory and make positions, orientations and types available via properties:
+The complete trajectory may be loaded into memory by calling the :py:meth:`~.trajectory.Trajectory.load_arrays` method.
+This will allow access to fields such as position, orientation, and velocity across all frames and particles.
+Supported properties are listed below:
 
 .. code-block:: python
 
     traj.load_arrays()
+    traj.box             # M
     traj.N               # M
-    traj.positions       # MxNx3
-    traj.orientations    # MxNx4
-    traj.velocities      # MxNx3
+    traj.types           # MxT
+    traj.type_shapes     # MxT
+    traj.typeid          # MxN
+    traj.position        # MxNx3
+    traj.orientation     # MxNx4
+    traj.velocity        # MxNx3
     traj.mass            # MxN
     traj.charge          # MxN
     traj.diameter        # MxN
     traj.moment_inertia  # MxNx3
     traj.angmom          # MxNx4
-    traj.image           # MxNx4
-    traj.types           # MxN
-    traj.type_ids        # MxN
-    traj.type            # list of type names ordered by type_id
+    traj.image           # MxNx3
 
-    # where M=len(traj) is the number of frames and N=max((len(f) for f in traj))
-    # is the is the maximum number of particles in any frame.
+    # M is the number of frames
+    # T is the number of particle types in a frame
+    # N is the number of particles in a frame
 
 Individual frame access
 -----------------------
@@ -107,18 +110,21 @@ Inidividual frame objects can be accessed via indexing of a (sub-)trajectory obj
 
     frame = traj[i]
     frame.box              # garnett.trajectory.Box object
-    frame.types            # N
-    frame.positions        # Nx3
-    frame.orientations     # Nx4
-    frame.velocities       # Nx3
+    frame.N                # scalar, number of particles
+    frame.types            # T, string names for each type
+    frame.type_shapes      # T, list of shapes for each type
+    frame.typeid           # N, type indices of each particle
+    frame.position         # Nx3
+    frame.orientation      # Nx4
+    frame.velocity         # Nx3
     frame.mass             # N
     frame.charge           # N
     frame.diameter         # N
     frame.moment_inertia   # Nx3
     frame.angmom           # Nx4
-    frame.data             # A dictionary of lists for each attribute
-    frame.data_key         # A list of strings
-    frame.shapedef         # A ordered dictionary of instances of ShapeDefinition
+    frame.image            # Nx3
+    frame.data             # Dictionary of lists for each attribute
+    frame.data_key         # List of strings
 
 Iterating over trajectories
 ---------------------------
@@ -130,7 +136,7 @@ Each frame will be loaded *prior* to access and unloaded *post* access, such tha
 
     # Iterate over a trajectory directly for read-only data access
     for frame in traj:
-        print(frame.positions)
+        print(frame.position)
 
 Efficient modification of trajectories
 ======================================
@@ -141,15 +147,15 @@ This is an example on how to modify frames in-place:
 .. code-block:: python
 
     import numpy as np
-    import garnett as gt
+    import garnett
 
     def center(frame):
-        frame.positions -= np.average(frame.positions, axis=0)
+        frame.position -= np.average(frame.position, axis=0)
         return frame
 
-    with gt.read('in.pos') as traj:
+    with garnett.read('in.pos') as traj:
         traj_centered = Trajectory((center(frame) for frame in traj))
-        gt.write(traj_centered, 'out.pos')
+        garnett.write(traj_centered, 'out.pos')
 
 Loading trajectories into memory
 ================================
@@ -161,12 +167,12 @@ This means that loading all trajectory data into memory requires an explicit cal
 
     # Make trajectory data accessible via arrays:
     traj.load_arrays()
-    traj.positions
+    traj.position
 
     # Load all frames:
     traj.load()
     frame = traj[i]
-    traj.positions    # load() also loads arrays
+    traj.position    # load() also loads arrays
 
 .. note::
 
@@ -179,7 +185,7 @@ Sub-trajectories inherit already loaded data:
 
     traj.load_arrays()
     sub_traj = traj[i:j]
-    sub_traj.positions
+    sub_traj.position
 
 .. tip::
 
@@ -189,19 +195,19 @@ Sub-trajectories inherit already loaded data:
 Example use with HOOMD-blue
 ===========================
 
-The **garnett** frames can be used to initialize HOOMD-blue by creating snapshots with the :py:meth:`~.Frame.make_snapshot` method or by copying the frame data to existing snapshots with the :py:meth:`~.Frame.copyto_snapshot` methods:
+The **garnett** frames can be used to initialize HOOMD-blue simulations by creating snapshots or copying the frame data to existing snapshots with the :py:meth:`~.Frame.to_hoomd_snapshot` method:
 
 .. code-block:: python
 
     from hoomd import init
-    import garnett as gt
+    import garnett
 
-    with gt.read('cube.pos') as traj:
+    with garnett.read('cube.pos') as traj:
 
         # Initialize from last frame
-        snapshot = traj[-1].make_snapshot()
+        snapshot = traj[-1].to_hoomd_snapshot()
         system = init.read_snapshot(snapshot)
 
         # Restore last frame
         snapshot = system.take_snapshot()
-        traj[-1].copyto_snapshot(snapshot)
+        traj[-1].to_hoomd_snapshot(snapshot)

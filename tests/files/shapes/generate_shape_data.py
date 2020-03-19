@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# Copyright (c) 2019 The Regents of the University of Michigan
+# Copyright (c) 2020 The Regents of the University of Michigan
 # All rights reserved.
 # This software is licensed under the BSD 3-Clause License.
 
@@ -98,8 +98,10 @@ shape_classes = [
     },
 ]
 
+
 def script_path(filename):
     return os.path.join(os.path.dirname(__file__), filename)
+
 
 if __name__ == '__main__':
     for shape_class in shape_classes:

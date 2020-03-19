@@ -36,13 +36,13 @@ To install the package with the package manager pip_, execute
 
 .. code:: bash
 
-    $ pip install git+https://github.com/glotzerlab/garnett.git#egg=garnett --user
+    $ pip install garnett --user
 
 To upgrade the package, simply execute the same command with the `--upgrade` option.
 
 .. code:: bash
 
-    $ pip install git+https://github.com/glotzerlab/garnett.git#egg=garnett --user --upgrade
+    $ pip install garnett --user --upgrade
 
 With git
 --------

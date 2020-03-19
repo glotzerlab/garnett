@@ -1,4 +1,4 @@
-# Copyright (c) 2019 The Regents of the University of Michigan
+# Copyright (c) 2020 The Regents of the University of Michigan
 # All rights reserved.
 # This software is licensed under the BSD 3-Clause License.
 """POS-file writer for the Glotzer Group, University of Michigan.
@@ -95,17 +95,10 @@ class PosFileWriter(object):
 
             # shape defs
             try:
-                required = set(frame.types).intersection(
-                    set(frame.shapedef.keys()))
-                not_defined = set(frame.types).difference(
-                    set(frame.shapedef.keys()))
-                for name in required:
-                    _write('def {} "{}"'.format(name, frame.shapedef[name].pos_string))
-                for name in not_defined:
-                    logger.info(
-                        "No shape defined for '{}'. "
-                        "Using fallback definition.".format(name))
-                    _write('def {} "{}"'.format(name, DEFAULT_SHAPE_DEFINITION))
+                if len(frame.types) != len(frame.type_shapes):
+                    raise ValueError("Unequal number of types and type_shapes.")
+                for name, type_shape in zip(frame.types, frame.type_shapes):
+                    _write('def {} "{}"'.format(name, type_shape.pos_string))
             except AttributeError:
                 # If AttributeError is raised because the frame does not contain
                 # shape information, fill them all with the default shape
@@ -113,18 +106,14 @@ class PosFileWriter(object):
                     logger.info(
                         "No shape defined for '{}'. "
                         "Using fallback definition.".format(name))
-                    _write('def {} "{}"'.format(name, DEFAULT_SHAPE_DEFINITION))
+                    _write('def {} "{}"'.format(name, DEFAULT_SHAPE_DEFINITION.pos_string))
 
             # Orientations must be provided for all particles
             # If the frame does not have orientations, identity quaternions are used
-            try:
-                orientations = frame.orientations
-            except AttributeError:
-                orientations = np.array([[1, 0, 0, 0]] * len(frame.types))
+            orientation = getattr(frame, 'orientation', np.array([[1, 0, 0, 0]] * frame.N))
 
-            for name, pos, rot in zip(frame.types, frame.positions,
-                                      orientations):
-
+            for typeid, pos, rot in zip(frame.typeid, frame.position, orientation):
+                name = frame.types[typeid]
                 _write(name, end=' ')
                 try:
                     shapedef = frame.shapedef.get(name)

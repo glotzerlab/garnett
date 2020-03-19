@@ -1,4 +1,4 @@
-# Copyright (c) 2019 The Regents of the University of Michigan
+# Copyright (c) 2020 The Regents of the University of Michigan
 # All rights reserved.
 # This software is licensed under the BSD 3-Clause License.
 from ddt import ddt, data
@@ -69,6 +69,7 @@ class ShapeTest(unittest.TestCase):
             if value is not None:
                 npt.assert_almost_equal(getattr(shape_A, key), value)
                 npt.assert_almost_equal(type_shape[key], value)
+
 
 @ddt
 class GSDShapeTest(ShapeTest):

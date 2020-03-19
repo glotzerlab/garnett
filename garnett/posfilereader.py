@@ -1,4 +1,4 @@
-# Copyright (c) 2019 The Regents of the University of Michigan
+# Copyright (c) 2020 The Regents of the University of Michigan
 # All rights reserved.
 # This software is licensed under the BSD 3-Clause License.
 """POS-file reader for the Glotzer Group, University of Michigan.
@@ -225,7 +225,6 @@ class PosFileFrame(Frame):
                     "Failed to read line #{}: {}.".format(i, line))
         monotype = False
         raw_frame = _RawFrameData()
-        raw_frame.shapedef = collections.OrderedDict()
         raw_frame.view_rotation = None
         for i, line in enumerate(self.stream):
             if _is_comment(line):
@@ -251,15 +250,20 @@ class PosFileFrame(Frame):
                     definition, data, end = line.strip().split('"')
                     _assert(len(end) == 0)
                     name = definition.split()[1]
-                    if name in raw_frame.shapedef:
-                        warnings.warn("Redifinition of type '{}'.".format(name))
-                    raw_frame.shapedef[
-                        name] = self._parse_shape_definition(data)
+                    type_shape = self._parse_shape_definition(data)
+                    if name not in raw_frame.types:
+                        raw_frame.types.append(name)
+                        raw_frame.type_shapes.append(type_shape)
+                    else:
+                        typeid = raw_frame.type_shapes.index(name)
+                        raw_frame.type_shapes[typeid] = type_shape
+                        warnings.warn("Redefinition of type '{}'.".format(name))
                 elif tokens[0] == 'shape':  # monotype
-                    definition = line.strip().split('"')[1]
-                    raw_frame.shapedef[self.default_type] = \
-                        self._parse_shape_definition(definition)
-                    _assert(len(raw_frame.shapedef) == 1)
+                    data = line.strip().split('"')[1]
+                    raw_frame.types.append(self.default_type)
+                    type_shape = self._parse_shape_definition(data)
+                    raw_frame.type_shapes.append(type_shape)
+                    _assert(len(raw_frame.type_shapes) == 1)
                     monotype = True
                 elif tokens[0] in ('boxMatrix', 'box'):
                     if len(tokens) == 10:
@@ -278,13 +282,15 @@ class PosFileFrame(Frame):
                     # assume we are reading positions now
                     if not monotype:
                         name = tokens[0]
-                        if name not in raw_frame.shapedef:
-                            raw_frame.shapedef.setdefault(
-                                name, self._parse_shape_definition(' '.join(tokens[:3])))
+                        if name not in raw_frame.types:
+                            raw_frame.types.append(name)
+                            type_shape = self._parse_shape_definition(' '.join(tokens[:3]))
+                            raw_frame.type_shapes.append(type_shape)
                     else:
                         name = self.default_type
-                    if len(tokens) == 7 and isinstance(
-                            raw_frame.shapedef[name], ArrowShape):
+                    typeid = raw_frame.types.index(name)
+                    type_shape = raw_frame.type_shapes[typeid]
+                    if len(tokens) == 7 and isinstance(type_shape, ArrowShape):
                         xyz = tokens[-6:-3]
                         quat = tokens[-3:] + [0]
                     elif len(tokens) >= 7:
@@ -295,30 +301,30 @@ class PosFileFrame(Frame):
                         quat = None
                     else:
                         raise ParserError(line)
-                    raw_frame.types.append(name)
-                    raw_frame.positions.append([self._num(v) for v in xyz])
+                    raw_frame.typeid.append(typeid)
+                    raw_frame.position.append([self._num(v) for v in xyz])
                     if quat is None:
-                        raw_frame.orientations.append(quat)
+                        raw_frame.orientation.append(quat)
                     else:
-                        raw_frame.orientations.append([self._num(v) for v in quat])
+                        raw_frame.orientation.append([self._num(v) for v in quat])
 
         # Perform inverse rotation to recover original coordinates
         if raw_frame.view_rotation is not None:
-            pos = rowan.rotate(rowan.inverse(raw_frame.view_rotation), raw_frame.positions)
+            pos = rowan.rotate(rowan.inverse(raw_frame.view_rotation), raw_frame.position)
         else:
-            pos = np.asarray(raw_frame.positions)
+            pos = np.asarray(raw_frame.position)
         # If all the z coordinates are close to zero, set box dimension to 2
         if np.allclose(pos[:, 2], 0.0, atol=1e-7):
             raw_frame.box_dimensions = 2
 
         # If no valid orientations have been added, the array should be empty
-        if all([quat is None for quat in raw_frame.orientations]):
-            raw_frame.orientations = []
+        if all([quat is None for quat in raw_frame.orientation]):
+            raw_frame.orientation = []
         else:
             # Replace values of None with an identity quaternion
-            for i in range(len(raw_frame.orientations)):
-                if raw_frame.orientations[i] is None:
-                    raw_frame.orientations[i] = [1, 0, 0, 0]
+            for i in range(len(raw_frame.orientation)):
+                if raw_frame.orientation[i] is None:
+                    raw_frame.orientation[i] = [1, 0, 0, 0]
         return raw_frame
 
     def __str__(self):

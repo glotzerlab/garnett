@@ -1,12 +1,10 @@
 #!/usr/bin/env python
-# Copyright (c) 2019 The Regents of the University of Michigan
+# Copyright (c) 2020 The Regents of the University of Michigan
 # All rights reserved.
 # This software is licensed under the BSD 3-Clause License.
 
+import garnett
 import logging
-
-from garnett.reader import PosFileReader
-from garnett.writer import PosFileWriter
 
 logger = logging.getLogger(__name__)
 

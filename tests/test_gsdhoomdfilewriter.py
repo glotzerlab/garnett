@@ -1,4 +1,4 @@
-# Copyright (c) 2019 The Regents of the University of Michigan
+# Copyright (c) 2020 The Regents of the University of Michigan
 # All rights reserved.
 # This software is licensed under the BSD 3-Clause License.
 import os
@@ -28,9 +28,9 @@ def get_filename(filename):
 
 
 class ColorlessShape(garnett.shapes.Shape):
-    """ShapeDefinition without colors, for comparing formats.
+    """Shape without colors, for comparing formats.
 
-    :param other: Another ShapeDefinition object.
+    :param other: Another Shape object.
     :type other: :py:class:`garnett.shapes.Shape`
     """
 
@@ -66,8 +66,8 @@ class BaseGSDHOOMDFileWriterTest(unittest.TestCase):
         traj = self.reader.read(gsdfile)
         traj.load_arrays()
         len_orig = len(traj)
-        readwrite_props = ['N', 'types', 'type_ids',
-                           'positions', 'orientations', 'velocities',
+        readwrite_props = ['N', 'types', 'typeid',
+                           'position', 'orientation', 'velocity',
                            'mass', 'charge', 'diameter',
                            'moment_inertia', 'angmom', 'image']
         original_data = {}
@@ -116,7 +116,7 @@ class BaseGSDHOOMDFileWriterTest(unittest.TestCase):
                 self.writer.write(traj, tmpfile)
                 written_traj = self.reader.read(tmpfile)
                 assert np.array_equal(written_traj[0].mass, np.ones(27).astype(float))
-                assert np.array_equal(written_traj[0].velocities, np.zeros([27, 3]).astype(float))
+                assert np.array_equal(written_traj[0].velocity, np.zeros([27, 3]).astype(float))
                 assert np.array_equal(written_traj[0].diameter, np.ones(27).astype(float))
                 assert np.array_equal(written_traj[0].moment_inertia, np.zeros([27, 3]).astype(float))
                 assert np.array_equal(written_traj[0].angmom, np.zeros([27, 4]).astype(float))

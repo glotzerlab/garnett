@@ -4,11 +4,69 @@ Changelog
 
 The **garnett** package follows `semantic versioning <https://semver.org/>`_.
 
-next
-====
+Version 0.7
+===========
 
-next
-----
+[0.7.0]
+-------
+
+Added
++++++
+  - Added ability to read ``_space_group_symop_operation_xyz`` keys in CIF files.
+  - Added ``to_hoomd_snapshot`` method to ``Frame`` objects. Replaces the deprecated ``make_snapshot`` and ``copyto_snapshot`` methods.
+  - The CIF reader supports a broader range of ``_atom_site_label`` values that match `component 0 as specified here <https://www.iucr.org/__data/iucr/cif/standard/cifstd15.html>`_.
+  - Enabled ``type_shape`` for ``SphereUnionShape`` class.
+  - Added ability to read getar files with dynamic properties (such as ``type_shapes.json``) stored at a different period than positions.
+  - Added ``box`` property to trajectory objects.
+
+Changed
++++++++
+  - Updated GSD reader to use the GSD v2.0.0 API.
+  - Changed behavior of ``types``, ``typeid``, ``type_shapes`` to match HOOMD conventions.
+  - Shapes can still be read from GSD via HOOMD-HPMC state but shapes are always written to ``type_shapes`` instead of the HPMC state.
+  - ``PosFileWriter`` requires the number of ``type_shapes`` to match the number of ``types``.
+
+Fixed
++++++
+  - Fixed finding nearest image when applying space group operations to CIF files. The meaning of the ``tolerance`` parameter is also adjusted to be absolute (in units of fractional coordinates), rather than relative.
+
+Deprecated
+++++++++++
+  - The following ``Frame`` and ``Trajectory`` attributes have been deprecated:
+
+    - ``positions`` (now ``position``)
+    - ``orientations`` (now ``orientation``)
+    - ``velocities`` (now ``velocity``)
+    - ``shapedef`` dict has been replaced by ``type_shapes`` list. Until this feature is removed, altering shape definitions is only supported if the entire dictionary is set at once.
+
+  - The following ``Frame`` methods have been deprecated:
+
+    - make_snapshot
+    - copyto_snapshot
+
+  - The following ``trajectory`` module-level functions have been deprecated:
+
+    - make_hoomd_blue_snapshot
+    - copyfrom_hoomd_blue_snapshot
+    - copyto_hoomd_blue_snapshot
+
+Removed
++++++++
+  - The ``Frame.frame_data`` property and ``FrameData`` class have been removed from the public API.
+
+Version 0.6
+===========
+
+[0.6.1] -- 2019-11-05
+---------------------
+
+Fixed
++++++
+  - Fix installation instructions with `pip`.
+  - Removed unnecessary extra headers from changelog.
+
+[0.6.0] -- 2019-11-04
+---------------------
 
 Added
 +++++
@@ -18,11 +76,15 @@ Added
 
 Changed
 +++++++
-  - GSD and GTAR writers now output shape information that adheres to the GSD shape visualization specification
+  - GSD and GTAR writers now output shape information that adheres to the GSD shape visualization specification.
 
 Removed
 +++++++
   - Dropped Python 2 support.
+
+Fixed
++++++
+  - Fix minor bug in ``PosFileWriter`` where default shape definition was incorrectly written.
 
 Version 0.5
 ===========

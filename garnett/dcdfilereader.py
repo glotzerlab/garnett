@@ -1,11 +1,11 @@
-# Copyright (c) 2019 The Regents of the University of Michigan
+# Copyright (c) 2020 The Regents of the University of Michigan
 # All rights reserved.
 # This software is licensed under the BSD 3-Clause License.
 """DCD-file reader for the Glotzer Group, University of Michigan.
 
 Authors: Carl Simon Adorf
 
-A dcd file conists only of positions.
+A dcd file consists only of positions.
 To provide additional information it is possible
 to provide a frame object, whose properties
 are copied into each frame of the dcd trajectory.
@@ -36,7 +36,7 @@ The example is given for a hoomd-blue xml frame:
 
     .. code::
 
-        ort = traj[0].orientations
+        ort = traj[0].orientation
         alpha = 2 * np.arctan2(ort[:, 3], ort[:, 0])
 """
 
@@ -48,8 +48,9 @@ import numpy as np
 from numpy.core import numeric as _nx
 from numpy.core.numeric import asanyarray
 
-from .trajectory import Frame, Trajectory
-from .trajectory import _RawFrameData, _generate_type_id_array
+from .trajectory import Frame, Trajectory, Box
+from .trajectory import FRAME_PROPERTIES, TYPE_PROPERTIES, PARTICLE_PROPERTIES
+from .trajectory import _RawFrameData
 from . import pydcdreader
 
 logger = logging.getLogger(__name__)
@@ -61,7 +62,7 @@ def _euler_to_quaternion(alpha, q):
     q.T[3] = np.sin(alpha * 0.5)
 
 
-def _box_matrix_from_frame_header(frame_header, tol=1e-12):
+def _box_from_frame_header(frame_header):
     fh = frame_header
 
     lx = fh.box_a
@@ -74,10 +75,7 @@ def _box_matrix_from_frame_header(frame_header, tol=1e-12):
     xy /= ly
     xz /= lz
     yz /= lz
-    return [
-        [lx, 0.0, 0.0],
-        [(xy * ly), ly, 0.0],
-        [(xz * lz), (yz * lz), lz]]
+    return Box(lx, ly, lz, xy=xy, xz=xz, yz=yz, dimensions=3)
 
 
 def _np_stack(arrays, axis=0):
@@ -130,10 +128,11 @@ class DCDFrame(Frame):
         self.offset = offset
         self.t_frame = t_frame
         self.default_type = default_type
-        self._types = None
         self._box = None
-        self._positions = None
-        self._orientations = None
+        self._types = None
+        self._typeid = None
+        self._position = None
+        self._orientation = None
         super(DCDFrame, self).__init__(dtype=dtype)
 
     def __len__(self):
@@ -142,36 +141,40 @@ class DCDFrame(Frame):
     def _read(self, xyz):
         frame_header = _DCDFrameHeader(
             ** self._dcdreader.read_frame(self.stream, xyz, self.offset))
-        self._box = np.asarray(_box_matrix_from_frame_header(frame_header)).T
-        self._positions = xyz.swapaxes(0, 1)
+        self._box = _box_from_frame_header(frame_header)
+        self._position = xyz.swapaxes(0, 1)
 
     def _load(self, xyz=None, ort=None):
-        N = int(self.file_header.n_particles)
+        N = FRAME_PROPERTIES['N'](self.file_header.n_particles)
         if xyz is None:
             xyz = np.zeros((3, N), dtype=np.float32)
         if ort is None:
             ort = np.zeros((N, 4), dtype=self._dtype)
         self._read(xyz=xyz)
         if self.t_frame is None:
-            self._types = [self.default_type] * len(self)
+            self._types = np.asarray([self.default_type],
+                                     dtype=TYPE_PROPERTIES['types'])
+            self._typeid = np.zeros(N, dtype=PARTICLE_PROPERTIES['typeid'])
         else:
-            self._types = self.t_frame.types
+            self._types = copy.copy(self.t_frame.types)
+            self._typeid = copy.copy(self.t_frame.typeid)
         if self.t_frame is None or self.t_frame.box.dimensions == 3:
             ort.T[0] = 1.0
             ort.T[1:] = 0
         elif self.t_frame.box.dimensions == 2:
             _euler_to_quaternion(
-                self._positions.T[-1], ort)
-            self._positions.T[-1] = 0
+                self._position.T[-1], ort)
+            self._position.T[-1] = 0
         else:
             raise ValueError(self.t_frame.box.dimensions)
-        self._orientations = ort
+        self._orientation = ort
 
     def _loaded(self):
-        return not (self._types is None or
-                    self._box is None or
-                    self._positions is None or
-                    self._orientations is None)
+        return not (self._box is None or
+                    self._types is None or
+                    self._typeid is None or
+                    self._position is None or
+                    self._orientation is None)
 
     def read(self):
         raw_frame = _RawFrameData()
@@ -180,26 +183,27 @@ class DCDFrame(Frame):
             raw_frame.data_keys = copy.deepcopy(self.t_frame.data_keys)
             raw_frame.box_dimensions = self.t_frame.box.dimensions
             try:
-                raw_frame.shapedef = copy.deepcopy(self.t_frame.shapedef)
+                raw_frame.type_shapes = copy.deepcopy(self.t_frame.type_shapes)
             except AttributeError:
                 pass
         if not self._loaded():
             self._load()
         assert self._loaded()
         raw_frame.box = self._box
-        raw_frame.types = copy.copy(self._types)
-        raw_frame.positions = self._positions
-        raw_frame.orientations = self._orientations
-        assert len(raw_frame.types) == len(self)
-        assert len(raw_frame.positions) == len(self)
-        assert len(raw_frame.orientations) == len(self)
+        raw_frame.types = self._types
+        raw_frame.typeid = self._typeid
+        raw_frame.position = self._position
+        raw_frame.orientation = self._orientation
+        assert len(raw_frame.typeid) == len(self)
+        assert len(raw_frame.position) == len(self)
+        assert len(raw_frame.orientation) == len(self)
         return raw_frame
 
     def unload(self):
-        self._types = None
         self._box = None
-        self._positions = None
-        self._orientations = None
+        self._types = None
+        self._position = None
+        self._orientation = None
         super(DCDFrame, self).unload()
 
     def __str__(self):
@@ -213,18 +217,18 @@ class DCDTrajectory(Trajectory):
         """Returns true if arrays are loaded into memory.
 
         See also: :meth:`~.load_arrays`"""
-        return not (self._N is None or
-                    self._type is None or
+        return not (self._box is None or
+                    self._N is None or
                     self._types is None or
-                    self._type_ids is None or
-                    self._positions is None or
-                    self._orientations is None)
+                    self._typeid is None or
+                    self._position is None or
+                    self._orientation is None)
 
     def load_arrays(self):
         # Determine array shapes
         M = len(self)
         N = len(self.frames[0])
-        _N = np.ones(M) * N
+        _N = np.full(M, N, dtype=FRAME_PROPERTIES['N'])
 
         # Coordinates
         xyz = np.zeros((M, 3, N), dtype=np.float32)
@@ -233,23 +237,26 @@ class DCDTrajectory(Trajectory):
             if not frame._loaded():
                 frame._load(xyz=xyz[i], ort=ort[i])
 
-        # Types, Can only be handled after frame._load() calls.
-        types = [f._types for f in self.frames]
-        type_ids = np.zeros((len(self), N), dtype=np.int_)
-        _type = _generate_type_id_array(types, type_ids)
+        # Types can only be handled after frame._load() calls.
+        types = np.asarray([f._types for f in self.frames],
+                           dtype=TYPE_PROPERTIES['types'])
+        typeid = np.asarray([f._typeid for f in self.frames],
+                            dtype=PARTICLE_PROPERTIES['typeid'])
+        box = np.asarray([f._box for f in self.frames],
+                         dtype=FRAME_PROPERTIES['box'])
 
         try:
             # Perform swap
+            self._box = box
             self._N = _N
-            self._type = _type
             self._types = types
-            self._type_ids = type_ids
-            self._positions = xyz.swapaxes(1, 2)
-            self._orientations = ort
+            self._typeid = typeid
+            self._position = xyz.swapaxes(1, 2)
+            self._orientation = ort
         except Exception:
             # Ensure consistent error state
-            self._N = self._type = self._types = self._type_ids = \
-                self._positions = self._orientations = None
+            self._box = self._N = self._type = self._types = \
+                self._type_ids = self._position = self._orientation = None
             raise
 
     def xyz(self, xyz=None):

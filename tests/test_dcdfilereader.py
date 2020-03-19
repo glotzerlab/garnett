@@ -1,4 +1,4 @@
-# Copyright (c) 2019 The Regents of the University of Michigan
+# Copyright (c) 2020 The Regents of the University of Michigan
 # All rights reserved.
 # This software is licensed under the BSD 3-Clause License.
 import io
@@ -51,7 +51,7 @@ class BaseDCDFileReaderTest(TrajectoryTest):
         with self.assertRaises(AttributeError):
             frame.mass
         with self.assertRaises(AttributeError):
-            frame.velocities
+            frame.velocity
         with self.assertRaises(AttributeError):
             frame.shapedef
 
@@ -67,7 +67,7 @@ class BaseDCDFileReaderTest(TrajectoryTest):
                 [4.713492870331, 0, 0],
                 [0, 4.713492870331, 0],
                 [0, 0, 4.713492870331]])))
-        self.assertTrue(np.allclose(traj[-1].positions, np.array([
+        self.assertTrue(np.allclose(traj[-1].position, np.array([
             [1.0384979248, 2.34347701073, -0.391116261482],
             [-1.75283277035, -2.35620737076, 2.03885579109],
             [-1.66501355171, 2.35222411156, -0.931703925133],

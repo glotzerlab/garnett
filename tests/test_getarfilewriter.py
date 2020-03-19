@@ -1,4 +1,4 @@
-# Copyright (c) 2019 The Regents of the University of Michigan
+# Copyright (c) 2020 The Regents of the University of Michigan
 # All rights reserved.
 # This software is licensed under the BSD 3-Clause License.
 import io
@@ -34,8 +34,8 @@ class BaseGetarFileWriterTest(unittest.TestCase):
         traj = garnett.reader.GSDHOOMDFileReader().read(gsdfile)
         traj.load_arrays()
         len_orig = len(traj)
-        readwrite_props = ['N', 'types', 'type_ids',
-                           'positions', 'orientations', 'velocities',
+        readwrite_props = ['N', 'types', 'typeid',
+                           'position', 'orientation', 'velocity',
                            'mass', 'charge', 'diameter',
                            'moment_inertia', 'angmom', 'image']
         original_data = {}

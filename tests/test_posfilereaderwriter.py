@@ -1,4 +1,4 @@
-# Copyright (c) 2019 The Regents of the University of Michigan
+# Copyright (c) 2020 The Regents of the University of Michigan
 # All rights reserved.
 # This software is licensed under the BSD 3-Clause License.
 import unittest
@@ -12,6 +12,8 @@ from ddt import ddt, data
 import garnett
 import numpy as np
 from tempfile import TemporaryDirectory
+import base64
+from garnett.posfilewriter import DEFAULT_SHAPE_DEFINITION
 
 PATH = os.path.join(garnett.__path__[0], '..')
 IN_PATH = os.path.abspath(PATH) == os.path.abspath(os.getcwd())
@@ -54,7 +56,7 @@ class BasePosFileReaderTest(unittest.TestCase):
 
     def assert_raise_attribute_error(self, frame):
         with self.assertRaises(AttributeError):
-            frame.velocities
+            frame.velocity
         with self.assertRaises(AttributeError):
             frame.charge
         with self.assertRaises(AttributeError):
@@ -79,17 +81,17 @@ class BasePosFileWriterTest(BasePosFileReaderTest):
 
     def assert_approximately_equal_frames(self, a, b,
                                           decimals=6, atol=1e-5,
-                                          ignore_orientations=False):
+                                          ignore_orientation=False):
         self.assertEqual(a.box.round(decimals), b.box.round(decimals))
         self.assertEqual(a.types, b.types)
-        self.assertTrue(np.allclose(a.positions, b.positions, atol=atol))
+        self.assertTrue(np.allclose(a.position, b.position, atol=atol))
         try:
-            self.assertTrue(np.allclose(a.velocities, b.velocities, atol=atol))
+            self.assertTrue(np.allclose(a.velocity, b.velocity, atol=atol))
         except AttributeError:
             pass
-        if not ignore_orientations:
+        if not ignore_orientation:
             try:
-                self.assertTrue(np.allclose(a.orientations, b.orientations, atol=atol))
+                self.assertTrue(np.allclose(a.orientation, b.orientation, atol=atol))
             except AttributeError:
                 pass
         self.assertEqual(a.data, b.data)
@@ -115,7 +117,8 @@ class PosFileReaderTest(BasePosFileReaderTest):
         box_expected = garnett.trajectory.Box(Lx=10, Ly=10, Lz=10)
         for frame in traj:
             N = len(frame)
-            self.assertEqual(frame.types, ['A'] * N)
+            self.assertEqual(frame.types, ['A'])
+            self.assertTrue(all(frame.typeid == [0] * N))
             self.assertEqual(frame.box, box_expected)
             self.assert_raise_attribute_error(frame)
 
@@ -128,7 +131,8 @@ class PosFileReaderTest(BasePosFileReaderTest):
         box_expected = garnett.trajectory.Box(Lx=10, Ly=10, Lz=10)
         for frame in traj:
             N = len(frame)
-            self.assertEqual(frame.types, ['A'] * N)
+            self.assertEqual(frame.types, ['A'])
+            self.assertTrue(all(frame.typeid == [0] * N))
             self.assertEqual(frame.box, box_expected)
             self.assert_raise_attribute_error(frame)
 
@@ -141,7 +145,8 @@ class PosFileReaderTest(BasePosFileReaderTest):
         box_expected = garnett.trajectory.Box(Lx=10, Ly=10, Lz=10)
         for frame in traj:
             N = len(frame)
-            self.assertEqual(frame.types, ['A'] * N)
+            self.assertEqual(frame.types, ['A'])
+            self.assertTrue(all(frame.typeid == [0] * N))
             self.assertEqual(frame.box, box_expected)
             self.assert_raise_attribute_error(frame)
 
@@ -154,12 +159,29 @@ class PosFileReaderTest(BasePosFileReaderTest):
         box_expected = garnett.trajectory.Box(Lx=10, Ly=10, Lz=10)
         for frame in traj:
             N = len(frame)
-            self.assertEqual(frame.types, ['A'] * N)
+            self.assertEqual(frame.types, ['A'])
+            self.assertTrue(all(frame.typeid == [0] * N))
             self.assertEqual(frame.box, box_expected)
             self.assert_raise_attribute_error(frame)
 
         traj.load_arrays()
         self.assert_raise_attribute_error(traj)
+
+    def test_default(self):
+        with TemporaryDirectory() as tmp_dir:
+            gsdfile = os.path.join(tmp_dir, 'testfile.gsd')
+            posfile = os.path.join(tmp_dir, 'testfile.pos')
+            with open(gsdfile, "wb") as f:
+                f.write(base64.b64decode(garnett.samples.GSD_BASE64))
+            with garnett.read(gsdfile) as traj:
+                with self.assertRaises(AttributeError):
+                    traj[-1].shapedef
+                garnett.write(traj, posfile)
+            with garnett.read(posfile) as traj:
+                for frame in traj:
+                    for name in frame.shapedef.keys():
+                        self.assertEqual(frame.shapedef[name],
+                                         DEFAULT_SHAPE_DEFINITION)
 
 
 @unittest.skipIf(not HPMC, 'requires HPMC')
@@ -331,8 +353,8 @@ class PosFileWriterTest(BasePosFileWriterTest):
         traj = self.read_trajectory(sample)
         traj.load_arrays()
         for frame in traj:
-            frame.shapedef['A'] = ArrowShape()
-            frame.orientations.T[3] = 0
+            frame.shapedef = {'A': ArrowShape()}
+            frame.orientation.T[3] = 0
         dump = io.StringIO()
         self.write_trajectory(traj, dump)
         dump.seek(0)
@@ -351,7 +373,7 @@ class PosFileWriterTest(BasePosFileWriterTest):
         b = 0.25
         c = 0.125
         for frame in traj:
-            frame.shapedef['A'] = EllipsoidShape(a=a, b=b, c=c)
+            frame.shapedef = {'A': EllipsoidShape(a=a, b=b, c=c)}
         dump = io.StringIO()
         self.write_trajectory(traj, dump)
         dump.seek(0)
@@ -413,7 +435,7 @@ class PosFileWriterTest(BasePosFileWriterTest):
                     for f0, f1 in zip(traj0, traj1):
                         self.assert_approximately_equal_frames(
                             f0, f1, decimals=4, atol=1e-6,
-                            ignore_orientations=True  # The shapes themselves are differently oriented
+                            ignore_orientation=True  # The shapes themselves are differently oriented
                             )
 
 

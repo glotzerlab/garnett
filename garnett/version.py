@@ -3,9 +3,9 @@
 # This software is licensed under the BSD 3-Clause License.
 
 
-class ParserError(RuntimeError):
-    pass
+__version__ = "0.6.1"
 
 
-class ParserWarning(RuntimeWarning):
-    pass
+__all__ = [
+    '__version__'
+]

@@ -1,28 +1,25 @@
 #!/usr/bin/env python
-# Copyright (c) 2019 The Regents of the University of Michigan
+# Copyright (c) 2020 The Regents of the University of Michigan
 # All rights reserved.
 # This software is licensed under the BSD 3-Clause License.
 
+import garnett
 import logging
 import numpy as np
 
-from garnett.reader import PosFileReader
-from garnett.writer import PosFileWriter
-from garnett.trajectory import Trajectory
 
 logger = logging.getLogger(__name__)
 
 
 def center(frame):
-    frame.positions -= np.average(frame.positions, axis=0)
+    frame.position -= np.average(frame.position, axis=0)
     return frame
 
 
 def main(args):
     with garnett.read(args.infile) as traj:
-        traj_centered = Trajectory((center(frame) for frame in traj))
+        traj_centered = garnett.trajectory.Trajectory((center(frame) for frame in traj))
         garnett.write(traj_centered, args.outfile)
-
     return 0
 
 

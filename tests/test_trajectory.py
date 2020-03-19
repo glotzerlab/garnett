@@ -1,13 +1,13 @@
-# Copyright (c) 2019 The Regents of the University of Michigan
+# Copyright (c) 2020 The Regents of the University of Michigan
 # All rights reserved.
 # This software is licensed under the BSD 3-Clause License.
 import io
 import unittest
 import tempfile
-
+import warnings
 import garnett
 import numpy as np
-
+from garnett.trajectory import PARTICLE_PROPERTIES
 
 try:
     try:
@@ -99,24 +99,36 @@ class TrajectoryTest(unittest.TestCase):
         sample_file = self.get_sample_file()
         traj = self.reader().read(sample_file)
         for frame in traj:
-            self.assertTrue(isinstance(frame.positions, np.ndarray))
-            self.assertTrue(frame.positions.dtype ==
+            self.assertTrue(isinstance(frame.position, np.ndarray))
+            self.assertTrue(frame.position.dtype ==
                             garnett.trajectory.DEFAULT_DTYPE)
         for dtype in (np.float32, np.float64):
             traj.set_dtype(dtype)
             for frame in traj:
-                self.assertTrue(isinstance(frame.positions, np.ndarray))
-                self.assertTrue(frame.positions.dtype == dtype)
+                self.assertTrue(isinstance(frame.position, np.ndarray))
+                self.assertTrue(frame.position.dtype == dtype)
         traj.set_dtype(np.float32)
         frame0 = traj[0]
-        self.assertTrue(frame0.positions.dtype == np.float32)
+        self.assertTrue(frame0.position.dtype == np.float32)
         frame0.load()
-        self.assertTrue(isinstance(frame0.positions, np.ndarray))
-        self.assertTrue(frame0.positions.dtype == np.float32)
+        self.assertTrue(isinstance(frame0.position, np.ndarray))
+        self.assertTrue(frame0.position.dtype == np.float32)
         with self.assertRaises(RuntimeError):
             traj.set_dtype(np.float64)
         with self.assertRaises(RuntimeError):
             frame0.dtype = np.float64
+
+    def test_box(self):
+        sample_file = self.get_sample_file()
+        traj = self.reader().read(sample_file)
+        with self.assertRaises(RuntimeError):
+            traj.box
+        traj.load_arrays()
+        self.assertTrue(len(traj.box.shape) == 1)
+        self.assertTrue(np.issubdtype(traj.box.dtype, np.object_))
+        M = len(traj)
+        self.assertEqual(traj.box.shape, (M,))
+        self.assertTrue(np.all(traj.box[i] == traj[i].box for i in range(M)))
 
     def test_N(self):
         sample_file = self.get_sample_file()
@@ -124,19 +136,9 @@ class TrajectoryTest(unittest.TestCase):
         with self.assertRaises(RuntimeError):
             traj.types
         traj.load_arrays()
-        self.assertTrue(np.issubdtype(traj.N.dtype, np.int_))
-        N = np.array([len(f) for f in traj], dtype=np.int_)
+        self.assertTrue(np.issubdtype(traj.N.dtype, np.uint))
+        N = np.array([len(f) for f in traj], dtype=np.uint)
         self.assertTrue((traj.N == N).all())
-
-    def test_type(self):
-        sample_file = self.get_sample_file()
-        traj = self.reader().read(sample_file)
-        with self.assertRaises(RuntimeError):
-            traj.types
-        traj.load_arrays()
-        self.assertTrue(isinstance(traj.type, list))
-        _type = sorted(set((t_ for f in traj for t_ in f.types)))
-        self.assertEqual(traj.type, _type)
 
     def test_types(self):
         sample_file = self.get_sample_file()
@@ -145,76 +147,75 @@ class TrajectoryTest(unittest.TestCase):
             traj.types
         traj.load_arrays()
         self.assertTrue(np.issubdtype(traj.types.dtype, np.str_))
-        self.assertEqual(traj.types.shape, (len(traj), len(traj[0])))
+        self.assertEqual(traj.types.shape, (len(traj), len(np.unique(traj[0].typeid))))
         self.assertTrue((traj.types[0] == traj[0].types).all())
 
-    def test_type_ids(self):
+    def test_typeid(self):
         sample_file = self.get_sample_file()
         traj = self.reader().read(sample_file)
         with self.assertRaises(RuntimeError):
             traj.types
         traj.load_arrays()
-        self.assertTrue(np.issubdtype(traj.type_ids.dtype, np.int_))
-        self.assertEqual(traj.type_ids.shape, (len(traj), len(traj[0])))
-        type_ids_0 = [traj.type.index(t) for t in traj.types[0]]
-        self.assertEqual(type_ids_0, traj.type_ids[0].tolist())
+        self.assertTrue(np.issubdtype(traj.typeid.dtype, np.uint))
+        self.assertEqual(traj.typeid.shape, (len(traj), len(traj[0])))
+        self.assertTrue((traj.typeid[0] == traj[0].typeid).all())
 
-    def test_positions(self):
+    def test_position(self):
         sample_file = self.get_sample_file()
         traj = self.reader().read(sample_file)
         with self.assertRaises(RuntimeError):
-            traj.positions
+            traj.position
         traj.load_arrays()
-        if traj.positions is not None and None not in traj.positions:
+        if traj.position is not None and None not in traj.position:
             self.assertTrue(np.issubdtype(
-                traj.positions.dtype, garnett.trajectory.DEFAULT_DTYPE))
-            self.assertEqual(traj.positions.shape, (len(traj), len(traj[0]), 3))
-            self.assertTrue((traj.positions[0] == traj[0].positions).all())
+                traj.position.dtype, garnett.trajectory.DEFAULT_DTYPE))
+            self.assertEqual(traj.position.shape, (len(traj), len(traj[0]), 3))
+            self.assertTrue((traj.position[0] == traj[0].position).all())
             with self.assertRaises(ValueError):
-                traj[0].positions = 'hello'
+                traj[0].position = 'hello'
             with self.assertRaises(ValueError):
                 # This should fail since it's using 2d positions
-                traj[0].positions = [[0, 0], [0, 0]]
+                traj[0].position = [[0, 0], [0, 0]]
 
-    def test_orientations(self):
+    def test_orientation(self):
         sample_file = self.get_sample_file()
         traj = self.reader().read(sample_file)
         with self.assertRaises(RuntimeError):
-            traj.orientations
+            traj.orientation
         traj.load_arrays()
         try:
-            if len(traj.orientations.shape) > 1:
+            if len(traj.orientation.shape) > 1:
                 self.assertTrue(np.issubdtype(
-                    traj.orientations.dtype, garnett.trajectory.DEFAULT_DTYPE))
-                self.assertEqual(traj.orientations.shape,
+                    traj.orientation.dtype, garnett.trajectory.DEFAULT_DTYPE))
+                self.assertEqual(traj.orientation.shape,
                                  (len(traj), len(traj[0]), 4))
-                self.assertTrue((traj.orientations[0] == traj[0].orientations).all())
+                self.assertTrue((traj.orientation[0] == traj[0].orientation).all())
             with self.assertRaises(ValueError):
-                traj[0].orientations = 'hello'
+                traj[0].orientation = 'hello'
             with self.assertRaises(ValueError):
                 # This should fail since it's using 2d positions
-                traj[0].orientations = [[0, 0], [0, 0]]
+                traj[0].orientation = [[0, 0], [0, 0]]
         except AttributeError:
             pass
 
-    def test_velocities(self):
+    def test_velocity(self):
         sample_file = self.get_sample_file()
         traj = self.reader().read(sample_file)
         with self.assertRaises(RuntimeError):
-            traj.velocities
+            traj.velocity
         traj.load_arrays()
         try:
-            if len(traj.velocities.shape) > 1:
+            if len(traj.velocity.shape) > 1:
                 self.assertTrue(np.issubdtype(
-                    traj.velocities.dtype, garnett.trajectory.DEFAULT_DTYPE))
-                self.assertEqual(traj.velocities.shape,
+                    traj.velocity.dtype, garnett.trajectory.DEFAULT_DTYPE))
+                self.assertEqual(traj.velocity.shape,
                                  (len(traj), len(traj[0]), 3))
-                self.assertTrue((traj.velocities[0] == traj[0].velocities).all())
+                self.assertTrue((traj.velocity[0] == traj[0].velocity).all())
             with self.assertRaises(ValueError):
-                traj[0].velocities = 'hello'
+                traj[0].velocity = 'hello'
             with self.assertRaises(ValueError):
                 # This should fail since it's using 2d velocities
-                traj[0].velocities = [[0, 0], [0, 0]]
+                traj[0].velocity = [[0, 0], [0, 0]]
         except AttributeError:
             pass
 
@@ -327,7 +328,7 @@ class TrajectoryTest(unittest.TestCase):
         try:
             if len(traj.image.shape) > 1:
                 self.assertTrue(np.issubdtype(
-                    traj.image.dtype, np.int32))
+                    traj.image.dtype, np.int_), traj.image.dtype)
                 self.assertEqual(traj.image.shape,
                                  (len(traj), len(traj[0]), 3))
                 self.assertTrue((traj.image[0] == traj[0].image).all())
@@ -336,13 +337,48 @@ class TrajectoryTest(unittest.TestCase):
         except AttributeError:
             pass
 
+    def test_deprecated(self):
+
+        def _access_deprecated_props(obj, pos_shape, ort_shape, is_traj):
+            # Since this test class is subclassed by the tests of other formats
+            # that may or may not support orientations & velocities...
+            self.assertTrue(np.array_equal(obj.positions, obj.position))
+            try:
+                self.assertTrue(np.array_equal(obj.orientations, obj.orientation))
+            except AttributeError:
+                # because traj objects have no setters
+                if not is_traj:
+                    obj.orientations = np.random.random(ort_shape)
+                    self.assertTrue(np.array_equal(obj.orientations, obj.orientation))
+                else:
+                    pass
+            try:
+                self.assertTrue(np.array_equal(obj.velocities, obj.velocity))
+            except AttributeError:
+                if not is_traj:
+                    obj.velocities = np.random.random(pos_shape)
+                    self.assertTrue(np.array_equal(obj.velocities, obj.velocity))
+                else:
+                    pass
+
+        sample_file = self.get_sample_file()
+        traj = self.reader().read(sample_file)
+        traj.load_arrays()
+        M = len(traj)
+        N = len(traj[0])
+        with warnings.catch_warnings():
+            warnings.simplefilter("always")
+            _access_deprecated_props(traj, (M, N, 3), (M, N, 4), True)
+            for frame in traj:
+                _access_deprecated_props(frame, (N, 3), (N, 4), False)
+
 
 @unittest.skipIf(not HOOMD, 'requires hoomd-blue')
 class FrameSnapshotExport(TrajectoryTest):
 
     def make_snapshot(self, sample):
         traj = self.get_trajectory(sample)
-        return traj[-1].make_snapshot()
+        return traj[-1].to_hoomd_snapshot()
 
     def del_system(self):
         del self.system
@@ -356,6 +392,17 @@ class FrameSnapshotExport(TrajectoryTest):
         self.assertTrue((s0.particles.position == s1.particles.position).all())
         self.assertTrue((s0.particles.orientation ==
                          s1.particles.orientation).all())
+
+    def test_to_hoomd_snapshot(self):
+        traj = self.get_trajectory(garnett.samples.POS_HPMC)
+        frame = traj[-1]
+        snapshot = frame.to_hoomd_snapshot()
+        for prop in PARTICLE_PROPERTIES:
+            try:
+                self.assertTrue(np.array_equal(getattr(snapshot.particles, prop),
+                                               getattr(frame, prop)))
+            except AttributeError:
+                pass
 
     @unittest.skipIf(not HPMC, 'requires HPMC')
     def test_sphere(self):
@@ -386,16 +433,23 @@ class FrameSnapshotExport(TrajectoryTest):
         with tempfile.NamedTemporaryFile('r') as tmpfile:
             pos = dump.pos(filename=tmpfile.name, period=1)
             run(10, quiet=True)
-            snapshot0 = self.system.take_snapshot()
+            snapshot_0 = self.system.take_snapshot()
+            frame_0 = garnett.trajectory.Frame.from_hoomd_snapshot(snapshot_0)
             run(1, quiet=True)  # the hoomd pos-writer lags by one sweep
             tmpfile.flush()
             traj = self.read_trajectory(tmpfile)
-            f_1 = traj[-1]
+            frame_1 = traj[-1]
+
+            # Ensure that some attributes are equal between the POS file and HOOMD snapshot
+            # (not all properties are supported by a POS file of spheres)
+            for attr in ('box', 'position', 'types', 'typeid'):
+                np.testing.assert_equal(getattr(frame_0, attr), getattr(frame_1, attr))
+
             # Pos-files don't support box dimensions.
-            f_1.box.dimensions = self.system.box.dimensions
-            snapshot1 = f_1.make_snapshot()
-            self.assert_snapshots_equal(snapshot0, snapshot1)
-            self.system.restore_snapshot(snapshot1)
+            frame_1.box.dimensions = self.system.box.dimensions
+            snapshot_1 = frame_1.to_hoomd_snapshot()
+            self.assert_snapshots_equal(snapshot_0, snapshot_1)
+            self.system.restore_snapshot(snapshot_1)
             pos.disable()
             run(1, quiet=True)  # sanity check
 
