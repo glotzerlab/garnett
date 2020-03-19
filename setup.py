@@ -7,15 +7,20 @@ import sys
 
 description = "Samples, parsers, and writers for formats used in the Glotzer Group."
 
-# Import Cython if available
+# Import Cython if available and not disabled.
+# Cython is disabled for wheel builds so the package is pure Python.
+CYTHON = False
 try:
     from Cython.Build import cythonize
     import numpy as np
 except ImportError:
     print("WARNING: Cython not available!", file=sys.stderr)
-    CYTHON = False
 else:
-    CYTHON = True
+    if '--no-cython' in sys.argv:
+        print("WARNING: Cython is disabled.", file=sys.stderr)
+        sys.argv.remove('--no-cython')
+    else:
+        CYTHON = True
 
 # Get long description from README.md
 try:
@@ -29,7 +34,7 @@ except (IOError, OSError):
 
 setup(
     name='garnett',
-    version='0.6.1',
+    version='0.7.0',
     packages=find_packages(),
 
     ext_modules=cythonize('garnett/*.pyx') if CYTHON else [],

@@ -104,7 +104,7 @@ Supported properties are listed below:
 Individual frame access
 -----------------------
 
-Inidividual frame objects can be accessed via indexing of a (sub-)trajectory object:
+Individual frames can be accessed via indexing a (sub-)trajectory object:
 
 .. code-block:: python
 

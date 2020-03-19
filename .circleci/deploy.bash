@@ -26,7 +26,7 @@ password: ${PYPI_PASSWORD}
 EOF
 
 # Create wheels and source distribution
-python setup.py bdist_wheel
+python setup.py bdist_wheel --no-cython
 python setup.py sdist
 
 # Test generated wheel
