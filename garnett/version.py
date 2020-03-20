@@ -3,7 +3,7 @@
 # This software is licensed under the BSD 3-Clause License.
 
 
-__version__ = "0.7.0"
+__version__ = "0.7.1"
 
 
 __all__ = [
