@@ -199,14 +199,14 @@ The **garnett** frames can be used to initialize HOOMD-blue simulations by creat
 
 .. code-block:: python
 
-    from hoomd import init
     import garnett
+    import hoomd
 
     with garnett.read('cube.pos') as traj:
 
         # Initialize from last frame
         snapshot = traj[-1].to_hoomd_snapshot()
-        system = init.read_snapshot(snapshot)
+        system = hoomd.init.read_snapshot(snapshot)
 
         # Restore last frame
         snapshot = system.take_snapshot()
