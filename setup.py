@@ -58,7 +58,8 @@ setup(
     install_requires=[
         'deprecation>=2',
         'numpy>=1.14',
-        'rowan>=0.5',
+        'rowan>=1.2',
+        'tqdm>=4.35',
     ],
 
     tests_require=[

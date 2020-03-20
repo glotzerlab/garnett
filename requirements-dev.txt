@@ -7,3 +7,4 @@ gtar>=1.0.1
 numpy>=1.18.1
 pycifrw>=4.4.1
 rowan>=1.2.2
+tqdm>=4.43.0
