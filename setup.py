@@ -40,11 +40,14 @@ setup(
     ext_modules=cythonize('garnett/*.pyx') if CYTHON else [],
     include_dirs=[np.get_include()] if CYTHON else [],
 
-    author='Carl Simon Adorf',
+    maintainer='garnett Developers',
+    author='Carl Simon Adorf et al.',
     author_email='csadorf@umich.edu',
     description=description,
     long_description=long_description,
     long_description_content_type="text/markdown",
+    url="https://garnett.readthedocs.io/",
+    download_url="https://pypi.org/project/garnett/",
     keywords='simulation trajectory formats particle',
 
     classifiers=[
