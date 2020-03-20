@@ -7,6 +7,13 @@ The **garnett** package follows `semantic versioning <https://semver.org/>`_.
 Version 0.7
 ===========
 
+[0.7.1] -- 2020-03-20
+---------------------
+
+Fixed
++++++
+- Corrected package dependencies.
+
 [0.7.0] -- 2020-03-18
 ---------------------
 
