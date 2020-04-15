@@ -4,6 +4,14 @@ Changelog
 
 The **garnett** package follows `semantic versioning <https://semver.org/>`_.
 
+Unreleased Changes
+==================
+
+Added
++++++
+- Added support to `GetarFileWriter` for writing trajectories containing frames with some missing per-particle quantities.
+
+
 Version 0.7
 ===========
 
