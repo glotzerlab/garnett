@@ -1,6 +1,7 @@
 # Copyright (c) 2020 The Regents of the University of Michigan
 # All rights reserved.
 # This software is licensed under the BSD 3-Clause License.
+import collections
 import io
 import unittest
 import base64
@@ -57,6 +58,26 @@ class BaseGetarFileWriterTest(unittest.TestCase):
                     self.assertTrue(np.array_equal(
                         getattr(traj, prop), original_data[prop]))
                 self.assertTrue(np.allclose(traj[0].box.get_box_matrix(), box_orig))
+
+    def test_missing_attrs(self):
+        Frame = collections.namedtuple('Frame', ['box', 'position', 'types'])
+        box = garnett.trajectory.Box(10, 10, 10, 0, 0, 0)
+
+        test_frame = Frame(box, [(0, 0, 0), (1, 1, 1)], ['A'])
+
+        with tempfile.NamedTemporaryFile(mode='w', suffix='.tar') as f:
+            self.writer.write([test_frame], f)
+
+            # Read back the file and check if it is the same as the original read
+            traj = self.reader.read(f)
+            traj.load_arrays()
+            self.assertEqual(len(traj), 1)
+            read_frame = traj[0]
+
+            self.assertTrue(np.array_equal(
+                read_frame.position, test_frame.position))
+            self.assertTrue(np.allclose(
+                read_frame.box.get_box_matrix(), box.get_box_matrix()))
 
 
 if __name__ == '__main__':
