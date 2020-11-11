@@ -84,6 +84,7 @@ class BasePosFileWriterTest(BasePosFileReaderTest):
                                           ignore_orientation=False):
         self.assertEqual(a.box.round(decimals), b.box.round(decimals))
         self.assertEqual(a.types, b.types)
+        print(a.position, b.position)
         self.assertTrue(np.allclose(a.position, b.position, atol=atol))
         try:
             self.assertTrue(np.allclose(a.velocity, b.velocity, atol=atol))

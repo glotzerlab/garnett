@@ -45,8 +45,6 @@ import copy
 from collections import namedtuple
 
 import numpy as np
-from numpy.core import numeric as _nx
-from numpy.core.numeric import asanyarray
 
 from .trajectory import Frame, Trajectory, Box
 from .trajectory import FRAME_PROPERTIES, TYPE_PROPERTIES, PARTICLE_PROPERTIES
@@ -76,34 +74,6 @@ def _box_from_frame_header(frame_header):
     xz /= lz
     yz /= lz
     return Box(lx, ly, lz, xy=xy, xz=xz, yz=yz, dimensions=3)
-
-
-def _np_stack(arrays, axis=0):
-    """Join a sequence of arrays along a new axis.
-
-    Copyright (c) 2005-2016, NumPy Developers.
-    All rights reserved.
-
-    From numpy/core/shape_base.py (requires numpy>=1.10),
-    included to avoid numpy dependency >=1.10."""
-    arrays = [asanyarray(arr) for arr in arrays]
-    if not arrays:
-        raise ValueError('need at least one array to stack')
-
-    shapes = set(arr.shape for arr in arrays)
-    if len(shapes) != 1:
-        raise ValueError('all input arrays must have the same shape')
-
-    result_ndim = arrays[0].ndim + 1
-    if not -result_ndim <= axis < result_ndim:
-        msg = 'axis {0} out of bounds [-{1}, {1})'.format(axis, result_ndim)
-        raise IndexError(msg)
-    if axis < 0:
-        axis += result_ndim
-
-    sl = (slice(None),) * axis + (_nx.newaxis,)
-    expanded_arrays = [arr[sl] for arr in arrays]
-    return _nx.concatenate(expanded_arrays, axis=axis)
 
 
 _DCDFileHeader = namedtuple(
