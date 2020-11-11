@@ -43,7 +43,7 @@ The example is given for a hoomd-blue xml frame:
 import logging
 import copy
 from collections import namedtuple
-
+import rowan
 import numpy as np
 
 from .trajectory import Frame, Trajectory, Box
@@ -52,12 +52,6 @@ from .trajectory import _RawFrameData
 from . import pydcdreader
 
 logger = logging.getLogger(__name__)
-
-
-def _euler_to_quaternion(alpha, q):
-    q.T[0] = np.cos(alpha * 0.5)
-    q.T[1] = q.T[2] = 0.0
-    q.T[3] = np.sin(alpha * 0.5)
 
 
 def _box_from_frame_header(frame_header):
@@ -132,8 +126,7 @@ class DCDFrame(Frame):
             ort.T[0] = 1.0
             ort.T[1:] = 0
         elif self.t_frame.box.dimensions == 2:
-            _euler_to_quaternion(
-                self._position.T[-1], ort)
+            ort = rowan.from_euler(self._position.T[-1], 0, 0)
             self._position.T[-1] = 0
         else:
             raise ValueError(self.t_frame.box.dimensions)
