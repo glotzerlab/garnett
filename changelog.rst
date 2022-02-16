@@ -7,6 +7,10 @@ The **garnett** package follows `semantic versioning <https://semver.org/>`_.
 Unreleased Changes
 ==================
 
+Fixed
++++++
+- Fixed frame ordering for some trajectories read by `GetarFileReader`. Previously frames were ordered pseudo-arbitrarily depending on a bisection using lexicographic ordering of strings, rather than the key order specified by the gtar library.
+
 Added
 +++++
 - Added support to `GetarFileWriter` for writing trajectories containing frames with some missing per-particle quantities.

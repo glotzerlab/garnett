@@ -32,9 +32,14 @@ def _find_le(a, x):
     raise ValueError
 
 
+def _gtar_index_key(index):
+    """Key by which to order GTAR frame indices"""
+    return (len(index), index)
+
+
 @functools.lru_cache(maxsize=64)
 def _get_record_frames(trajectory, record):
-    return trajectory.queryFrames(record)
+    return list(map(_gtar_index_key, trajectory.queryFrames(record)))
 
 
 class GetarFrame(Frame):
@@ -51,7 +56,7 @@ class GetarFrame(Frame):
         super(GetarFrame, self).__init__()
         self._trajectory = trajectory
         self._records = records
-        self._frame = frame
+        self._frame = _gtar_index_key(frame)
         self._default_type = default_type
         self._default_box = default_box
 
@@ -61,7 +66,7 @@ class GetarFrame(Frame):
     def _get_record_frame(self, name):
         record = self._records[name]
         frames = _get_record_frames(self._trajectory, record)
-        return _find_le(frames, self._frame)
+        return _find_le(frames, self._frame)[1]
 
     def _get_record_value(self, name):
         record = self._records[name]

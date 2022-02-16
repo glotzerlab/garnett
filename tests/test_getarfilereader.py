@@ -148,7 +148,7 @@ class GetarTrajectoryFrameTest(unittest.TestCase):
         self.getar_file_fn = os.path.join(self.tmp_dir.name, 'sample.tar')
 
         with gtar.GTAR(self.getar_file_fn, 'w') as traj:
-            for frame in range(6):
+            for frame in range(0, 18, 3):
                 traj.writePath('frames/{}/position.f32.ind'.format(frame),
                                [(0, 0, 0)])
                 if frame % 2:
@@ -163,7 +163,7 @@ class GetarTrajectoryFrameTest(unittest.TestCase):
     def test_ragged_frames(self):
         # first frame uses the default box value and a new value is
         # written on frame 1, 3, ...
-        target_lxs = [1, 2, 2, 4, 4, 6]
+        target_lxs = [1, 4, 4, 10, 10, 16]
         lxs = [frame.box.Lx for frame in self.trajectory]
         np.testing.assert_allclose(target_lxs, lxs)
 
