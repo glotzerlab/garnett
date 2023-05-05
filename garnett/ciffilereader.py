@@ -14,8 +14,6 @@ Authors: Matthew Spellings
 
 import logging
 import re
-import warnings
-from collections import OrderedDict
 
 import numpy as np
 
@@ -24,7 +22,7 @@ from .trajectory import _RawFrameData, Frame, Trajectory
 # CifFile is from the pycifrw package
 from CifFile import CifFile
 
-from .errors import ParserError, ParserWarning
+from .errors import ParserError
 
 logger = logging.getLogger(__name__)
 
@@ -156,11 +154,11 @@ class CifFileFrame(Frame):
         else:
             site_types = len(fractions)*[self.default_type]
 
+        (type_names, typeid) = np.unique(site_types, return_inverse=True)
         space_group_keys = ['_symmetry_equiv_pos_as_xyz', '_space_group_symop_operation_xyz']
         found_keys = [key for key in space_group_keys if key in self.parsed]
 
         unique_points = []
-        type_strings = []
 
         if found_keys:
             key_to_use = found_keys[0]
@@ -169,58 +167,26 @@ class CifFileFrame(Frame):
                             for sym in self.parsed[key_to_use]]
 
             replicated_fractions = []
-            replicated_types = []
-            for (type_name, (fx, fy, fz)) in zip(site_types, fractions):
-                extra_fractions = [eval(sym, dict(x=fx, y=fy, z=fz)) for sym in symmetry_ops]
-                replicated_fractions.extend(extra_fractions)
-                replicated_types.extend(len(extra_fractions)*[type_name])
+            symmetry_expression_context = dict(
+                x=fractions[:, 0], y=fractions[:, 1], z=fractions[:, 2])
+            for sym in symmetry_ops:
+                new_fractions = np.transpose(eval(sym, symmetry_expression_context))
+                replicated_fractions.append(new_fractions)
+            replicated_types = np.tile(typeid[None], (len(symmetry_ops), 1)).reshape(-1)
+            replicated_fractions = np.concatenate(replicated_fractions, axis=0)
             # wrap back into the box
             replicated_fractions -= np.floor(replicated_fractions)
-            replicated_fractions = dict(enumerate(np.array(replicated_fractions, dtype=np.float32)))
 
-            bad_types = False
-            # short of using scipy or freud, we just exhaustively search
-            # for points near each point to find symmetry-induced duplicates
-            while len(replicated_fractions):
-                (ref_index, ref_point) = replicated_fractions.popitem()
-                type_name = replicated_types[ref_index]
+            coords = np.sum(
+                replicated_fractions[:, np.newaxis, :]*box_matrix[np.newaxis, :, :], axis=2)
+            integer_scale_coords = np.round(coords/self.tolerance).astype(np.int32)
+            unique_check = np.concatenate([integer_scale_coords, replicated_types[:, None]], axis=-1)
+            (_, unique_indices) = np.unique(unique_check, axis=0, return_index=True)
 
-                # set of points that are ~equivalent to ref_point given a tolerance
-                current_points = [ref_point]
-
-                # find similar points and add them to the list
-                for index in list(replicated_fractions):
-                    # find nearest periodic image
-                    delta = replicated_fractions[index] - ref_point
-                    delta = ((delta + 0.5) % 1.0) - 0.5
-
-                    if np.allclose(delta, 0, atol=self.tolerance):
-                        del replicated_fractions[index]
-                        current_points.append(ref_point + delta)
-
-                        if replicated_types[ref_index] != replicated_types[index]:
-                            bad_types = True
-                            msg = ('Some distinct sites were merged into the same '
-                                   'position, the types for this file are invalid.')
-                            warnings.warn(msg, ParserWarning)
-
-                type_strings.append(type_name)
-                unique_points.append(np.mean(current_points, axis=0))
-            unique_points = np.array(unique_points, dtype=np.float32)
-
-            if bad_types:
-                site_types = [self.default_type]
-                type_strings = [self.default_type] * len(unique_points)
+            unique_points = replicated_fractions[unique_indices]
+            typeid = replicated_types[unique_indices]
         else:
             unique_points = fractions
-            type_strings = site_types
-
-        # Remove duplicate site_types while preserving their order
-        site_types = list(OrderedDict.fromkeys(site_types))
-
-        # Convert type strings to typeid
-        site_types_lookup = {key: index for index, key in enumerate(site_types)}
-        typeid = [site_types_lookup[t] for t in type_strings]
 
         # Save the exact points
         cif_coordinates = unique_points.copy()
@@ -234,7 +200,7 @@ class CifFileFrame(Frame):
 
         raw_frame = _RawFrameData()
         raw_frame.box = box_matrix
-        raw_frame.types = site_types
+        raw_frame.types = type_names.tolist()
         raw_frame.typeid = typeid
         raw_frame.position = coordinates
         raw_frame.cif_coordinates = cif_coordinates
@@ -261,7 +227,7 @@ class CifFileReader(object):
         :param precision: The number of digits to
                           round floating-point values to.
         :type precision: int
-        :param tolerance: Floating-point tolerance (in fractional
+        :param tolerance: Floating-point tolerance (in real
                           coordinates) of particle identity as symmetry
                           operations are applied.
         :type tolerance: float
