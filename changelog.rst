@@ -10,10 +10,16 @@ Unreleased Changes
 Fixed
 +++++
 - Fixed frame ordering for some trajectories read by `GetarFileReader`. Previously frames were ordered pseudo-arbitrarily depending on a bisection using lexicographic ordering of strings, rather than the key order specified by the gtar library.
+- Improved speed of `CifFileReader`.
 
 Added
 +++++
 - Added support to `GetarFileWriter` for writing trajectories containing frames with some missing per-particle quantities.
+
+Changed
++++++++
+
+- `CifFileReader` tolerance is now expressed in terms of real, rather than fractional, coordinates.
 
 
 Version 0.7
